@@ -10,8 +10,6 @@ com.apple.CompassCalibrationViewService
 com.apple.mobilesms.compose
 com.availtec.mystop
 com.apple.PhotosViewService
-com.cbord.cbordair
-com.amazon.Amazon
 com.pointabout.washingtonpost
 com.apple.mobiletimer
 com.nytimes.NYTimes
@@ -29,11 +27,7 @@ com.apple.WebContentFilter.remoteUI.WebContentAnalysisUI
 com.microsoft.Office.Word
 com.linkedin.LinkedIn
 com.apple.DocumentsApp
-tv.lifechurch.bible
-com.vzw.hss.myverizon
 com.apple.tv
-com.facebook.Facebook
-edu.northwestern.northwesternmobile
 com.apple.VSViewService
 com.apple.PassbookUIService
 com.apple.SafariViewService
@@ -41,13 +35,10 @@ com.apple.VoiceMemos
 com.dcmetroapps.dcmetrobus
 info.itrans.NYC
 com.apple.camera
-com.drafthouse.alamodrafthousecinema
 info.mta.subwaytime
 com.microsoft.rdc.ios
 com.spotify.client
 com.google.Drive
-com.panerabread.mobile.minneapolis
-com.tinyspeck.chatlyio
 eu.dialost.opas
 com.google.ios.youtube
 com.apple.DiagnosticsService
@@ -56,7 +47,6 @@ com.apple.purplebuddy
 com.apple.datadetectors.DDActionsService
 com.adobe.Adobe-Reader
 keybase.ios
-com.timewarnercable.mytwc
 com.apple.webapp
 com.piazza.Piazza
 com.duosecurity.DuoMobile
@@ -159,6 +149,7 @@ com.apple.InCallService
 com.apple.family
 com.apple.tips
 com.apple.mobilesafari
+com.findfriend.routetracker.familygps.locator.map
 com.apple.mobileslideshow
 com.apple.facetime
 com.cuappdev.BigRedShuttle
@@ -178,8 +169,10 @@ com.lucsens.japangoggles
 com.apple.Music
 com.apple.Home.HomeUIService
 com.apple.webapp1
+rs.pedjaapps.eventlogger
 com.google.Gmail
 com.google.Sheets
 com.apple.HealthPrivacyService
 com.printme
 com.google.Maps
+com.iglobsyn.kid_locator

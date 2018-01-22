@@ -22,8 +22,16 @@ def ios_scan(phone_id):
    relevant_spyware_df = apps_df[apps_df['relevant']=='y']
    
    spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
-   print(spyware_on_phone)
-   print(spyware_on_phone.value_counts())
+   
+   print('-'*80)
+   print('Apps Installed on Phone:')
+   print('-'*80)
+   print(installed_apps)
+   print('-'*80)
+   print('Spyware Apps Detected on Phone')
+   print('-'*80)
+   print(spyware_on_phone[spyware_on_phone == True])
+   #print(spyware_on_phone.value_counts())
 
 def _dev_ios_scan():
    installed_apps = open(config.TEST_SCAN_RESULTS, 'r').read().splitlines()
@@ -34,8 +42,16 @@ def _dev_ios_scan():
    relevant_spyware_df = apps_df[apps_df['relevant']=='y']
    
    spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
-   print(spyware_on_phone)
-   print(spyware_on_phone.value_counts())
+   
+   print('-'*80)
+   print('Apps Installed on Phone:')
+   print('-'*80)
+   print(installed_apps)
+   print('-'*80)
+   print('Spyware Apps Detected on Phone')
+   print('-'*80)
+   print(spyware_on_phone[spyware_on_phone == True])
+   #print(spyware_on_phone.value_counts())
   
 #def android_scan(phone_id):
 
