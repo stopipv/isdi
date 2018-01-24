@@ -70,7 +70,7 @@ def android_scan():
    installed_apps = subprocess.run(['adb', 'shell', 'pm', 'list', 'packages',
    '-f', '|', 'sed', '-e', "'s/.*=//'", '|', 'sed', "'s/\r//g'", '|', 'sort'],
    stdout=subprocess.PIPE)
-  if (installed_apps.returncode != 0):
+   if (installed_apps.returncode != 0):
       print("Error running Android device scan. Is the Android Debug Bridge (adb) \
         'tool installed on this machine?")
       exit(1)
@@ -103,4 +103,5 @@ def android_setup():
     subprocess.run(['sudo', 'adb', 'start-server'])
 
 if __name__ == "__main__":
-    android_scan()
+    _dev_ios_scan()
+    #android_scan()
