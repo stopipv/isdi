@@ -23,14 +23,18 @@ def ios_scan():
    
    spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
    
-   print('-'*80)
-   print('Apps Installed on Phone:')
-   print('-'*80)
-   print(installed_apps)
+   #print('-'*80)
+   #print('Apps Installed on Phone:')
+   #print('-'*80)
+   #print(installed_apps)
    print('-'*80)
    print('Spyware Apps Detected on Phone')
    print('-'*80)
-   print(spyware_on_phone[spyware_on_phone == True])
+   #print(spyware_on_phone[spyware_on_phone == True])
+   apps = spyware_on_phone[spyware_on_phone == True]
+
+   for app in apps.index:
+       print(relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0])
    #print(spyware_on_phone.value_counts())
 
 def _dev_ios_scan():
@@ -43,14 +47,18 @@ def _dev_ios_scan():
    
    spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
    
-   print('-'*80)
-   print('Apps Installed on Phone:')
-   print('-'*80)
-   print(installed_apps)
+   #print('-'*80)
+   #print('Apps Installed on Phone:')
+   #print('-'*80)
+   #print(installed_apps)
    print('-'*80)
    print('Spyware Apps Detected on Phone')
    print('-'*80)
-   print(spyware_on_phone[spyware_on_phone == True])
+   #print(spyware_on_phone[spyware_on_phone == True])
+   apps = spyware_on_phone[spyware_on_phone == True]
+
+   for app in apps.index:
+       print(relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0])
    #print(spyware_on_phone.value_counts())
   
 def android_scan():
@@ -71,16 +79,19 @@ def android_scan():
    
    spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
    
-   print('-'*80)
-   print('Apps Installed on Phone:')
-   print('-'*80)
-   print(installed_apps)
+   #print('-'*80)
+   #print('Apps Installed on Phone:')
+   #print('-'*80)
+   #print(installed_apps)
    print('-'*80)
    print('Spyware Apps Detected on Phone')
    print('-'*80)
-   print(spyware_on_phone[spyware_on_phone == True])
-   #print(spyware_on_phone.value_counts())
+   #print(spyware_on_phone[spyware_on_phone == True])
+   apps = spyware_on_phone[spyware_on_phone == True]
 
+   for app in apps.index:
+       print(relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0])
+   #print(spyware_on_phone.value_counts())
 
 if __name__ == "__main__":
     android_scan()
