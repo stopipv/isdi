@@ -103,5 +103,5 @@ def android_setup():
     subprocess.run(['sudo', 'adb', 'start-server'])
 
 if __name__ == "__main__":
-    _dev_ios_scan()
-    #android_scan()
+    #_dev_ios_scan()
+    android_scan()
