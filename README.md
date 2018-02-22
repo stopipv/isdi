@@ -1,14 +1,17 @@
 # Phone Scanner (OCDV Demo)
 
+
 ## Python tool Dependencies
 Run `pip3 install -r requirements.txt` to get the `appJar` (gui) and `pandas`
 modules.
+
 
 ## Dependencies (iOS)
 Must be using a computer running macOS:
 `brew install mobiledevice` on the Mac (or build from
 https://github.com/imkira/mobiledevice).
 Keep the phone unlocked and "trust this computer" when prompted.
+
 
 ## Dependencies (Android)
 Install the Android Debug Bridge (`adb`). Enable developer mode 
@@ -19,11 +22,19 @@ unlocked.
 
 Run `adb devices` to see if the device is connected properly.
 
+You will need to activate [`developer
+options`](https://developer.android.com/studio/debug/dev-options.html) in the
+phone. Follow the above link to activate the developer option. TODO: how to hide
+it back after the scan.
+
+
+
 ## Use the tool
 After dependencies are installed, run `python3 phone_scanner.py` with an android 
 or iOS device plugged in and unlocked! Change the line in `main` in the python
 file to whichever
 device you're targeting.
+
 
 ## TODO
 https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
