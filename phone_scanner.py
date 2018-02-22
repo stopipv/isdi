@@ -19,7 +19,7 @@ def ios_scan():
    installed_apps = installed_apps.split('\n').tolist()
 
    # NB: or use DB!
-   apps_df = pd.read_csv(config.APPS_LIST, index_col='appId')
+   apps_df = pd.read_csv(config.IOS_APPS_LIST, index_col='appId')
    apps_df['appId'] = apps_df.index
    relevant_spyware_df = apps_df[apps_df['relevant']=='y']
    
@@ -36,11 +36,12 @@ def ios_scan():
        relevant_spyware.append(spyware_app)
    return relevant_spyware
 
-def _dev_ios_scan():
-   installed_apps = open(config.TEST_SCAN_RESULTS, 'r').read().splitlines()
+def _test_scan_no_device():
+   installed_apps = open(config.TEST_APP_LIST, 'r').read().splitlines()
 
    # NB: or use DB!
-   apps_df = pd.read_csv(config.APPS_LIST, index_col='appId')
+   # NB: test scan running with the android spyware list. feel free to change this here.
+   apps_df = pd.read_csv(config.ANDROID_APP_LIST, index_col='appId')
    apps_df['appId'] = apps_df.index
    relevant_spyware_df = apps_df[apps_df['relevant']=='y']
    
@@ -80,7 +81,7 @@ def android_scan():
    installed_apps = str(installed_apps).split('\n')
 
    # NOTE: or use DB!
-   apps_df = pd.read_csv(config.APPS_LIST, index_col='appId')
+   apps_df = pd.read_csv(config.ANDROID_APPS_LIST, index_col='appId')
    apps_df['appId'] = apps_df.index
    relevant_spyware_df = apps_df[apps_df['relevant']=='y']
 

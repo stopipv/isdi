@@ -18,3 +18,6 @@ Run `adb kill-server && sudo adb start-server` with phone plugged in and
 unlocked.
 
 Run `adb devices` to see if the device is connected properly.
+
+## TODO
+Scan
