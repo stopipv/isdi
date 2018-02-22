@@ -1,15 +1,16 @@
 # Phone Scanner (OCDV Demo)
 
-Loosely following
-the [Phone Scan Decision Tree](https://docs.google.com/spreadsheets/d/18qI5EYe3ZQ824K0cgMRdTVysaHZV6kv1oFyNoMpTdlU/edit?ts=5a5d5a92#gid=0), the following steps are taken upon users' agreement to have their phones scanned for spyware.
-
-## 1a. Extract Installed Apps (iOS)
-
-### Dependencies
+## Dependencies (iOS)
 Must be using a computer running macOS:
 `brew install mobiledevice` on the Mac (or build from
 https://github.com/imkira/mobiledevice).
+Keep the phone unlocked and "trust this computer" when prompted.
 
-## 1b. Extract Installed Apps (Android)
+## Dependencies (Android)
+Install the Android Debug Bridge (`adb`). Enable developer mode 
+on the target android phone, and "Enable USB Debugging". 
+Keep the phone unlocked and "allow debugging" from host when prompted.
+Run `adb kill-server && sudo adb start-server` with phone plugged in and
+unlocked.
 
-(testing)
+Run `adb devices` to see if the device is connected properly.
