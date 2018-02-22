@@ -20,4 +20,4 @@ unlocked.
 Run `adb devices` to see if the device is connected properly.
 
 ## TODO
-Scan
+https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
