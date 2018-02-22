@@ -1,5 +1,9 @@
 # Phone Scanner (OCDV Demo)
 
+## Python tool Dependencies
+Run `pip3 install -r requirements.txt` to get the `appJar` (gui) and `pandas`
+modules.
+
 ## Dependencies (iOS)
 Must be using a computer running macOS:
 `brew install mobiledevice` on the Mac (or build from
