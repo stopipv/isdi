@@ -3,118 +3,99 @@
 from appJar import gui
 import subprocess
 import pandas as pd
-import config
+from config import DEV_SUPPRTED, APPS_LIST
 import time
 
-'''
-NEED https://github.com/imkira/mobiledevice installed (`brew install mobiledevice` or build from source).
-'''
-def ios_scan():
-   installed_apps = subprocess.run(['mobiledevice', 'list_apps'], stdout=subprocess.PIPE) 
-   if (installed_apps.returncode != 0):
-       print("Error running iOS device scan. Is the 'https://github.com/imkira/mobiledevice" \
-            "code installed on this Mac?")
-       exit(1)
-   installed_apps = installed_apps.stdout
-   installed_apps = installed_apps.split('\n').tolist()
+class AppScan(object):
+   device_type = ''
+   def __init__(self, dev_type):
+      assert dev_type in DEV_SUPPRTED, \
+         "dev={!r} is not supported yet. Allowed={}".format(dev_type, DEV_SUPPRTED)
+      self.device_type = dev_type
 
-   # NB: or use DB!
-   apps_df = pd.read_csv(config.IOS_APPS_LIST, index_col='appId')
-   apps_df['appId'] = apps_df.index
-   relevant_spyware_df = apps_df[apps_df['relevant']=='y']
+   def setup(self):
+      pass
    
-   spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
-   
-   print('-'*80)
-   print('Spyware Apps Detected on Phone')
-   print('-'*80)
-   apps = spyware_on_phone[spyware_on_phone == True]
+   def get_apps(self):
+      pass
 
-   relevant_spyware = []
-   for app in apps.index:
-       spyware_app = relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0]
-       relevant_spyware.append(spyware_app)
-   return relevant_spyware
+   def find_spyapps(self):
+      l = self.get_apps()
+      fname = APPS_LIST.get(self.device_type)
+      app_list = pd.read_csv(fname, index_col='appId')
+      return app_list.loc[set(l) & set(app_list.index), 'title'].apply(lambda x: x.encode('ascii', errors='ignore'))
 
-def _test_scan_no_device():
-   installed_apps = open(config.TEST_APP_LIST, 'r').read().splitlines()
+   def uninstall(self):
+      pass
 
-   # NB: or use DB!
-   # NB: test scan running with the android spyware list. feel free to change this here.
-   apps_df = pd.read_csv(config.ANDROID_APP_LIST, index_col='appId')
-   apps_df['appId'] = apps_df.index
-   relevant_spyware_df = apps_df[apps_df['relevant']=='y']
-   
-   spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
-   
-   print('-'*80)
-   print('Spyware Apps Detected on Phone')
-   print('-'*80)
-   apps = spyware_on_phone[spyware_on_phone == True]
-
-   relevant_spyware = []
-   for app in apps.index:
-       spyware_app = relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0]
-       relevant_spyware.append(spyware_app)
-   return relevant_spyware
 
 '''
 NEED Android Debug Bridge (adb) tool installed. Ensure your Android device is connected
 through Developer Mode with USB Debugging enabled, and `adb devices` showing the device as
 connected before running this scan function.
 '''
-def android_scan():
-   installed_apps = subprocess.run(['adb', 'shell', 'pm', 'list', 'packages',
-   '-f', '|', 'sed', '-e', "'s/.*=//'", '|', 'sed', "'s/\r//g'", '|', 'sort'],
-   stdout=subprocess.PIPE)
-   if (installed_apps.returncode != 0):
-      print("Error running Android device scan. Is the Android Debug Bridge (adb)" \
-        "tool installed on this machine?")
-      try:
-          print("Attempting to start Debug Server...")
-          android_setup()
-          print("Android Debug Server is online! Re-run the scan tool!")
-      except Exception as e:
-          print(e)
-      exit(1)
-   installed_apps = installed_apps.stdout.decode()
-   installed_apps = str(installed_apps).split('\n')
+class AndroidScan(AppScan):
+   def __init__(self):
+      super(AndroidScan, self).__init__('android')
 
-   # NOTE: or use DB!
-   apps_df = pd.read_csv(config.ANDROID_APPS_LIST, index_col='appId')
-   apps_df['appId'] = apps_df.index
-   relevant_spyware_df = apps_df[apps_df['relevant']=='y']
+   def setup(self):
+      subprocess.call(['/usr/bin/adb', 'kill-server'])
+      subprocess.call(['sudo', '/usr/bin/adb', 'start-server'])
 
-   spyware_on_phone = relevant_spyware_df['appId'].isin(installed_apps)
-   
-   print('-'*80)
-   print('Spyware Apps Detected on Phone')
-   print('-'*80)
-   apps = spyware_on_phone[spyware_on_phone == True]
+   def get_apps(self):
+      installed_apps = subprocess.run(
+         'adb shell pm list packages -f | sed -e "s/.*=//" | sed "s/\r//g" | sort',
+         stdout=subprocess.PIPE, shell=True
+      )
 
-   relevant_spyware = []
-   for app in apps.index:
-       spyware_app = relevant_spyware_df[relevant_spyware_df['appId']==app]['title'][0]
-       relevant_spyware.append(spyware_app)
-   return relevant_spyware
+      if (installed_apps.returncode != 0):
+         print("Error running Android device scan. Is the Android Debug Bridge (adb)" \
+           "tool installed on this machine?")
+         try:
+             print("Attempting to start Debug Server...")
+             android_setup()
+             print("Android Debug Server is online! Re-run the scan tool!")
+         except Exception as e:
+             print(e)
+             return 
+      installed_apps = installed_apps.stdout.decode()
+      installed_apps = installed_apps.split('\n')
 
-def android_setup():
-    subprocess.call(['/usr/bin/adb', 'kill-server'])
-    subprocess.call(['sudo', '/usr/bin/adb', 'start-server'])
+      return installed_apps
 
-def render_gui(spyware_list):
-    # super simple "gui"... it's very 90's and outdated! 
-    # TODO: use something better, like meteor (JS), instead.
-    with gui("Anti-IPS: Stop intiimate partner surveillance") as app:
-        app.setSize(700, 700)
-        app.setStretch("both")
-        app.setSticky("new")
-        app.setBg("#b31b1b")
-        app.setFont(22)
-        app.addLabel("Spyware", "Spyware found on your device:")
-        app.addListBox("spyware_label", spyware_list, 1, 0)
-        app.addEmptyMessage("Spyware Found on Device", 1, 1)
+
+'''
+NEED https://github.com/imkira/mobiledevice installed
+(`brew install mobiledevice` or build from source).
+'''
+class IosScan(AppScan):
+   def __init__(self):
+      super(IosScan, self).__init__('ios')
+      
+   def get_apps(self):
+      installed_apps = subprocess.run(['mobiledevice', 'list_apps'], stdout=subprocess.PIPE) 
+      if (installed_apps.returncode != 0):
+          print("Error running iOS device scan. Is the 'https://github.com/imkira/mobiledevice" \
+               "code installed on this Mac?")
+          exit(1)
+      installed_apps = installed_apps.stdout
+      installed_apps = installed_apps.split('\n').tolist()
+      return installed_apps
+
+
+class TestScan(AppScan):
+   def __init__(self):
+      super(IosScan, self).__init__(self, 'android')
+
+   def get_apps():
+      installed_apps = open(config.TEST_APP_LIST, 'r').read().splitlines()
+      return installed_apps
+
+
+
+
 
 if __name__ == "__main__":
     spyware = android_scan()
+    print(spyware)
     render_gui(spyware)
