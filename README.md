@@ -19,5 +19,11 @@ unlocked.
 
 Run `adb devices` to see if the device is connected properly.
 
+## Use the tool
+After dependencies are installed, run `python3 phone_scanner.py` with an android 
+or iOS device plugged in and unlocked! Change the line in `main` in the python
+file to whichever
+device you're targeting.
+
 ## TODO
 https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
