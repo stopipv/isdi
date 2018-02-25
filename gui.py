@@ -1,10 +1,13 @@
 from appJar import gui
 from phone_scanner import AndroidScan, IosScan
 import config
+from subprocess import Popen, PIPE
+app = gui(config.TITLE)
 
-app = gui(config.TITLE) 
 
+# TODO: Move this to phone_scanner
 def uninstall_package(button):
+    print("button={}".format(button))
     package = app.getListBox("list")[0]
     res = Popen("adb uninstall " + package, stdout=PIPE, shell=True)
     res = res.stdout.read()
@@ -14,6 +17,8 @@ def uninstall_package(button):
 
 
 def scan(button):
+    assert button in ('android', 'ios'),\
+        "Wrong button={!r}!".format(button)
     if button.lower() == 'android':
         sc = AndroidScan()
     elif button.lower() == 'ios':
@@ -23,7 +28,6 @@ def scan(button):
     return spyapps
 
 
-    
 def render_gui():
     # super simple "gui"... it's very 90's and outdated! 
     # TODO: use something better, like meteor (JS), instead.
@@ -41,6 +45,7 @@ def render_gui():
     app.addListBox("spyware_label", [])
 
     app.go()
+
 
 def main():
     render_gui()
