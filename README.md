@@ -53,7 +53,16 @@ and click on the type of device you have connected.
 
 
 ## TODO
-https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
+1. https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
+
+
+## Warnings  
+1. Don't connect two phones simultaneously! (It's a stupid problem, but don't want to waste time in fixing it).
+
+2. I (Rahul) decided to dump the whole system information of the device. `adb shell dumpsys`. This
+might contain PII, so the data need to be cleaned before further processing.
+
+
 
 
 ## Android ADB helps
