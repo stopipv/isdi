@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<title>Scan Phone for IPS apps</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
+<div class=page>
+  <h1>Scan for IPS apps</h1>
+  <div class=metanav>
+  </div>
+</div>
+<body class="container-fluid">
+    <div class=jumbotron> Hello</div>
+    <div class="col-md-3" style="height:80vh">
+        <h2>List of phones:</h2>
+        <ul>
+        <li><h4>Android</h4></li>
+        <ul>
+            {% for ph in android %}
+            <button onclick='/scan/android?serial={{ ph }}'> {{ ph }} </button>
+            {% endfor %}
+        </ul>
+        <li><h4>iPhone</h4></li>
+        <ul>
+            {% for ph in ios %}
+            <button onclick='/scan/ios?serial={{ ph }}'> {{ ph }} </button>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6" style="height:80vh">
+        <h4>Phone details</h4> 
+    </div>
+</body>

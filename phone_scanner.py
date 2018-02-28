@@ -89,7 +89,7 @@ class AndroidScan(AppScan):
     def devices(self):
         cmd = '{cli} devices | tail -n +2 | cut -f1'
         return [l.strip() for l in self.run_command(cmd)\
-                .stdout.read().decode('utf-8').split('\n')]
+                .stdout.read().decode('utf-8').split('\n') if l.strip()]
 
     def devices_info(self):
         cmd = '{cli} devices -l'
@@ -112,13 +112,14 @@ class AndroidScan(AppScan):
     def app_details(self, app):
         pass
 
-'''
-NEED https://github.com/imkira/mobiledevice installed
-(`brew install mobiledevice` or build from source).
-'''
 
 
 class IosScan(AppScan):
+    """
+    NEED https://github.com/imkira/mobiledevice installed
+    (`brew install mobiledevice` or build from source).
+    """
+
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
 
@@ -131,6 +132,11 @@ class IosScan(AppScan):
         installed_apps = installed_apps.stdout
         installed_apps = installed_apps.split('\n').tolist()
         return installed_apps
+
+    def devices(self):
+        cmd = '{cli} list_devices'
+        return [l.strip() for l in self.run_command(cmd)\
+                .stdout.read().decode('utf-8').split('\n') if l.strip()]
 
 
 class TestScan(AppScan):

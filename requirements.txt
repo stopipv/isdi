@@ -1,2 +1,3 @@
-appJar==0.90.0
-pandas==0.21.0
+# appJar==0.90.0
+pandas
+flask
