@@ -14,3 +14,7 @@ ADB_PATH = os.path.join(ANDROID_HOME, 'adb')
 MOBILEDEVICE_PATH = 'mobiledevice'
 
 DUMP_DIR = './phone_dumps'
+<
+
+
+DEBUG = True
