@@ -1,31 +1,59 @@
 <!DOCTYPE html>
-<title>Scan Phone for IPS apps</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
-<div class=page>
-  <h1>Scan for IPS apps</h1>
-  <div class=metanav>
-  </div>
-</div>
-<body class="container-fluid">
-    <div class=jumbotron> Hello</div>
-    <div class="col-md-3" style="height:80vh">
-        <h2>List of phones:</h2>
-        <ul>
-        <li><h4>Android</h4></li>
-        <ul>
-            {% for ph in android %}
-            <button onclick='/scan/android?serial={{ ph }}'> {{ ph }} </button>
-            {% endfor %}
-        </ul>
-        <li><h4>iPhone</h4></li>
-        <ul>
-            {% for ph in ios %}
-            <button onclick='/scan/ios?serial={{ ph }}'> {{ ph }} </button>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="col-md-6" style="height:80vh">
-        <h4>Phone details</h4> 
-    </div>
-</body>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='style.css') }}">
+        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+        <title>Scan Phone for IPS apps</title>
+        <script>
+         function fetch(url) {
+             $.get(url, function(data) {
+                 alert(data);
+             });
+         }
+        </script>
+    </head>
+    <body class="container-fluid">
+        <div class=""> 
+            <h1>Hello!</h1>
+            <p>Information about what we are doing.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 jumbotron" style="height:80vh">
+                <h4>List of phones:</h4>
+                <ul class="">
+                    {% for name,dlist in devices.items() %}
+                    <li>{{ name }}</li>
+                    <ul>{% for d in dlist %}
+                        <li><button type="button" class="btn btn-primary"
+                                    onclick='fetch("/scan/{{ name.lower() }}?serial={{ d }}")'> {{ d }} 
+                        </button></li>
+                        {% endfor %}
+                    </ul>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-8" style="height:80vh">
+                <h4>Phone details</h4> 
+                <div class="container">
+                    <table class="table table-bordered">
+                        <thead><tr>
+                            <th style="width: 10%">#</th>
+                            <th style="width: 30%">App Name</th>
+                            <th style="width: 30%">App ID</th>
+                            <th style="width: 30%">Action</th>
+                        </tr></thead>
+                        <tbody id="applist">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -7,6 +7,7 @@ from config import DEV_SUPPRTED, APPS_LIST, TEST_APP_LIST
 import gzip
 import os
 
+
 class AppScan(object):
     device_type = ''
 
@@ -113,7 +114,6 @@ class AndroidScan(AppScan):
         pass
 
 
-
 class IosScan(AppScan):
     """
     NEED https://github.com/imkira/mobiledevice installed
@@ -141,13 +141,14 @@ class IosScan(AppScan):
 
 class TestScan(AppScan):
     def __init__(self):
-        super(TestScan, self).__init__('android')
+        super(TestScan, self).__init__('android', cli='cli')
 
     def get_apps(self):
         installed_apps = open(TEST_APP_LIST, 'r').read().splitlines()
         return installed_apps
 
-
+    def devices(self):
+        return ["testdevice1"]
 if __name__ == "__main__":
     sc = AndroidScan()
     print(sc.find_spyapps())
