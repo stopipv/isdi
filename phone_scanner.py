@@ -3,9 +3,17 @@
 import subprocess
 import pandas as pd
 import config
-from config import DEV_SUPPRTED, APPS_LIST, TEST_APP_LIST
+from config import DEV_SUPPRTED, APPS_LIST, TEST_APP_LIST, DEBUG
 import gzip
 import os
+import dataset
+
+if DEBUG:
+    TEST = '~test'
+else:
+    TEST = ''
+
+db = dataset.connect('sqlite:///fieldstudy.db' + TEST)
 
 
 class AppScan(object):
@@ -41,6 +49,11 @@ class AppScan(object):
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
         )
         return p
+
+    def save(self, **kwargs):
+        tab = db.get_table('feedback')
+        tab.insert(kwargs)
+        db.commit()
 
 
 
