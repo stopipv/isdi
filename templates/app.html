@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='style.css') }}?234">
+        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    </head>
+    <body class=container">
+        <div class="container">
+            <h2>{{ app.title|safe }} </h2>
+            <code>{{ app.appId }}</code><br/>
+            Developer: <i>{{ app.developer }}</i> </br>
+            Website: <i>{{ app.website }}</i>
+            <div class="jumbotron" style="padding: 1em">
+                <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
+                {{ app.descriptionHTML|safe }}
+            </div>
+            <div class="text-sm-left">
+                <ul class="list-group">
+                    {% for perm in app.permissions %}
+                    <li class="code">perm</li>
+                    {% endfor %}
+            </ul>
+            </div>
+        </div>
+    </body>
+</html>

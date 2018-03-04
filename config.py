@@ -4,12 +4,16 @@ import os
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 APPS_LIST = {
     'android': 'android_apps_crawl.csv',
-    'ios': 'ios_apps_crawl.csv',
+    'ios': 'ios_apps_crawl.csv.gz',
+    'test': 'android_apps_crawl.csv'
 }
 TEST_APP_LIST = 'android.test.apps_list' 
 TITLE = "Anti-IPS: Stop intiimate partner surveillance"
 
-ANDROID_HOME = os.getenv('ANDROID_HOME', './platform-tools')
+ANDROID_HOME = os.path.join(
+    os.getenv('ANDROID_HOME', './'),
+    'platform-tools'
+)
 ADB_PATH = os.path.join(ANDROID_HOME, 'adb')
 MOBILEDEVICE_PATH = 'mobiledevice'
 
