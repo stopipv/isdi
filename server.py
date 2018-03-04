@@ -34,7 +34,6 @@ def app_details(device):
     appid = request.args.get('id')
     d = sc.app_details(appid).to_dict()
     d['appId'] = appid
-    print(d)
     return render_template(
         'app.html',
         app=d
