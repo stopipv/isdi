@@ -1,12 +1,3 @@
-table{
-    table-layout: fixed;
-    word-wrap: break-word;
-}
-
-button.action {
-    margin: 2px;
-}
-
 input[type=radio] {
     margin: 2px;
 }

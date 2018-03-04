@@ -28,43 +28,68 @@ def index():
         })
 
 
-@app.route('/?id=<id>', methods=['GET'])
-def app_details(appid):
-    pass
+@app.route('/details/app/<device>', methods=['GET'])
+def app_details(device):
+    sc = get_device(device)
+    appid = request.args.get('id')
+    d = sc.app_details(appid).to_dict()
+    d['appId'] = appid
+    print(d)
+    return render_template(
+        'app.html',
+        app=d
+    )
 
 
-@app.route("/scan", methods=['GET'])
-def scan():
-    device = request.args.get('device')
+@app.route("/scan/<device>", methods=['GET'])
+def scan(device):
     ser = request.args.get('serial')
     print(device, ser)
     sc = get_device(device)
-    return sc.find_spyapps().to_json()
+    return sc.find_spyapps(serialno=ser).to_json()
+
+@app.route("/delete/<device>", methods=["PUT"])
+def delete_app(device):
+    sc = get_device(device)
+    serial = request.args.get('serial')
+    appid = request.args.get('appid')
+    sc.uninstall(serial=serial, appid=appid)
 
 
-@app.route('/submit', methods=["POST", "GET"])
+
+@app.route('/submit', methods=["POST"])
 def record_response():
     if request.method == "POST":
-        t = re.match('device=(\w+)&serial=(\w+)', request.form.get('url'))
+        t = re.match('(\w+)\?serial=(\w+)', request.form.get('url', ''))
         if not t:
+            print(request.form)
             return "The form could not be submitted!", 400
         device, serial = t.groups()
         app_feedback = {
             k.split('-', 1)[1]: v
-            for k,v in request.form.items()
+            for k, v in request.form.items()
             if k != 'url'
         }
         sc = get_device(device)
-        sc.save(feedback=json.dumps(app_feedback), serial=serial)
-        return "Success", 200
+        r = True
+        for k, v in app_feedback.items():
+            if v == 'delete':
+                print("Deleting {}".format(k))
+                r &= sc.uninstall(appid=k, serialno=serial)
+        r &= bool(sc.save(feedback=json.dumps(app_feedback), serial=serial))
+        if not r:
+            return "The action failed for some reason. See the logs "\
+                "in the terminal.", 401
+        else:
+            return "Success!!", 200
     else:
         return "hello", 200
 
 
-@app.route('/list/<type>', methods=['GET'])
-def list():
-    phones = android.devices()
-    return json.dumps(phones)
+@app.route('/list/<device>', methods=['GET'])
+def list(device):
+    sc = get_device(device)
+    return json.dumps(sc.devices())
 
 
 if __name__ == "__main__":

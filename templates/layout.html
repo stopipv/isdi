@@ -7,18 +7,26 @@
         <link rel=stylesheet type=text/css 
               href="{{ url_for('static', filename='bootstrap.min.css') }}">
         <link rel=stylesheet type=text/css 
-              href="{{ url_for('static', filename='style.css') }}">
+              href="{{ url_for('static', filename='style.css') }}?234">
         <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
         <title>Scan Phone for IPS apps</title>
         <script>
-         /* Returns a button with id=k, and value t, and type=type */ 
-         /* function get_button(k, t, type) {
-          *     s = '<button id="' + t + '-' + k + '" type="button" ';
-          *     s += 'class="action btn btn-sm btn-'+ type +'">';
-          *     s += t + '</button>';
-          *     return s
-          * }*/
+         function postform() {
+             $('#btn-submit').prop('disabled', true);
+             d = $('#app-list').serialize();
+             $.post('/submit', data=d).done(success=function(r) {
+                 $('#msg').html(r);
+                 $('#msg').prop('class', 'alert alert-success')
+                 $('#btn-submit').prop('disabled', false);
+             }).fail(function(r) {
+                 /* alert('Bad request: ' + JSON.stringify(r));*/
+                 $('#msg').html(r.responseText);
+                 $('#msg').prop('class', 'alert alert-danger')
+             });
+             return false;
+         }
+
          function get_actions(k) {
              var s = '<div class="btn-group" data-toggle="buttons">';
              $.each(['delete', 'ignore', 'wrong'], function(i, b) {
@@ -29,16 +37,8 @@
              s += '</div>';
              return s;
          }
-         function postform() {
-             d = $('#app-list').serialize();
-             alert(d);
-             $.post('/submit', data=d, success=function(r) {
-                 $('#msg').html(r);
-             });
-             return false;
-         }
 
-         function fetch(url) {
+         function fetch(url, device) {
              $.get(url, function(data) {
                  var s = "";
                  var i = 0;
@@ -47,16 +47,22 @@
                      i += 1;
                      s += '<tr id="'+k+'">';
                      s += "<td>" + i + "</td>";
-                     s += "<td>" + d[k] + "</td>";
+                     s += "<td><a href='/details/app/" + device + "?id=" + k;
+                     s += "' target='_blank'>" + d[k] + "</td>";
                      s += "<td><code>" + k + "</code></td>";
                      s += "<td>" + get_actions(k);
                      s += '</tr>';
                  }
                  s += '<input type="hidden" name="url" value="';
-                 s += url.replace('/scan?', '') + '"></input>';
-
+                 s += url.replace('/scan/', '') + '"></input>';
+                 if (i <= 0) {
+                     alert("No spyware found");
+                     s = "<tr><td colspan='4' class='alert-success'>No spyware found! ";
+                     s += "<sup>1</sup></td></tr>";
+                 }
                  $('#applist').html(s);
                  $('input[value=ignore]').prop('checked', 'checked');
+                 $('#btn-submit').prop('disabled', false);
              });
          }
          $(document).ready(function () {
@@ -67,9 +73,11 @@
                      return false;
                  }
              });
+             $('#btn-submit').prop('disabled', true);
          });
         </script>
     </head>
+
     <body class="container-fluid">
         <div class=""> 
             <h1>Hello!</h1>
@@ -80,11 +88,13 @@
                 <h4>List of phones:</h4>
                 <ul class="">
                     {% for name,dlist in devices.items() %}
-                    <li>{{ name }}</li>
-                    <ul>{% for d in dlist %}
-                        <li><button type="button" class="btn btn-primary"
-                                    onclick='fetch("/scan?device={{ name.lower() }}&serial={{ d }}")'> {{ d }} 
-                        </button></li>
+                    <li class=''>{{ name }}</li>
+                    <ul class='list-group'>{% for d in dlist %}
+                        <!-- <li class='list-group-item'><button type="button" class="btn btn-primary btn-sm"
+                             onclick='fetch("/scan/{{ name.lower() }}?serial={{ d }}")'> {{ d }} 
+                             </button></li> -->
+                        <button class='list-group-item list-group-item-primary list-group-item-action' 
+                                onclick='fetch("/scan/{{ name.lower() }}?serial={{ d }}", "{{ name.lower() }}")'> {{ d }} </button>
                         {% endfor %}
                     </ul>
                     {% endfor %}
@@ -96,18 +106,18 @@
                 <div class="container form-group">
                     <table class="table table-bordered">
                         <thead><tr>
-                            <th style="width: 10%">#</th>
+                            <th style="width: 6%">#</th>
                             <th style="width: 30%">App Name</th>
                             <th style="width: 30%">App ID</th>
-                            <th style="width: 30%">Action</th>
+                            <th style="width: 35%">Action</th>
                         </tr></thead>
                         <tbody id="applist">
                         </tbody>
                     </table>
                 </div>
-                <button onclick="postform(this)" 
-                        class="btn btn-primary">Submit</button>
-                <div id="msg"> </div>
+                <button onclick="postform(this)" id="btn-submit"
+                        class="btn btn-primary btn-lg">Submit</button>
+                <div id="msg" style="margin: 10px" class="alert"> </div>
                 </form>
             </div>
         </div>
