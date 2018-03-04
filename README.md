@@ -1,12 +1,16 @@
 # Phone Scanner (OCDV Demo)
 
 
-## Code struture
+## Code struture  
+* `phone_scanner.py` has all the logic rquired to communicate with Android and
+  iOS phones.
+* `server.py` is the flask server. 
+* `templates/` folder contains the html templates rendering in the UI
+* `static/` folder contains the `.css` and `.js` files 
+* `phone_dumps` folder will contain the data recorded from the phone. 
 
-
-## Python tool Dependencies
-Run `pip3 install -r requirements.txt` to get the `appJar` (gui) and `pandas`
-modules.
+## Python tool Dependencies Run `pip3 install -r requirements.txt` to get the
+`appJar` (gui) and `pandas` modules.
 
 
 ## Dependencies 
@@ -52,15 +56,47 @@ $ python3 phone_scanner.py
 and click on the type of device you have connected.  
 
 
+## Downloaded data ##
+The data downloaded and stored in the study are the following. 
+1. A `sqlite` database containing the feed back and actions taken by the user. 
+2. `phone_dump` folder will have dump of some services in the phone. (For Android I have figured out what are these, for Ios I don't know how to get those information.)
+
+The services that we can dump safely using `dumpsys` are the following.
+    * activity
+    * appops
+    * cpuinfo: (CPU usage info of apps)
+    * graphicsstats: (stats about use of graphics info of apps)
+    * location (which apps and how often using location services)
+    * camera
+    * meminfo
+    * notification (what notifications are being shown or was shown. PII?)
+    * package (MUST)
+    * window (??)
+    * procstats and procinfo (Process stats, but not sure how useful)
+    * usagestats
+    
+Other interesting services, but may have PII
+    * backup: (where the account backing up the data)
+    * batterystats: (which app is using how much of battery)
+    * content: (have data about syncing, which app is syncing what, how frequently)
+    * user
+I don't know following services:
+    * country_detector??
+    * lock_settings:
+
+Definitely has PII
+    * account, user
+    * trust
+
 ## TODO
 1. https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
+2. How to figure out off-store apps
 
 
 ## Warnings  
-1. Don't connect two phones simultaneously! (It's a stupid problem, but don't want to waste time in fixing it).
-
-2. I (Rahul) decided to dump the whole system information of the device. `adb shell dumpsys`. This
-might contain PII, so the data need to be cleaned before further processing.
+~2. I (Rahul) was deciding ~decided~ to dump the whole system information of the device. `adb
+shell dumpsys`. This might contain PII, so the data need to be cleaned before
+further processing.~
 
 
 
