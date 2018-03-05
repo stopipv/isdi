@@ -9,8 +9,8 @@
 * `static/` folder contains the `.css` and `.js` files 
 * `phone_dumps` folder will contain the data recorded from the phone. 
 
-## Python tool Dependencies Run `pip3 install -r requirements.txt` to get the
-`appJar` (gui) and `pandas` modules.
+## Python tool Dependencies
+Run `pip3 install -r requirements.txt` to get the required modules.
 
 
 ## Dependencies 
@@ -62,31 +62,31 @@ The data downloaded and stored in the study are the following.
 2. `phone_dump` folder will have dump of some services in the phone. (For Android I have figured out what are these, for Ios I don't know how to get those information.)
 
 The services that we can dump safely using `dumpsys` are the following.
-    * activity
-    * appops
-    * cpuinfo: (CPU usage info of apps)
-    * graphicsstats: (stats about use of graphics info of apps)
-    * location (which apps and how often using location services)
-    * camera
-    * meminfo
-    * notification (what notifications are being shown or was shown. PII?)
-    * package (MUST)
-    * window (??)
-    * procstats and procinfo (Process stats, but not sure how useful)
-    * usagestats
+* activity
+* appops
+* cpuinfo: (CPU usage info of apps)
+* graphicsstats: (stats about use of graphics info of apps)
+* location (which apps and how often using location services)
+* camera
+* meminfo
+* notification (what notifications are being shown or was shown. PII?)
+* package (MUST)
+* window (??)
+* procstats and procinfo (Process stats, but not sure how useful)
+* usagestats
     
 Other interesting services, but may have PII
-    * backup: (where the account backing up the data)
-    * batterystats: (which app is using how much of battery)
-    * content: (have data about syncing, which app is syncing what, how frequently)
-    * user
+* backup: (where the account backing up the data)
+* batterystats: (which app is using how much of battery)
+* content: (have data about syncing, which app is syncing what, how frequently)
+* user
 I don't know following services:
-    * country_detector??
-    * lock_settings:
+* country_detector??
+* lock_settings:
 
 Definitely has PII
-    * account, user
-    * trust
+* account, user
+* trust
 
 ## TODO
 1. https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
