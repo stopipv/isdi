@@ -80,6 +80,7 @@ Other interesting services, but may have PII
 * batterystats: (which app is using how much of battery)
 * content: (have data about syncing, which app is syncing what, how frequently)
 * user
+
 I don't know following services:
 * country_detector??
 * lock_settings:
