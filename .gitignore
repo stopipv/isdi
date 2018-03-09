@@ -101,3 +101,12 @@ ENV/
 .mypy_cache/
 *~test
 tmp/
+
+
+
+## App data -- Do not add to public github repo
+android_apps_crawl.csv.gz
+test_android_apps_crawl.csv.gz
+
+## Submodules
+MobileDevice/

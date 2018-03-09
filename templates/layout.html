@@ -29,7 +29,7 @@
 
          function get_actions(k) {
              var s = '<div class="btn-group" data-toggle="buttons">';
-             $.each(['delete', 'ignore', 'wrong'], function(i, b) {
+             $.each(['delete', 'ignore'], function(i, b) {
                  s += '<label class="btn btn-danger">'
                  s += '<input type="radio" name="actions-' + k +'" value="' + b + '"> ';
                  s += b + '</label>';
@@ -80,8 +80,10 @@
 
     <body class="container-fluid">
         <div class=""> 
-            <h1>Hello!</h1>
-            <p>Information about what we are doing.</p>
+            <h2>Scan phones for IPS apps</h2>
+            <p>This application scans an Android and iOS phone for apps that can be used to spy,
+		track, or monitor on a person without their knowledge.
+	    </p>
         </div>
         <div class="row">
             <div class="col-md-4 jumbotron" style="height:80vh">
