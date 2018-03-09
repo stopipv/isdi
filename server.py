@@ -36,7 +36,12 @@ def app_details(device):
     d['appId'] = appid
     return render_template(
         'app.html',
-        app=d
+        app=d,
+        info={
+            'install_date': "<TODO>",
+            'battery_usage': "<TODO>",
+            'data_usage': "<TODO>"
+        },
     )
 
 

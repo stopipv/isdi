@@ -41,7 +41,12 @@ class AppScan(object):
 
     def app_details(self, appid):
         try:
-            return self.stored_apps.loc[appid]
+            d = self.stored_apps.loc[appid]
+            if not isinstance(d.get('permissions', ''), list):
+                d['permissions'] = d['permissions'].split(', ')
+            if 'descriptionHTML' not in d:
+                d['descriptionHTML'] = d['description']
+            return d
         except KeyError as ex:
             print(ex)
             return {}
@@ -88,6 +93,7 @@ class AndroidScan(AppScan):
 
     def __init__(self):
         super(AndroidScan, self).__init__('android', config.ADB_PATH)
+        # self.setup()
 
     def setup(self):
         p = self.run_command(
@@ -156,16 +162,17 @@ class IosScan(AppScan):
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
 
-    def get_apps(self):
-        installed_apps = subprocess.run(
-            ['mobiledevice', 'list_apps'], stdout=subprocess.PIPE
-        )
-        if installed_apps.returncode != 0:
-            print("Error running iOS device scan. Is the "
-                  "'https://github.com/imkira/mobiledevice"
-                  "code installed on this Mac?")
+    def get_apps(self, serialno):
+        cmd = '{cli} -u {serial} -t 5 list_apps'
+        p = self.run_command(cmd, serial=serialno); p.wait()
+        if p.returncode != 0:
+            print(
+                "Error running iOS device scan. \n{} - Error: {}"
+                "Is 'https://github.com/imkira/mobiledevice' installed?"
+                .format(p.returncode, p.stderr.read().decode())
+            )
             exit(1)
-        installed_apps = installed_apps.stdout
+        installed_apps = p.stdout.rea
         installed_apps = installed_apps.split('\n').tolist()
         return installed_apps
 
