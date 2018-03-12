@@ -28,7 +28,9 @@ class AppScan(object):
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
         fname = APPS_LIST.get(self.device_type)
         self.stored_apps = pd.read_csv(fname, index_col='appId')
-
+        if 'relevant' not in self.stored_apps.columns:
+            self.stored_apps['relevant'] = self.stored_apps['ml_score'] > 0.4
+            
     def setup(self):
         """If the device needs some setup to work."""
         pass
