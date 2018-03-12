@@ -3,9 +3,9 @@ import os
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 APPS_LIST = {
-    'android': 'android_apps_crawl.csv.gz',
-    'ios': 'ios_apps_crawl.csv.gz',
-    'test': 'test_android_apps_crawl.csv.gz'
+    'android': 'data/android_apps_crawl.csv.gz',
+    'ios': 'data/ios_apps_crawl.csv.gz',
+    'test': 'data/test_android_apps_crawl.csv.gz'
 }
 TEST_APP_LIST = 'android.test.apps_list' 
 TITLE = "Anti-IPS: Stop intiimate partner surveillance"
