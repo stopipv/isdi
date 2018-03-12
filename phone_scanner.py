@@ -39,13 +39,19 @@ class AppScan(object):
     def get_apps(self, serialno):
         pass
 
-    def app_details(self, appid):
+    def app_details(self, serialno, appid):
         try:
             d = self.stored_apps.loc[appid]
             if not isinstance(d.get('permissions', ''), list):
                 d['permissions'] = d['permissions'].split(', ')
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
+            
+            p = self.run_command(
+                'bash scripts/android_scan.sh info {ser} {appid}',
+                ser=serialno, appid=appid
+            ); p.wait()
+            d['info'] = p.stdout.read()
             return d
         except KeyError as ex:
             print(ex)
@@ -108,7 +114,6 @@ class AndroidScan(AppScan):
         cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
               ' sed "s/\r//g" | sort'
         p = self.run_command(cmd, serial=serialno); p.wait()
-
         if p.returncode != 0:
             print("Error running Android device scan. Error={}".format(
                 p.stderr.read())
@@ -119,7 +124,7 @@ class AndroidScan(AppScan):
         else:
             installed_apps = p.stdout.read().decode()
             installed_apps = installed_apps.split('\n')
-
+            q = self.run_command('bash scripts/android_scan.sh scan {ser}', ser=serialno); q.wait()
             return installed_apps
 
     def devices(self):

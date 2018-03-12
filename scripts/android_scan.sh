@@ -8,7 +8,7 @@ if [[ $# -lt 1 ]]; then
     exit -1
 fi
 
-serial="-s $1"
+serial="-s $2"
 dump_dir="./phone_dumps/"
 ofname=$dump_dir/${serial:3}.txt
 
@@ -32,6 +32,7 @@ function scan_spy {
 
 
 function retrieve {
+    # Make a python parser for this might be much faster
     if [[ ! -e $ofname ]]; then
         echo "Run scan first"
         return -1
@@ -78,4 +79,12 @@ function full_scan {
     adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'  >> "$ofname" 2>> error.txt
 }
     
-retrieve $2
+if [[ "$1" == "scan" ]]; then 
+    full_scan
+elif [[ "$1" == "info" ]]; then
+    retrieve $3
+else
+    echo "$ bash $0 <scan|info> <serial_no> [appId]"
+    exit -1;
+fi
+
