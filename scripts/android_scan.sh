@@ -68,6 +68,12 @@ services=(package location media.camera netpolicy mount
           activity appops)
 
 function full_scan {
+    secs_since_last_modified=$(($(date +%s) - $(stat -c %Y $ofname)))
+    if [[ ${secs_since_last_modified} -lt 1200 ]]; then # 20 min no re dump
+        echo "File is still pretty fresh (${secs_since_last_modified} sec)"
+        echo "Not re-dumping"
+        exit 0
+    fi
     rm -rf $ofname
     for a in ${services[*]}; do
         echo "--------------------------------------------------------------------------------------"
