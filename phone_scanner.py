@@ -28,8 +28,11 @@ class AppScan(object):
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
         fname = APPS_LIST.get(self.device_type)
         self.stored_apps = pd.read_csv(fname, index_col='appId')
-        if 'relevant' not in self.stored_apps.columns:
-            self.stored_apps['relevant'] = self.stored_apps['ml_score'] > 0.4
+        if ('relevant' not in self.stored_apps.columns) or \
+           (self.stored_apps.relevant.count() < len(self.stored_apps)*0.5):
+            print("Relevant column is missing or unpopulated... recreating")
+            self.stored_apps['relevant'] = (self.stored_apps['ml_score'] > 0.4)\
+                .apply(lambda x: 'y' if x else 'n')
             
     def setup(self):
         """If the device needs some setup to work."""
@@ -53,15 +56,24 @@ class AppScan(object):
                 'bash scripts/android_scan.sh info {ser} {appid}',
                 ser=serialno, appid=appid
             ); p.wait()
-            d['info'] = p.stdout.read()
+            d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
             return d
         except KeyError as ex:
             print(ex)
             return {}
 
+    def find_offstore_apps(self, serialno):
+        installed_apps = self.get_apps(serialno)
+        offstore_apps = pd.read_csv(config.OFFSTORE_APPS, index_col='appId')
+        return (offstore_apps.loc[
+            list(set(installed_apps) & set(offstore_apps.index)), 'title'
+        ].apply(lambda x: x.encode('ascii', errors='ignore')))
+        
+        
     def find_spyapps(self, serialno):
         installed_apps = self.get_apps(serialno)
         app_list = self.stored_apps.query('relevant == "y"')
+        
         return (app_list.loc[
             list(set(installed_apps) & set(app_list.index)), 'title'
         ].apply(lambda x: x.encode('ascii', errors='ignore')))
@@ -101,6 +113,7 @@ class AndroidScan(AppScan):
 
     def __init__(self):
         super(AndroidScan, self).__init__('android', config.ADB_PATH)
+        self.serialno = None
         # self.setup()
 
     def setup(self):
@@ -113,6 +126,9 @@ class AndroidScan(AppScan):
         self.devid = None
 
     def get_apps(self, serialno):
+        if self.serialno == serialno and self.installed_apps:
+            return self.installed_apps
+
         cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
               ' sed "s/\r//g" | sort'
         p = self.run_command(cmd, serial=serialno); p.wait()
@@ -127,6 +143,7 @@ class AndroidScan(AppScan):
             installed_apps = p.stdout.read().decode()
             installed_apps = installed_apps.split('\n')
             q = self.run_command('bash scripts/android_scan.sh scan {ser}', ser=serialno); q.wait()
+            self.installed_apps = installed_apps
             return installed_apps
 
     def devices(self):
@@ -168,8 +185,14 @@ class IosScan(AppScan):
 
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
+        self.installed_apps = None
+        self.serialno = None
+
 
     def get_apps(self, serialno):
+        if self.serialno == serialno and self.installed_apps:
+            return self.installed_apps
+        self.serialno = serialno
         cmd = '{cli} -u {serial} -t 5 list_apps'
         p = self.run_command(cmd, serial=serialno); p.wait()
         if p.returncode != 0:
@@ -179,12 +202,12 @@ class IosScan(AppScan):
                 .format(p.returncode, p.stderr.read().decode())
             )
             exit(1)
-        installed_apps = p.stdout.rea
-        installed_apps = installed_apps.split('\n').tolist()
-        return installed_apps
+        self.installed_apps = [x.strip() for x in p.stdout]
+        return self.installed_apps
 
     def devices(self):
         cmd = '{cli} list_devices'
+        self.serialno = None
         return [l.strip() for l in self.run_command(cmd)\
                 .stdout.read().decode('utf-8').split('\n') if l.strip()]
 

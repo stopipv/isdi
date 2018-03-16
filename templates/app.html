@@ -23,7 +23,7 @@
 			<tr><td>Install Date</td> <td>{{ info.install_date }} </td></tr>
 			<tr><td>Battery Usage</td> <td>{{ info.battery_usage }} </td></tr>
 			<tr><td>Data Usage</td> <td>{{ info.data_usage }} </td></tr>
-			<tr><td>Info</td> <td>{{ app.info }} </td></tr>
+			<tr><td>Info</td> <td>{{ app.info|safe }} </td></tr>
                     </tbody>
                 </table>
 		<label class="btn btn-danger">
