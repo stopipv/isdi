@@ -39,7 +39,7 @@ function retrieve {
     fi
     app="$1"
     process_uid=$(grep -A1 "Package \[$app\]" $ofname | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
-    process_uidu=$(grep -Eo "app=ProcessRecord{[a-f0-9]+ [0-9]+:$app/([a-z0-9]*)" $ofname  | cut -d '/' -f 2)
+    process_uidu=$(grep -Eo "app=ProcessRecord{[a-f0-9]+ [0-9]+:$app/([a-z0-9]*)" $ofname  | cut -d '/' -f 2 | sort -u)
 
     # Install date
     echo "Install Date"
@@ -68,7 +68,11 @@ services=(package location media.camera netpolicy mount
           activity appops)
 
 function full_scan {
-    secs_since_last_modified=$(($(date +%s) - $(stat -c %Y $ofname)))
+    if [[ ! -e $ofname ]]; then
+        secs_since_last_modified=100000000;
+    else
+        secs_since_last_modified=$(($(date +%s) - $(stat -c %Y $ofname)))
+    fi
     if [[ ${secs_since_last_modified} -lt 1200 ]]; then # 20 min no re dump
         echo "File is still pretty fresh (${secs_since_last_modified} sec)"
         echo "Not re-dumping"
@@ -86,8 +90,10 @@ function full_scan {
 }
     
 if [[ "$1" == "scan" ]]; then 
+    (>&2 echo "------ Running full scan ------- $2")
     full_scan
 elif [[ "$1" == "info" ]]; then
+    (>&2 echo "------ Running app info ------- $2 $3")
     retrieve $3
 else
     echo "$ bash $0 <scan|info> <serial_no> [appId]"
