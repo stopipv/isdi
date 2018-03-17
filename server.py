@@ -3,6 +3,8 @@ from phone_scanner import AndroidScan, IosScan, TestScan
 import json
 import re
 import config
+import parse_dump
+
 
 FLASK_APP = Flask(__name__)
 android = AndroidScan()
@@ -35,15 +37,14 @@ def app_details(device):
     ser = request.args.get('ser')
     d = sc.app_details(ser, appid).to_dict()
     d['appId'] = appid
-    
+    dumpf = './phone_dumps/{}_{}.txt'.format(ser, device)
+    df = parse_dump.load_file(dumpf)
+    print(parse_dump.info(df, appid))
     return render_template(
         'app.html',
         app=d,
-        info={
-            'install_date': "<TODO>",
-            'battery_usage': "<TODO>",
-            'data_usage': "<TODO>",
-        },
+        info=parse_dump.info(df, appid)
+
     )
 
 
