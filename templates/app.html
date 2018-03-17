@@ -14,19 +14,34 @@
     <body class=container">
         <div class="container">
             <h2>{{ app.title|safe }} </h2>
-            <code>{{ app.appId }}</code><br/>
-            Developer: <i>{{ app.developer }}</i> </br>
-            Website: <i>{{ app.website }}</i>
+            <div class="container form-group">
+                <table class="table table-bordered">
+                    <tbody>
+			<tr><td>AppId</td><td><code>{{ app.appId }}</code></td></tr>
+			<tr><td>Developer</td> <td><i>{{ app.developer }}</i> </td></tr>
+			<tr><td>Website</td> <td>{{ app.website }} </td></tr>
+                        {% for k, v in info.items() %}
+			<tr><td>{{ k }}</td> <td>{{ v }} </td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+		<label class="btn btn-danger">
+		    <button type="button" class="btn btn-danger"
+			    onclick='' disabled>Delete</button>
+		</label>
+            </div>
+
             <div class="jumbotron" style="padding: 1em">
                 <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
                 {{ app.descriptionHTML|safe }}
             </div>
             <div class="text-sm-left">
+		<h4>Number of permissions: {{ app.permissions| length }}</h4>
                 <ul class="list-group">
                     {% for perm in app.permissions %}
-                    <li class="code">perm</li>
+                    <li class="code">{{ perm }}</li>
                     {% endfor %}
-            </ul>
+		</ul>
             </div>
         </div>
     </body>
