@@ -9,3 +9,4 @@ else
 fi
 mv platform-tools ~/.platform-tools
 export ANDROID_HOME=~/.platform-tools
+export PATH=$ANDROID_HOME:$PATH
