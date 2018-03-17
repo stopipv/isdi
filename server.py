@@ -3,8 +3,10 @@ from phone_scanner import AndroidScan, IosScan, TestScan
 import json
 import re
 import config
+import parse_dump
 
-app = Flask(__name__)
+
+FLASK_APP = Flask(__name__)
 android = AndroidScan()
 ios = IosScan()
 test = TestScan()
@@ -17,7 +19,7 @@ def get_device(k):
         'test': test
     }.get(k)
 
-@app.route("/", methods=['GET'])
+@FLASK_APP.route("/", methods=['GET'])
 def index():
     return render_template(
         'layout.html',
@@ -28,26 +30,36 @@ def index():
         })
 
 
-@app.route('/details/app/<device>', methods=['GET'])
+@FLASK_APP.route('/details/app/<device>', methods=['GET'])
 def app_details(device):
     sc = get_device(device)
     appid = request.args.get('id')
-    d = sc.app_details(appid).to_dict()
+    ser = request.args.get('ser')
+    d = sc.app_details(ser, appid).to_dict()
     d['appId'] = appid
+    dumpf = './phone_dumps/{}_{}.txt'.format(ser, device)
+    df = parse_dump.load_file(dumpf)
+    print(parse_dump.info(df, appid))
     return render_template(
         'app.html',
-        app=d
+        app=d,
+        info=parse_dump.info(df, appid)
+
     )
 
 
-@app.route("/scan/<device>", methods=['GET'])
+@FLASK_APP.route("/scan/<device>", methods=['GET'])
 def scan(device):
     ser = request.args.get('serial')
     print(device, ser)
     sc = get_device(device)
-    return sc.find_spyapps(serialno=ser).to_json()
+    return json.dumps({
+        'onstore': sc.find_spyapps(serialno=ser).to_json(),
+        'offstore': sc.find_offstore_apps(serialno=ser).to_json(),
+        'serial': ser
+    })
 
-@app.route("/delete/<device>", methods=["PUT"])
+@FLASK_APP.route("/delete/<device>", methods=["PUT"])
 def delete_app(device):
     sc = get_device(device)
     serial = request.args.get('serial')
@@ -56,7 +68,7 @@ def delete_app(device):
 
 
 
-@app.route('/submit', methods=["POST"])
+@FLASK_APP.route('/submit', methods=["POST"])
 def record_response():
     if request.method == "POST":
         t = re.match('(\w+)\?serial=(\w+)', request.form.get('url', ''))
@@ -85,11 +97,11 @@ def record_response():
         return "hello", 200
 
 
-@app.route('/list/<device>', methods=['GET'])
+@FLASK_APP.route('/list/<device>', methods=['GET'])
 def list(device):
     sc = get_device(device)
     return json.dumps(sc.devices())
 
 
 if __name__ == "__main__":
-    app.run(debug=config.DEBUG)
+    FLASK_APP.run(debug=config.DEBUG)
