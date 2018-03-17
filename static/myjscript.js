@@ -58,10 +58,10 @@ function fetch(url, device) {
         updateProgress(100);
         var d = $.parseJSON(data);
         var ser = d['serial'];
-        var s = "<tr><td colspan='4'><h5 style='color: red'>Off-store apps</h5></td></tr> ";
+        var s = "<tr><td colspan='4'><h5 style='color: red'>Off-store spyware apps</h5></td></tr> ";
         s += create_tab(d['offstore'], device, ser);
 
-        s += "<tr><td colspan='4'><h5>Spyware apps found in Play Store</h5></td></tr> ";
+        s += "<tr><td colspan='4'><h5 style='color: magenta'>On-store spyware apps</h5></td></tr> ";
         s += create_tab(d['onstore'], device, ser);
 
         s += '<input type="hidden" name="url" value="';

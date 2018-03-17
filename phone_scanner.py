@@ -33,7 +33,7 @@ class AppScan(object):
             print("Relevant column is missing or unpopulated... recreating")
             self.stored_apps['relevant'] = (self.stored_apps['ml_score'] > 0.4)\
                 .apply(lambda x: 'y' if x else 'n')
-            
+
     def setup(self):
         """If the device needs some setup to work."""
         pass
@@ -46,21 +46,24 @@ class AppScan(object):
 
     def app_details(self, serialno, appid):
         try:
-            d = self.stored_apps.loc[appid]
+            d = self.stored_apps.loc[appid].copy()
             if not isinstance(d.get('permissions', ''), list):
                 d['permissions'] = d['permissions'].split(', ')
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
-            
-            p = self.run_command(
-                'bash scripts/android_scan.sh info {ser} {appid}',
-                ser=serialno, appid=appid
-            ); p.wait()
-            d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
+
+            # p = self.run_command(
+            #     'bash scripts/android_scan.sh info {ser} {appid}',
+            #     ser=serialno, appid=appid
+            # ); p.wait()
+            # d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
             return d
         except KeyError as ex:
             print(ex)
-            return {}
+            offstore_apps = pd.read_csv(config.OFFSTORE_APPS, index_col='appId')
+            d = offstore_apps.loc[appid]
+            d['permissions'] = ['<not recorded>' for x in range(10)]
+            return d
 
     def find_offstore_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
@@ -68,8 +71,7 @@ class AppScan(object):
         return (offstore_apps.loc[
             list(set(installed_apps) & set(offstore_apps.index)), 'title'
         ].apply(lambda x: x.encode('ascii', errors='ignore')))
-        
-        
+
     def find_spyapps(self, serialno):
         installed_apps = self.get_apps(serialno)
         app_list = self.stored_apps.query('relevant == "y"')
