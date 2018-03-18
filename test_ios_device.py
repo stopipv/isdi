@@ -1,3 +1,6 @@
+"""
+# Does not run in python3!!!
+
 from MobileDevice import list_devices, InstallationProxy
 a = list(list_devices().items())
 k, d = a[0]
@@ -6,3 +9,6 @@ d.connect()
 
 ip = InstallationProxy(d)
 print(ip.lookup_applications())
+"""
+
+

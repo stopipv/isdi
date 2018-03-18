@@ -1,6 +1,14 @@
 function updateProgress(percentage) {
-    $('#scan-prog').css("width", percentage + "%");
-    // $('#pbar_innertext').text(percentage + "%");
+    if (percentage >= 99) {
+        $('#scan-prog').animate({
+            // width: "100%"
+        }, 1000, function() {
+            $(this).closest('.progress').fadeOut();
+        });
+    } else {
+        $('#scan-prog').css("width", percentage + "%");
+    }
+    $('#scan-prog').text(percentage + "%");
 }
 
 var start = null;
@@ -12,6 +20,10 @@ function startProgressbar() {
     perc = 0;
     animateUpdate();
 }
+function killProgressbar() {
+    start = new Date(0);
+}
+
 function max(a, b) {
     if (a>b)
         return a;
@@ -69,5 +81,8 @@ function fetch(url, device) {
         $('#applist').html(s);
         $('input[value=ignore]').prop('checked', 'checked');
         $('#btn-submit').prop('disabled', false);
+    }).fail(function(err) {
+        perc=100;
+        alert(JSON.stringify(err));
     });
 }

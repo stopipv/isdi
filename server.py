@@ -37,14 +37,10 @@ def app_details(device):
     ser = request.args.get('ser')
     d = sc.app_details(ser, appid).to_dict()
     d['appId'] = appid
-    dumpf = './phone_dumps/{}_{}.txt'.format(ser, device)
-    df = parse_dump.load_file(dumpf)
-    print(parse_dump.info(df, appid))
     return render_template(
         'app.html',
         app=d,
-        info=parse_dump.info(df, appid)
-
+        info=d['info']
     )
 
 
