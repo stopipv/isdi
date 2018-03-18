@@ -5,4 +5,5 @@
 4. ~Check `MobileDevice/` to write a python script that can do the scanning stuff.~   (Does not work on python3!!)
 
 
-5. Search for appIds with spy/monitor/track
+5. Search for appIds with spy
+6. IOS how to uninstall the apps. 
