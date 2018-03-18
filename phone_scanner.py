@@ -8,6 +8,7 @@ import gzip
 import os
 import dataset
 from datetime import datetime
+import parse_dump
 
 if DEBUG:
     TEST = '~test'
@@ -38,20 +39,39 @@ class AppScan(object):
         """If the device needs some setup to work."""
         pass
 
+    def catch_err(self, p, cmd='', msg=''):
+        p.wait(10)
+        if p.returncode != 0:
+            print("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
+                self.device_type, cmd, p.returncode, p.stderr.read(), msg
+            ))
+            return ''
+        else:
+            return p.stdout.read().decode()
+
     def devices(self):
         raise Exception("Not implemented")
 
     def get_apps(self, serialno):
         pass
 
+    def dump_file_name(self, serial, fsuffix='json'):
+        return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
+            serial, self.device_type, fsuffix))
+
     def app_details(self, serialno, appid):
         try:
             d = self.stored_apps.loc[appid].copy()
             if not isinstance(d.get('permissions', ''), list):
-                d['permissions'] = d['permissions'].split(', ')
+                d['permissions'] = d.get('permissions', '').split(', ')
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
-
+            dfname = self.dump_file_name(serialno)
+            if self.device_type == 'ios':
+                ddump = parse_dump.IosDump(dfname)
+            else:
+                ddump = parse_dump.AndroidDump(dfname)
+            d['info'] = ddump.info(appid)
             # p = self.run_command(
             #     'bash scripts/android_scan.sh info {ser} {appid}',
             #     ser=serialno, appid=appid
@@ -59,7 +79,7 @@ class AppScan(object):
             # d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
             return d
         except KeyError as ex:
-            print(ex)
+            print("Exception:::", ex)
             offstore_apps = pd.read_csv(config.OFFSTORE_APPS, index_col='appId')
             d = offstore_apps.loc[appid]
             d['permissions'] = ['<not recorded>' for x in range(10)]
@@ -116,6 +136,7 @@ class AndroidScan(AppScan):
     def __init__(self):
         super(AndroidScan, self).__init__('android', config.ADB_PATH)
         self.serialno = None
+        self.installed_apps = None
         # self.setup()
 
     def setup(self):
@@ -128,7 +149,7 @@ class AndroidScan(AppScan):
         self.devid = None
 
     def get_apps(self, serialno):
-        if self.serialno == serialno and self.installed_apps:
+        if self.serialno == serialno and self.installed_apps is not None:
             return self.installed_apps
 
         cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
@@ -184,34 +205,34 @@ class IosScan(AppScan):
     NEED https://github.com/imkira/mobiledevice installed
     (`brew install mobiledevice` or build from source).
     """
-
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
         self.installed_apps = None
         self.serialno = None
 
-
     def get_apps(self, serialno):
-        if self.serialno == serialno and self.installed_apps:
+        if self.serialno == serialno and self.installed_apps is not None:
             return self.installed_apps
         self.serialno = serialno
-        cmd = '{cli} -u {serial} -t 5 list_apps'
-        p = self.run_command(cmd, serial=serialno); p.wait()
-        if p.returncode != 0:
-            print(
-                "Error running iOS device scan. \n{} - Error: {}"
-                "Is 'https://github.com/imkira/mobiledevice' installed?"
-                .format(p.returncode, p.stderr.read().decode())
-            )
-            exit(1)
-        self.installed_apps = [x.strip() for x in p.stdout]
+        cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
+        dumpf = self.dump_file_name(serialno, 'json')
+        self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf))
+        print("Dumped the data into: {}".format(dumpf))
+        # with open(outf, 'w') as f:
+        #     f.write(self.catch_err(
+        #         self.run_command(cmd, serial=serialno, outf=outf),
+        #         msg="Cannot browse apps"
+        #     ))
+        s = parse_dump.IosDump(dumpf)
+        self.installed_apps = s.installed_apps()
         return self.installed_apps
 
     def devices(self):
-        cmd = '{cli} list_devices'
+        cmd = '{cli} list'
         self.serialno = None
-        return [l.strip() for l in self.run_command(cmd)\
-                .stdout.read().decode('utf-8').split('\n') if l.strip()]
+        s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
+        print(s)
+        return [l.strip() for l in s.split('\n') if l.strip()]
 
 
 class TestScan(AppScan):
@@ -230,8 +251,3 @@ class TestScan(AppScan):
         return True
 
 
-if __name__ == "__main__":
-    sc = AndroidScan()
-    print(sc.find_spyapps())
-    print(sc.devices())
-    sc.dump_phone()

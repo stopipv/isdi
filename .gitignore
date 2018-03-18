@@ -110,3 +110,5 @@ test_android_apps_crawl.csv.gz
 
 ## Submodules
 MobileDevice/
+.pytest_cache/
+.idea/
