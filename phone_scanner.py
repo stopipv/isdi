@@ -45,7 +45,7 @@ class AppScan(object):
             print("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
                 self.device_type, cmd, p.returncode, p.stderr.read(), msg
             ))
-            return ''
+            return -1
         else:
             return p.stdout.read().decode()
 
@@ -149,9 +149,6 @@ class AndroidScan(AppScan):
         self.devid = None
 
     def get_apps(self, serialno):
-        if self.serialno == serialno and self.installed_apps is not None:
-            return self.installed_apps
-
         cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
               ' sed "s/\r//g" | sort'
         p = self.run_command(cmd, serial=serialno); p.wait()
@@ -211,28 +208,28 @@ class IosScan(AppScan):
         self.serialno = None
 
     def get_apps(self, serialno):
-        if self.serialno == serialno and self.installed_apps is not None:
-            return self.installed_apps
         self.serialno = serialno
-        cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
+        # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
+        cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
         dumpf = self.dump_file_name(serialno, 'json')
         self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf))
         print("Dumped the data into: {}".format(dumpf))
-        # with open(outf, 'w') as f:
-        #     f.write(self.catch_err(
-        #         self.run_command(cmd, serial=serialno, outf=outf),
-        #         msg="Cannot browse apps"
-        #     ))
         s = parse_dump.IosDump(dumpf)
         self.installed_apps = s.installed_apps()
         return self.installed_apps
 
     def devices(self):
-        cmd = '{cli} list'
+        cmd = '{cli} --detect -t1 | tail -n 1'
         self.serialno = None
         s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
         print(s)
         return [l.strip() for l in s.split('\n') if l.strip()]
+
+    def uninstall(self, appid, serialno):
+        cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
+        s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
+                       cmd=cmd, msg="Could not uninstall")
+        return s != -1
 
 
 class TestScan(AppScan):

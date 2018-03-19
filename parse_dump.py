@@ -168,22 +168,23 @@ class AndroidDump(PhoneDump):
 
 
 class IosDump(PhoneDump):
-    COLS = ['ApplicationType', 'BuildMachineOSBuild', 'CFBundleDevelopmentRegion',
-       'CFBundleDisplayName', 'CFBundleExecutable', 'CFBundleIdentifier',
-       'CFBundleInfoDictionaryVersion', 'CFBundleName',
-       'CFBundleNumericVersion', 'CFBundlePackageType',
-       'CFBundleShortVersionString', 'CFBundleSupportedPlatforms',
-       'CFBundleVersion', 'DTCompiler', 'DTPlatformBuild', 'DTPlatformName',
-       'DTPlatformVersion', 'DTSDKBuild', 'DTSDKName', 'DTXcode',
-       'DTXcodeBuild', 'Entitlements', 'IsDemotedApp', 'IsUpgradeable',
-       'LSRequiresIPhoneOS', 'MinimumOSVersion', 'Path', 'SequenceNumber',
-       'UIDeviceFamily', 'UIRequiredDeviceCapabilities',
-       'UISupportedInterfaceOrientations']
-    INDEX = 'CFBundleIdentifier'
+    # COLS = ['ApplicationType', 'BuildMachineOSBuild', 'CFBundleDevelopmentRegion',
+    #    'CFBundleDisplayName', 'CFBundleExecutable', 'CFBundleIdentifier',
+    #    'CFBundleInfoDictionaryVersion', 'CFBundleName',
+    #    'CFBundleNumericVersion', 'CFBundlePackageType',
+    #    'CFBundleShortVersionString', 'CFBundleSupportedPlatforms',
+    #    'CFBundleVersion', 'DTCompiler', 'DTPlatformBuild', 'DTPlatformName',
+    #    'DTPlatformVersion', 'DTSDKBuild', 'DTSDKName', 'DTXcode',
+    #    'DTXcodeBuild', 'Entitlements', 'IsDemotedApp', 'IsUpgradeable',
+    #    'LSRequiresIPhoneOS', 'MinimumOSVersion', 'Path', 'SequenceNumber',
+    #    'UIDeviceFamily', 'UIRequiredDeviceCapabilities',
+    #    'UISupportedInterfaceOrientations']
+    # INDEX = 'CFBundleIdentifier'
 
 
     def load_file(self):
-        d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
+        # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
+        d = pd.read_json(self.fname).T
         d.index.rename('appId', inplace=True)
         return d
 
