@@ -1,6 +1,6 @@
 [submodule "MobileDevice"]
 	path = MobileDevice
-	url = https://github.com/mountainstorm/MobileDevice.git
+	url = https://github.com/rchatterjee/MobileDevice.git
 [submodule "ios-deploy"]
 	path = ios-deploy
-	url = git@github.com:rchatterjee/ios-deploy.git
+	url = https://github.com/rchatterjee/ios-deploy.git
