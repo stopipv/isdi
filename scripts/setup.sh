@@ -13,12 +13,17 @@ if [[ "$?" -ne "0" ]]; then
 	mv platform-tools "$HOME/.platform-tools"
     fi
     export ANDROID_HOME=$HOME/.platform-tools
+else
+    export ANDROID_HOME=$(dirname $(which adb))
 fi
-command -v mobiledevice &>/dev/null
-if [[ "$?" -ne "0" ]]; then 
-    git clone https://github.com/imkira/mobiledevice.git && \
-	cd ./mobiledevice && make && make install
-fi
+
+cd ios-debug && xcodebuild
+# Does not work for all versions of iOS
+# command -v mobiledevice &>/dev/null
+# if [[ "$?" -ne "0" ]]; then 
+#     git clone https://github.com/imkira/mobiledevice.git && \
+# 	cd ./mobiledevice && make && make install
+# fi
 
 PATH=$PATH:$ANDROID_HOME
 export PATH

@@ -15,7 +15,8 @@ THISDIR = os.path.dirname(os.path.abspath(__file__))
 ANDROID_HOME = os.getenv('ANDROID_HOME', './.platform-tools')
 ADB_PATH = os.path.join(ANDROID_HOME, 'adb')
 # MOBILEDEVICE_PATH = 'mobiledevice'
-MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
+# MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
+MOBILEDEVICE_PATH = os.path.join(THISDIR, "ios-deploy/build/Release/ios-deploy")  #'python2 -m MobileDevice'
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 

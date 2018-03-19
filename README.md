@@ -24,18 +24,30 @@ Keep the phone unlocked and "trust this computer" when prompted.
 
 iOS devices can be accessed from Linux using `ideviceinstaller` (Mainted by
 Ubuntu developers).  Needs some dependencies that are not specified in the
-file. Possibly `libusbmuxd-dev`. (I have to check). 
+file. Possibly `libusbmuxd-dev`. (I have to check). [*Update*: The library is
+not dependable, and does not work most of the time.]
+
+### Other programs for iOS
+
+There are many programs that I found while searching for ways to communitcate to
+a iOS device via commandline.
+1. [`mobiledevice`](https://github.com/imkira/mobiledevice) - Works sometimes for some version of OSX and iOS
+2. [`pymobiledevice`](https://github.com/iOSForensics/pymobiledevice/) - Does not work at all
+3. [`MobileDevice`](https://github.com/mountainstorm/MobileDevice/) - Most reliable I could find (though testedo only on one MAC and one iPhone.) *Using this*.
+4. ['ios-deploy'](https://github.com/AtomicGameEngine/ios-deploy) - A `nodjs` package. (Was originally forked from https://github.com/phildrip/fruitstrap, but much better now.)
 
 
 
-### Dependencies (Android)
-* Install the Android Debug Bridge (`adb`). 
-  Download [adb from here](https://androidsdkoffline.blogspot.com/p/android-sdk-platform-tools.html)
-  (for correct platform) unzip it in the folder and add it to PATH. 
-* Enable developer mode on the target android phone, and "Enable USB Debugging".
-* Keep the phone unlocked and "allow debugging" from host when prompted.  
-* Run `adb kill-server && sudo adb start-server` with phone plugged in and
-  unlocked.
+
+
+
+### Dependencies (Android) * Install the Android Debug Bridge (`adb`).  Download
+[adb from
+here](https://androidsdkoffline.blogspot.com/p/android-sdk-platform-tools.html)
+(for correct platform) unzip it in the folder and add it to PATH.  * Enable
+developer mode on the target android phone, and "Enable USB Debugging".  * Keep
+the phone unlocked and "allow debugging" from host when prompted.  * Run `adb
+kill-server && sudo adb start-server` with phone plugged in and unlocked.
 
 In the terminal of the computer, run `adb devices` to see if the device is connected properly.
 
