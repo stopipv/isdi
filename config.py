@@ -22,3 +22,19 @@ DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
 
 DEBUG = True
+ERROR_LOG = []
+
+
+def add_to_error(*args):
+    m = '\n'.join(str(e) for e in args)
+    print(m)
+    ERROR_LOG.append(m)
+
+
+def error():
+    e = ''
+    if len(ERROR_LOG)>0:
+        e = ERROR_LOG.popleft()
+        print("ERROR: {}".format(e))
+    return e
+

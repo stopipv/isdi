@@ -52,7 +52,8 @@ def scan(device):
     return json.dumps({
         'onstore': sc.find_spyapps(serialno=ser).to_json(),
         'offstore': sc.find_offstore_apps(serialno=ser).to_json(),
-        'serial': ser
+        'serial': ser,
+        'error': config.error()
     })
 
 @FLASK_APP.route("/delete/<device>", methods=["PUT"])
@@ -60,7 +61,7 @@ def delete_app(device):
     sc = get_device(device)
     serial = request.args.get('serial')
     appid = request.args.get('appid')
-    sc.uninstall(serial=serial, appid=appid)
+    return sc.uninstall(serialno=serial, appid=appid)
 
 
 

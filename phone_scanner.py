@@ -42,9 +42,10 @@ class AppScan(object):
     def catch_err(self, p, cmd='', msg=''):
         p.wait(10)
         if p.returncode != 0:
-            print("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
+            m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
                 self.device_type, cmd, p.returncode, p.stderr.read(), msg
             ))
+            config.add_to_error(m)
             return -1
         else:
             return p.stdout.read().decode()
@@ -144,24 +145,20 @@ class AndroidScan(AppScan):
             '{cli} kill-server; {cli} start-server'
         )
         if p != 0:
-            print("Setup failed with returncode={}.\nex={!r}"
-                  .format(p, p.stderr.read()))
-        self.devid = None
+            print("Setup failed with returncode={}. ~~ ex={!r}"
+                  .format(p.returncode, p.stderr.read() + p.stdout.read()))
 
     def get_apps(self, serialno):
         cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
               ' sed "s/\r//g" | sort'
-        p = self.run_command(cmd, serial=serialno); p.wait()
-        if p.returncode != 0:
-            print("Error running Android device scan. Error={}".format(
-                p.stderr.read())
-            )
-            print("Retry in few second")
+        s = self.catch_err(self.run_command(cmd, serial=serialno),
+                           msg="App search failed", cmd=cmd)
+
+        if not s:
             self.setup()
             return []
         else:
-            installed_apps = p.stdout.read().decode()
-            installed_apps = installed_apps.split('\n')
+            installed_apps = s.split('\n')
             q = self.run_command('bash scripts/android_scan.sh scan {ser}', ser=serialno); q.wait()
             self.installed_apps = installed_apps
             return installed_apps
