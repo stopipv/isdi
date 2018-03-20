@@ -12,12 +12,17 @@ function updateProgress(percentage) {
 }
 
 var start = null;
-var maxTime = 30000;  // 30 sec
+var maxTime = 5000;  // 30 sec
 var timeoutVal = Math.floor(maxTime/50);
 var perc = 0;
 function startProgressbar() {
     start = new Date();
     perc = 0;
+    $('#applist').html('')
+    $('#scan-prog').animate({
+    }, 100, function() {
+        $(this).closest('.progress').fadeIn('fast');
+    });
     animateUpdate();
 }
 function killProgressbar() {
@@ -33,7 +38,7 @@ function max(a, b) {
 
 function animateUpdate() {
     var now = new Date();
-    var timeDiff = now.getTime() - start.getTime();
+    var timeDiff = now.getTime() - start.getTime() - 1000;
     perc = max(perc, Math.round((timeDiff/maxTime)*100));
 
     if (perc <= 100) {
@@ -81,8 +86,9 @@ function fetch(url, device) {
         $('#applist').html(s);
         $('input[value=ignore]').prop('checked', 'checked');
         $('#btn-submit').prop('disabled', false);
+        $('#error-notice').html(d['error'])
     }).fail(function(err) {
         perc=100;
-        alert(JSON.stringify(err));
+        $('#error-notice').html(JSON.stringify(err));
     });
 }
