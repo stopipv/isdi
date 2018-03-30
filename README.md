@@ -105,8 +105,4 @@ In the terminal of the computer, run `adb devices` to see if the device is conne
 3. For iOS, how to find out app installation dates, resource usage, etc?
 
 
-
-
 See [notes.md](notes.md) for other developer helps.
-
-
