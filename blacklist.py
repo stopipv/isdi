@@ -10,11 +10,14 @@ import config
 import pandas as pd
 
 APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE)
-SPY_REGEX = r'(?i)(?!anti)[\-\s]*(spy|track|keylog)'
+SPY_REGEX = {
+    "pos": re.compile(r'(?i)(spy|track|keylog)'),
+    "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
+}
 
 
 def _regex_blacklist(app):
-    return ['regex-spy'] if re.search(SPY_REGEX, app) \
+    return ['regex-spy'] if (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) \
         else []
 
 
