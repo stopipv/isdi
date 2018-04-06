@@ -48,11 +48,10 @@ def app_details(device):
 @FLASK_APP.route("/scan/<device>", methods=['GET'])
 def scan(device):
     ser = request.args.get('serial')
-    print(device, ser)
+    print(">>>scan_device", device, ser, "<<<<<")
     sc = get_device(device)
     return json.dumps({
-        'onstore': sc.find_spyapps(serialno=ser).to_json(orient="index"),
-        'offstore': sc.find_offstore_apps(serialno=ser).to_json(orient="index"),
+        'apps': sc.find_spyapps(serialno=ser).to_json(orient="index"),
         'serial': ser,
         'error': config.error()
     })

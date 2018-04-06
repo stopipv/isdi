@@ -45,6 +45,7 @@
              var s = '';
              var i = 0;
              d = $.parseJSON(data)
+             console.log(data)
              for (k in d) {
                  i += 1;
                  s += '<tr id="'+k+'">';
@@ -72,9 +73,10 @@
                  updateProgress(100);
                  var d = $.parseJSON(data);
                  var ser = d['serial'];
+                 $('#device-id').attr("value", device);
+                 $('#device-id').css("font-size", "0.25in");
                  var s = "";
-                 s += create_tab(d['onstore'], device, ser);
-
+                 s += create_tab(d['apps'], device, ser);
                  s += '<input type="hidden" name="url" value="';
                  s += url.replace('/scan/', '') + '"></input>';
                  $('#applist').html(s);

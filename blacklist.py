@@ -17,17 +17,19 @@ SPY_REGEX = {
 
 
 def _regex_blacklist(app):
+    # print("_regex_balcklist: {}".format(app))
     return ['regex-spy'] if (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) \
         else []
 
 
 def flag_apps(apps, device=''):
     """Flag a list of apps based on the APP_FLAGS obtained from the csv file, or spy regex flags"""
-    _td = (pd.DataFrame({'appId': apps}).set_index('appId')
-           .join(APP_FLAGS.set_index('appId'), how="left"))
+    _td = (pd.DataFrame({'appId': apps})
+           .join(APP_FLAGS, on='appId', how="left", rsuffix='_r')).set_index('appId')
     flagged_apps = (_td['store'] + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
-    print(flagged_apps)
-    return flagged_apps + flagged_apps.index.map(_regex_blacklist)
+    # print(apps, flagged_apps)
+    a = flagged_apps + flagged_apps.index.map(_regex_blacklist)
+    return a
 
 
 def flag_app(app, device=''):

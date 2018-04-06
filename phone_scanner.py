@@ -9,7 +9,7 @@ import os
 import dataset
 from datetime import datetime
 import parse_dump
-from blacklist import flag_app
+from blacklist import flag_apps
 if DEBUG:
     TEST = '~test'
 else:
@@ -96,17 +96,17 @@ class AppScan(object):
 
     def find_spyapps(self, serialno):
         installed_apps = self.get_apps(serialno)
-        app_list = self.stored_apps.query('relevant == "y"').reset_index()
-        r = app_list.query('appId in @installed_apps')
-        r['flags'] = r.appId.apply(
-            lambda x: flag_app(self.device_type, x)
-        )
+        # r = app_list.query('appId in @installed_apps').copy()
+        r = pd.DataFrame({'appId': installed_apps}).join(self.stored_apps, on="appId", how="left", rsuffix='_r')
+        r['flags'] = flag_apps(r.appId.values).values
         r['title'] = r.title.str.encode('ascii', errors='ignore')
-        return r[['title', 'appId', 'flags']].set_index('appId')
+        # print("SpyApps:", r[r.appId.str.contains('spy')])
+        a = r[['title', 'appId', 'flags']].set_index('appId')
+        return a
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
-        app_flags = map(flag_app, installed_apps)
+        app_flags = flag_apps(installed_apps)
         return app_flags
 
     def uninstall(self, serialno, appid):
