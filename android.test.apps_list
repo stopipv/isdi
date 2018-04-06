@@ -16,7 +16,8 @@ com.nytimes.NYTimes
 com.apple.Diagnostics
 com.facebook.Messenger
 com.apple.weather
-com.google.Authenticator
+com.google.Authenticator.spy
+com.antispy.something
 com.apple.SharedWebCredentialViewService
 com.apple.CTCarrierSpaceAuth
 jp.pokemon.koiking
