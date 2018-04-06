@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel=stylesheet type=text/css 
+              href="{{ url_for('static', filename='style.css') }}?234">
+        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+        <title>Scan Phone for IPS apps</title>
+        <script>
+
+
+         function postform() {
+             $('#btn-submit').prop('disabled', true);
+             d = $('#app-list').serialize();
+             $.post('/submit', data=d).done(success=function(r) {
+                 $('#msg').html(r);
+                 $('#msg').prop('class', 'alert alert-success')
+                 $('#btn-submit').prop('disabled', false);
+             }).fail(function(r) {
+                 /* alert('Bad request: ' + JSON.stringify(r));*/
+                 $('#msg').html(r.responseText);
+                 $('#msg').prop('class', 'alert alert-danger')
+             });
+             return false;
+         }
+
+         function get_actions(k) {
+             var s = '<div class="btn-group" data-toggle="buttons">';
+             $.each(['delete', 'ignore'], function(i, b) {
+                 s += '<label class="btn btn-danger">'
+                 s += '<input type="radio" name="actions-' + k +'" value="' + b + '"> </input>';
+                 s += b + '</label>';
+             });
+             s += '</div>';
+             return s;
+         }
+         
+         function create_tab(data, device, ser) {
+             var s = '';
+             var i = 0;
+             d = $.parseJSON(data)
+             for (k in d) {
+                 i += 1;
+                 s += '<tr id="'+k+'">';
+                 s += "<td><a class=\"h4 text-danger\" onclick='delete('" + device+"', '" + k + "')'>"
+                 s += "&otimes;</a></td>";
+                 s += "<td><a href='/details/app/" + device + "?id=" + k + "&ser=" + ser;
+                 s += "' target='_blank'>" + d[k]['title'] + "</td>";
+                 s += "<td><code>" + k + "</code></td>";
+                 s += "<td>" + d[k]["flags"] + "</td>";
+                 // s += "<td>" + get_actions(k) + "</td>";
+                 s += "<td><input type=\"text\" placeholder=\"Notes\" class='form-control'/></td>"
+                 s += '</tr>';
+             }
+             if (i <= 0) {
+                 s = "<tr><td colspan='5' class='alert-success'>No spyware found! ";
+                 s += "<sup>1</sup></td></tr>";
+             }
+             return s;
+         }
+
+         function fetch(url, device) {
+             startProgressbar();
+             $.get(url, function(data) {
+                 perc = 100;
+                 updateProgress(100);
+                 var d = $.parseJSON(data);
+                 var ser = d['serial'];
+                 var s = "";
+                 s += create_tab(d['onstore'], device, ser);
+
+                 s += '<input type="hidden" name="url" value="';
+                 s += url.replace('/scan/', '') + '"></input>';
+                 $('#applist').html(s);
+                 $('input[value=ignore]').prop('checked', 'checked');
+                 $('#btn-submit').prop('disabled', false);
+                 $('#error-notice').html(d['error'])
+             }).fail(function(err) {
+                 perc=100;
+                 $('#error-notice').html(JSON.stringify(err));
+             });
+         }
+
+         $(document).ready(function () {
+             $('#app-list').on('keyup keypress', function(e) {
+                 var keyCode = e.keyCode || e.which;
+                 if (keyCode === 13) { 
+                     e.preventDefault();
+                     return false;
+                 }
+             });
+             $('#btn-submit').prop('disabled', true);
+         });
+        </script>
+    </head>
+
+    <body class="container-fluid">
+        <div class=""> 
+            <h4><span style="color: green; font-family: monospace; font-size: 0.3in">PhoneScanner:</span> 
+                Scan phones for IPS apps</h4>
+            <p>This application scans an Android and iOS phone for apps that can be used to spy,
+		track, or monitor on a person without their knowledge.
+	    </p>
+        </div>
+        <div class="row">
+            <div class="col-md-3 border py-2" style="height:80vh;">
+                <div align="center">
+                    <label class="font-weight-bold lead">Scan</label>
+                    {% for t in ["Android", "iOS", "test"] %}
+                    <button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
+                            class="btn btn-primary mx-2">{{ t }}</button>
+                    {% endfor %}
+                    <hr/>
+                </div>
+                
+                <form id="metainfo" class="border-warning visible">
+                    <input class="form-control" id="device-id" type="text" placeholder="Device Id" readonly/>
+                    <input class="form-control" id="client-id" type="text" placeholder="Client Id"/>
+                    <textarea class="form-control " id="notes" type="text" placeholder="Notes" rows="10"></textarea>
+                    <button onclick="postform(this)" id="btn-metainfo-submit"
+                            class="btn btn-primary btn-lg my-3">Submit</button>
+                    
+                </form>
+            </div>
+            <div class="col-md-9" style="height:80vh">
+                <form onsubmit="return false" id="app-list">
+                <div class="form-group">
+                    <div id="error-notice" class="alert alert-danger"></div>
+                    <table class="table table-bordered">
+                        <thead><tr>
+                            <th style="width: 3%"> </th>
+                            <th style="width: 23%">App Name</th>
+                            <th style="width: 23%">App ID</th>
+                            <th style="width: 10%">Flags</th>
+                            <th style="width: 30%">Notes</th>
+                        </tr></thead>
+                        <tbody id="applist">
+                        </tbody>
+                    </table>`
+                    <!-- <button onclick="postform(this)" id="btn-submit"
+                         class="btn btn-primary btn-lg">Submit</button> -->
+                <div id="msg" style="margin: 10px" class="alert"> </div>
+                </form>
+                </div>
+                <div class="progress">
+                    <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
