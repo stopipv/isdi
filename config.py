@@ -10,6 +10,7 @@ APPS_LIST = {
 OFFSTORE_APPS = 'data/offstore_apks.csv'
 TEST_APP_LIST = 'android.test.apps_list' 
 TITLE = "Anti-IPS: Stop intiimate partner surveillance"
+APP_FLAGS_FILE = 'data/app-flags.csv'
 
 THISDIR = os.path.dirname(os.path.abspath(__file__))
 ANDROID_HOME = os.getenv('ANDROID_HOME', './.platform-tools')

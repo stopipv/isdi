@@ -19,10 +19,11 @@ def get_device(k):
         'test': test
     }.get(k)
 
+
 @FLASK_APP.route("/", methods=['GET'])
 def index():
     return render_template(
-        'layout.html',
+        'main.html',
         devices={
             'Android': android.devices(),
             'iOS': ios.devices(),
@@ -50,11 +51,12 @@ def scan(device):
     print(device, ser)
     sc = get_device(device)
     return json.dumps({
-        'onstore': sc.find_spyapps(serialno=ser).to_json(),
-        'offstore': sc.find_offstore_apps(serialno=ser).to_json(),
+        'onstore': sc.find_spyapps(serialno=ser).to_json(orient="index"),
+        'offstore': sc.find_offstore_apps(serialno=ser).to_json(orient="index"),
         'serial': ser,
         'error': config.error()
     })
+
 
 @FLASK_APP.route("/delete/<device>", methods=["PUT"])
 def delete_app(device):
@@ -62,7 +64,6 @@ def delete_app(device):
     serial = request.args.get('serial')
     appid = request.args.get('appid')
     return sc.uninstall(serialno=serial, appid=appid)
-
 
 
 @FLASK_APP.route('/submit', methods=["POST"])
@@ -73,11 +74,11 @@ def record_response():
             print(request.form)
             return "The form could not be submitted!", 400
         device, serial = t.groups()
-        app_feedback = {
-            k.split('-', 1)[1]: v
+        app_feedback = dict(
+            (k.split('-', 1)[1], v)
             for k, v in request.form.items()
             if k != 'url'
-        }
+        )
         sc = get_device(device)
         r = True
         for k, v in app_feedback.items():
@@ -93,11 +94,6 @@ def record_response():
     else:
         return "hello", 200
 
-
-@FLASK_APP.route('/list/<device>', methods=['GET'])
-def list(device):
-    sc = get_device(device)
-    return json.dumps(sc.devices())
 
 
 if __name__ == "__main__":

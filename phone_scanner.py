@@ -9,7 +9,7 @@ import os
 import dataset
 from datetime import datetime
 import parse_dump
-
+from blacklist import flag_app
 if DEBUG:
     TEST = '~test'
 else:
@@ -81,7 +81,8 @@ class AppScan(object):
             return d
         except KeyError as ex:
             print("Exception:::", ex)
-            offstore_apps = pd.read_csv(config.OFFSTORE_APPS, index_col='appId')
+            offstore_apps = pd.read_csv(config.OFFSTORE_APPS,
+                                        index_col='appId')
             d = offstore_apps.loc[appid]
             d['permissions'] = ['<not recorded>' for x in range(10)]
             return d
@@ -95,11 +96,18 @@ class AppScan(object):
 
     def find_spyapps(self, serialno):
         installed_apps = self.get_apps(serialno)
-        app_list = self.stored_apps.query('relevant == "y"')
-        
-        return (app_list.loc[
-            list(set(installed_apps) & set(app_list.index)), 'title'
-        ].apply(lambda x: x.encode('ascii', errors='ignore')))
+        app_list = self.stored_apps.query('relevant == "y"').reset_index()
+        r = app_list.query('appId in @installed_apps')
+        r['flags'] = r.appId.apply(
+            lambda x: flag_app(self.device_type, x)
+        )
+        r['title'] = r.title.str.encode('ascii', errors='ignore')
+        return r[['title', 'appId', 'flags']].set_index('appId')
+
+    def flag_apps(self, serialno):
+        installed_apps = self.get_apps(serialno)
+        app_flags = map(flag_app, installed_apps)
+        return app_flags
 
     def uninstall(self, serialno, appid):
         pass
@@ -159,7 +167,9 @@ class AndroidScan(AppScan):
             return []
         else:
             installed_apps = s.split('\n')
-            q = self.run_command('bash scripts/android_scan.sh scan {ser}', ser=serialno); q.wait()
+            q = self.run_command(
+                'bash scripts/android_scan.sh scan {ser}',
+                ser=serialno); q.wait()
             self.installed_apps = installed_apps
             return installed_apps
 
@@ -172,18 +182,18 @@ class AndroidScan(AppScan):
         cmd = '{cli} devices -l'
         return self.run_command(cmd).stdout.read().decode('utf-8')
 
-    def dump_phone(self, serialno=None):
-        if not serialno:
-            serialno = self.devices()[0]
-        cmd = '{cli} -s {serial} shell dumpsys'
-        p = self.run_command(cmd, serial=serialno)
-        outfname = os.path.join(config.DUMP_DIR, '{}.txt.gz'.format(serialno))
-        # if p.returncode != 0:
-        #     print("Dump command failed")
-        #     return
-        with gzip.open(outfname, 'w') as f:
-            f.write(p.stdout.read())
-        print("Dump success! Written to={}".format(outfname))
+    # def dump_phone(self, serialno=None):
+    #     if not serialno:
+    #         serialno = self.devices()[0]
+    #     cmd = '{cli} -s {serial} shell dumpsys'
+    #     p = self.run_command(cmd, serial=serialno)
+    #     outfname = os.path.join(config.DUMP_DIR, '{}.txt.gz'.format(serialno))
+    #     # if p.returncode != 0:
+    #     #     print("Dump command failed")
+    #     #     return
+    #     with gzip.open(outfname, 'w') as f:
+    #         f.write(p.stdout.read())
+    #     print("Dump success! Written to={}".format(outfname))
 
     def uninstall(self, appid, serialno):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
@@ -225,7 +235,7 @@ class IosScan(AppScan):
     def uninstall(self, appid, serialno):
         cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
-                       cmd=cmd, msg="Could not uninstall")
+                           cmd=cmd, msg="Could not uninstall")
         return s != -1
 
 
@@ -234,7 +244,7 @@ class TestScan(AppScan):
         super(TestScan, self).__init__('android', cli='cli')
 
     def get_apps(self, serialno):
-        assert serialno == 'testdevice1'
+        # assert serialno == 'testdevice1'
         installed_apps = open(TEST_APP_LIST, 'r').read().splitlines()
         return installed_apps
 

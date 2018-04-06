@@ -73,3 +73,13 @@ communitcate to a iOS device via commandline.
 4. ['ios-deploy'](https://github.com/AtomicGameEngine/ios-deploy) -
 A `nodjs` package. (Was originally forked from https://github.com/phildrip/fruitstrap,
 but much better now. **Using this.**)
+
+
+
+## Code Architecture  
+The code is getting big enough to fall back to MVC architecture. (20180405)
+So, the components are scanning services for each type of devices - `phone_scanner`. 
+There should be a view section which is `server.py`.  Finally there should be the logic
+for connecting components with views via models. 
+
+
