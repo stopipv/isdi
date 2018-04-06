@@ -110,7 +110,7 @@
 		track, or monitor on a person without their knowledge.
 	    </p>
         </div>
-        <div class="row">
+        <div class="row  h-100">
             <div class="col-md-3 border py-2" style="height:80vh;">
                 <div align="center">
                     <label class="font-weight-bold lead">Scan</label>
@@ -130,24 +130,23 @@
                     
                 </form>
             </div>
-            <div class="col-md-9" style="height:80vh">
-                <form onsubmit="return false" id="app-list">
-                <div class="form-group">
-                    <div id="error-notice" class="alert alert-danger"></div>
-                    <table class="table table-bordered">
-                        <thead><tr>
-                            <th style="width: 3%"> </th>
-                            <th style="width: 23%">App Name</th>
-                            <th style="width: 23%">App ID</th>
-                            <th style="width: 10%">Flags</th>
-                            <th style="width: 30%">Notes</th>
-                        </tr></thead>
-                        <tbody id="applist">
-                        </tbody>
-                    </table>`
-                    <!-- <button onclick="postform(this)" id="btn-submit"
+            <div class="col-md-9 border py-2" style="height: 80vh">
+                <div class="h-100 w-100" style="overflow: auto;">
+                    <div id="notice" class="alert alert-danger invisible"></div>
+                <form class="h-100" onsubmit="return false" id="app-list">
+                        <table class="table table-bordered w-100 h-100">
+                            <thead><tr>
+                                <th style="width: 3%"> </th>
+                                <th style="width: 23%">App Name</th>
+                                <th style="width: 23%">App ID</th>
+                                <th style="width: 10%">Flags</th>
+                                <th style="width: 30%">Notes</th>
+                            </tr></thead>
+                            <tbody id="applist" class="h-100">
+                            </tbody>
+                        </table>
+                        <!-- <button onclick="postform(this)" id="btn-submit"
                          class="btn btn-primary btn-lg">Submit</button> -->
-                <div id="msg" style="margin: 10px" class="alert"> </div>
                 </form>
                 </div>
                 <div class="progress">

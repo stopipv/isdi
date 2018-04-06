@@ -95,6 +95,9 @@ class AppScan(object):
         ].apply(lambda x: x.encode('ascii', errors='ignore')))
 
     def find_spyapps(self, serialno):
+        """Finds the apps in the phone and add flags to them based on @blacklist.py
+        Return the sorted dataframe
+        """
         installed_apps = self.get_apps(serialno)
         # r = app_list.query('appId in @installed_apps').copy()
         r = pd.DataFrame({'appId': installed_apps}).join(self.stored_apps, on="appId", how="left", rsuffix='_r')
@@ -102,7 +105,7 @@ class AppScan(object):
         r['title'] = r.title.str.encode('ascii', errors='ignore')
         # print("SpyApps:", r[r.appId.str.contains('spy')])
         a = r[['title', 'appId', 'flags']].set_index('appId')
-        return a
+        return a.loc[a.flags.apply(len).sort_values(ascending=False).index]
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
