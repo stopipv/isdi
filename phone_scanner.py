@@ -3,52 +3,54 @@
 import subprocess
 import pandas as pd
 import config
-from config import DEV_SUPPRTED, APPS_LIST, TEST_APP_LIST, DEBUG
-import gzip
 import os
 import dataset
 from datetime import datetime
 import parse_dump
-from blacklist import flag_apps
-if DEBUG:
-    TEST = '~test'
-else:
-    TEST = ''
+import blacklist
+import re
 
-db = dataset.connect('sqlite:///fieldstudy.db' + TEST)
+
+db = dataset.connect(config.SQL_DB_PATH)
 
 
 class AppScan(object):
     device_type = ''
+    # app_info = pd.read_csv(config.APP_INFO_FILE, index_col='appId')
+    app_info_conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
 
     def __init__(self, dev_type, cli):
-        assert dev_type in DEV_SUPPRTED, \
+        assert dev_type in config.DEV_SUPPRTED, \
             "dev={!r} is not supported yet. Allowed={}"\
-                .format(dev_type, DEV_SUPPRTED)
+                .format(dev_type, config.DEV_SUPPRTED)
         self.device_type = dev_type
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
-        fname = APPS_LIST.get(self.device_type)
-        self.stored_apps = pd.read_csv(fname, index_col='appId')
-        if ('relevant' not in self.stored_apps.columns) or \
-           (self.stored_apps.relevant.count() < len(self.stored_apps)*0.5):
-            print("Relevant column is missing or unpopulated... recreating")
-            self.stored_apps['relevant'] = (self.stored_apps['ml_score'] > 0.4)\
-                .apply(lambda x: 'y' if x else 'n')
 
     def setup(self):
         """If the device needs some setup to work."""
         pass
 
     def catch_err(self, p, cmd='', msg=''):
-        p.wait(10)
-        if p.returncode != 0:
-            m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
-                self.device_type, cmd, p.returncode, p.stderr.read(), msg
-            ))
-            config.add_to_error(m)
+        try:
+            p.wait(10)
+            print("Returncode: ", p.returncode)
+            if p.returncode != 0:
+                m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
+                    self.device_type, cmd, p.returncode, p.stderr.read(), msg
+                ))
+                config.add_to_error(m)
+                return -1
+            else:
+                s = p.stdout.read().decode()
+                if len(s) <= 100 and re.search('(?i)(fail|error)', s):
+                    config.add_to_error(s)
+                    return -1
+                else:
+                    return s
+        except Exception as ex:
+            config.add_to_error(ex)
+            print("Exception>>>", ex)
             return -1
-        else:
-            return p.stdout.read().decode()
 
     def devices(self):
         raise Exception("Not implemented")
@@ -62,7 +64,8 @@ class AppScan(object):
 
     def app_details(self, serialno, appid):
         try:
-            d = self.stored_apps.loc[appid].copy()
+            d = pd.read_sql('select * from apps where appid=?', self.app_info_conn.engine,
+                            params=(appid,))
             if not isinstance(d.get('permissions', ''), list):
                 d['permissions'] = d.get('permissions', '').split(', ')
             if 'descriptionHTML' not in d:
@@ -81,35 +84,28 @@ class AppScan(object):
             return d
         except KeyError as ex:
             print("Exception:::", ex)
-            offstore_apps = pd.read_csv(config.OFFSTORE_APPS,
-                                        index_col='appId')
-            d = offstore_apps.loc[appid]
-            d['permissions'] = ['<not recorded>' for x in range(10)]
-            return d
-
-    def find_offstore_apps(self, serialno):
-        installed_apps = self.get_apps(serialno)
-        offstore_apps = pd.read_csv(config.OFFSTORE_APPS, index_col='appId')
-        return (offstore_apps.loc[
-            list(set(installed_apps) & set(offstore_apps.index)), 'title'
-        ].apply(lambda x: x.encode('ascii', errors='ignore')))
+            return pd.DataFrame([])
 
     def find_spyapps(self, serialno):
         """Finds the apps in the phone and add flags to them based on @blacklist.py
         Return the sorted dataframe
         """
         installed_apps = self.get_apps(serialno)
-        # r = app_list.query('appId in @installed_apps').copy()
-        r = pd.DataFrame({'appId': installed_apps}).join(self.stored_apps, on="appId", how="left", rsuffix='_r')
-        r['flags'] = flag_apps(r.appId.values).values
+        # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
+        #     ', ?'*(len(installed_apps)-1)
+        #     ), self.app_info_conn.engine, params=(installed_apps,))
+        # r.rename({'appid': 'appId'}, axis='columns', copy=False, inplace=True)
+        r = blacklist.app_title_and_flag(pd.DataFrame({'appId': installed_apps}))
+        r['class_'] = r.flags.apply(blacklist.assign_class)
+        r['score'] = r.flags.apply(blacklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
-        # print("SpyApps:", r[r.appId.str.contains('spy')])
-        a = r[['title', 'appId', 'flags']].set_index('appId')
-        return a.loc[a.flags.apply(len).sort_values(ascending=False).index]
+        r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
+        r.set_index('appId', inplace=True)
+        return r[['title', 'flags', 'score']]
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
-        app_flags = flag_apps(installed_apps)
+        app_flags = blacklist.flag_apps(installed_apps)
         return app_flags
 
     def uninstall(self, serialno, appid):
@@ -130,6 +126,7 @@ class AppScan(object):
         try:
             tab = db.get_table(table)
             kwargs['time'] = datetime.now()
+            kwargs['device'] = kwargs.get('device', self.device_type)
             tab.insert(kwargs)
             db.commit()
             return True
@@ -160,8 +157,7 @@ class AndroidScan(AppScan):
                   .format(p.returncode, p.stderr.read() + p.stdout.read()))
 
     def get_apps(self, serialno):
-        cmd = '{cli} -s {serial} shell pm list packages -f -u | sed -e "s/.*=//" |'\
-              ' sed "s/\r//g" | sort'
+        cmd = "{cli} -s {serial} shell pm list packages -u | sed 's/package://g' | sort"
         s = self.catch_err(self.run_command(cmd, serial=serialno),
                            msg="App search failed", cmd=cmd)
 
@@ -169,7 +165,7 @@ class AndroidScan(AppScan):
             self.setup()
             return []
         else:
-            installed_apps = s.split('\n')
+            installed_apps = [x for x in s.split() if x]
             q = self.run_command(
                 'bash scripts/android_scan.sh scan {ser}',
                 ser=serialno); q.wait()
@@ -200,11 +196,9 @@ class AndroidScan(AppScan):
 
     def uninstall(self, appid, serialno):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
-        p = self.run_command(cmd, serial=serialno, appid=appid)
-        p.wait()
-        if p.returncode != 0:
-            print("Error ({}) = {}".format(p.returncode, p.stderr.read()))
-        return p.returncode == 0
+        s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
+                           cmd=cmd, msg="Could not uninstall")
+        return s != -1
 
 
 class IosScan(AppScan):
@@ -222,10 +216,12 @@ class IosScan(AppScan):
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
         cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
         dumpf = self.dump_file_name(serialno, 'json')
-        self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf))
-        print("Dumped the data into: {}".format(dumpf))
-        s = parse_dump.IosDump(dumpf)
-        self.installed_apps = s.installed_apps()
+        if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
+            print("Dumped the data into: {}".format(dumpf))
+            s = parse_dump.IosDump(dumpf)
+            self.installed_apps = s.installed_apps()
+        else:
+            self.installed_apps = []
         return self.installed_apps
 
     def devices(self):
@@ -248,7 +244,7 @@ class TestScan(AppScan):
 
     def get_apps(self, serialno):
         # assert serialno == 'testdevice1'
-        installed_apps = open(TEST_APP_LIST, 'r').read().splitlines()
+        installed_apps = open(config.TEST_APP_LIST, 'r').read().splitlines()
         return installed_apps
 
     def devices(self):

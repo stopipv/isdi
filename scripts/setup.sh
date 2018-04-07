@@ -18,7 +18,9 @@ else
 fi
 
 cd -
-git submodule update --recursive --remote && cd ios-deploy && xcodebuild
+if [ ! -e ios-deploy/build/Release/ios-deploy ]; then
+   git submodule update --recursive --remote && cd ios-deploy && xcodebuild && cd -
+fi
 # Does not work for all versions of iOS
 # command -v mobiledevice &>/dev/null
 # if [[ "$?" -ne "0" ]]; then 
@@ -27,4 +29,4 @@ git submodule update --recursive --remote && cd ios-deploy && xcodebuild
 # fi
 
 export PATH=$PATH:$ANDROID_HOME
-cd -
+

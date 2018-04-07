@@ -2,15 +2,23 @@ from pathlib import Path
 import os
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
-APPS_LIST = {
-    'android': 'data/android_apps_crawl.csv.gz',
-    'ios': 'data/ios_apps_crawl.csv.gz',
-    'test': 'data/test_android_apps_crawl.csv.gz'
+
+# Used by data_process only.
+source_files = {
+    'playstore': 'static_data/android_apps_crawl.csv.gz',
+    'appstore': 'static_data/ios_apps_crawl.csv.gz',
+    'offstore': 'static_data/offstore_apks.csv',
 }
-OFFSTORE_APPS = 'data/offstore_apks.csv'
-TEST_APP_LIST = 'android.test.apps_list' 
+spyware_list_file = 'static_data/spyware.csv'   # hand picked
+
+# ---------------------------------------------------------
+
+
+TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = "Anti-IPS: Stop intiimate partner surveillance"
-APP_FLAGS_FILE = 'data/app-flags.csv'
+APP_FLAGS_FILE = 'static_data/app-flags.csv'
+APP_INFO_FILE = 'static_data/app-info.csv'
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
 
 THISDIR = os.path.dirname(os.path.abspath(__file__))
 ANDROID_HOME = os.getenv('ANDROID_HOME', './.platform-tools')
@@ -21,21 +29,25 @@ MOBILEDEVICE_PATH = os.path.join(THISDIR, "ios-deploy/build/Release/ios-deploy")
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
-
 DEBUG = True
 ERROR_LOG = []
 
+SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if DEBUG else "")
+
 
 def add_to_error(*args):
+    global ERROR_LOG
     m = '\n'.join(str(e) for e in args)
     print(m)
     ERROR_LOG.append(m)
 
 
 def error():
+    global ERROR_LOG
     e = ''
     if len(ERROR_LOG)>0:
-        e = ERROR_LOG.popleft()
+        e, ERROR_LOG = ERROR_LOG[0], ERROR_LOG[1:]
+
         print("ERROR: {}".format(e))
     return e
 
