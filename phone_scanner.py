@@ -102,7 +102,7 @@ class AppScan(object):
         # r = app_list.query('appId in @installed_apps').copy()
         r = pd.DataFrame({'appId': installed_apps}).join(self.stored_apps, on="appId", how="left", rsuffix='_r')
         r['flags'] = flag_apps(r.appId.values).values
-        r['title'] = r.title.str.encode('ascii', errors='ignore')
+        r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
         # print("SpyApps:", r[r.appId.str.contains('spy')])
         a = r[['title', 'appId', 'flags']].set_index('appId')
         return a.loc[a.flags.apply(len).sort_values(ascending=False).index]
@@ -126,9 +126,9 @@ class AppScan(object):
         )
         return p
 
-    def save(self, **kwargs):
+    def save(self, table, **kwargs):
         try:
-            tab = db.get_table('feedback')
+            tab = db.get_table(table)
             kwargs['time'] = datetime.now()
             tab.insert(kwargs)
             db.commit()

@@ -115,14 +115,17 @@
                 <div align="center">
                     <label class="font-weight-bold lead">Scan</label>
                     {% for t in ["Android", "iOS", "test"] %}
-                    <button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
+                    <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
+                            class="btn btn-primary mx-2">{{ t }}</button -->
+                    <button onclick="window.location.href='/scan/{{ t.lower() }}'" id="btn-android"
                             class="btn btn-primary mx-2">{{ t }}</button>
                     {% endfor %}
                     <hr/>
                 </div>
                 
                 <form id="metainfo" class="border-warning visible">
-                    <input class="form-control" id="device-id" type="text" placeholder="Device Id" readonly/>
+                    <input class="form-control" id="device-id" type="text" placeholder="Device Id"
+                           readonly value="{{ serial }}">
                     <input class="form-control" id="client-id" type="text" placeholder="Client Id"/>
                     <textarea class="form-control " id="notes" type="text" placeholder="Notes" rows="10"></textarea>
                     <button onclick="postform(this)" id="btn-metainfo-submit"
@@ -143,6 +146,12 @@
                                 <th style="width: 30%">Notes</th>
                             </tr></thead>
                             <tbody id="applist" class="h-100">
+                            {% for a, v in apps.items() %}
+                                <tr>
+                                <td></td><td>{{ v['title'] }}</td>
+                                <td>{{ a }}</td><td>{{ v['flags'] }}</td>
+                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                         <!-- <button onclick="postform(this)" id="btn-submit"
