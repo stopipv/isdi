@@ -112,3 +112,8 @@ test_android_apps_crawl.csv.gz
 MobileDevice/
 .pytest_cache/
 .idea/
+
+
+## Sensitive folder don't add to Git
+phone_dumps/
+static_data/
