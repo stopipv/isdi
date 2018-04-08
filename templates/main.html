@@ -1,169 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel=stylesheet type=text/css 
-              href="{{ url_for('static', filename='bootstrap.min.css') }}">
-        <link rel=stylesheet type=text/css 
-              href="{{ url_for('static', filename='style.css') }}?234">
-        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
-        <title>Scan Phone for IPS apps</title>
-        <script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel=stylesheet type=text/css
+          href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css
+          href="{{ url_for('static', filename='style.css') }}?234">
+    <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+    <title>Scan Phone for IPS apps</title>
+    <script>
 
+        var device = "{{ device }}";
+        var serial = "{{ serial }}";
 
-         function postform() {
-             $('#btn-submit').prop('disabled', true);
-             d = $('#app-list').serialize();
-             $.post('/submit', data=d).done(success=function(r) {
-                 $('#msg').html(r);
-                 $('#msg').prop('class', 'alert alert-success')
-                 $('#btn-submit').prop('disabled', false);
-             }).fail(function(r) {
-                 /* alert('Bad request: ' + JSON.stringify(r));*/
-                 $('#msg').html(r.responseText);
-                 $('#msg').prop('class', 'alert alert-danger')
-             });
-             return false;
-         }
+        function report_success(m) {
+            $('#msg').html(m);
+            $('#msg').prop('class', 'alert alert-success')
+        }
 
-         function get_actions(k) {
-             var s = '<div class="btn-group" data-toggle="buttons">';
-             $.each(['delete', 'ignore'], function(i, b) {
-                 s += '<label class="btn btn-danger">'
-                 s += '<input type="radio" name="actions-' + k +'" value="' + b + '"> </input>';
-                 s += b + '</label>';
-             });
-             s += '</div>';
-             return s;
-         }
-         
-         function create_tab(data, device, ser) {
-             var s = '';
-             var i = 0;
-             d = $.parseJSON(data)
-             console.log(data)
-             for (k in d) {
-                 i += 1;
-                 s += '<tr id="'+k+'">';
-                 s += "<td><a class=\"h4 text-danger\" onclick='delete('" + device+"', '" + k + "')'>"
-                 s += "&otimes;</a></td>";
-                 s += "<td><a href='/details/app/" + device + "?id=" + k + "&ser=" + ser;
-                 s += "' target='_blank'>" + d[k]['title'] + "</td>";
-                 s += "<td><code>" + k + "</code></td>";
-                 s += "<td>" + d[k]["flags"] + "</td>";
-                 // s += "<td>" + get_actions(k) + "</td>";
-                 s += "<td><input type=\"text\" placeholder=\"Notes\" class='form-control'/></td>"
-                 s += '</tr>';
-             }
-             if (i <= 0) {
-                 s = "<tr><td colspan='5' class='alert-success'>No spyware found! ";
-                 s += "<sup>1</sup></td></tr>";
-             }
-             return s;
-         }
+        function report_failure(m) {
+            $('#msg').html(m);
+            $('#msg').prop('class', 'alert alert-danger')
+        }
 
-         function fetch(url, device) {
-             startProgressbar();
-             $.get(url, function(data) {
-                 perc = 100;
-                 updateProgress(100);
-                 var d = $.parseJSON(data);
-                 var ser = d['serial'];
-                 $('#device-id').attr("value", device);
-                 $('#device-id').css("font-size", "0.25in");
-                 var s = "";
-                 s += create_tab(d['apps'], device, ser);
-                 s += '<input type="hidden" name="url" value="';
-                 s += url.replace('/scan/', '') + '"></input>';
-                 $('#applist').html(s);
-                 $('input[value=ignore]').prop('checked', 'checked');
-                 $('#btn-submit').prop('disabled', false);
-                 $('#error-notice').html(d['error'])
-             }).fail(function(err) {
-                 perc=100;
-                 $('#error-notice').html(JSON.stringify(err));
-             });
-         }
+        function delete_app(appid, e) {
+            y = confirm(`Are you sure you wanna delete the app  '${appid}'?"`);
+            if (!y){return;}
+            data = {'appid': appid, 'serial': serial, 'device': device};
+            $.post('/delete/app/' + device, data=data).done(function (r){
+                $('tr#' + appid).addClass('text-muted');
+                $(e).removeClass('text-danger')
+                $(e).prop('onclick', null).off('click');
+                report_success(r);
+            }).fail(function(){
+                report_failure("Could not delete the app '" + appid + "'")
+            })
+        }
+        function postform(form1) {
+            // $(form1).prop('disabled', true);
+            d1 = $('#form-metainfo').serialize()
+            // d2 = $('#form-applist').serialize()
+            $.post('/save/metainfo/' + device, data = d1).done(function (r) {
+                report_success(r)
+                $('#btn-submit').prop('disabled', false);
+            }).fail(function (r) {
+                report_failure(r.responseText)
+            });
+            return false;
+        }
 
-         $(document).ready(function () {
-             $('#app-list').on('keyup keypress', function(e) {
-                 var keyCode = e.keyCode || e.which;
-                 if (keyCode === 13) { 
-                     e.preventDefault();
-                     return false;
-                 }
-             });
-             $('#btn-submit').prop('disabled', true);
-         });
-        </script>
-    </head>
+        $(document).ready(function () {
+            $('input[type="text"]').on('keyup keypress', function (e) {
+                var keyCode = e.keyCode || e.which;
+                if (keyCode === 13) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            $('#btn-submit').prop('disabled', true);
+            $('#applist > tr > td > input').focusout(function (e) {
+                data = {'appId': e.target.name, 'serial': serial, 'note': e.target.value}
+                $.post('/save/appnote/' + device, data = data).done(success = function (r) {
+                    report_success("Note saved.")
+                });
+            })
+        });
+    </script>
+</head>
 
-    <body class="container-fluid">
-        <div class=""> 
-            <h4><span style="color: green; font-family: monospace; font-size: 0.3in">PhoneScanner:</span> 
-                Scan phones for IPS apps</h4>
-            <p>This application scans an Android and iOS phone for apps that can be used to spy,
-		track, or monitor on a person without their knowledge.
-	    </p>
-        </div>
-        <div class="row  h-100">
-            <div class="col-md-3 border py-2" style="height:80vh;">
-                <div align="center">
-                    <label class="font-weight-bold lead">Scan</label>
-                    {% for t in ["Android", "iOS", "test"] %}
-                    <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
+<body class="container-fluid">
+<div class="">
+    <h4><span style="color: green; font-family: monospace; font-size: 0.3in">PhoneScanner:</span>
+        Scan phones for IPS apps</h4>
+    <p>This application scans an Android and iOS phone for apps that can be used to spy,
+        track, or monitor on a person without their knowledge.
+    </p>
+</div>
+<div class="row  h-100">
+    <div class="col-md-3 border py-2" style="height:80vh;">
+        <div align="center">
+            <label class="font-weight-bold lead">Scan</label>
+            {% for t in ["Android", "iOS", "test"] %}
+                <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
                             class="btn btn-primary mx-2">{{ t }}</button -->
-                    <button onclick="window.location.href='/scan/{{ t.lower() }}'" id="btn-android"
-                            class="btn btn-primary mx-2">{{ t }}</button>
-                    {% endfor %}
-                    <hr/>
-                </div>
-                
-                <form id="metainfo" class="border-warning visible">
-                    <input class="form-control" id="device-id" type="text" placeholder="Device Id"
-                           readonly value="{{ serial }}">
-                    <input class="form-control" id="client-id" type="text" placeholder="Client Id"/>
-                    <textarea class="form-control " id="notes" type="text" placeholder="Notes" rows="10"></textarea>
-                    <button onclick="postform(this)" id="btn-metainfo-submit"
-                            class="btn btn-primary btn-lg my-3">Submit</button>
-                    
-                </form>
-            </div>
-            <div class="col-md-9 border py-2" style="height: 80vh">
-                <div class="h-100 w-100" style="overflow: auto;">
-                    <div id="notice" class="alert alert-danger invisible"></div>
-                <form class="h-100" onsubmit="return false" id="app-list">
-                        <table class="table table-bordered w-100 h-100">
-                            <thead><tr>
-                                <th style="width: 3%"> </th>
-                                <th style="width: 23%">App Name</th>
-                                <th style="width: 23%">App ID</th>
-                                <th style="width: 10%">Flags</th>
-                                <th style="width: 30%">Notes</th>
-                            </tr></thead>
-                            <tbody id="applist" class="h-100">
-                            {% for a, v in apps.items() %}
-                                <tr>
-                                <td></td><td>{{ v['title'] }}</td>
-                                <td>{{ a }}</td><td>{{ v['flags'] }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <!-- <button onclick="postform(this)" id="btn-submit"
-                         class="btn btn-primary btn-lg">Submit</button> -->
-                </form>
-                </div>
-                <div class="progress">
-                    <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                    </div>
-                </div>
+                <button onclick="window.location.href='/scan/{{ t.lower() }}'" id="btn-android"
+                        class="btn btn-primary mx-2">{{ t }}</button>
+            {% endfor %}
+            <hr/>
+        </div>
+        <div class="border-warning visible">
+            <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
+                <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
+                       value="{{ serial }}" readonly>
+                <input class="form-control" name="client" id="client-id" type="text" placeholder="Client Id"/>
+                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Notes"
+                          rows="10"></textarea>
+                <button onclick="postform(this)" id="btn-metainfo-submit"
+                        class="btn btn-primary btn-lg my-3">Save
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-9 border py-2" style="height: 80vh">
+        <div id="msg" class="alert alert-danger invisible" style="height: 3em">     </div>
+        <div class="w-100" style="height: 70vh; overflow: auto;">
+            <table class="table table-bordered w-100 h-100">
+                <thead>
+                <tr>
+                    <th style="width: 3%"></th>
+                    <th style="width: 23%">App Name</th>
+                    <th style="width: 23%">App ID</th>
+                    <th style="width: 20%">Flags</th>
+                    <th style="width: 30%">Notes</th>
+                </tr>
+                </thead>
+                <tbody id="applist" class="h-100">
+                {% for appId, info in apps.items() %}
+                    <tr id="{{ appId }}">
+                        <td><a class="h4 text-danger" onclick="delete_app('{{ appId }}', this)">&otimes;</a></td>
+                        <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank">
+                            {{ info['title'] }}</a></td>
+                        <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
+                               target="_blank"><code>{{ appId }}</code></a></td>
+                        <td>{{ info['flags'] | safe }}</td>
+                        <td><input type="text" placeholder="Notes" class='form-control' name="{{ appId }}" value="{{ info['score'] }}"/></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <!-- <button onclick="postform(this)" id="btn-submit"
+                     class="btn btn-primary btn-lg">Submit</button> -->
+        </div>
+        <div class="progress">
+            <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
             </div>
         </div>
-    </body>
+    </div>
+</div>
+</body>
 </html>
