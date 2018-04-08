@@ -1,5 +1,10 @@
 """
 This file have different ways to detect spyware apps add flags to them.
+The csv file has two column appId, store, and flag
+store: {'playstore', 'appstore', 'offstore'}
+flag: {'dual-use', 'spyware', 'safe'}
+
+Flags added to them are from the following four classes
 1. "onstore-dual-use": onstore dual-use apps
 2. "onstore-spyware": onstore apps which are clearly spyware based on our analysis
 3. "offstore-spyware": offstore spyware apps
@@ -22,11 +27,54 @@ def _regex_blacklist(app):
         else []
 
 
+def score(flags):
+    weight = {
+        'onstore-dual-use': 0.5,
+        'onstore-spyware': 1.0,
+        'offstore-spyware': 1.0,
+        'regex-spy': 0.3
+    }
+    return sum(map(lambda x: weight.get(x, 0.0), flags))
+
+
+def assign_class(flags):
+    w = score(flags)
+    norm_w = 0 if w==0 else 1 if w<=0.3 else 2 if w<=0.8 else 3
+    _classes = ['', 'alert-info', 'alert-warning', 'alert-danger']
+    return _classes[norm_w]
+
+
+def flag_str(flags):
+    """Returns a comma seperated strings"""
+    def _add_class(flag):
+        return ('danger' if 'spyware' in flag else
+                'warning' if 'dual-use' in flag else
+                'info' if 'spy' in flag else ''
+        )
+    # If spyware <span class='text-danger'>{}</span>
+    return ','.join("<span class=\"text-{}\">{}</span>".format(_add_class(flag), flag) for flag in flags)
+
+
+def store_str(st):
+    return 'onstore' if st in ('playstore', 'appstore') else 'offstore'
+
+def app_title_and_flag(apps):
+    _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
+    flagged_apps = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+    # print(apps, flagged_apps)
+    print(_td, apps)
+    _td['flags'] = flagged_apps + flagged_apps.index.map(_regex_blacklist)
+    return _td[['title', 'flags']].reset_index()
+
+
+
+
+
 def flag_apps(apps, device=''):
     """Flag a list of apps based on the APP_FLAGS obtained from the csv file, or spy regex flags"""
     _td = (pd.DataFrame({'appId': apps})
            .join(APP_FLAGS, on='appId', how="left", rsuffix='_r')).set_index('appId')
-    flagged_apps = (_td['store'] + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+    flagged_apps = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     # print(apps, flagged_apps)
     a = flagged_apps + flagged_apps.index.map(_regex_blacklist)
     return a
