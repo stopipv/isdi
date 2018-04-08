@@ -69,7 +69,6 @@ def scan(device):
     #     'error': config.error()
     # })
     apps = sc.find_spyapps(serialno=ser).fillna('')
-    print(apps)
     # apps['flags'] = apps.flags.apply(blacklist.flag_str)
     return render_template(
         'main.html',

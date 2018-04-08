@@ -23,8 +23,9 @@ SPY_REGEX = {
 
 def _regex_blacklist(app):
     # print("_regex_balcklist: {}".format(app))
-    return ['regex-spy'] if (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) \
-        else []
+    # return ['regex-spy'] if (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) \
+    #     else []
+    return (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) is not None
 
 
 def score(flags):
@@ -52,7 +53,7 @@ def flag_str(flags):
                 'info' if 'spy' in flag else ''
         )
     # If spyware <span class='text-danger'>{}</span>
-    return ','.join("<span class=\"text-{}\">{}</span>".format(_add_class(flag), flag) for flag in flags)
+    return ',  '.join("<span class=\"text-{}\">{}</span>".format(_add_class(flag), flag) for flag in flags)
 
 
 def store_str(st):
@@ -60,10 +61,10 @@ def store_str(st):
 
 def app_title_and_flag(apps):
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
-    flagged_apps = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+    _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     # print(apps, flagged_apps)
-    print(_td, apps)
-    _td['flags'] = flagged_apps + flagged_apps.index.map(_regex_blacklist)
+    spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
+    _td.loc[spy_regex_app,'flags'].apply(lambda x: x.extend(['regex-spy']))
     return _td[['title', 'flags']].reset_index()
 
 

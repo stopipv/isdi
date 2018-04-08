@@ -8,13 +8,15 @@ def create_app_flags_file():
         d = pd.read_csv(v, index_col='appId')
         if k == 'offstore':
             d['relevant'] = 'y'
-        elif ('relevant' not in d.columns) or \
-           (d.relevant.count() < len(d) * 0.2):
-            print("Relevant column is missing or unpopulated... recreating")
-            d['relevant'] = (d['ml_score'] > 0.4)\
+        elif (('relevant' not in d.columns) or (d.relevant.count() < len(d) * 0.5)) \
+                and ('ml_score' in d.columns):
+            ## TODO: Remove this or set 0.5 to 0.2 or something
+            print("---->  Relevant column is missing or unpopulated... recreating")
+            d['relevant'] = ((d['ml_score'] > 0.4) | d.get('relevant', pd.Series([])).fillna(False))\
                 .apply(lambda x: 'y' if x else 'n')
         print('done reading: {} (l={})'.format(k, len(d)))
-        r = pd.DataFrame(columns=['store', 'flag', 'title'], index=(d['relevant'] == "y").index)
+        d = d.query('relevant == "y"')
+        r = pd.DataFrame(columns=['store', 'flag', 'title'], index=d.index)
         r['title'] = d['title']
         r['store'] = k
         r['flag'] = 'dual-use' if k != 'offstore' else 'spyware'

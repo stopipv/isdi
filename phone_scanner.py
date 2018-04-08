@@ -99,9 +99,10 @@ class AppScan(object):
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
+        r['flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
-        return r[['title', 'flags', 'score']]
+        return r[['title', 'flags', 'score', 'class_']]
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)

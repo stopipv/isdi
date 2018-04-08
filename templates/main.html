@@ -106,7 +106,7 @@
         </div>
     </div>
     <div class="col-md-9 border py-2" style="height: 80vh">
-        <div id="msg" class="alert alert-danger invisible" style="height: 3em">     </div>
+        <div id="msg" class="alert alert-danger invisible" style="height: 3em">  {{ error }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
             <table class="table table-bordered w-100 h-100">
                 <thead>
@@ -127,7 +127,7 @@
                         <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                target="_blank"><code>{{ appId }}</code></a></td>
                         <td>{{ info['flags'] | safe }}</td>
-                        <td><input type="text" placeholder="Notes" class='form-control' name="{{ appId }}" value="{{ info['score'] }}"/></td>
+                        <td><input type="text" placeholder="Notes" class='form-control' name="{{ appId }}" /></td>
                     </tr>
                 {% endfor %}
                 </tbody>
