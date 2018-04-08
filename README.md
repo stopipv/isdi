@@ -3,6 +3,8 @@ Simple tool to check Android or iOS phones for IPS-spyware.
 
 
 ## Use the tool
+Get the application data from the [private repo](https://github.com/rchatterjee/phone_scanner).
+If you dont't have access to it, then you should not get the data :-) (Send me an email).
 After [dependencies](#dependencies) are installed, with an Android or iOS device plugged in and
 unlocked, run the following command in the terminal
 
@@ -103,6 +105,6 @@ In the terminal of the computer, run `adb devices` to see if the device is conne
 1. https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
 2. How to figure out off-store apps in Android and iOS?
 3. For iOS, how to find out app installation dates, resource usage, etc?
-
+4. Update the `data/` with new labellings.
 
 See [notes.md](notes.md) for other developer helps.
