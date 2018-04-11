@@ -13,7 +13,8 @@ APPS_PER_DEVICE = 'data/app_set_data-lno.txt.gz'
 APPS_TRIE = 'data/apps-unique.marisa_trie'
 regex_found = set()
 SPY_REGEX = {
-  "pos": re.compile(r'(?i)(spy|track|keylog|cheat|recorder|location|gps)')
+  "pos": re.compile(r'(?i)(spy|track|keylog|recorder|location|gps)')
+  #"pos": re.compile(r'(?i)(spy|track|keylog|cheat|recorder|location|gps)')
   #"neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
 }
 
@@ -75,10 +76,6 @@ def _updatedevicecount(check, deviceID):
 #simulated_apps_trie.load(APPS_TRIE)
 
 def all_checks(df):
-    SPY_REGEX = {
-      "pos": re.compile(r'(?i)(spy|track|keylog|cheat|recorder|location|gps)')
-      #"neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
-    }
     for x in range(SAMPLESIZE):
         ID, *deviceapps = df['id'][x].split(',')
         checks['summary']['appsperdevice'].append(len(deviceapps))
