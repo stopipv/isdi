@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import marisa_trie
-from collections import defaultdict, Counter
-from pprint import pprint
 import re
 import sys
-import plotly.plotly as py
+import pandas as pd
+import matplotlib.pyplot as plt
+from pprint import pprint
+from collections import defaultdict, Counter
+#import marisa_trie
 
 SUMMARY_THRESHOLD=-1
 APPS_PER_DEVICE = 'data/app_set_data-lno.txt.gz'
@@ -99,13 +97,10 @@ def all_checks(df):
         checks['check2'][ID] = checks['check1'][ID].union(set(android_onstore_check.index))
         checks['check3'][ID] = checks['check2'][ID].union(regex1isn)
 
-        #print(checks['check1'][ID])
-        #print(checks['check2'][ID])
-        #print(checks['check3'][ID])
-
         for check in range(1,NUMCHECKS+1):
             _updatedevicecount('check'+str(check), ID)
 
+# same as all_checks but skips to only the regexes to allow faster testing.
 def regex_checks(df):
     for x in range(SAMPLESIZE):
         ID, *deviceapps = df['id'][x].split(',')
@@ -122,11 +117,11 @@ def _summarize(check):
         numflaggedapps = len(checks[check][deviceID])
         checks[check+'summary']['appsflaggedperdevice'].append(numflaggedapps)
 
-        # maybe take this 'if' out of loop and unroll
-        if numflaggedapps>SUMMARY_THRESHOLD: # TODO: param for this
+        # TODO: maybe take this 'if' out of loop and unroll
+        if numflaggedapps>SUMMARY_THRESHOLD: # param for this
             checks[check+'summary']['deviceIDsflagged'].append(('Phone '+str(deviceID), numflaggedapps))
             #print("Adding "+str(deviceID)+" for "+str(checks[check][deviceID]))
-    try:
+    try: # TODO: is try/except necessary?
         checks[check+'summary']['avgflaggedperdevice'] = sum(checks[check+'summary']['appsflaggedperdevice']) \
                 / float(len(checks[check+'summary']['appsflaggedperdevice']))
     except ZeroDivisionError:
@@ -161,15 +156,14 @@ def print_summary_report():
             print("  This check introduced "+str(checks['check'+str(check)+'summary']['devicecount']-\
                     checks['check'+str(check-1)+'summary']['devicecount'])+\
                     " new flagged devices")
-        #print('Device IDs flagged with at least '+str(SUMMARY_THRESHOLD+1)+' app(s) "(ID, number of flagged apps)":')
+
+        # Compute the histogram and CDF per check level
         devicesflagged = sorted(checks['check'+str(check)+'summary']['deviceIDsflagged'], reverse=True, key=lambda x: x[1])
         print("\nGenerating Histogram...")
         flagcounts = [x[1] for x in devicesflagged]
 
         hist = Counter(flagcounts)
         percentiles = {}
-        #for k,v in hist.most_common():
-        #    print(str(k)+" app(s) flagged on "+str(v)+"/"+str(SAMPLESIZE)+" devices ({0:.2f}%).".format(100*(v/float(SAMPLESIZE))))
         counts_per_app_num = sorted(hist.items(), reverse=True, key=lambda x: x[0])
         for i in range(len(counts_per_app_num)):
             k,v = counts_per_app_num[i]
@@ -177,8 +171,6 @@ def print_summary_report():
                 percentiles[i] = v + percentiles[i-1]
             else:
                 percentiles[i] = int(v)
-            #print(str(k)+" app(s) flagged on "+str(v)+"/"+str(SAMPLESIZE)+\
-            #        " devices ({0:.2f}%).".format(100*(v/float(SAMPLESIZE))))
             print("% devices with "+str(k)+" apps:\t"+\
                     str(v)+"/"+str(SAMPLESIZE)+\
                     " ({0:.4f}%)"\
@@ -199,6 +191,9 @@ def print_summary_report():
             bins_cdf.append(x1) # also get right edge of last bin
             return n_cdf,bins_cdf
         n,bins = _get_cdf(cdf)
+
+
+        # Print CDF and generate PNGs for CDF/Histogram figures
         print("\nCumDist\t\t\tNumber of IPS Apps or less")
         for i in range(len(n)):
             print(str(n[i])+"\t"+str(bins[i]))
@@ -216,20 +211,10 @@ def print_summary_report():
         plt.xlabel("IPS Apps Flagged")
         plt.ylabel("Number of Devices Affected")
         fig = plt.gcf()
-        #plot_url = py.plot_mpl(fig, filename='mpl-basic-histogram')
         #plt.show()
         plt.savefig('histogramSample'+str(SAMPLESIZE)+'check'+str(check)+'.png', bbox_inches='tight')
         plt.clf()
 
-#        for k,v in hist.most_common():
-#            if int(k) > 1:
-#                percentiles[k] = v + percentiles[int(k)-1]
-#            else:
-#                percentiles[k] = int(v)
-#            print(str(k)+" app(s) flagged on "+str(v)+"/"+str(SAMPLESIZE)+" devices ({0:.2f}%).".format(100*(v/float(SAMPLESIZE))))
-#            print("\t>= ({0:.2f}%).".format(100*(percentiles[k]/float(SAMPLESIZE))))
-
-            #print(str(k)+" apps flagged on "+str(v)+"/"+str(SAMPLESIZE)+" devices ({0:.2f}"+str(100*(v/float(SAMPLESIZE)))+"%).")
     print('='*80)
     print("AVERAGE NUMBER OF APPS FLAGGED PER DEVICE:\n")
     for check in range(1,NUMCHECKS+1):
