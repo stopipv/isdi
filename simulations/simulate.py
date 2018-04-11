@@ -100,6 +100,7 @@ def all_checks(df):
         for check in range(1,NUMCHECKS+1):
             _updatedevicecount('check'+str(check), ID)
 
+
 # same as all_checks but skips to only the regexes to allow faster testing.
 def regex_checks(df):
     for x in range(SAMPLESIZE):
@@ -226,8 +227,30 @@ def print_summary_report():
                     " average flagged apps")
     print('Average apps installed per phone: '+str(checks['summary']['avgappsperdevice']))
     print('='*80)
-    print("Unique apps found from regex searching in check 3 (are there any false positives to prune?):\n")
+    print(str(len(regex_found))+" unique apps found from regex searching in check 3 (are there any false positives to prune?):\n")
     pprint(regex_found)
+
+    # Check all of the regexes picked up that may already be labelled
+    #### unnecessary
+    #regex_found.clear()
+    #with open('data/regx.txt', 'r') as f:
+    #    regex_found.update([line.strip() for line in f])
+    ####
+    offstore_isn = offstore['appId'].isin(regex_found)
+    offstore_check = offstore_isn[offstore_isn == True]
+
+    android_onstore_isn = apps_full_df['appId'].isin(regex_found)
+    android_onstore_check = android_onstore_isn[android_onstore_isn == True]
+
+    regex_isn = set(offstore_check.index).union(set(android_onstore_check.index))
+    print('-'*80)
+    print(str(len(regex_isn))+"/"+str(len(regex_found))+\
+            " unique regex appID(s) found in Offstore and Android Blacklists (already labelled!):")
+    for regx in regex_isn:
+        print(str(regx)+" IPS relevant on blacklists? " +str(apps_full_df['relevant'][regx]))
+    print("There are "+str(len(regex_found)-len(regex_isn))+"/"+str(len(regex_found))+\
+            " ("+str(100*(len(regex_found)-len(regex_isn))/float(len(regex_found)))+\
+            "%) regex appIDs not on our current blacklists (not labelled.)")
     print('='*80)
     
 
