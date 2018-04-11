@@ -8,6 +8,7 @@ from collections import defaultdict, Counter
 from pprint import pprint
 import re
 import sys
+import plotly.plotly as py
 
 SUMMARY_THRESHOLD=-1
 APPS_PER_DEVICE = 'data/app_set_data-lno.txt.gz'
@@ -201,8 +202,24 @@ def print_summary_report():
         print("\nCumDist\t\t\tNumber of IPS Apps or less")
         for i in range(len(n)):
             print(str(n[i])+"\t"+str(bins[i]))
-        plt.clf()
+        plt.title("CDF of IPS Apps found on sample of "+str("{:,}".format(SAMPLESIZE))\
+                +" phones (check "+str(check)+")")
+        plt.xlabel("Number of IPS Apps Flagged")
+        plt.ylabel("CumDist of IPS Apps or less")
         #plt.show()
+        plt.savefig('cdfSample'+str(SAMPLESIZE)+'check'+str(check)+'.png', bbox_inches='tight')
+        plt.clf()
+
+        plt.hist(flagcounts, density=None, bins=bn)
+        plt.title("Histogram of IPS Apps found on sample of "+str("{:,}".format(SAMPLESIZE))\
+                +" phones (check "+str(check)+")")
+        plt.xlabel("IPS Apps Flagged")
+        plt.ylabel("Number of Devices Affected")
+        fig = plt.gcf()
+        #plot_url = py.plot_mpl(fig, filename='mpl-basic-histogram')
+        #plt.show()
+        plt.savefig('histogramSample'+str(SAMPLESIZE)+'check'+str(check)+'.png', bbox_inches='tight')
+        plt.clf()
 
 #        for k,v in hist.most_common():
 #            if int(k) > 1:
