@@ -27,7 +27,7 @@ def clean_json(d):
 
 
 
-def match_keys(d, keys):
+def match_keys(d, keys, only_last=False):
     ret = []
     # print(keys)
     for sk in keys.split('//'):
@@ -37,7 +37,10 @@ def match_keys(d, keys):
                 ret.append(k)
                 d = d[k]
                 break
-    return ret
+    if only_last:
+        return 'key=NOTFOUND' if not ret else ret[-1]
+    else:
+        return ret
 
 
 def extract(d, lkeys):
@@ -151,7 +154,7 @@ class AndroidDump(PhoneDump):
             match_keys(d, '^package$//^Packages//^Package \[{}\].*'.format(appid))
         )
         res = dict(
-            split_equalto_delim(match_keys(package, v)[-1])
+            split_equalto_delim(match_keys(package, v, only_last=True))
             for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
         )
         process_uid = res['userId']
@@ -181,7 +184,6 @@ class IosDump(PhoneDump):
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
 
-
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
         d = pd.read_json(self.fname).T
@@ -190,7 +192,10 @@ class IosDump(PhoneDump):
 
     def info(self, appid):
         d = self.df
-        return {}
+        return {'ios-info': ['<Not-available>']}
+
+    def system_apps(self):
+        return self.df.query('ApplicationType=="System"').index
 
     def installed_apps(self):
         return self.df.index

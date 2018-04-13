@@ -67,7 +67,8 @@ class AppScan(object):
             d = pd.read_sql('select * from apps where appid=?', self.app_info_conn.engine,
                             params=(appid,))
             if not isinstance(d.get('permissions', ''), list):
-                d['permissions'] = d.get('permissions', '').split(', ')
+                d['permissions'] = d.get('permissions', pd.Series([]))
+                d['permissions'] = d['permissions'].fillna('').str.split(', ')
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
             dfname = self.dump_file_name(serialno)
@@ -75,16 +76,17 @@ class AppScan(object):
                 ddump = parse_dump.IosDump(dfname)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
-            d['info'] = ddump.info(appid)
+            info = ddump.info(appid)
+            print("AppInfo: ", info, appid, dfname, ddump)
             # p = self.run_command(
             #     'bash scripts/android_scan.sh info {ser} {appid}',
             #     ser=serialno, appid=appid
             # ); p.wait()
             # d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
-            return d
+            return d.fillna(''), info
         except KeyError as ex:
             print("Exception:::", ex)
-            return pd.DataFrame([])
+            return pd.DataFrame([]), dict()
 
     def find_spyapps(self, serialno):
         """Finds the apps in the phone and add flags to them based on @blacklist.py
@@ -157,9 +159,9 @@ class AndroidScan(AppScan):
             print("Setup failed with returncode={}. ~~ ex={!r}"
                   .format(p.returncode, p.stderr.read() + p.stdout.read()))
 
-    def get_apps(self, serialno):
-        cmd = "{cli} -s {serial} shell pm list packages -u | sed 's/package://g' | sort"
-        s = self.catch_err(self.run_command(cmd, serial=serialno),
+    def _get_apps_(self, serialno, flag):
+        cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/package://g' | sort"
+        s = self.catch_err(self.run_command(cmd, serial=serialno, flag=flag),
                            msg="App search failed", cmd=cmd)
 
         if not s:
@@ -167,11 +169,20 @@ class AndroidScan(AppScan):
             return []
         else:
             installed_apps = [x for x in s.split() if x]
+            return installed_apps
+
+    def get_apps(self, serialno):
+        installed_apps = self._get_apps_(serialno, '-u')
+        if installed_apps:
             q = self.run_command(
                 'bash scripts/android_scan.sh scan {ser}',
                 ser=serialno); q.wait()
             self.installed_apps = installed_apps
-            return installed_apps
+        return installed_apps
+
+    def get_system_apps(self, serialno):
+        apps = self._get_apps_(serialno, '-s')
+        return apps
 
     def devices(self):
         cmd = '{cli} devices | tail -n +2 | cut -f1'
@@ -224,6 +235,14 @@ class IosScan(AppScan):
         else:
             self.installed_apps = []
         return self.installed_apps
+
+    def get_system_apps(self, serialno):
+        dumpf = self.dump_file_name(serialno, 'json')
+        if os.path.exists(dumpf):
+            s = parse_dump.IosDump(dumpf)
+            return s.system_apps()
+        else:
+            return []
 
     def devices(self):
         cmd = '{cli} --detect -t1 | tail -n 1'
