@@ -270,6 +270,9 @@ class TestScan(AppScan):
     def devices(self):
         return ["testdevice1", "testdevice2"]
 
+    def get_system_apps(self, serialno):
+        return self.get_apps(serialno)[:10]
+
     def uninstall(self, appid, serialno):
         return True
 
