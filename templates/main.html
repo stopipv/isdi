@@ -54,6 +54,7 @@
         }
 
         $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
             $('input[type="text"]').on('keyup keypress', function (e) {
                 var keyCode = e.keyCode || e.which;
                 if (keyCode === 13) {
@@ -121,7 +122,13 @@
                 <tbody id="applist" class="h-100">
                 {% for appId, info in apps.items() %}
                     <tr id="{{ appId }}">
-                        <td><a class="h4 text-danger" onclick="delete_app('{{ appId }}', this)">&otimes;</a></td>
+                        {% if appId in sysapps %}
+                            <td><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
+                                   title="System App! Cannot delete">&otimes;</a></td>
+                        {%  else %}
+                            <td><a class="h4 text-danger" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
+                                   title="Delete app">&otimes;</a></td>
+                        {% endif %}
                         <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank">
                             {{ info['title'] }}</a></td>
                         <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"

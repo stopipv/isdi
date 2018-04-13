@@ -70,7 +70,12 @@ function dump {
     done 
     echo "DUMP OF SERVICE net_stats"
     adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
+    for namespace in secure system global; do
+	echo "DUMP OF SETTINGS $namespace"
+	adb shell settings list $namespace
+    done
 }
+
 function full_scan {
     if [[ ! -e $ofname ]]; then
         secs_since_last_modified=100000000;
@@ -84,12 +89,13 @@ function full_scan {
     fi
     rm -rf $ofname
     dump  > "$ofname" 2> error.txt
+    # Clear the settings to remove developer options
 }
 
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
     full_scan
-
+    adb $serial shell pm shell clear com.android.settings
 elif [[ "$1" == "info" ]]; then
     (>&2 echo "------ Running app info ------- $2 $3")
     retrieve $3
@@ -97,4 +103,5 @@ else
     echo "$ bash $0 <scan|info> <serial_no> [appId]"
     exit -1;
 fi
+
 

@@ -37,12 +37,13 @@ def app_details(device):
     sc = get_device(device)
     appid = request.args.get('appId')
     ser = request.args.get('serial')
-    d = sc.app_details(ser, appid).to_dict()
+    d, info = sc.app_details(ser, appid)
+    d = d.to_dict(orient='index').get(0, {})
     d['appId'] = appid
     return render_template(
         'app.html',
         app=d,
-        info=d['info']
+        info=info
     )
 
 
@@ -73,6 +74,7 @@ def scan(device):
     return render_template(
         'main.html',
         apps=apps.to_dict(orient='index'),
+        sysapps=set(sc.get_system_apps(serialno=ser)),
         serial=ser,
         device=device,
         error=config.error(),
