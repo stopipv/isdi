@@ -99,9 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
-*~test
 tmp/
-
+*~
 
 
 ## App data -- Do not add to public github repo
@@ -116,4 +115,11 @@ MobileDevice/
 
 ## Sensitive folder don't add to Git
 phone_dumps/
-static_data/
+static_data/android_apps_crawl.csv.gz
+static_data/app-flags.csv
+static_data/app-info.db
+static_data/com.symantec.mobilesecurity.apk
+static_data/ios_apps_crawl.csv.gz
+static_data/offstore_apks.csv
+static_data/spyware.csv
+data/fieldstudy.db~test 
