@@ -10,7 +10,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Wallet",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -54,8 +54,11 @@
       "com.apple.security.exception.files.absolute-path.read-only" : [
         "\/private\/var\/containers\/Shared\/SystemGroup\/systemgroup.com.apple.lsd.iconscache\/Library\/Caches\/com.apple.IconsCache\/"
       ],
-      "com.apple.private.hsa-authentication-processing" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
       "com.apple.springboard.opensensitiveurl" : true,
+      "com.apple.private.hsa-authentication-processing" : true,
       "com.apple.coreduetd.people" : true,
       "com.apple.payment.all-access" : true,
       "com.apple.private.contactsui" : true,
@@ -142,7 +145,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "MailCompositionService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -206,7 +209,7 @@
     "CFBundleName" : "MailCompositionService"
   },
   "com.apple.calculator" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/00CAC7E8-2543-411A-8D05-EAAB7F63150A",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/E86F86A1-82A3-43A9-8905-5F2815776AE4",
     "CFBundleIdentifier" : "com.apple.calculator",
     "CFBundleShortVersionString" : "1.0.0",
     "ApplicationType" : "System",
@@ -218,11 +221,11 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Calculator",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/1A3D4CAC-A6CE-4757-B8E0-55B194249D39\/Calculator.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/6DD53191-90D6-47CC-A2A6-18A994C6681F\/Calculator.app",
     "Entitlements" : {
       "com.apple.private.security.system-application" : true,
       "application-identifier" : "com.apple.calculator",
@@ -245,7 +248,7 @@
 
     ],
     "CFBundleDisplayName" : "SharedWebCredentialViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -261,7 +264,7 @@
     "CFBundleName" : "SharedWebCredentialViewService"
   },
   "com.apple.tv" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/B0441BDF-D2AA-4A5D-91D1-B147924329D7",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/8A6787B4-8CA3-4C38-8B36-C6201359E8D5",
     "CFBundleIdentifier" : "com.apple.tv",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -273,7 +276,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "TV",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -297,9 +300,10 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/8C23FB11-0396-4608-BDC3-F5624B6B4DBA\/TV.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/8AEBA980-23C9-4045-B565-D87EF45C8D9E\/TV.app",
     "Entitlements" : {
       "fairplay-client" : 1974055701,
+      "com.apple.avfoundation.allows-access-to-device-list" : true,
       "com.apple.private.nsurlsession.media-asset-download.can-specify-destination-url" : true,
       "application-identifier" : "com.apple.tv",
       "com.apple.itunesstored.private" : true,
@@ -326,10 +330,15 @@
       "com.apple.private.security.container-required" : true,
       "com.apple.itunesstored.metrics" : true,
       "com.apple.keystore.device" : true,
+      "com.apple.managedconfiguration.profiled-access" : true,
       "keychain-access-groups" : [
         "apple",
         "com.apple.VideoSubscriberAccount"
       ],
+      "com.apple.private.tcc.allow" : [
+        "kTCCServiceMediaLibrary"
+      ],
+      "com.apple.frontboard.launchapplications" : true,
       "com.apple.security.exception.files.home-relative-path.read-write" : [
         "\/Library\/Caches\/",
         "\/Library\/Logs\/com.apple.itunesstored",
@@ -337,11 +346,6 @@
         "\/Library\/com.apple.WatchListKit\/",
         "\/Library\/Application Support\/com.apple.VideoSubscriberAccount\/"
       ],
-      "com.apple.private.tcc.allow" : [
-        "kTCCServiceMediaLibrary"
-      ],
-      "com.apple.frontboard.launchapplications" : true,
-      "com.apple.managedconfiguration.profiled-access" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.adid",
         "com.apple.ak.anisette.xpc",
@@ -399,20 +403,17 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "SafariViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/SafariViewService.app",
     "Entitlements" : {
-      "com.apple.private.launchservices.suppresscustomschemeprompt" : "*",
+      "com.apple.private.webinspector.proxy-application" : true,
       "com.apple.locationd.effective_bundle" : true,
-      "keychain-access-groups" : [
-        "com.apple.cfnetwork",
-        "com.apple.identities",
-        "com.apple.mobilesafari",
-        "com.apple.certificates",
-        "com.apple.safari.credit-cards"
+      "com.apple.private.launchservices.suppresscustomschemeprompt" : "*",
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
       ],
       "com.apple.private.assets.accessible-asset-types" : [
         "com.apple.MobileAsset.CoreSuggestions"
@@ -423,15 +424,22 @@
         "kTCCServiceCamera",
         "kTCCServiceMicrophone",
         "kTCCServiceCalendar",
-        "kTCCServicePhotos",
         "kTCCServicePhotosAdd",
         "kTCCServiceAddressBook",
         "kTCCServiceFaceID"
       ],
       "com.apple.private.in-app-payments" : true,
       "platform-application" : true,
+      "keychain-access-groups" : [
+        "com.apple.cfnetwork",
+        "com.apple.identities",
+        "com.apple.mobilesafari",
+        "com.apple.certificates",
+        "com.apple.safari.credit-cards"
+      ],
       "com.apple.private.canModifyAppLinkPermissions" : true,
       "com.apple.private.coreservices.canmaplsdatabase" : true,
+      "com.apple.developer.WebKit.ServiceWorkers" : true,
       "com.apple.locationd.usage_oracle" : true,
       "com.apple.private.can-load-any-content-blocker" : true,
       "com.apple.private.canGetAppLinkInfo" : true,
@@ -441,29 +449,33 @@
         "\/private\/var\/mobile\/Library\/Cookies\/",
         "\/private\/var\/mobile\/Library\/WebClips\/"
       ],
+      "com.apple.sharing.DeviceDiscovery" : true,
       "com.apple.accounts.appleaccount.fullaccess" : true,
       "com.apple.Contacts.database-allow" : true,
-      "com.apple.private.suggestions.events" : true,
       "com.apple.springboard.openurlinbackground" : true,
       "com.apple.private.webinspector.allow-remote-inspection" : true,
+      "com.apple.private.suggestions.events" : true,
       "com.apple.managedconfiguration.profiled.configurationprofiles" : [
         "UIInstallation"
       ],
+      "com.apple.bluetooth.internal" : true,
       "com.apple.private.associated-domains" : true,
       "com.apple.private.CoreAuthentication.SPI" : true,
       "com.apple.TextInput.autofill-action" : true,
+      "com.apple.sharing.Services" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.TextInput.autofill-server",
         "com.apple.Safari.SafeBrowsing.Service",
         "com.apple.mobile.keybagd.xpc",
         "com.apple.SharedWebCredentials",
-        "com.apple.managedconfiguration.profiled"
-      ],
-      "com.apple.private.webinspector.proxy-application" : true
+        "com.apple.managedconfiguration.profiled",
+        "com.apple.SharingServices"
+      ]
     },
     "UIDeviceFamily" : [
       1,
-      2
+      2,
+      4
     ],
     "CFBundleName" : "SafariViewService"
   },
@@ -480,7 +492,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "iTunes",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -517,19 +529,12 @@
         "CheckCapabilitiesMatch"
       ],
       "com.apple.private.MobileGestalt.AllowedProtectedKeys" : [
-        "UniqueDeviceID"
+        "UniqueDeviceID",
+        "SerialNumber"
       ],
       "com.apple.accounts.appleaccount.fullaccess" : true,
-      "com.apple.UIKit.vends-view-services" : true,
       "abs-client" : "1192613791",
       "com.apple.private.social.facebook.like" : true,
-      "com.apple.backboardd.launchapplications" : true,
-      "com.apple.private.security.container-required" : true,
-      "com.apple.private.network.socket-delegate" : true,
-      "com.apple.Contacts.database-allow" : true,
-      "com.apple.security.exception.files.home-relative-path.read-write" : [
-        "\/Library\/Caches\/com.apple.storeservices\/"
-      ],
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.absd",
         "com.apple.adid",
@@ -542,22 +547,33 @@
         "com.apple.ibooks.BLService",
         "com.apple.hsa-authentication-server"
       ],
+      "com.apple.backboardd.launchapplications" : true,
+      "com.apple.private.security.container-required" : true,
+      "com.apple.private.network.socket-delegate" : true,
+      "com.apple.keystore.device" : true,
+      "com.apple.Contacts.database-allow" : true,
+      "com.apple.security.exception.files.home-relative-path.read-write" : [
+        "\/Library\/Caches\/com.apple.storeservices\/"
+      ],
+      "com.apple.coretelephony.Identity.get" : true,
       "com.apple.appstored.xpc.updates" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServiceMediaLibrary",
         "kTCCServiceCamera",
         "kTCCServiceAddressBook"
       ],
-      "com.apple.coretelephony.Identity.get" : true,
+      "com.apple.managedconfiguration.profiled-access" : true,
       "com.apple.QuartzCore.secure-mode" : true,
-      "com.apple.mobile.deleted.AllowFreeSpace" : true,
       "adi-client" : "602490525",
       "com.apple.developer.pass-type-identifiers" : [
         "*.pass.com.apple.itunes.storecredit"
       ],
+      "com.apple.UIKit.vends-view-services" : true,
       "com.apple.appstored.private" : true,
       "com.apple.ibooks.BLService.private" : true,
       "com.apple.coremedia.allow-protected-content-playback" : true,
+      "com.apple.springboard.remote-alert" : true,
+      "com.apple.mobile.deleted.AllowFreeSpace" : true,
       "com.apple.itunesstored.download-monitor" : true,
       "com.apple.private.coreservices.canmaplsdatabase" : true,
       "com.apple.coremedia.allow-preview-encrypted-tone-playback" : true
@@ -570,7 +586,7 @@
     "CFBundleName" : "iTunes"
   },
   "com.apple.MobileStore" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/04AF471B-3DD1-4A74-8702-D28416D889E0",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/722D4CEA-2ACC-4361-BD05-0CC8ACECAEAC",
     "CFBundleIdentifier" : "com.apple.MobileStore",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -583,7 +599,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "iTunes Store",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -596,7 +612,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/AF996924-CBBB-4DEC-9002-5E17BADA3A8C\/MobileStore.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/0B24B83B-14B1-46D8-8F65-55C9A7263F7F\/MobileStore.app",
     "Entitlements" : {
       "fairplay-client" : "510421582",
       "com.apple.springboard.launchapplications" : true,
@@ -683,7 +699,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "WLAccessService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -723,7 +739,7 @@
     "CFBundleName" : "WLAccessService"
   },
   "com.apple.tips" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/F727AB17-6A8B-4A2F-8E16-FE026C4E4711",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/DA5A1C97-A2E0-4D70-B7E5-6FD9F58764A1",
     "CFBundleIdentifier" : "com.apple.tips",
     "CFBundleShortVersionString" : "4.0",
     "ApplicationType" : "System",
@@ -733,7 +749,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Tips",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -742,12 +758,11 @@
         "CFBundleURLName" : "com.apple.tips.notify",
         "CFBundleURLIsPrivate" : true,
         "CFBundleURLSchemes" : [
-          "x-tips-bulletin",
           "x-tips-widget"
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/48F3051B-A6A2-4772-A432-E313DB8028DE\/Tips.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/22DE5ADE-99D1-4680-9773-6B5E01AA9FC5\/Tips.app",
     "Entitlements" : {
       "com.apple.private.carkit" : true,
       "com.apple.private.security.container-required" : true,
@@ -805,7 +820,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Camera",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -909,7 +924,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Web",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -948,7 +963,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "CompassCalibrationViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -978,7 +993,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Workbench Ad Tester",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1021,7 +1036,7 @@
     "CFBundleName" : "Workbench Ad Tester"
   },
   "com.apple.DocumentsApp" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/FF9C10C1-7B7F-4EF1-B9E7-7D94EFD85B89",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/C624C030-4191-4BA6-8A57-F08628F0809D",
     "CFBundleIdentifier" : "com.apple.DocumentsApp",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -1033,7 +1048,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Files",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1045,7 +1060,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/469FAE19-9D66-408A-8915-6582023A7420\/Files.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/46CFC023-E340-49AC-A83C-F04A6C0A2556\/Files.app",
     "Entitlements" : {
       "com.apple.fileprovider.fetch-url" : true,
       "com.apple.springboard.opensensitiveurl" : true,
@@ -1125,32 +1140,12 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "MusicUIService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/MusicUIService.app",
     "Entitlements" : {
-      "keychain-access-groups" : [
-        "com.apple.MediaRemote.pairing"
-      ],
-      "com.apple.springboard.stark.activateBackgroundProvider" : true,
-      "com.apple.avfoundation.allow-system-wide-context" : true,
-      "com.apple.homekit.private-spi-access" : true,
-      "com.apple.PairingManager.Write" : true,
-      "com.apple.private.tcc.allow" : [
-        "kTCCServiceWillow",
-        "kTCCServiceMediaLibrary"
-      ],
-      "SBStarkCapable" : true,
-      "com.apple.mediaremote.allow" : [
-        "TVPairing"
-      ],
-      "com.apple.private.tcc.manager" : true,
-      "com.apple.QuartzCore.secure-mode" : true,
-      "com.apple.PairingManager.RemovePeer" : true,
-      "com.apple.frontboard.launchapplications" : true,
-      "com.apple.UIKit.vends-view-services" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.coremedia.endpointpicker.xpc",
         "com.apple.coremedia.routediscoverer.xpc",
@@ -1158,8 +1153,33 @@
         "com.apple.coremedia.endpointremotecontrolsession.xpc",
         "com.apple.PairingManager"
       ],
+      "keychain-access-groups" : [
+        "apple",
+        "com.apple.MediaRemote.pairing"
+      ],
+      "com.apple.private.tcc.allow" : [
+        "kTCCServiceWillow",
+        "kTCCServiceMediaLibrary"
+      ],
+      "com.apple.homekit.private-spi-access" : true,
+      "com.apple.avfoundation.allows-set-output-device" : true,
+      "com.apple.PairingManager.RemovePeer" : true,
+      "com.apple.private.coreservices.canmaplsdatabase" : true,
+      "com.apple.avfoundation.allow-system-wide-context" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.private.tcc.manager" : true,
+      "com.apple.private.accounts.allaccounts" : true,
+      "com.apple.springboard.stark.activateBackgroundProvider" : true,
       "com.apple.PairingManager.Read" : true,
-      "com.apple.developer.homekit" : true
+      "com.apple.accounts.appleaccount.fullaccess" : true,
+      "SBStarkCapable" : true,
+      "com.apple.PairingManager.Write" : true,
+      "com.apple.developer.homekit" : true,
+      "com.apple.QuartzCore.secure-mode" : true,
+      "com.apple.frontboard.launchapplications" : true,
+      "com.apple.mediaremote.allow" : [
+        "TVPairing"
+      ]
     },
     "UIDeviceFamily" : [
       1,
@@ -1181,7 +1201,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "ScreenshotServicesService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1233,7 +1253,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "WebContentAnalysisUI",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1264,7 +1284,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "MessagesViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1330,7 +1350,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "SoftwareUpdateUIService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1365,16 +1385,12 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "HomeUIService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/HomeUIService.app",
     "Entitlements" : {
-      "com.apple.nfcd.hwmanager" : true,
-      "com.apple.private.coreservices.canmaplsdatabase" : true,
-      "com.apple.wifi.manager-access" : true,
-      "com.apple.homekit.private-spi-access" : true,
       "com.apple.locationd.effective_bundle" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServicePhotos",
@@ -1383,19 +1399,24 @@
         "kTCCServiceCamera",
         "kTCCServiceAddressBook"
       ],
+      "com.apple.homekit.private-spi-access" : true,
       "com.apple.internal.nfc.allow.backgrounded.session" : true,
+      "com.apple.private.coreservices.canmaplsdatabase" : true,
+      "com.apple.sharing.Client" : true,
       "com.apple.private.bmk.allow" : true,
-      "com.apple.seld.tsmmanager" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.sharing.DeviceDiscovery" : true,
+      "com.apple.wifi.manager-access" : true,
       "com.apple.private.stockholm.allow" : true,
       "com.apple.Contacts.database-allow" : true,
-      "com.apple.private.corerecents" : true,
-      "com.apple.UIKit.vends-view-services" : true,
-      "com.apple.springboard.launchapplications" : true,
       "com.apple.developer.homekit.background-mode" : true,
       "com.apple.itunesstored.private" : true,
-      "com.apple.sharing.Client" : true,
-      "com.apple.sharing.DeviceDiscovery" : true,
-      "com.apple.developer.homekit" : true
+      "com.apple.seld.tsmmanager" : true,
+      "com.apple.developer.homekit" : true,
+      "com.apple.springboard.launchapplications" : true,
+      "com.apple.private.corerecents" : true,
+      "com.apple.springboard.opensensitiveurl" : true,
+      "com.apple.nfcd.hwmanager" : true
     },
     "UIDeviceFamily" : [
       1,
@@ -1414,7 +1435,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "StoreDemoViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1447,7 +1468,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "SLGoogleAuth",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1470,7 +1491,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Photos",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1610,7 +1631,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Health",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1619,7 +1640,8 @@
         "CFBundleTypeRole" : "Editor",
         "CFBundleURLName" : "com.apple.Health",
         "CFBundleURLSchemes" : [
-          "x-apple-health"
+          "x-apple-health",
+          "x-argonaut-app"
         ]
       }
     ],
@@ -1644,13 +1666,17 @@
       "com.apple.security.exception.files.absolute-path.read-only" : [
         "\/private\/var\/containers\/Bundle\/",
         "\/Applications\/MobileTimer.app\/",
-        "\/private\/var\/containers\/Shared\/SystemGroup\/systemgroup.com.apple.configurationprofiles\/Library\/ConfigurationProfiles\/UserSettings.plist"
+        "\/private\/var\/containers\/Shared\/SystemGroup\/systemgroup.com.apple.configurationprofiles\/Library\/ConfigurationProfiles\/UserSettings.plist",
+        "\/private\/var\/mobile\/Library\/Health\/Analytics\/"
       ],
       "com.apple.telephonyutilities.callservicesd" : [
         "access-call-providers"
       ],
-      "com.apple.springboard.opensensitiveurl" : true,
+      "com.apple.developer.associated-domains" : [
+        "applinks:*.health.apple.com"
+      ],
       "com.apple.developer.auto-elect-plugin" : true,
+      "com.apple.springboard.opensensitiveurl" : true,
       "com.apple.private.healthkit.medicaliddata" : true,
       "com.apple.private.contactsui" : true,
       "com.apple.private.assets.change-daemon-config" : true,
@@ -1690,9 +1716,9 @@
     "CFBundleName" : "Health"
   },
   "com.apple.news" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/DB01B464-059A-495B-9C7D-06A7C9E6C78C",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/EF1E0C7C-2A81-44D5-85E7-3F926BD994AA",
     "CFBundleIdentifier" : "com.apple.news",
-    "CFBundleShortVersionString" : "3.2",
+    "CFBundleShortVersionString" : "3.3",
     "ApplicationType" : "System",
     "CFBundleExecutable" : "News",
     "IsUpgradeable" : true,
@@ -1702,7 +1728,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "News",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1717,9 +1743,13 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/F88146D6-C42E-4945-9C64-A3370EF7CB07\/News.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/02126EE8-A604-4312-A0C5-C9520ED5E3B5\/News.app",
     "Entitlements" : {
       "fairplay-client" : "1397409257",
+      "com.apple.private.tcc.allow.overridable" : [
+        "kTCCServiceAddressBook",
+        "kTCCServiceCalendar"
+      ],
       "com.apple.developer.icloud-container-environment" : "Production",
       "application-identifier" : "ZL6BUSYGB3.com.apple.news",
       "com.apple.backboardd.hostCanRequireTouchesFromHostedContent" : true,
@@ -1739,21 +1769,25 @@
       "com.apple.security.exception.files.absolute-path.read-only" : [
         "\/private\/var\/mobile\/Library\/CoreDuet\/Knowledge\/"
       ],
-      "com.apple.private.mobileinstall.upgrade-enabled" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
       "com.apple.private.cloudkit.serviceNameForContainerMap" : {
         "com.apple.news.private.secure" : "com.apple.news.private.secure2",
         "com.apple.news.private.secure.qa" : "com.apple.news.private.secure2",
         "com.apple.news.private.secure.staging" : "com.apple.news.private.secure2"
       },
+      "com.apple.private.ad.analytics" : true,
+      "com.apple.private.cloudkit.setEnvironment" : true,
+      "com.apple.private.mobileinstall.upgrade-enabled" : true,
+      "com.apple.locationd.authorizeapplications" : true,
       "com.apple.developer.associated-domains" : [
         "applinks:news.apple.com",
         "applinks:apple.news",
         "activitycontinuation:apple.news",
         "activitycontinuation:news.apple.com"
       ],
-      "com.apple.private.cloudkit.setEnvironment" : true,
       "com.apple.springboard.opensensitiveurl" : true,
-      "com.apple.locationd.authorizeapplications" : true,
       "com.apple.private.canModifyAppLinkPermissions" : true,
       "com.apple.appstored.manage-iap" : true,
       "com.apple.accounts.appleaccount.fullaccess" : true,
@@ -1769,11 +1803,11 @@
       ],
       "com.apple.private.security.system-application" : true,
       "com.apple.private.security.container-required" : true,
+      "com.apple.backboardd.launchapplications" : true,
       "com.apple.security.exception.files.home-relative-path.read-write" : [
         "\/Library\/Logs\/CrashReporter\/",
         "\/Library\/News\/"
       ],
-      "com.apple.backboardd.launchapplications" : true,
       "com.apple.private.appleaccount.app-hidden-from-icloud-settings" : true,
       "com.apple.private.canGetAppLinkInfo" : true,
       "com.apple.private.iad.open-privacy-view-controller" : true,
@@ -1819,7 +1853,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "AccountAuthenticationDialog",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1848,7 +1882,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Do Not Disturb While Driving",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1877,7 +1911,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Setup",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -1939,6 +1973,7 @@
       "com.apple.authkit.client.private" : true,
       "com.apple.managedconfiguration.profiled-access" : true,
       "com.apple.keystore.device" : true,
+      "com.apple.dmd-access" : true,
       "com.apple.private.cloudkit.setEnvironment" : true,
       "com.apple.seld.tsmmanager" : true,
       "fairplay-client" : "1093702998",
@@ -2023,11 +2058,12 @@
         "data-allowed-write"
       ],
       "com.apple.mkb.usersession.info" : true,
+      "com.apple.dmd.operation.fetch-device-properties" : true,
       "com.apple.private.cloudkit.masquerade" : true,
-      "com.apple.assistant.dictation.prerecorded" : true,
       "com.apple.private.mobilestoredemo.enabledemo" : [
         "Enroll"
       ],
+      "com.apple.assistant.dictation.prerecorded" : true,
       "com.apple.springboard.wipedevice" : true,
       "com.apple.keystore.device.verify" : true,
       "com.apple.locationd.effective_bundle" : true,
@@ -2102,7 +2138,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "SLYahooAuth",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2126,7 +2162,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "iAd",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2187,7 +2223,7 @@
   "com.apple.Diagnostics" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/DC6E4541-F1EA-49EA-9E6D-4B24E09B98BC",
     "CFBundleIdentifier" : "com.apple.Diagnostics",
-    "CFBundleShortVersionString" : "2.2",
+    "CFBundleShortVersionString" : "2.3",
     "ApplicationType" : "System",
     "CFBundleExecutable" : "Diagnostics",
     "IsUpgradeable" : false,
@@ -2195,7 +2231,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Diagnostics",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2298,7 +2334,7 @@
     "CFBundleName" : "Diagnostics"
   },
   "com.apple.Maps" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/B1B52498-281A-4D40-9EDE-91FEE642B7C3",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/52DBFE65-9F52-4F17-B073-1E594A6918AA",
     "CFBundleIdentifier" : "com.apple.Maps",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -2311,7 +2347,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Maps",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2347,7 +2383,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/DB90B260-E33B-4BCA-8BCE-0BAA59B32585\/Maps.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/82D8E29E-BDBA-48E4-9BCC-9FC50895268D\/Maps.app",
     "Entitlements" : {
       "com.apple.locationd.vehicle_data" : true,
       "com.apple.payment.all-access" : true,
@@ -2360,6 +2396,7 @@
       "com.apple.locationd.simulation" : true,
       "com.apple.geoservices.mapLayerDataSizes" : true,
       "com.apple.geoservices.navd.clientIdentifier" : "",
+      "com.apple.authkit.client.internal" : true,
       "com.apple.geoservices.mapdata.debug" : true,
       "com.apple.private.canModifyAppLinkPermissions" : true,
       "com.apple.maps.ipc-access" : true,
@@ -2378,7 +2415,9 @@
       "com.apple.intents.intents-image-service" : true,
       "com.apple.springboard.thermalWarningSuppression" : true,
       "com.apple.geoservices.mapdata.manage-subscriptions" : true,
-      "com.apple.springboard.activateawayviewplugins" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
       "com.apple.security.exception.files.home-relative-path.read-write" : [
         "\/Library\/Caches\/com.apple.Maps.Suggestions\/",
         "\/Library\/Caches\/GeoServices\/DevResources\/"
@@ -2391,6 +2430,7 @@
         "kTCCServiceCamera"
       ],
       "com.apple.maps.model-access" : true,
+      "com.apple.springboard.activateawayviewplugins" : true,
       "com.apple.private.security.system-application" : true,
       "com.apple.security.exception.files.absolute-path.read-only" : [
         "\/private\/var\/mobile\/Library\/ReplayKit\/",
@@ -2509,8 +2549,8 @@
       "com.apple.private.mobileinstall.allowedSPI" : [
         "UninstallForLaunchServices"
       ],
-      "com.apple.geoservices.getmanifest" : true,
       "com.apple.geoservices.preload" : true,
+      "com.apple.geoservices.getmanifest" : true,
       "com.apple.geoservices.changetilegroup" : true,
       "com.apple.geoservice.deactivate-resource-filter" : true,
       "com.apple.managedconfiguration.feature-setting.allowFindMyCar" : true,
@@ -2546,7 +2586,7 @@
     "CFBundleName" : "Maps"
   },
   "com.apple.iBooks" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/3DC6B23C-2C2C-4D6C-BA59-755D1363B44B",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/8369AA7A-1C9D-435C-9976-8DAB05C3229D",
     "CFBundleIdentifier" : "com.apple.iBooks",
     "CFBundleName" : "iBooks",
     "ApplicationType" : "System",
@@ -2559,7 +2599,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "iBooks",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2578,7 +2618,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/7EBFA653-EE52-417C-A1C1-E25CF7206D39\/iBooks.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/88657EB6-9481-432F-B667-1A03AA804CC3\/iBooks.app",
     "HasSettingsBundle" : true,
     "Entitlements" : {
       "fairplay-client" : "1328318286",
@@ -2599,19 +2639,23 @@
         "iCloud.com.apple.iBooks",
         "iCloud.com.apple.iBooks.iTunesU"
       ],
-      "com.apple.accounts.facebook.defaultaccess" : true,
+      "com.apple.authkit.client.internal" : true,
       "platform-application" : true,
-      "com.apple.private.accounts.allaccounts" : true,
+      "com.apple.accounts.facebook.defaultaccess" : true,
       "com.apple.developer.ubiquity-kvstore-identifier" : "com.apple.iBooks",
-      "com.apple.itunesstored.private" : true,
+      "com.apple.private.accounts.allaccounts" : true,
       "com.apple.CommCenter.fine-grained" : [
         "spi"
       ],
+      "com.apple.itunesstored.private" : true,
       "aps-environment" : "production",
       "com.apple.private.mobileinstall.xpc-services-enabled" : true,
       "com.apple.private.hid.client.event-monitor" : true,
-      "com.apple.private.accounts.customaccesssinfo" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
       "com.apple.private.librarian.can-get-application-info" : true,
+      "com.apple.private.accounts.customaccesssinfo" : true,
       "com.apple.private.hsa-authentication-processing" : true,
       "com.apple.private.mobileinstall.upgrade-enabled" : true,
       "com.apple.springboard.opensensitiveurl" : true,
@@ -2684,7 +2728,7 @@
       1,
       2
     ],
-    "CFBundleShortVersionString" : "4.15"
+    "CFBundleShortVersionString" : "4.16"
   },
   "com.apple.PrintKit.Print-Center" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/1E9F64A5-02A7-4432-B9B0-9A320E6E41E2",
@@ -2699,7 +2743,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Print Center",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2724,7 +2768,7 @@
     "CFBundleName" : "Print Center"
   },
   "com.apple.mobilecal" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/6E83B0BA-68B5-47E6-9ED1-EE97274BBD8C",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/7D789C6D-DBB5-44A9-8F03-FBF0B4C55706",
     "CFBundleIdentifier" : "com.apple.mobilecal",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -2736,7 +2780,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Calendar",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2770,7 +2814,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/CC8406E5-5E2D-4B54-886E-51F4FB7677A7\/MobileCal.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/846202AB-34C1-4037-A1D0-CFA9748C016F\/MobileCal.app",
     "Entitlements" : {
       "com.apple.notificationcenter.widgetcontrollerhascontent" : true,
       "com.apple.locationd.effective_bundle" : true,
@@ -2840,26 +2884,11 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "DiagnosticsService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/DiagnosticsService.app",
-    "Entitlements" : {
-      "application-identifier" : "com.apple.DiagnosticsService",
-      "com.apple.security.exception.mach-lookup.global-name" : [
-        "com.apple.Checkerboard.UIKit.KeyboardManagement.hosted",
-        "com.apple.Checkerboard.UIKit.statusbarserver",
-        "com.apple.CheckerBoard.jail.com.apple.frontboard.systemappservices",
-        "com.apple.CheckerBoard.jail.com.apple.frontboard.workspace",
-        "com.apple.backlightd"
-      ],
-      "com.apple.private.security.container-required" : true,
-      "com.apple.security.exception.shared-preference.read-only" : [
-        "com.apple.Diagnostics"
-      ],
-      "platform-application" : true
-    },
     "UIDeviceFamily" : [
       1,
       2
@@ -2878,7 +2907,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Messages",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -2952,7 +2981,8 @@
         "com.apple.personad.xpc",
         "com.apple.appstored.xpc.request",
         "com.apple.private.healthd.server-extended",
-        "com.apple.mobile.keybagd.xpc"
+        "com.apple.mobile.keybagd.xpc",
+        "com.apple.cdp.daemon"
       ],
       "com.apple.nanopassd.connect" : true,
       "com.apple.private.suggestions.searchtoshare" : true,
@@ -2976,10 +3006,11 @@
       "com.apple.private.pluginkit.manager" : true,
       "com.apple.avfoundation.allow-still-image-capture-shutter-sound-manipulation" : true,
       "com.apple.private.imcore.imremoteurlconnection" : true,
+      "com.apple.cdp.statemachine" : true,
+      "com.apple.coreaudio.allow-amr-encode" : true,
       "com.apple.private.mobileinstall.allowedSPI" : [
         "UninstallForLaunchServices"
       ],
-      "com.apple.coreaudio.allow-amr-encode" : true,
       "keychain-access-groups" : [
         "apple",
         "com.apple.TextInput"
@@ -2990,8 +3021,8 @@
       "com.apple.springboard.opensensitiveurl" : true,
       "com.apple.springboard.allowallcallurls" : true,
       "com.apple.peerpayment.all-access" : true,
-      "com.apple.private.suggestions.messages" : true,
       "com.apple.keystore.device" : true,
+      "com.apple.private.suggestions.messages" : true,
       "com.apple.private.suggestions.contacts" : true,
       "com.apple.backboardd.hostCanRequireTouchesFromHostedContent" : true,
       "com.apple.coretelephony.Identity.get" : true,
@@ -3098,7 +3129,7 @@
     "CFBundleName" : "iCloud"
   },
   "com.apple.Music" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/E336F468-B52F-4C7E-84A5-44AA8DD16BC6",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/4A09CF80-1839-445B-A869-0982BA874A37",
     "CFBundleIdentifier" : "com.apple.Music",
     "CFBundleShortVersionString" : "3.1",
     "ApplicationType" : "System",
@@ -3108,7 +3139,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Music",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3126,7 +3157,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/09B81CC4-8788-4663-AF8A-4EE021373D70\/Music.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/6DA6A6B9-BC9B-4014-BC4E-8BC4848E9868\/Music.app",
     "Entitlements" : {
       "com.apple.itunescloud.delegate-account-store" : true,
       "com.apple.launchservices.receivereferrerrurl" : true,
@@ -3181,7 +3212,9 @@
         "com.apple.coremedia.routingcontext.xpc",
         "com.apple.coremedia.endpointremotecontrolsession.xpc",
         "com.apple.bulletinboard.observerconnection",
-        "com.apple.symptom_analytics"
+        "com.apple.symptom_analytics",
+        "com.apple.itunescloud.contenttaste",
+        "com.apple.lsd.modifydb"
       ],
       "com.apple.private.security.container-required" : true,
       "com.apple.private.iad.privileged-client" : true,
@@ -3194,12 +3227,17 @@
       "aps-connection-initiate" : true,
       "com.apple.security.assets.music.read-write" : true,
       "com.apple.assistant.contextprovider" : true,
+      "com.apple.private.mobileinstall.allowedSPI" : [
+        "InstallForLaunchServices",
+        "InstallLocalProvisioned"
+      ],
       "com.apple.assertiond.background-view-services" : true,
       "com.apple.coreaudio.allow-amr-encode" : true,
       "keychain-access-groups" : [
         "apple",
         "com.apple.MediaRemote.pairing"
       ],
+      "com.apple.wifi.manager-access" : true,
       "com.apple.security.exception.files.home-relative-path.read-write" : [
         "\/Library\/com.apple.itunesstored\/",
         "\/Library\/com.apple.iTunesCloud\/",
@@ -3269,7 +3307,7 @@
     "CFBundleName" : "Music"
   },
   "com.apple.podcasts" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/9B305925-F5D3-4164-9C46-A5E96C40ED4A",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/9737072A-4786-47F8-8410-E2039CC9FBFA",
     "CFBundleIdentifier" : "com.apple.podcasts",
     "CFBundleName" : "Podcasts",
     "ApplicationType" : "System",
@@ -3280,7 +3318,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "Podcasts",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3305,10 +3343,11 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/9D228D5C-17BF-4AF4-AE0F-1882A151E0CB\/Podcasts.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/D1DFAD35-B0D2-4B55-8A42-4A8336F4298B\/Podcasts.app",
     "HasSettingsBundle" : true,
     "Entitlements" : {
       "fairplay-client" : "1933904193",
+      "com.apple.avfoundation.allow-system-wide-context" : true,
       "com.apple.avfoundation.allows-access-to-device-list" : true,
       "application-identifier" : "243LU875E5.com.apple.podcasts",
       "dynamic-codesigning" : true,
@@ -3325,6 +3364,9 @@
       "com.apple.private.mobileinstall.xpc-services-enabled" : true,
       "com.apple.security.exception.files.absolute-path.read-only" : [
         "\/private\/var\/mobile\/Library\/Preferences\/com.apple.restrictionspassword.plist"
+      ],
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
       ],
       "com.apple.private.mobileinstall.upgrade-enabled" : true,
       "com.apple.CoreTelephony.DataUsageInfo.allow" : true,
@@ -3343,24 +3385,26 @@
         "com.apple.coremedia.endpointremotecontrolsession.xpc",
         "com.apple.familycircle.agent",
         "com.apple.routined.registration",
-        "com.apple.adid"
+        "com.apple.adid",
+        "com.apple.ibooks.BLService",
+        "com.apple.sharingd.nsxpc"
       ],
       "com.apple.private.security.container-required" : true,
       "com.apple.Contacts.database-allow" : true,
       "keychain-access-groups" : [
         "243LU875E5.com.apple.podcasts"
       ],
-      "com.apple.security.exception.files.home-relative-path.read-write" : [
-        "\/Library\/DeviceRegistry\/",
-        "\/Library\/Preferences\/com.apple.mediaremote.plist"
-      ],
+      "com.apple.managedconfiguration.profiled-access" : true,
       "com.apple.private.coreservices.alwaysEligibleEvenWhenInBackground" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServiceMediaLibrary",
         "kTCCServiceCamera",
         "kTCCServiceAddressBook"
       ],
-      "com.apple.managedconfiguration.profiled-access" : true,
+      "com.apple.security.exception.files.home-relative-path.read-write" : [
+        "\/Library\/DeviceRegistry\/",
+        "\/Library\/Preferences\/com.apple.mediaremote.plist"
+      ],
       "com.apple.mobile.deleted.AllowFreeSpace" : true,
       "com.apple.developer.pass-type-identifiers" : [
         "*.pass.com.apple.itunes.storecredit"
@@ -3373,8 +3417,9 @@
       "com.apple.security.exception.shared-preference.read-write" : [
         "com.apple.NanoMusicSync"
       ],
-      "com.apple.springboard.wallpaperAnimationSuspension" : true,
       "com.apple.telephony.cupolicy-rw-access" : true,
+      "com.apple.private.coreservices.canmaplsdatabase" : true,
+      "com.apple.springboard.wallpaperAnimationSuspension" : true,
       "com.apple.developer.playable-content" : true,
       "com.apple.CoreRoutine.Application" : true
     },
@@ -3382,10 +3427,10 @@
       1,
       2
     ],
-    "CFBundleShortVersionString" : "3.4"
+    "CFBundleShortVersionString" : "3.5"
   },
   "com.apple.compass" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/E408F26C-9627-43A9-A0EF-632BD67BF093",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/242DFF67-E6BB-4394-BB44-1948C429F3AD",
     "CFBundleIdentifier" : "com.apple.compass",
     "CFBundleShortVersionString" : "1.0.0",
     "ApplicationType" : "System",
@@ -3395,11 +3440,11 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Compass",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/15D05C7A-179A-4BCE-9311-B7D251ED49B7\/Compass.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/CF54B63B-6F1B-4EC3-AF72-1EDD26AF92D4\/Compass.app",
     "Entitlements" : {
       "com.apple.private.security.system-application" : true,
       "application-identifier" : "com.apple.compass",
@@ -3418,7 +3463,7 @@
     "CFBundleExecutable" : "FieldTest",
     "IsUpgradeable" : false,
     "CFBundleDisplayName" : "FieldTest",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3449,7 +3494,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "HealthPrivacyService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3480,7 +3525,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "AskPermissionUI",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3515,7 +3560,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "App Store",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3617,7 +3662,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Watch",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3644,7 +3689,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/25E4764C-0785-43B1-9B10-F93646BDC6A1\/Bridge.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/695ABFA4-8988-4FAC-AFDA-4855E058C549\/Bridge.app",
     "Entitlements" : {
       "com.apple.payment.all-access" : true,
       "application-identifier" : "com.apple.Bridge",
@@ -3807,6 +3852,44 @@
     ],
     "CFBundleName" : "Watch"
   },
+  "com.apple.Magnifier" : {
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/776038AA-DE38-49A1-A7B5-689C7C9BD8A1",
+    "CFBundleIdentifier" : "com.apple.Magnifier",
+    "CFBundleShortVersionString" : "1.0",
+    "ApplicationType" : "System",
+    "CFBundleExecutable" : "Magnifier",
+    "IsUpgradeable" : false,
+    "UISupportedInterfaceOrientations" : [
+      "UIInterfaceOrientationPortrait"
+    ],
+    "CFBundleDisplayName" : "Magnifier",
+    "MinimumOSVersion" : "11.3",
+    "CFBundleSupportedPlatforms" : [
+      "iPhoneOS"
+    ],
+    "Path" : "\/Applications\/Magnifier.app",
+    "Entitlements" : {
+      "com.apple.springboard.activateRemoteAlert" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.springboard.appbackgroundstyle" : true,
+      "com.apple.private.security.container-required" : true,
+      "com.apple.springboard.hardware-button-service.event-consumption" : true,
+      "com.apple.accessibility.MagnifierViewService" : true,
+      "com.apple.avfoundation.allow-still-image-capture-shutter-sound-manipulation" : true,
+      "com.apple.private.tcc.allow" : [
+        "kTCCServiceCamera",
+        "kTCCServicePhotos",
+        "kTCCServiceAddressBook"
+      ],
+      "com.apple.QuartzCore.secure-mode" : true
+    },
+    "UIStatusBarHidden" : true,
+    "UIDeviceFamily" : [
+      1,
+      2
+    ],
+    "CFBundleName" : "Magnifier"
+  },
   "com.apple.mobilesafari" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/D54E4393-6AB9-462B-8AE1-F94173D16650",
     "CFBundleIdentifier" : "com.apple.mobilesafari",
@@ -3820,7 +3903,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Safari",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -3867,8 +3950,8 @@
       "com.apple.private.canGetAppLinkInfo" : true,
       "com.apple.itunesstored.downloads" : true,
       "com.apple.locationd.effective_bundle" : true,
+      "com.apple.sharing.Services" : true,
       "com.apple.private.safari.can-use-social-helper" : true,
-      "com.apple.managedconfiguration.profiled.profile-list-read" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServiceMediaLibrary",
         "kTCCServiceCamera",
@@ -3895,10 +3978,13 @@
       "com.apple.coreaudio.allow-amr-decode" : true,
       "com.apple.locationd.authorizeapplications" : true,
       "com.apple.private.tcc.allow.overridable" : [
-        "kTCCServicePhotos",
         "kTCCServiceCalendar"
       ],
       "com.apple.itunesstored.private" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
+      "com.apple.developer.WebKit.ServiceWorkers" : true,
       "com.apple.developer.icloud-container-identifiers" : [
         "iCloud.com.apple.mobilesafari"
       ],
@@ -3916,7 +4002,10 @@
         "com.apple.internal.safaricyclerd",
         "com.apple.watchlistd.xpc",
         "com.apple.Safari.ImageDecoder",
-        "com.apple.BarcodeSupport.ParsingService"
+        "com.apple.BarcodeSupport.ParsingService",
+        "com.apple.managedconfiguration.profiled",
+        "com.apple.Safari.History",
+        "com.apple.SharingServices"
       ],
       "com.apple.private.CoreAuthentication.SPI" : true,
       "com.apple.private.security.container-required" : true,
@@ -3930,11 +4019,16 @@
       "com.apple.springboard.statusbarstyleoverrides.coordinator" : [
         "UIStatusBarStyleOverrideWebRTCCapture"
       ],
+      "com.apple.springboard.addWebClipToHomeScreen" : true,
       "com.apple.private.launchservices.suppresscustomschemeprompt" : "*",
       "com.apple.private.accounts.allaccounts" : true,
       "com.apple.security.system-container" : true,
       "com.apple.itunesstored.lookup" : true,
       "com.apple.developer.networking.HotspotConfiguration" : true,
+      "com.apple.sharing.DeviceDiscovery" : true,
+      "com.apple.managedconfiguration.profiled.configurationprofiles" : [
+        "UIInstallation"
+      ],
       "keychain-access-groups" : [
         "com.apple.cfnetwork",
         "com.apple.identities",
@@ -3955,12 +4049,12 @@
       "com.apple.private.can-load-any-content-blocker" : true,
       "com.apple.private.coreservices.canmaplsdatabase" : true,
       "com.apple.private.webinspector.allow-remote-inspection" : true,
+      "com.apple.private.imcore.imagent" : true,
       "com.apple.private.Safari.History" : true,
       "com.apple.system.get-wallpaper" : true,
       "com.apple.CommCenter.fine-grained" : [
         "spi"
       ],
-      "com.apple.managedconfiguration.profiled-access" : true,
       "com.apple.accounts.appleaccount.fullaccess" : true,
       "com.apple.private.assets.accessible-asset-types" : [
         "com.apple.MobileAsset.SafariCloudHistoryConfiguration",
@@ -3969,12 +4063,13 @@
       "com.apple.private.canModifyAppLinkPermissions" : true,
       "com.apple.itunesstored.software-library" : true,
       "com.apple.TextInput.rdt.me" : true,
-      "com.apple.private.cloudkit.systemService" : true,
       "com.apple.coreduetd.allow" : true,
+      "com.apple.private.cloudkit.systemService" : true,
       "com.apple.security.exception.files.absolute-path.read-write" : [
         "\/private\/var\/mobile\/Library\/com.apple.WatchListKit\/"
       ],
       "com.apple.Contacts.database-allow" : true,
+      "com.apple.bluetooth.internal" : true,
       "com.apple.symptom_diagnostics.report" : true,
       "com.apple.developer.default-data-protection" : "NSFileProtectionCompleteUntilFirstUserAuthentication",
       "fairplay-client" : 965772570
@@ -3984,44 +4079,6 @@
       2
     ],
     "CFBundleName" : "Safari"
-  },
-  "com.apple.Magnifier" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/776038AA-DE38-49A1-A7B5-689C7C9BD8A1",
-    "CFBundleIdentifier" : "com.apple.Magnifier",
-    "CFBundleShortVersionString" : "1.0",
-    "ApplicationType" : "System",
-    "CFBundleExecutable" : "Magnifier",
-    "IsUpgradeable" : false,
-    "UISupportedInterfaceOrientations" : [
-      "UIInterfaceOrientationPortrait"
-    ],
-    "CFBundleDisplayName" : "Magnifier",
-    "MinimumOSVersion" : "11.2",
-    "CFBundleSupportedPlatforms" : [
-      "iPhoneOS"
-    ],
-    "Path" : "\/Applications\/Magnifier.app",
-    "Entitlements" : {
-      "com.apple.springboard.activateRemoteAlert" : true,
-      "com.apple.UIKit.vends-view-services" : true,
-      "com.apple.springboard.appbackgroundstyle" : true,
-      "com.apple.private.security.container-required" : true,
-      "com.apple.springboard.hardware-button-service.event-consumption" : true,
-      "com.apple.accessibility.MagnifierViewService" : true,
-      "com.apple.avfoundation.allow-still-image-capture-shutter-sound-manipulation" : true,
-      "com.apple.private.tcc.allow" : [
-        "kTCCServiceCamera",
-        "kTCCServicePhotos",
-        "kTCCServiceAddressBook"
-      ],
-      "com.apple.QuartzCore.secure-mode" : true
-    },
-    "UIStatusBarHidden" : true,
-    "UIDeviceFamily" : [
-      1,
-      2
-    ],
-    "CFBundleName" : "Magnifier"
   },
   "com.apple.CTCarrierSpaceAuth" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/9D7116A0-7A70-41DC-97D4-65C9D6AD2D98",
@@ -4036,7 +4093,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "CTCarrierSpaceAuth",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4062,7 +4119,7 @@
     "CFBundleName" : "CTCarrierSpaceAuth"
   },
   "com.apple.weather" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/1BEEBEF5-7EE8-4A14-BF02-E885CEF3DC59",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/0F8A1E84-E296-49E5-9E23-766B52301BAE",
     "CFBundleIdentifier" : "com.apple.weather",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -4074,11 +4131,11 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Weather",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/3B5405EE-F080-431D-A1A3-4853ACE2B9DA\/Weather.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/4327B666-11BC-400E-B7E6-CD2E9D095574\/Weather.app",
     "Entitlements" : {
       "com.apple.private.security.container-required" : true,
       "com.apple.security.exception.files.home-relative-path.read-write" : [
@@ -4110,7 +4167,7 @@
     "CFBundleName" : "Weather"
   },
   "com.apple.facetime" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/1212163B-6363-4314-BBAA-5C11087BC9F6",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/9B32952A-FCAF-49C7-8811-2A7D2DFF69A5",
     "CFBundleIdentifier" : "com.apple.facetime",
     "CFBundleShortVersionString" : "36",
     "ApplicationType" : "System",
@@ -4121,11 +4178,11 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "FaceTime",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/115A50B3-80FC-463E-99C2-E27A519D18B4\/FaceTime.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/B2163C75-673D-408D-A81E-1928AFB8D67E\/FaceTime.app",
     "Entitlements" : {
       "SBStarkCapable" : false,
       "com.apple.private.game-center.bypass-authentication" : true,
@@ -4274,7 +4331,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Voice Memos",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4290,33 +4347,39 @@
       }
     ],
     "CFBundleIconFile" : "AppIcon",
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/CB5FE23F-8618-4FD4-81B1-AAEFD27A5EA5\/VoiceMemos.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/CD361A53-5D00-4266-98DC-6967E76B9556\/VoiceMemos.app",
     "Entitlements" : {
-      "com.apple.UIKit.vends-view-services" : true,
-      "com.apple.private.security.container-required" : true,
+      "com.apple.coreaudio.allow-amr-decode" : true,
+      "com.apple.frontboard.launchapplications" : true,
+      "com.apple.springboard.opensensitiveurl" : true,
       "com.apple.telephonyutilities.callservicesd" : [
         "access-calls"
       ],
-      "com.apple.security.exception.files.absolute-path.read-write" : [
-        "\/private\/var\/mobile\/Media\/Recordings\/"
-      ],
       "com.apple.springboard.secureAppAssertion" : true,
-      "com.apple.security.exception.files.home-relative-path.read-write" : [
-        "Library\/Preferences\/"
-      ],
-      "com.apple.coreaudio.allow-amr-decode" : true,
-      "com.apple.springboard.activateawayviewplugins" : true,
+      "com.apple.private.security.container-required" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServiceMicrophone"
       ],
+      "platform-application" : true,
+      "com.apple.springboard.activateawayviewplugins" : true,
+      "application-identifier" : "com.apple.VoiceMemos",
+      "com.apple.avfoundation.allows-set-output-device" : true,
+      "com.apple.springboard.statusbarstyleoverrides" : true,
+      "com.apple.avfoundation.allow-system-wide-context" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.security.exception.files.absolute-path.read-write" : [
+        "\/private\/var\/mobile\/Media\/Recordings\/"
+      ],
+      "com.apple.private.mobileinstall.xpc-services-enabled" : true,
+      "com.apple.security.exception.files.home-relative-path.read-write" : [
+        "Library\/Preferences\/"
+      ],
+      "com.apple.security.exception.shared-preference.read-only" : [
+        "com.apple.MobileSMS.plist"
+      ],
+      "com.apple.avfoundation.allows-access-to-device-list" : true,
       "com.apple.QuartzCore.secure-mode" : true,
       "com.apple.private.security.system-application" : true,
-      "com.apple.frontboard.launchapplications" : true,
-      "platform-application" : true,
-      "com.apple.private.mobileinstall.xpc-services-enabled" : true,
-      "application-identifier" : "com.apple.VoiceMemos",
-      "com.apple.springboard.statusbarstyleoverrides" : true,
-      "com.apple.springboard.opensensitiveurl" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.telephonyutilities.callservicesdaemon.callstatecontroller",
         "com.apple.voicememod.xpc",
@@ -4327,16 +4390,13 @@
         "com.apple.mobilenotes.SharingExtension.apple-extension-service",
         "com.apple.mobilenotes.SharingExtension.viewservice",
         "com.apple.uifoundation-bundle-helper"
-      ],
-      "com.apple.security.exception.shared-preference.read-only" : [
-        "com.apple.MobileSMS.plist"
       ]
     },
     "UIStatusBarHidden" : false,
     "UIDeviceFamily" : [
       1
     ],
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/5A4211D9-684B-4802-9818-1224DD3287CA"
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/CB4592E1-BF15-496C-AB3E-E35E99FD547D"
   },
   "com.apple.mobileme.fmip1" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/5CCEDA03-EB6F-4C22-9628-F40E2164D9F8",
@@ -4352,7 +4412,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Find iPhone",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4421,7 +4481,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "PhotosViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4441,7 +4501,7 @@
   "com.apple.ScreenSharingViewService" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/BED68BC7-3706-4F96-8C13-5C5A945723DC",
     "CFBundleIdentifier" : "com.apple.ScreenSharingViewService",
-    "CFBundleShortVersionString" : "1.0",
+    "CFBundleShortVersionString" : "1.1",
     "ApplicationType" : "System",
     "CFBundleExecutable" : "ScreenSharingViewService",
     "IsUpgradeable" : false,
@@ -4451,7 +4511,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "ScreenSharingViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4480,7 +4540,7 @@
     "CFBundleName" : "ScreenSharingViewService"
   },
   "com.apple.SharingViewService" : {
-    "CFBundleShortVersionString" : "972.40",
+    "CFBundleShortVersionString" : "1019.47",
     "CFBundleIdentifier" : "com.apple.SharingViewService",
     "ApplicationType" : "System",
     "CFBundleExecutable" : "SharingViewService",
@@ -4492,7 +4552,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "SharingViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4508,15 +4568,17 @@
       "platform-application" : true,
       "com.apple.accounts.idms.fullaccess" : true,
       "com.apple.sharing.Services" : true,
-      "com.apple.sharing.DeviceDiscovery" : true,
       "com.apple.PairingManager.Read" : true,
+      "com.apple.sharing.DeviceDiscovery" : true,
       "com.apple.springboard.openurlinbackground" : true,
       "com.apple.appstored.install-apps" : true,
+      "com.apple.private.networkextension.configuration" : true,
       "com.apple.springboard.CFUserNotification" : true,
       "com.apple.assistant.settings" : true,
       "com.apple.springboard.opensensitiveurl" : true,
       "com.apple.wirelessproxd-disable-scans" : true,
       "com.apple.PairingManager.HomeKit" : true,
+      "absinthe-client" : "355968556",
       "com.apple.private.mobileinstall.allowedSPI" : [
         "InstallForLaunchServices"
       ],
@@ -4532,6 +4594,7 @@
         "com.apple.analyticsd",
         "com.apple.appstored.xpc.request",
         "com.apple.awdd",
+        "com.apple.CompanionLink",
         "com.apple.coreservices.appleid.authentication",
         "com.apple.icloud.fmfd",
         "com.apple.lsd.installation",
@@ -4554,9 +4617,11 @@
         "apple",
         "com.apple.coreservices.appleidauthentication",
         "com.apple.coreservices.appleidauthentication.keychainaccessgroup",
-        "com.apple.Sharing"
+        "com.apple.Sharing",
+        "com.apple.cfnetwork",
+        "com.apple.mobilesafari"
       ],
-      "com.apple.PairingManager.Write" : true,
+      "com.apple.private.homekit" : true,
       "com.apple.private.tcc.allow" : [
         "kTCCServiceAddressBook",
         "kTCCServiceCamera",
@@ -4565,12 +4630,14 @@
         "kTCCServiceWillow"
       ],
       "com.apple.appstored.install-system-apps" : true,
+      "com.apple.PairingManager.Write" : true,
       "com.apple.homekit.private-spi-access" : true,
       "com.apple.QuartzCore.secure-mode" : true,
       "com.apple.icloud.fmfd.access" : true,
       "com.apple.developer.homekit.background-mode" : true,
       "com.apple.purplebuddy.budd.access" : true,
       "com.apple.sharing.Client" : true,
+      "com.apple.CompanionLink" : true,
       "com.apple.sharing.Session" : true,
       "com.apple.developer.homekit" : true
     },
@@ -4594,7 +4661,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "CheckerBoard",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4637,7 +4704,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Settings",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -4764,7 +4831,8 @@
         "com.apple.VideoSubscriberAccount",
         "com.apple.Passbook.PeerPayment",
         "com.apple.coreservices.appleidauthentication",
-        "com.apple.coreservices.appleidauthentication.keychainaccessgroup"
+        "com.apple.coreservices.appleidauthentication.keychainaccessgroup",
+        "com.apple.sharing.appleidauthentication"
       ],
       "com.apple.CoreRoutine.preferences" : true,
       "com.apple.private.webbookmarks.settings" : true,
@@ -4868,6 +4936,7 @@
       "com.apple.PairingManager.Write" : true,
       "com.apple.private.game-center.bypass-authentication" : true,
       "com.apple.private.system-keychain" : true,
+      "com.apple.private.ClassKit.dashboard" : true,
       "com.apple.sharing.Client" : true,
       "com.apple.backboardd.launchapplications" : true,
       "com.apple.geoservices.mapLayerDataSizes" : true,
@@ -4937,15 +5006,15 @@
       "com.apple.private.imcore.imremoteurlconnection" : true,
       "com.apple.coreduetd.allow" : true,
       "com.apple.seld.tsmmanager" : true,
-      "com.apple.rootless.storage.facekit" : true,
       "com.apple.backboard.displaybrightness" : true,
       "com.apple.private.subscriptionservice.web-sources.read-write" : true,
+      "com.apple.private.ClassKit.internal" : true,
+      "com.apple.aosnotification.aosnotifyd-access" : true,
       "com.apple.private.mobileinstall.allowedSPI" : [
         "InstallForLaunchServices",
         "UninstallForLaunchServices",
         "CopyDiskUsageForLaunchServices"
       ],
-      "com.apple.aosnotification.aosnotifyd-access" : true,
       "com.apple.coreduetd.batterysaver.allow" : true,
       "com.apple.NPKCompanionAgent.client" : true,
       "com.apple.private.Photos.CPLDiagnose" : true,
@@ -4993,6 +5062,7 @@
       "com.apple.authkit.client.private" : true,
       "com.apple.private.hid.client.event-filter" : true,
       "com.apple.watchlist.private" : true,
+      "com.apple.developer.ClassKit-environment" : "production",
       "com.apple.authkit.client.internal" : true,
       "com.apple.private.carkit" : true,
       "com.apple.CallKit.call-directory.extension-host" : true,
@@ -5077,7 +5147,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Phone",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5217,7 +5287,7 @@
     "CFBundleName" : "Phone"
   },
   "com.apple.reminders" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/D348550E-903C-43B6-9C12-35B69394D91D",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/C82068F6-E2AD-4A1C-BA6D-25256D441F93",
     "CFBundleIdentifier" : "com.apple.reminders",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -5229,7 +5299,7 @@
       "UIInterfaceOrientationLandscapeLeft"
     ],
     "CFBundleDisplayName" : "Reminders",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5241,7 +5311,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/03AE4DCF-1875-4EEE-B1EE-F772F50168CD\/Reminders.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/F50560DF-CD90-4CFD-9A75-4F7502D15372\/Reminders.app",
     "Entitlements" : {
       "com.apple.private.tcc.allow.overridable" : [
         "kTCCServiceReminders",
@@ -5304,7 +5374,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Clock",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5340,7 +5410,7 @@
     "CFBundleName" : "Clock"
   },
   "com.apple.MobileAddressBook" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/E40F9ECD-CE5F-408B-8866-4BC0954B6D22",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/487999CF-D18B-4ADC-9937-30F7DC80F6D8",
     "CFBundleIdentifier" : "com.apple.MobileAddressBook",
     "CFBundleShortVersionString" : "1.0",
     "ApplicationType" : "System",
@@ -5352,7 +5422,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Contacts",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5365,7 +5435,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/807EAAF1-0E2B-4CED-B7DF-80350E324E7F\/Contacts.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/26C28FD7-C761-4398-BC92-B90AC10BECD1\/Contacts.app",
     "Entitlements" : {
       "com.apple.private.tcc.allow.overridable" : [
         "kTCCServicePhotos"
@@ -5448,7 +5518,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "User Authentication",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5496,7 +5566,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "DDActionsService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5576,7 +5646,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Wallet",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5609,6 +5679,9 @@
         "\/private\/var\/containers\/Shared\/SystemGroup\/systemgroup.com.apple.lsd.iconscache\/Library\/Caches\/com.apple.IconsCache\/"
       ],
       "com.apple.itunesstored.private" : true,
+      "com.apple.telephonyutilities.callservicesd" : [
+        "access-call-providers"
+      ],
       "com.apple.private.ids.messaging.urgent-priority" : [
         "com.apple.private.alloy.passbook.provisioning"
       ],
@@ -5728,12 +5801,14 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "DataActivation",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/DataActivation.app",
     "Entitlements" : {
+      "com.apple.private.CoreAuthentication.BackgroundUI" : true,
+      "com.apple.networkd.allow_bootstrap_cellular_service_request" : true,
       "keychain-access-groups" : [
         "com.apple.cfnetwork",
         "com.apple.identities",
@@ -5741,26 +5816,26 @@
         "com.apple.certificates",
         "com.apple.safari.credit-cards"
       ],
-      "com.apple.private.CoreAuthentication.BackgroundUI" : true,
-      "seatbelt-profiles" : [
-        "DataActivation"
-      ],
       "com.apple.springboard.remote-alert" : true,
-      "com.apple.networkd.allow_bootstrap_cellular_service_request" : true,
+      "com.apple.springboard.activateRemoteAlert" : true,
       "com.apple.CommCenter.fine-grained" : [
         "spi",
         "cellular-plan"
       ],
       "com.apple.private.tcc.allow" : [
+        "kTCCServiceFaceID",
         "kTCCServiceCamera",
         "kTCCServicePhotos",
         "kTCCServiceAddressBook"
       ],
       "com.apple.coretelephony.CTDataPlanDeviceInfo.allow" : true,
-      "com.apple.springboard.activateRemoteAlert" : true,
+      "com.apple.private.CoreAuthentication.SPI" : true,
       "com.apple.TextInput.rdt.me" : true,
       "com.apple.private.webinspector.allow-carrier-remote-inspection" : true,
       "com.apple.private.in-app-payments" : true,
+      "seatbelt-profiles" : [
+        "DataActivation"
+      ],
       "com.apple.managedconfiguration.profiled-access" : true,
       "platform-application" : true,
       "com.apple.UIKit.vends-view-services" : true
@@ -5778,7 +5853,7 @@
     "CFBundleExecutable" : "Family",
     "IsUpgradeable" : false,
     "CFBundleDisplayName" : "Family",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5792,15 +5867,20 @@
     ],
     "Path" : "\/Applications\/Family.app",
     "Entitlements" : {
-      "com.apple.private.accounts.allaccounts" : true,
       "com.apple.springboard.opensensitiveurl" : true,
-      "com.apple.springboard.openurlinbackground" : true,
+      "com.apple.itunesstored.private" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.authkit.client.private" : true,
       "com.apple.private.familycircle" : true,
+      "com.apple.springboard.openurlinbackground" : true,
+      "com.apple.private.accounts.allaccounts" : true,
+      "com.apple.private.MobileGestalt.AllowedProtectedKeys" : [
+        "UniqueDeviceID"
+      ],
       "com.apple.springboard.activateRemoteAlert" : true
     },
     "UIDeviceFamily" : [
-      1,
-      2
+      1
     ],
     "CFBundleName" : "Family"
   },
@@ -5817,7 +5897,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "TrustMe",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5847,7 +5927,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "InCallService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -5922,7 +6002,8 @@
       "com.apple.private.contacts" : true,
       "com.apple.developer.healthkit" : true,
       "com.apple.security.exception.shared-preference.read-only" : [
-        "com.apple.TelephonyUtilities"
+        "com.apple.TelephonyUtilities",
+        "com.apple.purplebuddy"
       ],
       "com.apple.private.corerecents" : true,
       "com.apple.sos.contacts" : true,
@@ -6035,7 +6116,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "Feedback",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6080,7 +6161,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "WebApp1",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6113,39 +6194,42 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "WebSheet",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/WebSheet.app",
     "Entitlements" : {
-      "com.apple.springboard.opensensitiveurl" : [
-        "prefs:root=WIFI",
-        "com-apple-mobilesafari-tab"
-      ],
-      "com.apple.private.tcc.allow" : [
-        "kTCCServiceAddressBook"
-      ],
-      "seatbelt-profiles" : [
-        "WebSheet"
-      ],
-      "com.apple.TextInput.rdt.me" : true,
-      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.private.CoreAuthentication.BackgroundUI" : true,
       "keychain-access-groups" : [
         "com.apple.cfnetwork",
         "com.apple.mobilesafari",
         "com.apple.certificates",
         "com.apple.safari.credit-cards"
       ],
+      "seatbelt-profiles" : [
+        "WebSheet"
+      ],
+      "com.apple.private.necp.match" : true,
+      "com.apple.private.CoreAuthentication.SPI" : true,
+      "com.apple.private.tcc.allow" : [
+        "kTCCServiceAddressBook",
+        "kTCCServiceFaceID"
+      ],
+      "com.apple.TextInput.rdt.me" : true,
       "com.apple.springboard.openurlinbackground" : true,
+      "com.apple.managedconfiguration.profiled.configurationprofiles" : [
+        "UIInstallation"
+      ],
+      "com.apple.UIKit.vends-view-services" : true,
       "com.apple.captive.private" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.mobilesafari-settings"
       ],
-      "com.apple.managedconfiguration.profiled.configurationprofiles" : [
-        "UIInstallation"
-      ],
-      "com.apple.private.necp.match" : true
+      "com.apple.springboard.opensensitiveurl" : [
+        "prefs:root=WIFI",
+        "com-apple-mobilesafari-tab"
+      ]
     },
     "UIDeviceFamily" : [
       1,
@@ -6154,7 +6238,7 @@
     "CFBundleName" : "WebSheet"
   },
   "com.apple.mobilemail" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/DC30651C-7B37-482D-B959-281D405116A0",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/2BBAF1D2-C6EC-43B7-A2A6-7CD3F69ED2E4",
     "CFBundleIdentifier" : "com.apple.mobilemail",
     "CFBundleShortVersionString" : "1.0.0",
     "ApplicationType" : "System",
@@ -6167,7 +6251,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Mail",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6191,7 +6275,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/1726E37A-8643-4CF5-BC9A-D2AED9101E1C\/MobileMail.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/685160B7-EDE2-4F69-A063-5B298C9D51A5\/MobileMail.app",
     "Entitlements" : {
       "platform-application" : true,
       "com.apple.developer.icloud-container-environment" : "Production",
@@ -6359,8 +6443,49 @@
     ],
     "CFBundleName" : "Mail"
   },
+  "com.apple.AdPlatformsDiagnostics" : {
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/F77C4642-3CE9-48DC-8F18-66852B9FA82B",
+    "CFBundleIdentifier" : "com.apple.AdPlatformsDiagnostics",
+    "CFBundleShortVersionString" : "1.0",
+    "ApplicationType" : "System",
+    "CFBundleExecutable" : "AdPlatformsDiagnostics",
+    "IsUpgradeable" : false,
+    "UISupportedInterfaceOrientations" : [
+      "UIInterfaceOrientationPortrait",
+      "UIInterfaceOrientationLandscapeLeft",
+      "UIInterfaceOrientationLandscapeRight"
+    ],
+    "CFBundleDisplayName" : "Ad Platforms Diagnostics",
+    "MinimumOSVersion" : "11.3",
+    "CFBundleSupportedPlatforms" : [
+      "iPhoneOS"
+    ],
+    "CFBundleURLTypes" : [
+      {
+        "CFBundleURLName" : "com.apple.AdPlatformsDiagnostics",
+        "CFBundleURLSchemes" : [
+          "adplatforms"
+        ]
+      }
+    ],
+    "Path" : "\/Applications\/AdPlatformsDiagnostics.app",
+    "Entitlements" : {
+      "com.apple.itunesstored.private" : true,
+      "keychain-access-groups" : [
+        "apple"
+      ],
+      "com.apple.accounts.appleaccount.fullaccess" : true,
+      "com.apple.managedconfiguration.profiled-access" : true
+    },
+    "UIStatusBarHidden" : true,
+    "UIDeviceFamily" : [
+      1,
+      2
+    ],
+    "CFBundleName" : "Ad Platforms Diagnostics"
+  },
   "com.apple.stocks" : {
-    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/0E5DA24D-A665-484E-B1B9-E89F4A672281",
+    "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/7C3B0BED-BE2A-4774-AC02-2435D9DDCE8C",
     "CFBundleIdentifier" : "com.apple.stocks",
     "CFBundleShortVersionString" : "1",
     "ApplicationType" : "System",
@@ -6372,11 +6497,11 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Stocks",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/E5B3FA49-ADF0-4243-BE35-4187F83FF04C\/Stocks.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/273EBD70-A312-41CF-8E2E-36E037D3B65C\/Stocks.app",
     "Entitlements" : {
       "com.apple.private.security.container-required" : true,
       "com.apple.coretelephony.CTCarrierSettings.allow" : true,
@@ -6420,7 +6545,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Server Drive",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6449,7 +6574,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "Home",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6460,7 +6585,7 @@
         ]
       }
     ],
-    "Path" : "\/private\/var\/containers\/Bundle\/Application\/D60A14B6-40AD-48BA-AC3E-CBF30F47DC18\/Home.app",
+    "Path" : "\/private\/var\/containers\/Bundle\/Application\/BE8D4B3A-7185-4721-B595-D4D6D44B4F55\/Home.app",
     "Entitlements" : {
       "com.apple.CoreRoutine.Application" : true,
       "com.apple.private.corerecents" : true,
@@ -6491,6 +6616,7 @@
       "com.apple.authkit.client.private" : true,
       "com.apple.private.security.system-application" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
+        "com.apple.CompanionLink",
         "com.apple.routined.registration"
       ],
       "com.apple.Contacts.database-allow" : true,
@@ -6508,6 +6634,7 @@
       "com.apple.videoconference.allow-conferencing" : true,
       "com.apple.icloud.fmfd.access" : true,
       "com.apple.private.suggestions.contacts" : true,
+      "com.apple.CompanionLink" : true,
       "com.apple.private.coreservices.canmaplsdatabase" : true,
       "com.apple.developer.homekit" : true,
       "com.apple.private.ids.messaging" : [
@@ -6523,27 +6650,32 @@
   "com.apple.gamecenter.GameCenterUIService" : {
     "Container" : "\/private\/var\/mobile\/Containers\/Data\/Application\/24CC46BF-CD6B-4CB9-84BA-CC3EB20C30A6",
     "CFBundleIdentifier" : "com.apple.gamecenter.GameCenterUIService",
-    "CFBundleShortVersionString" : "559.3",
+    "CFBundleShortVersionString" : "563.15",
     "ApplicationType" : "System",
     "CFBundleExecutable" : "GameCenterUIService",
     "IsUpgradeable" : false,
     "CFBundleDisplayName" : "Game Center UI Service",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
     "Path" : "\/Applications\/GameCenterUIService.app",
     "Entitlements" : {
-      "com.apple.authkit.client.private" : true,
+      "DataProtectionClass" : "NSFileProtectionComplete",
+      "com.apple.private.security.container-required" : true,
+      "com.apple.accounts.facebook.defaultaccess" : true,
       "keychain-access-groups" : [
         "apple"
       ],
-      "com.apple.mobile.deleted.AllowFreeSpace" : true,
-      "com.apple.private.security.container-required" : true,
-      "com.apple.private.tcc.allow" : [
-        "kTCCServiceAddressBook"
-      ],
       "com.apple.private.contactsui" : true,
+      "com.apple.developer.game-center" : [
+        "Account",
+        "Scores",
+        "Achievements",
+        "Challenges",
+        "Multiplayer",
+        "TurnBasedMultiplayer"
+      ],
       "com.apple.private.game-center" : [
         "Account",
         "Authenticate",
@@ -6557,32 +6689,26 @@
         "TurnBasedMultiplayer",
         "GameStats"
       ],
-      "com.apple.authkit.client.internal" : true,
-      "com.apple.UIKit.vends-view-services" : true,
-      "com.apple.accounts.facebook.defaultaccess" : true,
-      "com.apple.Contacts.database-allow" : true,
-      "DataProtectionClass" : "NSFileProtectionComplete",
-      "com.apple.developer.game-center" : [
-        "Account",
-        "Scores",
-        "Achievements",
-        "Challenges",
-        "Multiplayer",
-        "TurnBasedMultiplayer"
+      "com.apple.mobile.deleted.AllowFreeSpace" : true,
+      "com.apple.private.tcc.allow" : [
+        "kTCCServiceAddressBook"
       ],
       "com.apple.private.tcc.allow.overridable" : [
         "kTCCServiceAddressBook"
       ],
+      "com.apple.Contacts.database-allow" : true,
       "com.apple.springboard.openurlinbackground" : true,
-      "com.apple.itunesstored.private" : true,
-      "com.apple.private.social.facebook.like" : true,
       "com.apple.springboard.launchapplications" : true,
+      "com.apple.UIKit.vends-view-services" : true,
+      "com.apple.itunesstored.private" : true,
       "com.apple.security.exception.mach-lookup.global-name" : [
         "com.apple.ak.auth.xpc",
         "com.apple.cdp.daemon",
         "com.apple.mobile.keybagd.xpc"
       ],
-      "com.apple.springboard.opensensitiveurl" : true
+      "com.apple.springboard.opensensitiveurl" : true,
+      "com.apple.authkit.client.internal" : true,
+      "com.apple.authkit.client.private" : true
     },
     "UIDeviceFamily" : [
       1,
@@ -6604,7 +6730,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "VideoSubscriberAccountViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6665,7 +6791,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "PreBoard",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6707,7 +6833,7 @@
       "UIInterfaceOrientationLandscapeRight"
     ],
     "CFBundleDisplayName" : "Siri",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6834,7 +6960,7 @@
       "UIInterfaceOrientationPortrait"
     ],
     "CFBundleDisplayName" : "DemoApp",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
@@ -6869,7 +6995,7 @@
       "UIInterfaceOrientationPortraitUpsideDown"
     ],
     "CFBundleDisplayName" : "AXUIViewService",
-    "MinimumOSVersion" : "11.2",
+    "MinimumOSVersion" : "11.3",
     "CFBundleSupportedPlatforms" : [
       "iPhoneOS"
     ],
