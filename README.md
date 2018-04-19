@@ -18,7 +18,7 @@ will see the page of the `PhoneScanner` tool running.  Connect a
 device and click on the suitable button `Android` or `iOS`. (**Please
 connect one device at a time.**)
 
-![Phone Scanner UI](static_data/phone_scanner-ui.png "Phone Scanner UI")
+![Phone Scanner UI](static/phone_scanner-ui.png "Phone Scanner UI")
 
 
 
