@@ -3,18 +3,23 @@ Simple tool to check Android or iOS phones for IPS-spyware.
 
 
 ## Use the tool
-Get the application data from the [private repo](https://github.com/rchatterjee/phone_scanner).
+Get the application data from the [private repo](https://bitbucket.org/rchatterjee/appscraper/).
 If you dont't have access to it, then you should not get the data :-) (Send me an email).
+
 After [dependencies](#dependencies) are installed, with an Android or iOS device plugged in and
 unlocked, run the following command in the terminal
 
 ```bash
 $ ./run.sh
 ```
-Navigate to `http://localhost:5000`, on the Google Chrome browser, you will
-see the page of the `PhoneScanner` tool running.
-If any device is connected, it will show in the left list,
-click on the device id for scanning it. **Please connect one device at a time.**
+
+Navigate to `http://localhost:5000`, on the Google Chrome browser, you
+will see the page of the `PhoneScanner` tool running.  Connect a
+device and click on the suitable button `Android` or `iOS`. (**Please
+connect one device at a time.**)
+
+![Phone Scanner UI](static_data/phone_scanner-ui.png "Phone Scanner UI")
+
 
 
 #### Prepare the phone for scanning
@@ -22,6 +27,9 @@ click on the device id for scanning it. **Please connect one device at a time.**
 1. You will need to activate [`developer options`](https://developer.android.com/studio/debug/dev-options.html)
 in the phone. Follow the above link to activate the developer option.
 **TODO**: how to hide it back after the scan.
+`$ adb shell pm clear com.android.setting` cleans the data for  many (if not most) Android, but not all.
+Some might need manual cleaning of the settings data by going `Setting -> Apps -> "Settings" -> Data -> Clear data`.
+
 2. Connect the phone to the laptop using USB. If `PhoneScanner` is running, try
 refreshing the page, and see if the phone ask for "Do you trust this computer?" (or similar)
 message.

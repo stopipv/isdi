@@ -12,13 +12,16 @@ source_files = {
 spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
+DEBUG = True
+TEST = True 
 
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = "Anti-IPS: Stop intiimate partner surveillance"
-APP_FLAGS_FILE = 'static_data/app-flags.csv'
+APP_FLAGS_FILE = 'static_data/app-flags.csv'+ ("~test" if TEST else "")
 APP_INFO_FILE = 'static_data/app-info.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'+ ("~test" if TEST else "")
+SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
 
 THISDIR = os.path.dirname(os.path.abspath(__file__))
 ANDROID_HOME = os.getenv('ANDROID_HOME', './.platform-tools')
@@ -29,10 +32,8 @@ MOBILEDEVICE_PATH = os.path.join(THISDIR, "ios-deploy/build/Release/ios-deploy")
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
-DEBUG = True
 ERROR_LOG = []
 
-SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if DEBUG else "")
 
 
 def add_to_error(*args):
