@@ -9,7 +9,7 @@ from datetime import datetime
 import parse_dump
 import blacklist
 import re
-
+import shlex
 
 db = dataset.connect(config.SQL_DB_PATH)
 
@@ -163,7 +163,6 @@ class AndroidScan(AppScan):
         cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/package://g' | sort"
         s = self.catch_err(self.run_command(cmd, serial=serialno, flag=flag),
                            msg="App search failed", cmd=cmd)
-
         if not s:
             self.setup()
             return []
@@ -208,15 +207,15 @@ class AndroidScan(AppScan):
 
     def uninstall(self, appid, serialno):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
-        s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
+        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serialno),
+                                                appid=shlex.quote(appid)),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
 
 class IosScan(AppScan):
     """
-    NEED https://github.com/imkira/mobiledevice installed
-    (`brew install mobiledevice` or build from source).
+    Needs ios-deploy (compiled with it) or run `bash scripts/setup.sh`
     """
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
