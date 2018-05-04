@@ -114,4 +114,12 @@ def record_response(device):
 
 
 if __name__ == "__main__":
+    from imp import reload
+    import sys
+    if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
+        print("Running in test mode.")
+        config.set_test_mode(True)
+        print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
+                  .format(config.TEST, config.APP_FLAGS_FILE,
+                              config.SQL_DB_PATH))
     FLASK_APP.run(debug=config.DEBUG)
