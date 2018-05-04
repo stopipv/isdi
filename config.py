@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shlex
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 
@@ -17,11 +18,12 @@ TEST = False
 
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
-TITLE = "Anti-IPS: Stop intiimate partner surveillance"
+TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_FILE = 'static_data/app-info.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'+ ("~test" if TEST else "")
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + ("~test" if TEST else "")
 SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
+
 
 def set_test_mode(test):
     global TEST, APP_FLAGS_FILE, SQL_DB_PATH
@@ -37,15 +39,16 @@ def set_test_mode(test):
         if SQL_DB_PATH.endswith('~test'):
             SQL_DB_PATH = SQL_DB_PATH.replace("~test", '')
 
+
 set_test_mode(TEST)
 
 
 THISDIR = os.path.dirname(os.path.abspath(__file__))
 ANDROID_HOME = os.getenv('ANDROID_HOME', os.path.join(THISDIR, './static_data'))
-ADB_PATH = os.path.join(ANDROID_HOME, 'adb')
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb'))
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = os.path.join(THISDIR, "static_data/ios-deploy")  #'python2 -m MobileDevice'
+MOBILEDEVICE_PATH = shlex.quote(os.path.join(THISDIR, "static_data/ios-deploy"))  #'python2 -m MobileDevice'
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
