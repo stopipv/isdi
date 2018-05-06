@@ -161,7 +161,7 @@ class AndroidScan(AppScan):
                   .format(p.returncode, p.stderr.read() + p.stdout.read()))
 
     def _get_apps_(self, serialno, flag):
-        cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/package://g' | sort"
+        cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/^package://g' | sort"
         s = self.catch_err(self.run_command(cmd, serial=serialno, flag=flag),
                            msg="App search failed", cmd=cmd)
         if not s:
@@ -183,6 +183,15 @@ class AndroidScan(AppScan):
     def get_system_apps(self, serialno):
         apps = self._get_apps_(serialno, '-s')
         return apps
+
+    def get_offstore_apps(self, serialno):
+        offstore = []
+        for l in self._get_apps_(serialno, '-i -u -3'):
+            apps, t = l.split()
+            installer = t.replace('installer=', '')
+            if installer not in config.APPROVED_INSTALLERS:
+                offstore.append(apps)
+        return offstore
 
     def devices(self):
         cmd = '{cli} devices | tail -n +2 | cut -f1'

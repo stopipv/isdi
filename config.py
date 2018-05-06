@@ -54,6 +54,7 @@ DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
 ERROR_LOG = []
 
+APPROVED_INSTALLERS = {'com.android.vending', }
 
 
 def add_to_error(*args):
