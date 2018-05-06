@@ -120,6 +120,6 @@ if __name__ == "__main__":
         print("Running in test mode.")
         config.set_test_mode(True)
         print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
-                  .format(config.TEST, config.APP_FLAGS_FILE,
-                              config.SQL_DB_PATH))
+              .format(config.TEST, config.APP_FLAGS_FILE,
+                      config.SQL_DB_PATH))
     FLASK_APP.run(debug=config.DEBUG)

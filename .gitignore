@@ -124,3 +124,5 @@ static_data/offstore_apks.csv
 static_data/spyware.csv
 data/fieldstudy.db~test
 phone_dumps/
+apps/
+backup.tar
