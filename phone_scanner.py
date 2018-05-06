@@ -64,7 +64,8 @@ class AppScan(object):
 
     def app_details(self, serialno, appid):
         try:
-            d = pd.read_sql('select * from apps where appid=?', self.app_info_conn.engine,
+            d = pd.read_sql('select * from apps where appid=?', 
+                            self.app_info_conn.engine,
                             params=(appid,))
             if not isinstance(d.get('permissions', ''), list):
                 d['permissions'] = d.get('permissions', pd.Series([]))

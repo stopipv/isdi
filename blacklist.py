@@ -16,7 +16,7 @@ import pandas as pd
 
 APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE)
 SPY_REGEX = {
-    "pos": re.compile(r'(?i)(spy|track|keylog)'),
+    "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
     "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
 }
 
@@ -53,22 +53,21 @@ def flag_str(flags):
                 'info' if 'spy' in flag else ''
         )
     # If spyware <span class='text-danger'>{}</span>
-    return ',  '.join("<span class=\"text-{}\">{}</span>".format(_add_class(flag), flag) for flag in flags)
+    return ',  '.join("<span class=\"text-{}\">{}</span>"\
+                      .format(_add_class(flag), flag) for flag in flags)
 
 
 def store_str(st):
     return 'onstore' if st in ('playstore', 'appstore') else 'offstore'
+
 
 def app_title_and_flag(apps):
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
     _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     # print(apps, flagged_apps)
     spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
-    _td.loc[spy_regex_app,'flags'].apply(lambda x: x.extend(['regex-spy']))
+    _td.loc[spy_regex_app, 'flags'].apply(lambda x: x.extend(['regex-spy']))
     return _td[['title', 'flags']].reset_index()
-
-
-
 
 
 def flag_apps(apps, device=''):
@@ -83,4 +82,3 @@ def flag_apps(apps, device=''):
 
 def flag_app(app, device=''):
     return flag_apps([app], device=device).iloc[0]
-
