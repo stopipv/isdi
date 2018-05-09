@@ -1,14 +1,14 @@
 import sqlite3
 import config
+from flask import g
 
 DATABASE = config.SQL_DB_PATH
-db = None
 
 
 def get_db():
-    global db
+    db = getattr(g, '_database', None)
     if db is None:
-        db = sqlite3.connect(config.SQL_DB_PATH)
+        db = g._database = sqlite3.connect(DATABASE)
     return db
 
 
