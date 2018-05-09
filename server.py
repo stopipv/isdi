@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, g
 from phone_scanner import AndroidScan, IosScan, TestScan
 import json
 import blacklist
 import config
 import parse_dump
+import db
 
 
 FLASK_APP = Flask(__name__)
+FLASK_APP.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
 ios = IosScan()
 test = TestScan()
@@ -18,6 +20,13 @@ def get_device(k):
         'ios': ios,
         'test': test
     }.get(k)
+
+
+@FLASK_APP.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 
 @FLASK_APP.route("/", methods=['GET'])
@@ -57,20 +66,19 @@ def is_success(b, msg_succ="", msg_err=""):
     else:
         return msg_err if msg_err else "Failed", 401
 
+
 @FLASK_APP.route("/scan/<device>", methods=['GET'])
 def scan(device):
-    # ser = request.args.get('serial')
+    """
+    Needs three attribute for a device
+    :param device: "android" or "ios" or test
+    :return: a flask view template
+    """
     sc = get_device(device)
     ser = first_element_or_none(sc.devices())
-    print(">>>scan_device", device, "<<<<<")
-
-    # return json.dumps({
-    #     'apps': sc.find_spyapps(serialno=ser).to_json(orient="index"),
-    #     'serial': ser,
-    #     'error': config.error()
-    # })
+    print(">>>scanning_device", device, "<<<<<")
+    # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('')
-    # apps['flags'] = apps.flags.apply(blacklist.flag_str)
     return render_template(
         'main.html',
         apps=apps.to_dict(orient='index'),
@@ -79,6 +87,7 @@ def scan(device):
         device=device,
         error=config.error(),
     )
+
 
 ##############  RECORD DATA PART  ###############################
 
@@ -93,13 +102,14 @@ def delete_app(device):
     r &= sc.save('app_uninstall', serial=serial, appid=appid, notes=request.form.get('note', ''))
     return is_success(r, "Success!", config.error())
 
+
 @FLASK_APP.route('/save/appnote/<device>', methods=["POST"])
 def save_app_note(device):
     sc = get_device(device)
     serial = request.form.get('serial')
     appId = request.form.get('appId')
     note = request.form.get('note')
-    return is_success(sc.save('notes', serialno=serial, appId=appId, note=note))
+    return is_success(sc.save('appinfo', serial=serial, appId=appId, note=note))
 
 
 @FLASK_APP.route('/save/metainfo/<device>', methods=["POST"])
@@ -123,3 +133,4 @@ if __name__ == "__main__":
               .format(config.TEST, config.APP_FLAGS_FILE,
                       config.SQL_DB_PATH))
     FLASK_APP.run(debug=config.DEBUG)
+

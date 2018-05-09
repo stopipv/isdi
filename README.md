@@ -18,7 +18,7 @@ will see the page of the `PhoneScanner` tool running.  Connect a
 device and click on the suitable button `Android` or `iOS`. (**Please
 connect one device at a time.**)
 
-![Phone Scanner UI](static/phone_scanner-ui.png "Phone Scanner UI")
+![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
 
 
 
@@ -83,7 +83,7 @@ application. I don't konw how to get install date, resource usage, etc.
   iOS phones.
 * `server.py` is the flask server. 
 * `templates/` folder contains the html templates rendering in the UI
-* `static/` folder contains the `.css` and `.js` files 
+* `webstatic/` folder contains the `.css` and `.js` files 
 * `phone_dumps/` folder will contain the data recorded from the phone.
 
 ## Dependencies
