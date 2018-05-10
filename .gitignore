@@ -122,8 +122,9 @@ static_data/com.symantec.mobilesecurity.apk
 static_data/ios_apps_crawl.csv.gz
 static_data/offstore_apks.csv
 static_data/spyware.csv
-data/fieldstudy.db~test
 phone_dumps/
-apps/
 backup.tar
+
 reports/*.csv
+apps/
+data/
