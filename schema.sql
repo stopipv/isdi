@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS scan_res (
 
 
 -- This is a backup table to keep logs of everything. 
-CREATE TABLE IF NOT EXISTS all_logs (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       args TEXT,
-       formargs TEXT,
-       httpmethod TEXT,
-       res TEXT,
-       time DATETIME DEFAULT (datetime('now', 'localtime'))
-);
+-- CREATE TABLE IF NOT EXISTS all_logs (
+--        id INTEGER PRIMARY KEY AUTOINCREMENT,
+--        args TEXT,
+--        formargs TEXT,
+--        httpmethod TEXT,
+--        res TEXT,
+--        time DATETIME DEFAULT (datetime('now', 'localtime'))
+-- );
 
 CREATE TABLE IF NOT EXISTS  app_info (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
