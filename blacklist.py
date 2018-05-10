@@ -63,6 +63,7 @@ def store_str(st):
 
 def app_title_and_flag(apps):
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
+    _td['rawflags'] = ''
     _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     # print(apps, flagged_apps)
     spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values

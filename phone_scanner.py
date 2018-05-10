@@ -11,8 +11,6 @@ import blacklist
 import re
 import shlex
 
-db = dataset.connect(config.SQL_DB_PATH)
-
 
 class AppScan(object):
     device_type = ''
@@ -102,17 +100,17 @@ class AppScan(object):
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
-        r['flags'] = r.flags.apply(blacklist.flag_str)
+        r['html_flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
-        return r[['title', 'flags', 'score', 'class_']]
+        return r[['title', 'flags', 'score', 'class_', 'html_flags']]
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
         app_flags = blacklist.flag_apps(installed_apps)
         return app_flags
 
-    def uninstall(self, serialno, appid):
+    def uninstall(self, serial, appid):
         pass
 
     def run_command(self, cmd, **kwargs):
@@ -129,7 +127,6 @@ class AppScan(object):
     def save(self, table, **kwargs):
         try:
             tab = db.get_table(table)
-            kwargs['time'] = datetime.now()
             kwargs['device'] = kwargs.get('device', self.device_type)
             tab.insert(kwargs)
             db.commit()
@@ -215,7 +212,7 @@ class AndroidScan(AppScan):
     #         f.write(p.stdout.read())
     #     print("Dump success! Written to={}".format(outfname))
 
-    def uninstall(self, appid, serialno):
+    def uninstall(self, serial, appid):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
         s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serialno),
                                                 appid=shlex.quote(appid)),
@@ -260,7 +257,7 @@ class IosScan(AppScan):
         print(s)
         return [l.strip() for l in s.split('\n') if l.strip()]
 
-    def uninstall(self, appid, serialno):
+    def uninstall(self, serial, appid):
         cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
@@ -282,7 +279,7 @@ class TestScan(AppScan):
     def get_system_apps(self, serialno):
         return self.get_apps(serialno)[:10]
 
-    def uninstall(self, appid, serialno):
+    def uninstall(self, serial, appid):
         return True
 
 

@@ -1,14 +1,25 @@
-from flask import Flask, render_template, request, redirect, g
+from flask import (
+    Flask, render_template, request, redirect, g, jsonify
+)
+import logging
+from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
 import json
 import blacklist
 import config
 import parse_dump
-import db
+from time import strftime
+import traceback
+
+from db import (
+    get_db, create_scan, save_note, create_appinfo, update_appinfo,
+    create_report, new_client_id, init_db, create_mult_appinfo,
+    get_device_from_db, update_mul_appinfo,
+)
 
 
-FLASK_APP = Flask(__name__)
-FLASK_APP.config['STATIC_FOLDER'] = 'webstatic'
+app = Flask(__name__, static_folder='webstatic')
+# app.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
 ios = IosScan()
 test = TestScan()
@@ -22,14 +33,15 @@ def get_device(k):
     }.get(k)
 
 
-@FLASK_APP.teardown_appcontext
+
+@app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
 
 
-@FLASK_APP.route("/", methods=['GET'])
+@app.route("/", methods=['GET'])
 def index():
     return render_template(
         'main.html',
@@ -37,11 +49,13 @@ def index():
             'Android': android.devices(),
             'iOS': ios.devices(),
             'Test': test.devices()
-        }, apps={}
+        },
+        apps={},
+        clientid=new_client_id()
     )
 
 
-@FLASK_APP.route('/details/app/<device>', methods=['GET'])
+@app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):
     sc = get_device(device)
     appid = request.args.get('appId')
@@ -67,21 +81,37 @@ def is_success(b, msg_succ="", msg_err=""):
         return msg_err if msg_err else "Failed", 401
 
 
-@FLASK_APP.route("/scan/<device>", methods=['GET'])
-def scan(device):
+
+@app.route("/scan", methods=['POST'])
+def scan():
     """
     Needs three attribute for a device
     :param device: "android" or "ios" or test
     :return: a flask view template
     """
+    clientid = request.form.get('clientid')
+    device = request.form.get('device')
     sc = get_device(device)
+    if not sc:
+        return render_template("main.html",
+                               apps={},
+                               error="Please pick one device.",
+                               clientid=clientid
+        )
     ser = first_element_or_none(sc.devices())
+    # clientid = new_client_id()
+    scanid = create_scan(clientid, ser, device)
     print(">>>scanning_device", device, "<<<<<")
     # @apps have appid, title, flags, TODO: add icon
-    apps = sc.find_spyapps(serialno=ser).fillna('')
+    apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+    print("Creating appinfo...")
+    create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
+                          for appid, info in apps.items()])
     return render_template(
         'main.html',
-        apps=apps.to_dict(orient='index'),
+        apps=apps,
+        scanid=scanid,
+        clientid=clientid,
         sysapps=set(sc.get_system_apps(serialno=ser)),
         serial=ser,
         device=device,
@@ -92,35 +122,94 @@ def scan(device):
 ##############  RECORD DATA PART  ###############################
 
 
-@FLASK_APP.route("/delete/app/<device>", methods=["POST"])
-def delete_app(device):
+@app.route("/delete/app/<scanid>", methods=["POST", "GET"])
+def delete_app(scanid):
+    device = get_device_from_db(scanid)
+    serial = get_serial_from_db(scanid)
     sc = get_device(device)
-    serial = request.form.get('serial')
     appid = request.form.get('appid')
+    remark = request.form.get('remark')
+    action = "delete"
     # TODO: Record the uninstall and note
     r = sc.uninstall(serialno=serial, appid=appid)
-    r &= sc.save('app_uninstall', serial=serial, appid=appid, notes=request.form.get('note', ''))
+    if r:
+        r = save_appinfo(
+            scanid=scanid, appid=appid, remark=remark, action=action
+        )
     return is_success(r, "Success!", config.error())
 
 
-@FLASK_APP.route('/save/appnote/<device>', methods=["POST"])
-def save_app_note(device):
+# @app.route('/save/appnote/<device>', methods=["POST"])
+# def save_app_note(device):
+#     sc = get_device(device)
+#     serial = request.form.get('serial')
+#     appId = request.form.get('appId')
+#     note = request.form.get('note')
+#     return is_success(sc.save('appinfo', serial=serial, appId=appId, note=note))
+
+@app.route('/saveapps/<scanid>', methods=["POST"])
+def record_applist(scanid):
+    device = get_device_from_db(scanid)
     sc = get_device(device)
-    serial = request.form.get('serial')
-    appId = request.form.get('appId')
-    note = request.form.get('note')
-    return is_success(sc.save('appinfo', serial=serial, appId=appId, note=note))
+    d = request.form
+    update_mul_appinfo([(remark, scanid, appid)
+                        for appid, remark in d.items()])
+    return "Success", 200
 
 
-@FLASK_APP.route('/save/metainfo/<device>', methods=["POST"])
-def record_response(device):
+@app.route('/savescan/<scanid>', methods=["POST"])
+def record_scanres(scanid):
+    device = get_device_from_db(scanid)
     sc = get_device(device)
-    r = bool(sc.save(
-        'response',
-        response=json.dumps(request.form),
-        serial=request.form.get('serial'),
-    ))
-    return is_success(r, "Success!", "Could not save for some reason. See logs in the terminal.")
+    note = request.form.get('notes')
+    r = save_note(scanid, note)
+    create_report(request.form.get('clientid'))
+    return is_success(r, "Success!", "Could not save the form. See logs in the terminal.")
+
+
+
+
+################# For logging ##############################################
+@app.route("/error")
+def get_nothing():
+    """ Route for intentional error. """
+    return foobar # intentional non-existent variable
+
+
+@app.after_request
+def after_request(response):
+    """ Logging after every request. """
+    # This avoids the duplication of registry in the log,
+    # since that 500 is already logged via @app.errorhandler.
+    if response.status_code != 500:
+        ts = strftime('[%Y-%b-%d %H:%M]')
+        logger.error('%s %s %s %s %s %s',
+                      ts,
+                      request.remote_addr,
+                      request.method,
+                      request.scheme,
+                      request.full_path,
+                      response.status)
+    return response
+
+
+# @app.errorhandler(Exception)
+# def exceptions(e):
+#     """ Logging after every Exception. """
+#     ts = strftime('[%Y-%b-%d %H:%M]')
+#     tb = traceback.format_exc()
+#     logger.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
+#                   ts,
+#                   request.remote_addr,
+#                   request.method,
+#                   request.scheme,
+#                   request.full_path,
+#                   tb)
+#     print(e, file=sys.stderr)
+#     return "Internal server error", 500
+
+
+
 
 
 if __name__ == "__main__":
@@ -132,5 +221,14 @@ if __name__ == "__main__":
         print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
               .format(config.TEST, config.APP_FLAGS_FILE,
                       config.SQL_DB_PATH))
-    FLASK_APP.run(debug=config.DEBUG)
+
+
+    init_db(app, force=True)
+    handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
+                                  backupCount=30)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.ERROR)
+    logger.addHandler(handler)
+
+    app.run(debug=config.DEBUG)
 
