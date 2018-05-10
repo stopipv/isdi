@@ -223,7 +223,7 @@ if __name__ == "__main__":
                       config.SQL_DB_PATH))
 
 
-    init_db(app, force=True)
+    init_db(app, force=(not config.TEST))
     handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
                                   backupCount=30)
     logger = logging.getLogger(__name__)
