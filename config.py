@@ -15,7 +15,7 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
 DEBUG = True
-TEST = True
+TEST = False
 
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
