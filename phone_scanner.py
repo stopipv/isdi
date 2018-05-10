@@ -56,6 +56,9 @@ class AppScan(object):
     def get_apps(self, serialno):
         pass
 
+    def get_offstore_apps(self, serialno):
+        return []
+
     def dump_file_name(self, serial, fsuffix='json'):
         return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
             serial, self.device_type, fsuffix))
@@ -96,7 +99,11 @@ class AppScan(object):
         #     ', ?'*(len(installed_apps)-1)
         #     ), self.app_info_conn.engine, params=(installed_apps,))
         # r.rename({'appid': 'appId'}, axis='columns', copy=False, inplace=True)
-        r = blacklist.app_title_and_flag(pd.DataFrame({'appId': installed_apps}))
+        r = blacklist.app_title_and_flag(
+            pd.DataFrame({'appId': installed_apps}),
+            offstore_apps=self.get_offstore_apps(serialno),
+            system_apps=self.get_system_apps(serialno)
+        )
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
@@ -278,6 +285,9 @@ class TestScan(AppScan):
 
     def get_system_apps(self, serialno):
         return self.get_apps(serialno)[:10]
+
+    def get_offstore_apps(self, serialno):
+        return self.get_apps(serialno)[-4:]
 
     def uninstall(self, serial, appid):
         return True

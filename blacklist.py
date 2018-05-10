@@ -29,18 +29,21 @@ def _regex_blacklist(app):
 
 
 def score(flags):
+    """The weights are completely arbitrary"""
     weight = {
         'onstore-dual-use': 0.5,
         'onstore-spyware': 1.0,
         'offstore-spyware': 1.0,
-        'regex-spy': 0.3
+        'offstore-app': 0.8,
+        'regex-spy': 0.3,
+        'system-app': -1.0
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
 
 
 def assign_class(flags):
     w = score(flags)
-    norm_w = 0 if w==0 else 1 if w<=0.3 else 2 if w<=0.8 else 3
+    norm_w = 0 if w<=0 else 1 if w<=0.3 else 2 if w<=0.8 else 3
     _classes = ['', 'alert-info', 'alert-warning', 'alert-danger']
     return _classes[norm_w]
 
@@ -61,10 +64,11 @@ def store_str(st):
     return 'onstore' if st in ('playstore', 'appstore') else 'offstore'
 
 
-def app_title_and_flag(apps):
+def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
-    _td['rawflags'] = ''
     _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+    _td.loc[offstore_apps, 'flags'].apply(lambda x: x.append('offstore-app'))
+    _td.loc[system_apps, 'flags'].apply(lambda x: x.append('system-app'))
     # print(apps, flagged_apps)
     spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
     _td.loc[spy_regex_app, 'flags'].apply(lambda x: x.extend(['regex-spy']))
