@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+
 def prefix(pre, a):
     if not pre:
         return a
@@ -25,7 +26,8 @@ def common_prefix_set(a, prefix_criteria=lambda x: len(x)>=5):
 
 
 if __name__ == "__main__":
-    print(common_prefix_set('''appinventor.ai_thewolfman1984.Spytxt_listen_in
+    import json
+    print(json.dumps(common_prefix_set('''appinventor.ai_thewolfman1984.Spytxt_listen_in
 com.ITU.ahmedsohail.spyapp
 com.ah.ispyoo.config
 com.ah.ispyoo.main
@@ -56,4 +58,4 @@ com.ispyoo.common.monitor.UserPresentBroadcastReceiver
 com.jalle.ispyserver
 com.mxspy
 com.mxspy.RegistrationIntentService
-com.trackerspy'''.split()))
+    com.trackerspy'''.split()), indent=4))

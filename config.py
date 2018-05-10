@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import shlex
+from sys import platform
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 
@@ -14,7 +15,7 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
 DEBUG = True
-TEST = False
+TEST = True
 
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
@@ -44,11 +45,14 @@ set_test_mode(TEST)
 
 
 THISDIR = os.path.dirname(os.path.abspath(__file__))
-ANDROID_HOME = os.getenv('ANDROID_HOME', os.path.join(THISDIR, './static_data'))
-ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb'))
+STATIC_DATA = os.path.join(THISDIR, 'static_data')
+ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
+PLATFORM = 'darwin' if platform == 'darwin' else 'linux' if platform.startswith('linux') \
+           else 'win32' if platform == 'win32' else None
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(os.path.join(THISDIR, "static_data/ios-deploy"))  #'python2 -m MobileDevice'
+MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "/ios-deploy-" + PLATFORM))
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
@@ -56,6 +60,9 @@ ERROR_LOG = []
 
 APPROVED_INSTALLERS = {'com.android.vending', }
 
+REPORT_PATH = os.path.join(THISDIR, 'reports')
+if not os.path.exists(REPORT_PATH):
+    os.mkdir(REPORT_PATH)
 
 def add_to_error(*args):
     global ERROR_LOG

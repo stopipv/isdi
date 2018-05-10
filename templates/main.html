@@ -16,7 +16,9 @@
 
         var device = "{{ device }}";
         var serial = "{{ serial }}";
-
+        var scanid = "{{ scanid }}";
+        var clientid = "{{ clientid }}";
+     
         function report_success(m) {
             $('#msg').html(m);
             $('#msg').prop('class', 'alert alert-success')
@@ -31,7 +33,7 @@
             y = confirm(`Are you sure you want to delete the app  '${appid}'?"`);
             if (!y){return;}
             data = {'appid': appid, 'serial': serial, 'device': device};
-            $.post('/delete/app/' + device, data=data).done(function (r){
+            $.post('/delete/app/' + scanid, data=data).done(function (r){
                 $('tr#' + appid).addClass('text-muted');
                 $(e).removeClass('text-danger');
                 $(e).addClass('text-success');
@@ -44,9 +46,10 @@
         }
         function postform(form1) {
             // $(form1).prop('disabled', true);
-            d1 = $('#form-metainfo').serialize()
-            // d2 = $('#form-applist').serialize()
-            $.post('/save/metainfo/' + device, data = d1).done(function (r) {
+            d1 = $('#form-metainfo').serialize();
+            d2 = $('#form-applist').serialize();
+            $.post('/saveapps/' + scanid, data=d2);
+            $.post('/savescan/' + scanid, data = d1).done(function (r) {
                 report_success(r)
                 $('#btn-submit').prop('disabled', false);
             }).fail(function (r) {
@@ -55,6 +58,11 @@
             return false;
         }
 
+     function reset_form(form) {
+         if (confirm("Do you want to reset the form?")) {
+             window.location.href = "/";
+         }
+     }
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
             $('input[type="text"]').on('keyup keypress', function (e) {
@@ -87,11 +95,25 @@
     <div class="col-md-3 border py-2" style="height:80vh;">
         <div align="center">
             <label class="font-weight-bold lead">Scan</label>
+            <form id="scan_select" method="POST" action="/scan">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
+                    </label>
+                </div>
+                <label><b>Client ID</b>
+                <input class="form-control col-sm-9" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+                <button class="btn btn-primary mx-2">Scan</button>
+            </form>
             {% for t in ["Android", "iOS", "test"] %}
                 <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
                             class="btn btn-primary mx-2">{{ t }}</button -->
-                <button onclick="window.location.href='/scan/{{ t.lower() }}'" id="btn-android"
-                        class="btn btn-primary mx-2">{{ t }}</button>
             {% endfor %}
             <hr/>
         </div>
@@ -99,20 +121,20 @@
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
                 <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
                        value="{{ serial }}" readonly>
-                <input class="form-control" name="client" id="client-id" type="text" placeholder="Client Id"/>
+                <input type="hidden" name="clientid" type="text" value="{{ clientid }}"/></label>
                 <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Notes"
-                          rows="10"></textarea>
+                          rows="10" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
                         class="btn btn-primary btn-lg my-3">Save
                 </button>
-                <button onclick="postform(this); reset(this)" id="btn-metainfo-reset"
+                <button onclick="reset_form(this)" id="btn-metainfo-reset"
                         class="btn btn-outline-warning btn-lg my-3">Reset
                 </button>
             </form>
         </div>
     </div>
     <div class="col-md-9 border py-2" style="height: 80vh">
-        <div id="msg" class="alert alert-danger invisible" style="height: 3em">  {{ error }}   </div>
+        <div id="msg" class="alert alert-danger" style="height: 3em">  {{ error }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
             <table class="table table-bordered w-100 h-100">
                 <thead>
@@ -124,25 +146,27 @@
                     <th style="width: 30%">Notes</th>
                 </tr>
                 </thead>
-                <tbody id="applist" class="h-100">
-                {% for appId, info in apps.items() %}
-                    <tr id="{{ appId.replace('.', '-') }}">
-                        {% if appId in sysapps %}
+                <form id="form-applist" onsubmit="" method="post" name="form-applist" >
+                    <tbody id="applist" class="h-100">
+                        {% for appId, info in apps.items() %}
+                        <tr id="{{ appId.replace('.', '-') }}">
+                            {% if appId in sysapps %}
                             <td><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
                                    title="System App! Cannot delete">&otimes;</a></td>
-                        {%  else %}
+                            {%  else %}
                             <td><a class="h4 text-danger" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
                                    title="Delete app">&otimes;</a></td>
-                        {% endif %}
-                        <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank">
-                            {{ info['title'] }}</a></td>
-                        <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
-                               target="_blank"><code>{{ appId }}</code></a></td>
-                        <td>{{ info['flags'] | safe }}</td>
-                        <td><input type="text" placeholder="Notes" class='form-control' name="{{ appId }}" /></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
+                            {% endif %}
+                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank">
+                                {{ info['title'] }}</a></td>
+                            <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
+                                   target="_blank"><code>{{ appId }}</code></a></td>
+                            <td>{{ info['html_flags'] | safe }}</td>
+                            <td><input type="text" placeholder="Notes" class='form-control appnotes' name="{{ appId }}" /></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </form>
             </table>
             <!-- <button onclick="postform(this)" id="btn-submit"
                      class="btn btn-primary btn-lg">Submit</button> -->
