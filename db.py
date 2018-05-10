@@ -12,7 +12,7 @@ DATABASE = config.SQL_DB_PATH.replace('sqlite:///', '')
 def today():
     db = get_db()
     t = dt.now()
-    today = t.strftime('%Y%m%d:%H')
+    today = t.strftime('%Y%m%d_%H')
     return today
 
 
@@ -25,7 +25,7 @@ def new_client_id():
     d, t = today(), 0
     print("new_client_id >>>> {}".format(last_client_id))
     if last_client_id:
-        d, t = last_client_id.split('_')
+        d, t = last_client_id.rsplit('_', 1)
     return '{}_{:03d}'.format(d, int(t)+1)
 
 

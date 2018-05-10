@@ -126,3 +126,4 @@ data/fieldstudy.db~test
 phone_dumps/
 apps/
 backup.tar
+reports/*.csv
