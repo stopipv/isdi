@@ -124,6 +124,7 @@ static_data/offstore_apks.csv
 static_data/spyware.csv
 phone_dumps/
 backup.tar
+.DS_Store
 
 reports/*.csv
 apps/
