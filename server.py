@@ -14,7 +14,7 @@ import traceback
 from db import (
     get_db, create_scan, save_note, create_appinfo, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
-    get_device_from_db, update_mul_appinfo,
+    get_device_from_db, update_mul_appinfo, get_serial_from_db
 )
 
 
@@ -133,7 +133,7 @@ def delete_app(scanid):
     # TODO: Record the uninstall and note
     r = sc.uninstall(serialno=serial, appid=appid)
     if r:
-        r = save_appinfo(
+        r = update_appinfo(
             scanid=scanid, appid=appid, remark=remark, action=action
         )
     return is_success(r, "Success!", config.error())
@@ -173,7 +173,7 @@ def record_scanres(scanid):
 @app.route("/error")
 def get_nothing():
     """ Route for intentional error. """
-    return foobar # intentional non-existent variable
+    return "foobar" # intentional non-existent variable
 
 
 @app.after_request

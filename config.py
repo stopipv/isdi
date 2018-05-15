@@ -52,7 +52,7 @@ PLATFORM = 'darwin' if platform == 'darwin' else 'linux' if platform.startswith(
 ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "/ios-deploy-" + PLATFORM))
+MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "ios-deploy-" + PLATFORM))
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 
@@ -78,5 +78,5 @@ def error():
         e, ERROR_LOG = ERROR_LOG[0], ERROR_LOG[1:]
 
         print("ERROR: {}".format(e))
-    return e
+    return e.replace("\n", "<br/>")
 

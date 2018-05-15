@@ -172,7 +172,7 @@ class AndroidScan(AppScan):
             self.setup()
             return []
         else:
-            installed_apps = [x for x in s.split() if x]
+            installed_apps = [x for x in s.splitlines() if x]
             return installed_apps
 
     def get_apps(self, serialno):
@@ -225,7 +225,7 @@ class AndroidScan(AppScan):
 
     def uninstall(self, serial, appid):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
-        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serialno),
+        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial),
                                                 appid=shlex.quote(appid)),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
@@ -270,7 +270,7 @@ class IosScan(AppScan):
 
     def uninstall(self, serial, appid):
         cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
-        s = self.catch_err(self.run_command(cmd, serial=serialno, appid=appid),
+        s = self.catch_err(self.run_command(cmd, serial=serial, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
