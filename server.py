@@ -66,7 +66,8 @@ def app_details(device):
     return render_template(
         'app.html',
         app=d,
-        info=info
+        info=info,
+        device=device
     )
 
 @app.route('/kill', methods=['POST', 'GET'])
