@@ -186,9 +186,13 @@ class IosDump(PhoneDump):
 
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
-        d = pd.read_json(self.fname).T
-        d.index.rename('appId', inplace=True)
-        return d
+        try:
+            d = pd.read_json(self.fname).T
+            d.index.rename('appId', inplace=True)
+            return d
+        except Exception as ex:
+            print(ex)
+            print("Could not load the json file: {}".format(self.fname))
 
     def info(self, appid):
         d = self.df
