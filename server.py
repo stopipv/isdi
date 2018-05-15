@@ -85,7 +85,9 @@ def is_success(b, msg_succ="", msg_err=""):
     else:
         return msg_err if msg_err else "Failed", 401
 
-
+def first_element_or_none(l):
+    if l and len(l)>1:
+        return l[0]
 
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
