@@ -69,9 +69,14 @@ def app_details(device):
         info=info
     )
 
-
-def first_element_or_none(a):
-    if a: return a[0]
+@app.route('/kill', methods=['POST', 'GET'])
+def killme():
+    print("I am here")
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return ("The app has been closed!")
 
 
 def is_success(b, msg_succ="", msg_err=""):
