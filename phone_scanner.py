@@ -191,10 +191,14 @@ class AndroidScan(AppScan):
     def get_offstore_apps(self, serialno):
         offstore = []
         for l in self._get_apps_(serialno, '-i -u -3'):
-            apps, t = l.split()
-            installer = t.replace('installer=', '')
-            if installer not in config.APPROVED_INSTALLERS:
-                offstore.append(apps)
+            l = l.split()
+            if len(l) == 2:
+                apps, t = l
+                installer = t.replace('installer=', '')
+                if installer not in config.APPROVED_INSTALLERS:
+                    offstore.append(apps)
+            else:
+                print(">>>>>> ERROR: {}".format(l))
         return offstore
 
     def devices(self):
