@@ -266,7 +266,9 @@ class IosScan(AppScan):
         self.serialno = None
         s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
         print(s)
-        return [l.strip() for l in s.split('\n') if l.strip()]
+        d = [l.strip() for l in s.split('\n') if l.strip()]
+        print("Devices found:", d)
+        return d
 
     def uninstall(self, serial, appid):
         cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'

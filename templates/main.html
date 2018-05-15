@@ -132,10 +132,11 @@
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-                <label> Serial<input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
-                                     value="{{ serial }}" readonly></label>
+                <label> Phone Serial No:</label>
+		<input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
+                                     value="{{ serial }}" readonly>
                  <input type="hidden" name="clientid" type="text" value="{{ clientid }}"/></label>
-                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take NOTES here."
+                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
                           rows="10" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
                         class="btn btn-primary btn-lg my-3">Save

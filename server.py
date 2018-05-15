@@ -86,7 +86,7 @@ def is_success(b, msg_succ="", msg_err=""):
         return msg_err if msg_err else "Failed", 401
 
 def first_element_or_none(l):
-    if l and len(l)>1:
+    if l and len(l)>0:
         return l[0]
 
 @app.route("/scan", methods=['POST', 'GET'])
@@ -107,8 +107,10 @@ def scan():
         )
     ser = first_element_or_none(sc.devices())
     # clientid = new_client_id()
+    print(">>>scanning_device", device, ser, "<<<<<")
+    if not ser:
+        return "Error!"
     scanid = create_scan(clientid, ser, device)
-    print(">>>scanning_device", device, "<<<<<")
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
     print("Creating appinfo...")
