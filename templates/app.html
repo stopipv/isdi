@@ -39,7 +39,7 @@
 		<h4>Number of permissions: {{ app.permissions| length }}</h4>
                 <ul class="list-group">
                     {% for perm in app.permissions %}
-                    <li class="code">{{ perm }}</li>
+                    <li class="code">{{ perm | title | replace('_', ' ') }}</li>
                     {% endfor %}
 		</ul>
             </div>
