@@ -95,20 +95,28 @@
     <div class="col-md-3 border py-2" style="height:80vh;">
         <div align="center">
             <label class="font-weight-bold lead">Scan</label>
-            <form id="scan_select" method="POST" action="/scan">
+            <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
+		    {% for a in ["Android", "iOS", "Test"] %}
+                    <label class="btn btn-secondary {% if device==a.lower() %} active {% endif %}">
+                        <input type="radio" name="device" id="{{ a | lower }}"
+			       value="{{ a| lower }}" autocomplete="off"
+			       {% if device==a.lower() %} checked {% endif %}
+			> {{ a }}
                     </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
-                    </label>
+		    {% endfor %}
+                    <!-- <label class="btn btn-secondary">
+                         <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
+			 </label>
+			 <label class="btn btn-secondary">
+                         <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
+			 </label>
+			 <label class="btn btn-secondary">
+                         <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
+			 </label> -->
                 </div>
                 <label><b>Client ID</b>
-                <input class="form-control col-sm-9" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+                <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <button class="btn btn-primary mx-2">Scan</button>
             </form>
             {% for t in ["Android", "iOS", "test"] %}
@@ -119,10 +127,10 @@
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-                <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
-                       value="{{ serial }}" readonly>
-                <input type="hidden" name="clientid" type="text" value="{{ clientid }}"/></label>
-                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Notes"
+                <label> Serial<input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
+                                     value="{{ serial }}" readonly></label>
+                 <input type="hidden" name="clientid" type="text" value="{{ clientid }}"/></label>
+                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take NOTES here."
                           rows="10" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
                         class="btn btn-primary btn-lg my-3">Save
@@ -143,7 +151,7 @@
                     <th style="width: 23%">App Name</th>
                     <th style="width: 23%">App ID</th>
                     <th style="width: 20%">Flags</th>
-                    <th style="width: 30%">Notes</th>
+                    <th style="width: 30%">Remarks</th>
                 </tr>
                 </thead>
                 <form id="form-applist" onsubmit="" method="post" name="form-applist" >
@@ -162,7 +170,7 @@
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank"><code>{{ appId }}</code></a></td>
                             <td>{{ info['html_flags'] | safe }}</td>
-                            <td><input type="text" placeholder="Notes" class='form-control appnotes' name="{{ appId }}" /></td>
+                            <td><input type="text" placeholder="Remarks" class='form-control appnotes' name="{{ appId }}" /></td>
                         </tr>
                         {% endfor %}
                     </tbody>

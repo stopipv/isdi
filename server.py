@@ -82,15 +82,15 @@ def is_success(b, msg_succ="", msg_err=""):
 
 
 
-@app.route("/scan", methods=['POST'])
+@app.route("/scan", methods=['POST', 'GET'])
 def scan():
     """
     Needs three attribute for a device
     :param device: "android" or "ios" or test
     :return: a flask view template
     """
-    clientid = request.form.get('clientid')
-    device = request.form.get('device')
+    clientid = request.form.get('clientid', request.args.get('clientid'))
+    device = request.form.get('device', request.args.get('device'))
     sc = get_device(device)
     if not sc:
         return render_template("main.html",
