@@ -99,9 +99,9 @@ def create_scan(clientid, serial, device):
 
 def update_appinfo(scanid, appid, remark, action):
     return insert("update app_info set "\
-                    "remark=?, action=? where scanid=? and appid=?",
+                    "remark=?, action_taken=? where scanid=? and appid=?",
                     args=(remark, action, scanid, appid),
-    )
+    ) == 0
 
 
 def update_app_deleteinfo(scanid, appid, remark):

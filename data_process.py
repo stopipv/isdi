@@ -51,6 +51,7 @@ def create_app_info_dict():
         d = pd.read_csv(v, index_col='appId')
 
         d['store'] = k
+
         if 'permissions' not in d.columns:
             print(k, v, d.columns)
             d.assign(permissions=["<not recorded>"]*len(d))
