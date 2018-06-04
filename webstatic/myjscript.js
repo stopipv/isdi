@@ -11,6 +11,23 @@ function updateProgress(percentage) {
     $('#scan-prog').text(percentage + "%");
 }
 
+function delete_app(appid, e) {
+    y = confirm(`Are you sure you want to delete the app  '${appid}'?"`);
+    if (!y){return;}
+    data = {'appid': appid, 'serial': serial, 'device': device};
+    $.post('/delete/app/' + scanid, data=data).done(function (r){
+        $('tr#' + appid).addClass('text-muted');
+        $(e).removeClass('text-warning');
+        $(e).addClass('text-success');
+        $(e).html('&#10003;');
+        $(e).prop('onclick', null).off('click');
+        report_success(r);
+    }).fail(function(){
+        report_failure("Could not delete the app '" + appid + "'")
+    })
+}
+
+
 var start = null;
 var maxTime = 5000;  // 30 sec
 var timeoutVal = Math.floor(maxTime/50);
