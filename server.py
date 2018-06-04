@@ -132,7 +132,7 @@ def scan():
         apps=apps,
         scanid=scanid,
         clientid=clientid,
-        sysapps=set(sc.get_system_apps(serialno=ser)),
+        sysapps=set(), #sc.get_system_apps(serialno=ser)),
         serial=ser,
         device=device,
         error=config.error(),
