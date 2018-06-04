@@ -30,6 +30,7 @@ def clean_json(d):
 def match_keys(d, keys, only_last=False):
     ret = []
     # print(keys)
+    print(keys)
     for sk in keys.split('//'):
         sk = re.compile(sk)
         for k, v in d.items():
@@ -196,6 +197,10 @@ class IosDump(PhoneDump):
 
     def info(self, appid):
         d = self.df
+        print("PRINTING COLUMNS")
+        print(d.columns)
+        print(d["Entitlements"])
+        #print(d["Entitlements"]["com.apple.private.tcc.allow"])
         return {'ios-info': ['<Not-available>']}
 
     def system_apps(self):

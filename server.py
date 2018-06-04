@@ -63,6 +63,16 @@ def app_details(device):
     d, info = sc.app_details(ser, appid)
     d = d.to_dict(orient='index').get(0, {})
     d['appId'] = appid
+
+    ## detect apple and put the key into d.permissions
+    if "Ios" in str(type(sc)):
+        print("apple iphone")
+    else:
+        print(type(sc))
+    
+    #print(self.df["Entitlements"]["com.apple.private.tcc.allow"])
+    print(d.keys())
+    print(d)
     return render_template(
         'app.html',
         app=d,
@@ -141,11 +151,14 @@ def delete_app(scanid):
     remark = request.form.get('remark')
     action = "delete"
     # TODO: Record the uninstall and note
-    r = sc.uninstall(serialno=serial, appid=appid)
+    r = sc.uninstall(serial=serial, appid=appid)
     if r:
         r = update_appinfo(
             scanid=scanid, appid=appid, remark=remark, action=action
         )
+        print("Update appinfo failed! r={}".format(r))
+    else:
+        print("Uinstall failed. r={}".format(r))
     return is_success(r, "Success!", config.error())
 
 
