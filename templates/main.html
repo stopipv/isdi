@@ -26,24 +26,9 @@
 
         function report_failure(m) {
             $('#msg').html(m);
-            $('#msg').prop('class', 'alert alert-danger')
+            $('#msg').prop('class', 'alert alert-warning')
         }
 
-        function delete_app(appid, e) {
-            y = confirm(`Are you sure you want to delete the app  '${appid}'?"`);
-            if (!y){return;}
-            data = {'appid': appid, 'serial': serial, 'device': device};
-            $.post('/delete/app/' + scanid, data=data).done(function (r){
-                $('tr#' + appid).addClass('text-muted');
-                $(e).removeClass('text-danger');
-                $(e).addClass('text-success');
-                $(e).html('&#10003;');
-                $(e).prop('onclick', null).off('click');
-                report_success(r);
-            }).fail(function(){
-                report_failure("Could not delete the app '" + appid + "'")
-            })
-        }
         function postform(form1) {
             // $(form1).prop('disabled', true);
             d1 = $('#form-metainfo').serialize();
@@ -148,12 +133,12 @@
         </div>
     </div>
     <div class="col-md-9 border py-2" style="height: 80vh">
-        <div id="msg" class="alert alert-danger" style="height: 3em">  {{ error }}   </div>
+        <div id="msg" class="alert alert-primary" style="height: 3em">  {{ error }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
             <table class="table table-bordered w-100 h-100">
                 <thead>
                 <tr>
-                    <th style="width: 3%"></th>
+                    <th style="width: 3%">Delete</th>
                     <th style="width: 23%">App Name</th>
                     <th style="width: 23%">App ID</th>
                     <th style="width: 20%">Flags</th>
@@ -165,14 +150,14 @@
                         {% for appId, info in apps.items() %}
                         <tr id="{{ appId.replace('.', '-') }}">
                             {% if appId in sysapps %}
-                            <td><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
+                            <td align="center" ><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
                                    title="System App! Cannot delete">&otimes;</a></td>
                             {%  else %}
-                            <td><a class="h4 text-danger" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
+                            <td align="center"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
                                    title="Delete app">&otimes;</a></td>
                             {% endif %}
-                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank">
-                                {{ info['title'] }}</a></td>
+                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
+				class="text text-dark">{{ info['title'] }}</a></td>
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank"><code>{{ appId }}</code></a></td>
                             <td>{{ info['html_flags'] | safe }}</td>

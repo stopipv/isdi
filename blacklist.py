@@ -44,14 +44,14 @@ def score(flags):
 def assign_class(flags):
     w = score(flags)
     norm_w = 0 if w<=0 else 1 if w<=0.3 else 2 if w<=0.8 else 3
-    _classes = ['', 'alert-info', 'alert-warning', 'alert-danger']
+    _classes = ['', 'alert-info', 'alert-warning', 'alert-primary']
     return _classes[norm_w]
 
 
 def flag_str(flags):
     """Returns a comma seperated strings"""
     def _add_class(flag):
-        return ('danger' if 'spyware' in flag else
+        return ('primary' if 'spyware' in flag else
                 'warning' if 'dual-use' in flag else
                 'info' if 'spy' in flag else ''
         )
