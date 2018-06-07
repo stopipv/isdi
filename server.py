@@ -65,14 +65,12 @@ def app_details(device):
     d['appId'] = appid
 
     ## detect apple and put the key into d.permissions
-    if "Ios" in str(type(sc)):
-        print("apple iphone")
-    else:
-        print(type(sc))
+    #if "Ios" in str(type(sc)):
+    #    print("apple iphone")
+    #else:
+    #    print(type(sc))
     
-    #print(self.df["Entitlements"]["com.apple.private.tcc.allow"])
     print(d.keys())
-    print(d)
     return render_template(
         'app.html',
         app=d,
@@ -119,10 +117,10 @@ def scan():
     ser = first_element_or_none(sc.devices())
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
-    error = "If an iPhone is connected, open iTunes, wait for the \"Trust this compupter\" "\
-    "to pop up in the iPhone, and then try again." if device == 'ios' else\
+    error = "If an iPhone is connected, open iTunes, click through the connection dialog and wait for the \"Trust this computer\" prompt "\
+    "to pop up in the iPhone, and then scan again." if device == 'ios' else\
     "If an Android device is connected, disconnect and reconnect the device, make sure "\
-    "developer options is activated and USB debugging is turned on on the device, and click \"Scan\"."
+    "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
     if not ser:
         return render_template(
@@ -135,8 +133,10 @@ def scan():
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
                           for appid, info in apps.items()])
+    rooted = sc.isrooted(ser)
     return render_template(
         'main.html',
+        isrooted = "Yes" if rooted else "Don't know" if rooted is None else "No",
         apps=apps,
         scanid=scanid,
         clientid=clientid,

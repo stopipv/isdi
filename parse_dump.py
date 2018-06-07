@@ -197,11 +197,22 @@ class IosDump(PhoneDump):
 
     def info(self, appid):
         d = self.df
-        print("PRINTING COLUMNS")
-        print(d.columns)
-        print(d["Entitlements"])
-        #print(d["Entitlements"]["com.apple.private.tcc.allow"])
-        return {'ios-info': ['<Not-available>']}
+        res = {}
+        entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
+
+        ''' remove kTCCService from beginning of string '''
+        def decruft(perms): 
+            return perms[11:]
+        if "com.apple.private.tcc.allow" in entitlements.keys():
+            permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow"]]
+            print(permissions)
+        elif "com.apple.private.tcc.allow.overridable" in entitlements.keys():
+            permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow.overridable"]]
+            print(permissions)
+        else:
+            print("Couldn't find any app permissions on '{}'".format(appid))
+        res['permissions'] = permissions
+        return res
 
     def system_apps(self):
         return self.df.query('ApplicationType=="System"').index
