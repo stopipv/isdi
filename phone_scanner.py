@@ -142,6 +142,9 @@ class AppScan(object):
             print(ex)
             return False
 
+    def isrooted(self, serial):
+        pass
+
 
 class AndroidScan(AppScan):
     """NEED Android Debug Bridge (adb) tool installed. Ensure your Android device
@@ -230,7 +233,16 @@ class AndroidScan(AppScan):
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
+    def isrooted(self, serial):
+        cmd = '{cli} -s {serial} shell su'
+        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial)))
+        if 'su: not found' in s:
+            return False
+        else:
+            return True
 
+
+    
 class IosScan(AppScan):
     """
     Needs ios-deploy (compiled with it) or run `bash scripts/setup.sh`

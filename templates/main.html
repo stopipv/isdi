@@ -135,6 +135,7 @@
     <div class="col-md-9 border py-2" style="height: 80vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
+	    <label>Jailbroken/Rooted: <b>{{ isrooted }}</b></label>
             <table class="table table-bordered w-100 h-100">
                 <thead>
                 <tr>
@@ -156,8 +157,13 @@
                             <td align="center"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
                                    title="Delete app">&otimes;</a></td>
                             {% endif %}
+                            {% if info['title'] %}
                             <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
 				class="text text-dark">{{ info['title'] }}</a></td>
+                            {% else %}
+                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
+				class="text text-dark">Unnamed</a></td>
+                            {% endif %}
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank"><code>{{ appId }}</code></a></td>
                             <td>{{ info['html_flags'] | safe }}</td>
