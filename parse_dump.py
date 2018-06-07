@@ -211,7 +211,9 @@ class IosDump(PhoneDump):
             print(permissions)
         else:
             print("Couldn't find any app permissions on '{}'".format(appid))
+            permissions = []
         res['permissions'] = permissions
+        res['title'] = d[d['CFBundleIdentifier'] == appid]["CFBundleExecutable"].iloc[0]
         return res
 
     def system_apps(self):

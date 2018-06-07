@@ -79,6 +79,11 @@ class AppScan(object):
             else:
                 ddump = parse_dump.AndroidDump(dfname)
             info = ddump.info(appid)
+            if self.device_type == 'ios':
+                d['permissions'] = [info['permissions']]
+                d['title'] = [info['title']]
+                #print(info['permissions'])
+                del info['permissions']
             print("AppInfo: ", info, appid, dfname, ddump)
             # p = self.run_command(
             #     'bash scripts/android_scan.sh info {ser} {appid}',

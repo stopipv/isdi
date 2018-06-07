@@ -161,8 +161,10 @@
                             <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
 				class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
-                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
-				class="text text-dark">Unnamed</a></td>
+  <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
+  class="text text-dark">Unnamed</a></td>
+
+
                             {% endif %}
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank"><code>{{ appId }}</code></a></td>
