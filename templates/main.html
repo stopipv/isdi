@@ -133,7 +133,7 @@
         </div>
     </div>
     <div class="col-md-9 border py-2" style="height: 80vh">
-        <div id="msg" class="alert alert-primary" style="height: 3em">  {{ error }}   </div>
+        <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
             <table class="table table-bordered w-100 h-100">
                 <thead>

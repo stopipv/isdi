@@ -119,8 +119,16 @@ def scan():
     ser = first_element_or_none(sc.devices())
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
+    error = "If an iPhone is connected, open iTunes, wait for the \"Trust this compupter\" "\
+    "to pop up in the iPhone, and then try again." if device == 'ios' else\
+    "If an Android device is connected, disconnect and reconnect the device, make sure "\
+    "developer options is activated and USB debugging is turned on on the device, and click \"Scan\"."
+
     if not ser:
-        return "Error!"
+        return render_template(
+            "main.html", apps={},
+            error="<b>No device is connected!!</b> {}".format(error)
+    )
     scanid = create_scan(clientid, ser, device)
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')

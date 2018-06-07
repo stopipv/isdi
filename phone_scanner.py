@@ -262,11 +262,15 @@ class IosScan(AppScan):
             return []
 
     def devices(self):
+        def _is_device(x):
+            """Is it looks like a serial number"""
+            return re.match(r'[a-f0-9]+', x) is not None
+
         cmd = '{cli} --detect -t1 | tail -n 1'
         self.serialno = None
         s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
-        print(s)
-        d = [l.strip() for l in s.split('\n') if l.strip()]
+        d = [l.strip() for l in s.split('\n')
+                 if l.strip() and _is_device(l.strip())]
         print("Devices found:", d)
         return d
 
