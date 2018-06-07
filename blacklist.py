@@ -36,7 +36,7 @@ def score(flags):
         'offstore-spyware': 1.0,
         'offstore-app': 0.8,
         'regex-spy': 0.3,
-        'system-app': -1.0
+        'system-app': 0.0
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
 
