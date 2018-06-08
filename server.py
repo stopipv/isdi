@@ -78,6 +78,11 @@ def app_details(device):
         device=device
     )
 
+@app.route('/instruction', methods=['GET'])
+def instruction():
+    return render_template('instruction.html')
+
+
 @app.route('/kill', methods=['POST', 'GET'])
 def killme():
     print("I am here")

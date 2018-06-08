@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel=stylesheet type=text/css
+              href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel=stylesheet type=text/css
+              href="{{ url_for('static', filename='style.css') }}?234">
+        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+        <title>Scan Phone for IPS apps</title>
+    </head>
+    <body class="container">
+        <a href="/">Home</a>
+        <div class="row">
+            <div class="border p-4">
+                <h3>Documentation of <span style="color: green; font-family: monospace; font-size: 0.3in">PhoneScanner</span></h3>
+                Simple tool to check Android or iOS phones for IPS-spyware.
+                Code: <code><a href="https://github.com/rchatterjee/phone_scanner">GitHub</a></code>
+
+                <h4>Prepare the phone for scanning</h4>
+                <h5>Android Phones</h5>
+                For Android device, the <code>developer options</code> on the phone needs to be
+                activated. Developer options provide functionality for PhoneScanner to scan the
+                device. The exact steps might vary from phone manufacturer and version of
+                Android, but roughly the following steps will help you activate4 developer
+                options and USB debugging.  PhoneScanner will try to deactivate the developer
+                mode at the end of the scan. <b>But for some phone this procedure false, so if
+                    you think that's a problem, then please don't turn it on, or scan your device.</b>
+
+                <ol>
+                    <li>Go to Settings. Either find the Settings app in the phone drawer, or
+                        pull down from the top notification bar, on the top right you will see a gear
+                        type icon (<b>&#9881;</b>) for settings.</li>
+                    <li>Scroll down to find About Phone, search for <code>Build number</code>,
+                        tap on the build number 6-8 times to activate the developer mode. For some
+                        phones, Build number might be hidden under Software info. (<b>Warning:</b> For
+                        most phone we can turn it off (see step 4), but there are some phones this
+                        cannot be undone. This will not interfere with any of the phone’s common
+                        functionality, but does not leave the phone at the state as it was before the
+                        scanning.)</li>
+                    <li>Next step is to turning on <code>USB debugging</code>. Go to
+                        <code>Settings</code>&rarr;<code>Developer options</code>&rarr;<code>USB debugging</code>.
+                        Tap on the toggle switch to turn it on. </li>
+                    <!-- 
+                         the developer mode is turned on, connect the phone to the laptop using the
+                         correct USB cable. In the phone a dialogue box will appear with message "Do you
+                         trust this computer?" (or something similar).  Saying okay to this will allow
+                         the computer the scan the phone via the USB cable.  Tap okay.  Press the
+                         “Android” button on the left side of the Phone Scanner page in browser. Let the
+                         scan finish.  (Troubleshooting: If PhoneScanner does not find any app, refresh
+                         the page once. If still doesn’t work, disconnect the USB cable from the phone,
+                         reconnect, and refresh the page. Last option, manually scroll over the apps on
+                         the phone by going to ‘Settings → Apps’, and see if anything looks suspicious.
+                         Once the scan is done, the page will look like the following.  There are three
+                         main input the researcher has to enter.  Client ID (The researcher has to pick
+                         the client ID) The left side notes are any general notes about the client the
+                         researchers want to record.  There are fields for taking notes for each App,
+                         record any comment form the client about the apps (especially the ones which are
+                         flagged) in the Notes input field beside each app.   -->
+                        <li><b>Turning off developer options:</b>
+                            <!-- Finally, after the interview is over, press the save button to save
+                                 the information in the database. To reset the page press the Reset. [Note: this
+                                 will also create a database entry, just in case someone accidentally presses
+                                 reset.]   -->
+                            The scanner will automatically try to reset the developer options
+                            once Save or Reset is pressed. Restart the phone to get to original
+                            state. If you still see the developer options (a.k.a, developer
+                            mode) is on, open <code>Settings</code>&rarr;<code>Apps</code>, you
+                            will see list of apps installed in your device. Find the app
+                            <code>Settings</code> in list of apps, tap on it, and tap clear data
+                            (sometimes clear data option is listed inside Storage).  This should
+                            clean the developer options. [Warning: For some Android, phone this
+                            might fail. So please check the settings again. developer options ,
+                            but not all.]</li>
+                </ol>
+
+                <h5>iOS/iPhones</h5>
+                There is not much preparation required for iOS, just connect the USB cable, on
+                the device you should see a prompt asking for the phone passcode (also call pin)
+                number. The passcode has to be entered to unlock the device, and trust the
+                computer to allow scan the iPhone. 
+                <b>Troubleshooting:</b> Sometimes the PhoneScanner might fail to recognize the
+                iPhone. Try opening iTunes on the MAC, and see if the phone is
+                listed. Disconnect the phone from the USB cable, reconnect, and try scanning again. 
+
+            </div>
+        </div>
+        
+        <br/><br/>
+        <div class="border p-4"> 
+            Send your feedbacks to <a href="mailto:rahul@cs.cornell.edu">rahul@cs.cornell.edu</a>
+        </div>
+    </body>
+</html>
