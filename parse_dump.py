@@ -143,8 +143,9 @@ class AndroidDump(PhoneDump):
         b = (match_keys(
             d, "batterystats//Statistics since last charge//Estimated power use .*"
             "//^Uid {}:.*".format(uidu))
-        )[-1]
-        return b.split(':', 1)[1]
+        )[-1].split(':')
+        print(b)
+        return b
 
     def info(self, appid):
         d = self.df
@@ -158,14 +159,20 @@ class AndroidDump(PhoneDump):
             split_equalto_delim(match_keys(package, v, only_last=True))
             for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
         )
+        if 'userId' not in res:
+            return {}
         process_uid = res['userId']
         del res['userId']
         memory = match_keys(d, 'meminfo//Total PSS by process//.*: {}.*'.format(appid))
 
         uidu = (match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
                 [-1]
-                .split(' / ')[1])
-
+                .split(' / '))
+        print("UIDU:", uidu)
+        if len(uidu) > 1:
+            uidu = uidu[1]
+        else:
+            uidu = uidu[0]
         res['data_usage'] = self.get_data_usage(d, process_uid)
         res['battery (mAh)'] = self.get_battery_stat(d, uidu)
         return res
@@ -228,4 +235,4 @@ if __name__ == "__main__":
     # data = [l.strip() for l in open(fname)]
     ddump = AndroidDump(fname)
     # print(json.dumps(parse_dump_file(fname), indent=2))
-    print(json.dumps(ddump.info('com.life360.android.safetymapd'), indent=2))
+    print(json.dumps(ddump.info('com.digiplex.game'), indent=2))
