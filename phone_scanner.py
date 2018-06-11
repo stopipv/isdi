@@ -29,6 +29,7 @@ class AppScan(object):
         pass
 
     def catch_err(self, p, cmd='', msg=''):
+        """TODO: Therer are two different types. homogenize them"""
         try:
             p.wait(10)
             print("Returncode: ", p.returncode)
@@ -241,7 +242,8 @@ class AndroidScan(AppScan):
     def isrooted(self, serial):
         cmd = '{cli} -s {serial} shell su'
         s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial)))
-        if 'su: not found' in s:
+        if s == -1 or 'su: not found' in s:
+            print(config.error())
             return False
         else:
             return True
