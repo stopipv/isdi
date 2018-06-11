@@ -7,6 +7,23 @@ if [[ $# -lt 1 ]]; then
     echo -e "You have to provide a serial number. #Num args: $#"
     exit -1
 fi
+platform='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+   platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+    platform='darwin'
+elif [[ "$unamestr" == 'FreeBSD' ]]; then
+   platform='freebsd'
+fi
+
+if [[ $platform == 'darwin' ]]; then
+   adb='static_data/adb-darwin'
+elif [[ $platform == 'linux' ]]; then
+   adb='static_data/adb-linux'
+fi
+echo "$platform" "$adb"
+
 
 serial="-s $2"
 dump_dir="./phone_dumps/"
@@ -15,7 +32,7 @@ ofname=$dump_dir/${serial:3}_android.txt
 email="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 function scan {
     act=$1
-    adb $serial shell dumpsys $act | \
+    $adb $serial shell dumpsys $act | \
         sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
 }
 
@@ -69,33 +86,28 @@ function dump {
         scan $a
     done 
     echo "DUMP OF SERVICE net_stats"
-    adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
+    $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
     for namespace in secure system global; do
 	echo "DUMP OF SETTINGS $namespace"
-	adb shell settings list $namespace
+	$adb shell settings list $namespace
     done
 }
 
 function full_scan {
-    if [[ ! -e $ofname ]]; then
-        secs_since_last_modified=100000000;
-    else
-        secs_since_last_modified=$(($(date +%s) - $(stat -c %Y $ofname)))
-    fi
-    if [[ ${secs_since_last_modified} -lt 1200 ]]; then # 20 min no re dump
-        echo "File is still pretty fresh (${secs_since_last_modified} sec)"
+    # If file older than 20 min then receate
+    if [[ $(find "$ofname" -mtime -20m -print) ]]; then 
+        echo "File is still pretty fresh"
         echo "Not re-dumping"
-        exit 0
+    else
+	dump  > "$ofname" 2> error.txt
     fi
-    rm -rf $ofname
-    dump  > "$ofname" 2> error.txt
     # Clear the settings to remove developer options
 }
 
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
     full_scan
-    adb $serial shell pm shell clear com.android.settings
+    $adb $serial shell pm clear com.android.settings
 elif [[ "$1" == "info" ]]; then
     (>&2 echo "------ Running app info ------- $2 $3")
     retrieve $3

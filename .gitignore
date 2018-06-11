@@ -125,6 +125,7 @@ static_data/spyware.csv
 phone_dumps/
 backup.tar
 .DS_Store
+error.txt
 
 reports/*.csv
 apps/
