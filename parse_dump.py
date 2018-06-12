@@ -144,7 +144,10 @@ class AndroidDump(PhoneDump):
             d, "batterystats//Statistics since last charge//Estimated power use .*"
             "//^Uid {}:.*".format(uidu))
         )[-1].split(':')
-        print(b)
+        if len(b) > 1:
+            b = b[1]
+        else:
+            b = "Not known"
         return b
 
     def info(self, appid):
@@ -160,6 +163,7 @@ class AndroidDump(PhoneDump):
             for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
         )
         if 'userId' not in res:
+            print("UserID not found in res={}".format(res))
             return {}
         process_uid = res['userId']
         del res['userId']
@@ -168,7 +172,6 @@ class AndroidDump(PhoneDump):
         uidu = (match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
                 [-1]
                 .split(' / '))
-        print("UIDU:", uidu)
         if len(uidu) > 1:
             uidu = uidu[1]
         else:
