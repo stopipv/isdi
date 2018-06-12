@@ -131,11 +131,18 @@ class AppScan(object):
             cli=self.cli, **kwargs
         )
         print(_cmd)
-        p = subprocess.Popen(
-            _cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        return p
+        if kwargs.get('nowait', False) or kwargs.get('NOWAIT', False):
+            pid = subprocess.Popen(
+                _cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            ).pid
+            return pid
+        else:
+            p = subprocess.Popen(
+                _cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            )
+            return p
 
     def save(self, table, **kwargs):
         try:
@@ -189,7 +196,7 @@ class AndroidScan(AppScan):
         if installed_apps:
             q = self.run_command(
                 'bash scripts/android_scan.sh scan {ser}',
-                ser=serialno); q.wait()
+                ser=serialno, nowait=True);
             self.installed_apps = installed_apps
         return installed_apps
 
