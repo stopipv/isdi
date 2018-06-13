@@ -235,7 +235,7 @@ class IosDump(PhoneDump):
 
 if __name__ == "__main__":
     fname = sys.argv[1]
-    # data = [l.strip() for l in open(fname)]
+    #data = [l.strip() for l in open(fname)]
     ddump = AndroidDump(fname)
-    # print(json.dumps(parse_dump_file(fname), indent=2))
+    print(json.dumps(parse_dump_file(fname), indent=2))
     print(json.dumps(ddump.info('com.digiplex.game'), indent=2))
