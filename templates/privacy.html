@@ -1,34 +1,52 @@
 <script>
  function get(url){
-     $.get(url, function() {
-         $('#msg').html("<b>Loading</b>");
-     }).done(function(data) {
+     $('#loadingDiv').show();
+     $('#msg').html("")
+     $.get(url, function(data) {
          $('#msg').html(data);
+         $('#loadingDiv').hide();
+     }).done(function(data) {
      }).fail(function(data) {
-         alert("Failed:" + data);
+         alert("Failed:" + JSON.serialize(data));
      })
  }
 
+ var loading = $('#loadingDiv').hide();
+ $(document).ready(function() {
+     $('#loadingDiv').hide();
+ });
+ 
 </script>
 <div class="container">
     <div>
         <a href="/">Home</a>
         <div class="jumbotron">
             <h4>Adroid</h4>
-            {% for a in  ["account", "backup", "gmap", "gphotos"] %}
-            <button class="btn btn-primary mx-2"  onclick="get('/privacy/android/{{ a }}')" value="{{ a }}">{{ a | capitalize }}</button>
+            {% for k, v in  {"account": "Account", "sync": "Accounts and Sync", "backup": "Backup account", "gmap": "Google Map Sharing", "gphotos": "Google Photos Sharing"}.items() %}
+            <button class="btn btn-primary mx-2"  onclick="get('/privacy/android/{{ k }}')" value="{{ k }}">{{ v | title }}</button>
             {% endfor %}
+            <button class="btn btn-secondary mx-2"  onclick="get('/privacy/android/screenshot')" value="screenshot">Screenshot</button>      
         </div>
         <div class="jumbotron" id="msg">
         </div>
+        <div id="loadingDiv" align="center"><img src="{{ url_for('static', filename='images/waiting.gif') }}"/></div>
+
 
         <hr/>
         <div class="jumbotron">
             <h4>iPhone</h4>
-            <li> Do this; do that...</li>
-        </div>
-        <div class="jumbotron">
-            {{ res }}
+            <li> <code>Settings</code> &rarr;
+                <ul>
+                    <li><code>"Your Name"</code></li>
+                    <li><code>Privacy</code> &rarr; <code>Location Services</code> &rarr;
+                        <ul>
+                            <li> <code>Share My Location</code> </li>
+                            <li> <code>System Services</code> &rarr;  <code>Significant Locations</code> (Turn this always off.)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li> Check the sharing in <code>Find my Friends</code> app.</li>
         </div>
     </div>
 </div>

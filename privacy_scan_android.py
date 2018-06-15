@@ -26,19 +26,22 @@ Finally screen capture.
 4. Check location sharing settings
     adb shell am start 'com.google.android.apps.maps/com.google.android.maps.MapsActivity' && sleep 5 && adb shell input tap 20 80
 5. Check photo sharing settings
-    adb shell am start 'com.google.android.apps.photos' && sleep 10 && adb shell input tap 20 80
+    adb shell am start 'com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity' && sleep 10 && adb shell input tap 20 80
 """
 
 from subprocess import Popen, PIPE
 import re
 import time
+from flask import url_for
+import random
 
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(
         **kwargs
     )
+    print(_cmd)
     p = Popen(_cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.wait(2)
+    p.wait(4)
     return p.stdout.read().decode('utf-8'), p.stderr.read().decode('utf-8')
 
 def thiscli(ser):
@@ -61,10 +64,15 @@ def open_activity(ser, activity_name):
     """
     Opens an activity
     """
-    cmd = "{cli} shell am start {act}"
+    cmd = "{cli} shell am start '{act}'"
     out, err = run_command(cmd, cli=thiscli(ser), act=activity_name)
     if err:
         print("ERROR (open_activity): {!r}".format(err))
+        return False
+    if 'error' in out.lower():
+        print("ERROR (open_activity) stdout=: {!r}".format(out))
+        return False
+    return True
 
 def tap(ser, xpercent, ypercent):
     """
@@ -119,6 +127,10 @@ def wait(t):
     time.sleep(t)
 
 def do_privacy_check(ser, command):
+    def add_image(img, nocache=False):
+        rand = random.randint(0, 10000)
+        return "<img height='400px' src='" + \
+            url_for('static', filename='images/' + img) + "?{}'/>".format(rand if nocache else '')
     
     command = command.lower()
     if command == "account": # 1. Account ownership  & 3. Sync (if present)
@@ -126,28 +138,42 @@ def do_privacy_check(ser, command):
         # wait(2)
         # keycode(ser, 'home')
         # take_screenshot(ser, 'account.png')
-        return "Check the account email address on the mobile"
+        return "Click on the <code>Google Account</code> on the phone and then check the account email address at the top."
     elif command == "backup": # 2. Backup & reset
         open_activity(ser, "com.android.settings/.Settings\$PrivacySettingsActivity")
         # wait(2)
         # keycode(ser, 'home')
         # take_screenshot(ser, 'account.png')
-        return "Check the backup email address on the mobile"
+        return ("Check the email address of the <code>Backup account</code> on the mobile. (If "
+                "backup is <b>on</b>, then <code>Backup account</code> is where the data is being backed"
+                "up to.)")
     elif command == "gmap":  # 4. Google Maps sharing
         open_activity(ser, "com.google.android.apps.maps/com.google.android.maps.MapsActivity")
         wait(2)
         keycode(ser, "menu")
-        return "Check the location sharing option; make sure you are not sharing location with someone you don't want"
+        return "Check the location sharing option; make sure you are not sharing location with someone you don't want. " + \
+            add_image('google_maps_sharing.png')
     elif command == "gphotos":  # 5. Google Photos sharing
-        open_activity(ser, "com.google.android.apps.photos")
+        open_activity(ser, "com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity")
         wait(2)
         keycode(ser, "menu")
-        return "Check the 'Add partners accout'/'partner account'"
+        return "Check the <code>Shared library</code>. " + add_image('google_maps_sharing.png')
+    elif command == "sync":
+        if not open_activity(ser, 'com.android.settings/.Settings\$AccountsGroupSettingsActivity'):
+            return "I could not find syncing functionality in your Android. This most likely mean this is not available,"\
+                "and no need to check."
+        else:
+            return "Click on the <code>Google</code> (or other account) where the phone is syncing its data and what data."\
+                "."
+    elif command == "screenshot":
+        take_screenshot(ser, fname="webstatic/images/tmp.png")
+        return add_image("tmp.png", nocache=True)
     else:
         return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 
 if __name__ == "__main__":
-    ser = "ZY224F8TKG"
+    # ser = "ZY224F8TKG"
     # print(get_screen_res(ser)
     # print(is_screen_on(ser))
-    do_privacy_check(ser, 'account')
+    # do_privacy_check(ser, 'account')
+    take_screenshot(ser='')
