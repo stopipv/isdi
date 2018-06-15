@@ -10,7 +10,7 @@ import config
 import parse_dump
 from time import strftime
 import traceback
-
+from privacy_scan_android import do_privacy_check
 from db import (
     get_db, create_scan, save_note, create_appinfo, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
@@ -78,6 +78,7 @@ def app_details(device):
         device=device
     )
 
+
 @app.route('/instruction', methods=['GET'])
 def instruction():
     return render_template('instruction.html')
@@ -102,6 +103,25 @@ def is_success(b, msg_succ="", msg_err=""):
 def first_element_or_none(l):
     if l and len(l)>0:
         return l[0]
+
+@app.route("/privacy", methods=['GET'])
+def privacy():
+    """
+    TODO: Privacy scan. Think how should it flow. 
+    Privacy is a seperate page. 
+    """
+    device = request.form.get('device', request.args.get('device'))
+    return render_template('privacy.html', device=device)
+
+@app.route("/privacy/<device>/<cmd>", methods=['GET'])
+def privacy(device, cmd):
+    """
+    TODO: Privacy scan. Think how should it flow. 
+    Privacy is a seperate page. 
+    """
+    sc = get_device(device)
+    return do_privacy_check(sc.srialno, cmd)
+
 
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
