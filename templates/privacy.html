@@ -1,0 +1,34 @@
+<script>
+ function get(url){
+     $.get(url, function() {
+         $('#msg').html("<b>Loading</b>");
+     }).done(function(data) {
+         $('#msg').html(data);
+     }).fail(function(data) {
+         alert("Failed:" + data);
+     })
+ }
+
+</script>
+<div class="container">
+    <div>
+        <a href="/">Home</a>
+        <div class="jumbotron">
+            <h4>Adroid</h4>
+            {% for a in  ["account", "backup", "gmap", "gphotos"] %}
+            <button class="btn btn-primary mx-2"  onclick="get('/privacy/android/{{ a }}')" value="{{ a }}">{{ a | capitalize }}</button>
+            {% endfor %}
+        </div>
+        <div class="jumbotron" id="msg">
+        </div>
+
+        <hr/>
+        <div class="jumbotron">
+            <h4>iPhone</h4>
+            <li> Do this; do that...</li>
+        </div>
+        <div class="jumbotron">
+            {{ res }}
+        </div>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 from flask import (
-    Flask, render_template, request, redirect, g, jsonify
+    Flask, render_template, request, redirect, g, jsonify,
+    url_for
 )
 import logging
 from logging.handlers import RotatingFileHandler
@@ -44,7 +45,8 @@ def close_connection(exception):
 @app.route("/", methods=['GET'])
 def index():
     return render_template(
-        'main.html',
+        'page.html',
+        task = 'home',
         devices={
             'Android': android.devices(),
             'iOS': ios.devices(),
@@ -72,7 +74,7 @@ def app_details(device):
     
     print(d.keys())
     return render_template(
-        'app.html',
+        'page.html', task="app",
         app=d,
         info=info,
         device=device
@@ -81,7 +83,7 @@ def app_details(device):
 
 @app.route('/instruction', methods=['GET'])
 def instruction():
-    return render_template('instruction.html')
+    return render_template('page.html', task="instruction")
 
 
 @app.route('/kill', methods=['POST', 'GET'])
@@ -110,17 +112,13 @@ def privacy():
     TODO: Privacy scan. Think how should it flow. 
     Privacy is a seperate page. 
     """
-    device = request.form.get('device', request.args.get('device'))
-    return render_template('privacy.html', device=device)
+    return render_template('page.html', task="privacy")
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
-def privacy(device, cmd):
-    """
-    TODO: Privacy scan. Think how should it flow. 
-    Privacy is a seperate page. 
-    """
+def privacy_scan(device, cmd):
     sc = get_device(device)
-    return do_privacy_check(sc.srialno, cmd)
+    res = do_privacy_check(sc.serialno, cmd)
+    return res
 
 
 @app.route("/scan", methods=['POST', 'GET'])
@@ -132,9 +130,14 @@ def scan():
     """
     clientid = request.form.get('clientid', request.args.get('clientid'))
     device = request.form.get('device', request.args.get('device'))
+    action = request.form.get('action', request.args.get('action'))
+    print("--> Action = ", action)
+    # if action == "Privacy Check":
+    #     return redirect(url_for(privacy, device=device), code=302)
     sc = get_device(device)
     if not sc:
-        return render_template("main.html",
+        return render_template("page.html",
+                               task="home",
                                apps={},
                                error="Please pick one device.",
                                clientid=clientid
@@ -149,7 +152,7 @@ def scan():
 
     if not ser:
         return render_template(
-            "main.html", apps={},
+            "base.html", task="home", apps={},
             error="<b>No device is connected!!</b> {}".format(error)
     )
     scanid = create_scan(clientid, ser, device)
@@ -160,7 +163,7 @@ def scan():
                           for appid, info in apps.items()])
     rooted = sc.isrooted(ser)
     return render_template(
-        'main.html',
+        'page.html', task="home",
         isrooted = "Yes" if rooted else "Don't know" if rooted is None else "No",
         apps=apps,
         scanid=scanid,
