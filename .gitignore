@@ -130,3 +130,4 @@ error.txt
 reports/*.csv
 apps/
 data/
+static_data/app-info.db.gz
