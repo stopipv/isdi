@@ -5,7 +5,30 @@ Doc: https://docs.google.com/document/d/1HAzmB1IiViMrY7eyEt2K7-IwqFOKcczsgtRRayS
 
 Privacy configuration for Android. An attempt to automate most of this. 
 
+
+Automatic settings check
+
+To find what activity is running on the current window (*Super useful command*)
+
+    adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
+
+Finally screen capture. 
+
+    adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > screen.png
+
+
+1. Check the Accounts & Sync
+    adb shell am start 'com.android.settings/.Settings\$AccountsGroupSettingsActivity'
+2. Check the Google Account settings
+    adb shell am start 'com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsLink'
+3. Backup and reset
+    adb shell am start 'com.android.settings/.Settings\$PrivacySettingsActivity'
+4. Check location sharing settings
+    adb shell am start 'com.google.android.apps.maps/com.google.android.maps.MapsActivity' && sleep 5 && adb shell input tap 20 80
+5. Check photo sharing settings
+    adb shell am start 'com.google.android.apps.photos' && sleep 10 && adb shell input tap 20 80
 """
+
 from subprocess import Popen, PIPE
 import re
 import time
@@ -95,19 +118,36 @@ def take_screenshot(ser, fname=None):
 def wait(t):
     time.sleep(t)
 
-def do_privacy_check(ser):
-    # 1. Account ownership
-    open_activity(ser, "com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsLink")
-    wait(2)
-    keycode(ser, 'home')
-    take_screenshot(ser, 'account.png')
-    # 2. Backup & reset
-    # 3. Sync (if present)
-    # 4. Google Maps sharing
-    # 5. Google Photos sharing
+def do_privacy_check(ser, command):
+    
+    command = command.lower()
+    if command == "account": # 1. Account ownership  & 3. Sync (if present)
+        open_activity(ser, "com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsLink")
+        # wait(2)
+        # keycode(ser, 'home')
+        # take_screenshot(ser, 'account.png')
+        return "Check the account email address on the mobile"
+    elif command == "backup": # 2. Backup & reset
+        open_activity(ser, "com.android.settings/.Settings\$PrivacySettingsActivity")
+        # wait(2)
+        # keycode(ser, 'home')
+        # take_screenshot(ser, 'account.png')
+        return "Check the backup email address on the mobile"
+    elif command == "gmap":  # 4. Google Maps sharing
+        open_activity(ser, "com.google.android.apps.maps/com.google.android.maps.MapsActivity")
+        wait(2)
+        keycode(ser, "menu")
+        return "Check the location sharing option; make sure you are not sharing location with someone you don't want"
+    elif command == "gphotos":  # 5. Google Photos sharing
+        open_activity(ser, "com.google.android.apps.photos")
+        wait(2)
+        keycode(ser, "menu")
+        return "Check the 'Add partners accout'/'partner account'"
+    else:
+        return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 
 if __name__ == "__main__":
     ser = "ZY224F8TKG"
     # print(get_screen_res(ser)
     # print(is_screen_on(ser))
-    do_privacy_check(ser)
+    do_privacy_check(ser, 'account')
