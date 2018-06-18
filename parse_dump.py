@@ -205,7 +205,7 @@ class IosDump(PhoneDump):
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
     def __init__(self, fname):
-        super(AndroidDump, self).__init__('ios', fname)
+        super(IosDump, self).__init__('ios', fname)
 
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
