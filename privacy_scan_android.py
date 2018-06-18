@@ -34,6 +34,9 @@ import re
 import time
 from flask import url_for
 import random
+import config
+adb=config.ADB_PATH
+
 
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(
@@ -46,9 +49,9 @@ def run_command(cmd, **kwargs):
 
 def thiscli(ser):
     if ser:
-        return "adb -s {ser}".format(ser=ser)
+        return "{adb} -s {ser}".format(adb=adb, ser=ser)
     else:
-        return "adb"
+        return "{adb}".format(adb=adb)
 
 def get_screen_res(ser):
     cmd = "{cli} shell dumpsys window | grep 'mUnrestrictedScreen'"
