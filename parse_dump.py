@@ -177,10 +177,11 @@ class AndroidDump(PhoneDump):
         process_uid = res['userId']
         del res['userId']
         memory = match_keys(d, 'meminfo//Total PSS by process//.*: {}.*'.format(appid))
-
-        uidu = (match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
-                [-1]
-                .split(' / '))
+        uidu_match = match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
+        if uidu_match:
+            uidu = uidu_match[-1].split(' / ')
+        else:
+            uidu = "Not Found"
         if len(uidu) > 1:
             uidu = uidu[1]
         else:
