@@ -151,7 +151,7 @@ def scan():
 
     if not ser:
         return render_template(
-            "base.html", task="home", apps={},
+            "main.html", task="home", apps={},
             error="<b>No device is connected!!</b> {}".format(error)
     )
     scanid = create_scan(clientid, ser, device)
