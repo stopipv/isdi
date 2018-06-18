@@ -8,7 +8,6 @@ from phone_scanner import AndroidScan, IosScan, TestScan
 import json
 import blacklist
 import config
-import parse_dump
 from time import strftime
 import traceback
 from privacy_scan_android import do_privacy_check

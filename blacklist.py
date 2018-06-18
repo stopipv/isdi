@@ -55,9 +55,12 @@ def flag_str(flags):
                 'warning' if 'dual-use' in flag else
                 'info' if 'spy' in flag else ''
         )
+    def _info(flag):
+        return "App name or app-id contains words like 'spy', 'track', etc." if flag == "regex-spy"\
+            else flag
     # If spyware <span class='text-danger'>{}</span>
-    return ',  '.join("<span class=\"text-{}\">{}</span>"\
-                      .format(_add_class(flag), flag) for flag in flags)
+    return ',  '.join("<span class=\"text-{0}\"><abbr title=\"{1}\">{2}</abbr></span>"\
+                      .format(_add_class(flag), _info(flag), flag) for flag in flags)
 
 
 def store_str(st):

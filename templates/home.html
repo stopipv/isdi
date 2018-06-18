@@ -4,9 +4,10 @@
     <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App</a></span>
     </h4>
 
-    <p>This application scans an Android and iOS phone for apps that can be used to spy,
-        track, or monitor on a person without their knowledge.<br/>
-        To prepare the phones for scanning follow the <a href="/instruction">instruction here.</a>
+    <p>This application scans an Android and iOS phone for apps that can be used
+        to spy, track, or monitor a person.  To prepare the phones for scanning
+        follow the <a href="/instruction" target="_blank">instruction here.</a><br/>
+        Check built-in sharing features in your mobile using <a class="lead" href="/privacy"><u>Privacy Checkup</u></a>
     </p>
         <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
@@ -40,7 +41,6 @@
                 <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <br/>
                 <button class="btn btn-primary mx-2">Scan</button>
-                <a class="btn btn-primary mx-2" href="/privacy">Privacy Scan</a>
             </form>
             {% for t in ["Android", "iOS", "test"] %}
                 <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"

@@ -4,7 +4,7 @@ import subprocess
 import pandas as pd
 import config
 import os
-import dataset
+import sqlite3
 from datetime import datetime
 import parse_dump
 import blacklist
@@ -15,8 +15,12 @@ import shlex
 class AppScan(object):
     device_type = ''
     # app_info = pd.read_csv(config.APP_INFO_FILE, index_col='appId')
-    app_info_conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
-
+    # app_info_conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
+    app_info_conn = sqlite3.connect(
+        config.APP_INFO_SQLITE_FILE.replace('sqlite:///', ''),
+        check_same_thread=False
+    )
+    
     def __init__(self, dev_type, cli):
         assert dev_type in config.DEV_SUPPRTED, \
             "dev={!r} is not supported yet. Allowed={}"\
@@ -67,7 +71,7 @@ class AppScan(object):
     def app_details(self, serialno, appid):
         try:
             d = pd.read_sql('select * from apps where appid=?', 
-                            self.app_info_conn.engine,
+                            self.app_info_conn,
                             params=(appid,))
             if not isinstance(d.get('permissions', ''), list):
                 d['permissions'] = d.get('permissions', pd.Series([]))
@@ -103,7 +107,7 @@ class AppScan(object):
         installed_apps = self.get_apps(serialno)
         # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
         #     ', ?'*(len(installed_apps)-1)
-        #     ), self.app_info_conn.engine, params=(installed_apps,))
+        #     ), self.app_info_conn, params=(installed_apps,))
         # r.rename({'appid': 'appId'}, axis='columns', copy=False, inplace=True)
         r = blacklist.app_title_and_flag(
             pd.DataFrame({'appId': installed_apps}),
