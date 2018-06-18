@@ -54,7 +54,8 @@ def split_equalto_delim(k):
     return k.split('=', 1)
 
 class PhoneDump(object):
-    def __init__(self, fname):
+    def __init__(self, dev_type, fname):
+        self.device_type = dev_type
         self.fname = fname
         self.df = self.load_file()
 
@@ -66,6 +67,16 @@ class PhoneDump(object):
 
 
 class AndroidDump(PhoneDump):
+    def __init__(self, fname):
+        txtfname = fname.rsplit('.', 1)[0] + '.txt'
+        jsonfname = fname.rsplit('.', 1)[0] + '.json'
+        fname = jsonfname
+        if not os.path.exists(fname):
+            d = self.parse_dump_file(txtfname)
+            with open(jsonfname, 'w') as f:
+                json.dump(d, f, indent=2)
+        super(AndroidDump, self).__init__('android', fname)
+
     @staticmethod
     def parse_dump_file(fname):
         data = open(fname)
@@ -237,5 +248,5 @@ if __name__ == "__main__":
     fname = sys.argv[1]
     #data = [l.strip() for l in open(fname)]
     ddump = AndroidDump(fname)
-    print(json.dumps(parse_dump_file(fname), indent=2))
-    print(json.dumps(ddump.info('com.digiplex.game'), indent=2))
+    json.dump(ddump.parse_dump_file(fname), open(fname.rsplit('.', 1)[0] + '.json', 'w'), indent=2)
+    print(json.dumps(ddump.info('ru.kidcontrol.gpstracker'), indent=2))
