@@ -30,7 +30,7 @@ def clean_json(d):
 def match_keys(d, keys, only_last=False):
     ret = []
     # print(keys)
-    print(keys)
+    # print(keys)
     for sk in keys.split('//'):
         sk = re.compile(sk)
         for k, v in d.items():
@@ -127,8 +127,6 @@ class AndroidDump(PhoneDump):
                     print(ex)
                     return {}
         else:
-            if not os.path.exists(fname):
-                return {}
             with open(json_fname, 'w') as f:
                 d = self.parse_dump_file(fname)
                 json.dump(d, f, indent=2)
@@ -205,6 +203,8 @@ class IosDump(PhoneDump):
     #    'UIDeviceFamily', 'UIRequiredDeviceCapabilities',
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
+    def __init__(self, fname):
+        super(AndroidDump, self).__init__('ios', fname)
 
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)

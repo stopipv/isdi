@@ -56,8 +56,11 @@ def flag_str(flags):
                 'info' if 'spy' in flag else ''
         )
     def _info(flag):
-        return "App name or app-id contains words like 'spy', 'track', etc." if flag == "regex-spy"\
-            else flag
+        return {
+            "regex-spy": "App name or app-id contains words like 'spy', 'track', etc.",
+            "offstore-spyware": "Spyware apps distributed outside official applicate stores, e.g., "\
+            "Play Store or iTunes App Store"
+        }.get(flag.lower(), flag)
     # If spyware <span class='text-danger'>{}</span>
     return ',  '.join("<span class=\"text-{0}\"><abbr title=\"{1}\">{2}</abbr></span>"\
                       .format(_add_class(flag), _info(flag), flag) for flag in flags)

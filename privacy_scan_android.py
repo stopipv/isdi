@@ -141,21 +141,20 @@ def do_privacy_check(ser, command):
         # wait(2)
         # keycode(ser, 'home')
         # take_screenshot(ser, 'account.png')
-        return "Click on the <code>Google Account</code> on the phone and then check the account email address at the top."
+        return ("Click on the <code>Google Account</code> on the phone, and check the "
+                "<em>account email address</em> at the top.")
     elif command == "backup": # 2. Backup & reset
         open_activity(ser, "com.android.settings/.Settings\$PrivacySettingsActivity")
         # wait(2)
         # keycode(ser, 'home')
         # take_screenshot(ser, 'account.png')
-        return ("Check the email address of the <code>Backup account</code> on the mobile. (If "
-                "backup is <b>on</b>, then <code>Backup account</code> is where the data is being backed"
-                "up to.)")
+        return ("If backup is <b>on</b>, then check the email address where <code>Backup "
+                "account</code> is registered to.")
     elif command == "gmap":  # 4. Google Maps sharing
         open_activity(ser, "com.google.android.apps.maps/com.google.android.maps.MapsActivity")
         wait(2)
         keycode(ser, "menu")
-        return "Check the location sharing option; make sure you are not sharing location with someone you don't want. " + \
-            add_image('google_maps_sharing.png')
+        return ("Check the <code>location sharing</code> option; " + add_image('google_maps_sharing.png'))
     elif command == "gphotos":  # 5. Google Photos sharing
         open_activity(ser, "com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity")
         wait(2)
@@ -163,11 +162,12 @@ def do_privacy_check(ser, command):
         return "Check the <code>Shared library</code>. " + add_image('google_maps_sharing.png')
     elif command == "sync":
         if not open_activity(ser, 'com.android.settings/.Settings\$AccountsGroupSettingsActivity'):
-            return "I could not find syncing functionality in your Android. This most likely mean this is not available,"\
+            return "I could not find syncing functionality in your Android. This most likely mean this is not available, "\
                 "and no need to check."
         else:
-            return "Click on the <code>Google</code> (or other account) where the phone is syncing its data and what data."\
-                "."
+            return ("Click on the <code>Google</code> (or other account) where the phone is syncing its data "
+                    "and what data is being synced.")
+
     elif command == "screenshot":
         take_screenshot(ser, fname="webstatic/images/tmp.png")
         return add_image("tmp.png", nocache=True)
