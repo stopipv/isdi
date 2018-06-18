@@ -45,7 +45,7 @@ def close_connection(exception):
 @app.route("/", methods=['GET'])
 def index():
     return render_template(
-        'page.html',
+        'main.html',
         task = 'home',
         devices={
             'Android': android.devices(),
@@ -74,7 +74,7 @@ def app_details(device):
     
     print(d.keys())
     return render_template(
-        'page.html', task="app",
+        'main.html', task="app",
         app=d,
         info=info,
         device=device
@@ -83,7 +83,7 @@ def app_details(device):
 
 @app.route('/instruction', methods=['GET'])
 def instruction():
-    return render_template('page.html', task="instruction")
+    return render_template('main.html', task="instruction")
 
 
 @app.route('/kill', methods=['POST', 'GET'])
@@ -112,7 +112,7 @@ def privacy():
     TODO: Privacy scan. Think how should it flow. 
     Privacy is a seperate page. 
     """
-    return render_template('page.html', task="privacy")
+    return render_template('main.html', task="privacy")
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
@@ -136,7 +136,7 @@ def scan():
     #     return redirect(url_for(privacy, device=device), code=302)
     sc = get_device(device)
     if not sc:
-        return render_template("page.html",
+        return render_template("main.html",
                                task="home",
                                apps={},
                                error="Please pick one device.",
@@ -163,7 +163,7 @@ def scan():
                           for appid, info in apps.items()])
     rooted = sc.isrooted(ser)
     return render_template(
-        'page.html', task="home",
+        'main.html', task="home",
         isrooted = "Yes" if rooted else "Don't know" if rooted is None else "No",
         apps=apps,
         scanid=scanid,
