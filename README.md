@@ -111,8 +111,8 @@ In the terminal of the computer, run `adb devices` to see if the device is conne
 
 ## TODO
 1. https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
-2. How to figure out off-store apps in Android and iOS?
+2. ~How to figure out off-store apps in Android and iOS? Check the installer in `adb shell pm packages -i`~
 3. For iOS, how to find out app installation dates, resource usage, etc?
-4. Update the `data/` with new labellings.
+4. Explore viability of [WebUSB](https://github.com/WICG/webusb) and [WebADB](https://github.com/webadb/webadb.js).
 
 See [notes.md](notes.md) for other developer helps.
