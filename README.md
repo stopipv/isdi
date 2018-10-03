@@ -20,7 +20,8 @@ connect one device at a time.**)
 
 ![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
 
-
+## Cast iOS Screens or Mirror Android Screens 
+While you are running the scan (and especially if you use the privacy checkup feature), you can _mirror_ Android device screens in a new window using [scrcpy](https://github.com/Genymobile/scrcpy), and _cast_ iOS device screens on macOS with QuickTime 10 (launch it and click File --> New Movie Recording --> (on dropdown by red button) the iPhone/iPad name).
 
 #### Prepare the phone for scanning
 **Android**
