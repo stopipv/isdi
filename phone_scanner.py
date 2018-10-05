@@ -263,7 +263,7 @@ class AndroidScan(AppScan):
     
 class IosScan(AppScan):
     """
-    Needs ios-deploy (compiled with it) or run `bash scripts/setup.sh`
+    Run `bash scripts/setup.sh to get libimobiledevice dependencies`
     """
     def __init__(self):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
@@ -273,6 +273,7 @@ class IosScan(AppScan):
     def get_apps(self, serialno):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
+        # cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
         cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
         dumpf = self.dump_file_name(serialno, 'json')
         if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
