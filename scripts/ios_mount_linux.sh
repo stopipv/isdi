@@ -41,7 +41,7 @@ get_device_ids ()
 
 is_mounted ()
 {
-  gio mount -l | grep -i "mount.*$1" >/dev/null
+  gvfs-mount mount -l | grep -i "mount.*$1" >/dev/null
 }
 
 mount_iphone ()
@@ -62,8 +62,8 @@ mount_iphone ()
 unmount_iphone ()
 {
   ## now gvfs unmount the device
-  [ -z $show_mount_cmd ] || echo gio mount -u afc://$1/ >&2
-  if gio mount -u /run/user/`id -u $USER`/gvfs/afc:host=$1*; then
+  [ -z $show_mount_cmd ] || echo gvfs-mount mount -u afc://$1/ >&2
+  if gvfs-mount mount -u /run/user/`id -u $USER`/gvfs/afc:host=$1*; then
     show_msg "unmounted iphone with serial $1" "red"
   else
     show_msg "iphone umount failed" "red"
