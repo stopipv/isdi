@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-import json
-import plistlib
+from plistlib import readPlist
 from functools import reduce
 import operator
+import json
 
 # load permissions mappings, apps plist
 with open('ios_permissions.json', 'r') as fh:
     PERMISSIONS_MAP = json.load(fh)
 APPS_PLIST = plistlib.readPlist('iphone_plist.xml')
-
 
 def _retrieve(dict_, nest):
     '''
