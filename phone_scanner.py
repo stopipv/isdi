@@ -273,9 +273,10 @@ class IosScan(AppScan):
     def get_apps(self, serialno):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
-        # cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
+        # cmd = 'ideviceinstaller -u {serial} -o xml -o list_all > {outf}'
         cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
         dumpf = self.dump_file_name(serialno, 'json')
+        #dumpf = self.dump_file_name(serialno, 'xml')
         if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
             print("Dumped the data into: {}".format(dumpf))
             s = parse_dump.IosDump(dumpf)

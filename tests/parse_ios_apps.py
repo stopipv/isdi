@@ -39,8 +39,7 @@ def permissions():
                             PERMISSIONS_MAP[permission] = permission[11:]
                             fh.write(json.dumps(PERMISSIONS_MAP))
                         permission = permission[11:]
-                    else:
-                        print("\t{}: ".format(msg)+str(PERMISSIONS_MAP[permission]))
+                    print("\t{}: ".format(msg)+str(PERMISSIONS_MAP[permission]))
 
             _print_permissions(permissions, "Built-in")
             _print_permissions(adjustable_permissions, "Adjustable from settings")
