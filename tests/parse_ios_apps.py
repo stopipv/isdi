@@ -19,6 +19,16 @@ def _retrieve(dict_, nest):
     except KeyError as e:
         return ""
 
+def _print_permissions(permissions, msg):
+    for permission in permissions:
+        if permission not in PERMISSIONS_MAP:
+            # add newly-discovered permission
+            with open('ios_permissions.json', 'w') as fh:
+                PERMISSIONS_MAP[permission] = permission[11:]
+                fh.write(json.dumps(PERMISSIONS_MAP))
+            permission = permission[11:]
+        print("\t{}: ".format(msg)+str(PERMISSIONS_MAP[permission]))
+
 def permissions():
     # get xml dump from ios_dump.sh
     for app in APPS_PLIST:
@@ -29,23 +39,14 @@ def permissions():
 
             permissions = _retrieve(app, ['Entitlements','com.apple.private.tcc.allow'])
             adjustable_permissions =  _retrieve(app, ['Entitlements','com.apple.private.tcc.allow.overridable'])
-            c = _retrieve(app, ['Entitlements','com.apple.private.MobileGestalt.AllowedProtectedKeys'])
-
-            def _print_permissions(permissions, msg):
-                for permission in permissions:
-                    if permission not in PERMISSIONS_MAP:
-                        # add newly-discovered permission
-                        with open('ios_permissions.json', 'w') as fh:
-                            PERMISSIONS_MAP[permission] = permission[11:]
-                            fh.write(json.dumps(PERMISSIONS_MAP))
-                        permission = permission[11:]
-                    print("\t{}: ".format(msg)+str(PERMISSIONS_MAP[permission]))
+            PII = _retrieve(app, ['Entitlements','com.apple.private.MobileGestalt.AllowedProtectedKeys'])
 
             _print_permissions(permissions, "Built-in")
             _print_permissions(adjustable_permissions, "Adjustable from settings")
 
-            if c:
-                print("\tPII: "+str(c))
+            if PII:
+                print("\tPII: "+str(PII))
+
         print("")
 
 if __name__ == "__main__":
