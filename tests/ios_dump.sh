@@ -19,3 +19,6 @@ rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
 ifuse -u "$serial" --root /tmp/phonescanmnt &> ios_jailbroken.log
 cd ..
+
+# for consumption by python
+echo $serial
