@@ -1,6 +1,6 @@
 #!/bin/bash
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -l -o xml -o list_all > iphone_plist.xml
+ideviceinstaller -l -o xml -o list_all > iphone_plist.plist
 # use with installer_parse.py
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
