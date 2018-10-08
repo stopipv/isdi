@@ -4,10 +4,16 @@ from functools import reduce
 import operator
 import json
 
+path = 'serial/'
 # load permissions mappings and apps plist
 with open('ios_permissions.json', 'r') as fh:
     PERMISSIONS_MAP = json.load(fh)
-APPS_PLIST = readPlist('iphone_plist.plist')
+with open('ios_device_identifiers.json', 'r') as fh:
+    MODEL_MAKE_MAP = json.load(fh)
+with open(path+'ios_jailbroken.log', 'r') as fh:
+    JAILBROKEN_LOG = fh.readlines()
+APPS_PLIST = readPlist(path+'ios_apps.plist')
+DEVICE_INFO = readPlist(path+'ios_info.xml')
 
 def _retrieve(dict_, nest):
     '''
@@ -51,8 +57,8 @@ def get_permissions(app):
 
     return all_permissions
 
+# Get dumps by running ios_dump.sh first.
 def parse_dump():
-    # get plist dump from ios_dump.sh
     for app in APPS_PLIST:
         party = app["ApplicationType"].lower()
         if party in ['system','user']:
@@ -64,5 +70,19 @@ def parse_dump():
                 print("\t"+str(permission[0])+"\tReason: "+permission[1])
             print("")
 
+    # determine make and version
+    try:
+        make = MODEL_MAKE_MAP[DEVICE_INFO['ProductType']]
+    except KeyError as e:
+        make = DEVICE_INFO['DeviceClass']+" (Model "+DEVICE_INFO['ModelNumber']+DEVICE_INFO['RegionInfo']+")"
+    print("Your device, an "+make+", is running version "+DEVICE_INFO['ProductVersion'])
+
+    # check for jailbroken status
+    if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
+        print("Filesystem not rooted. Highly unlikely to be jailbroken.")
+    else:
+        print("Filesystem has been rooted. This device is jailbroken.")
+
 if __name__ == "__main__":
+    # Get dumps by running ios_dump.sh first.
     parse_dump()

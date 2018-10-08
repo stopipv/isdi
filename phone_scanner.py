@@ -298,7 +298,8 @@ class IosScan(AppScan):
             """Is it looks like a serial number"""
             return re.match(r'[a-f0-9]+', x) is not None
 
-        cmd = '{cli} --detect -t1 | tail -n 1'
+        #cmd = '{cli} --detect -t1 | tail -n 1'
+        cmd = 'idevice_id -l | tail -n 1'
         self.serialno = None
         s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
         d = [l.strip() for l in s.split('\n')
