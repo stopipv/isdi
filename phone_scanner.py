@@ -80,6 +80,8 @@ class AppScan(object):
                 d['descriptionHTML'] = d['description']
             dfname = self.dump_file_name(serialno)
             if self.device_type == 'ios':
+                #ddump = parse_dump.IosDump(dfname)
+                dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
                 ddump = parse_dump.IosDump(dfname)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
@@ -255,9 +257,11 @@ class AndroidScan(AppScan):
         s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial)))
         if s == -1 or 'su: not found' in s:
             print(config.error())
-            return False
+            reason = "couldn't find 'su' tool on the phone."
+            return (False, reason)
         else:
-            return True
+            reason = "found 'su' tool on the phone."
+            return (True, reason)
 
 
     
@@ -270,18 +274,40 @@ class IosScan(AppScan):
         self.installed_apps = None
         self.serialno = None
 
+    def setup(self):
+        ''' FIXME: iOS setup. '''
+        if config.PLATFORM == 'linux':
+            cmd = config.SCRIPT_DIR + '/ios_mount_linux.sh mount'
+            #mountmsg = self.run_command(cmd).stderr.read().decode('utf-8')
+            if self.catch_err(self.run_command(cmd)) == -1:
+                return (False, "Couldn't detect device. See ios_mount_linux.sh.")
+        cmd = 'idevicepair pair'
+        pairmsg = self.run_command(cmd).stdout.read().decode('utf-8')
+        if "No device found, is it plugged in?" in pairmsg:
+            return (False, pairmsg)
+        return (True, "Follow trust dialog on iOS deivce to continue.")
+
     def get_apps(self, serialno):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
-        # cmd = 'ideviceinstaller -u {serial} -o xml -o list_all > {outf}'
-        cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
-        dumpf = self.dump_file_name(serialno, 'json')
+        #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
+
+        path = os.path.join(config.DUMP_DIR, serialno+"_ios")
+        cmd = 'ideviceinstaller -u {serial} -l -o xml -o list_all > {path}/ios_apps.plist'
+
+        #dumpf = self.dump_file_name(serialno, 'json')
         #dumpf = self.dump_file_name(serialno, 'xml')
+        dumpf = path+"/ios_apps.plist"
+
         if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
             print("Dumped the data into: {}".format(dumpf))
             s = parse_dump.IosDump(dumpf)
             self.installed_apps = s.installed_apps()
         else:
+            connected, connected_reason = self.setup()
+            if not connected:
+                print(connected_reason)
+                # FIXME: error here?
             self.installed_apps = []
         return self.installed_apps
 
@@ -308,10 +334,25 @@ class IosScan(AppScan):
         return d
 
     def uninstall(self, serial, appid):
-        cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
+        #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
+        cmd = 'ideviceinstaller -udid {serial} -uninstall {appid!r}'
         s = self.catch_err(self.run_command(cmd, serial=serial, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
+
+    def isrooted(self, serial):
+        with open(os.path.join(config.DUMP_DIR,"{serial}/ios_jailbroken.log",'r')) as fh:
+            JAILBROKEN_LOG = fh.readlines()
+
+        ''' check for jailbroken status after attempts logged by ios_dump.sh '''
+        if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
+            reason = "Filesystem is not rooted. *Highly unlikely* to be jailbroken."
+            print(reason)
+            return (False, reason)
+	else:
+	    reason = "Filesystem has been rooted. This device is jailbroken."
+            print(reason)
+            return (True, reason)
 
 
 class TestScan(AppScan):
