@@ -150,6 +150,7 @@ def scan():
     "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
     if not ser:
+        # FIXME: add scripts/ios_mount_linux.sh workflow for iOS.
         return render_template(
             "main.html", task="home", apps={},
             error="<b>No device is connected!!</b> {}".format(error)
@@ -160,10 +161,11 @@ def scan():
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
                           for appid, info in apps.items()])
-    rooted = sc.isrooted(ser)
+    rooted, rooted_reason = sc.isrooted(ser)
     return render_template(
         'main.html', task="home",
-        isrooted = "Yes" if rooted else "Don't know" if rooted is None else "No",
+        isrooted = "Yes: {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
+                else "No: {}".format(rooted_reason),
         apps=apps,
         scanid=scanid,
         clientid=clientid,

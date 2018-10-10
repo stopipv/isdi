@@ -210,7 +210,17 @@ class IosDump(PhoneDump):
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
         try:
-            d = pd.read_json(self.fname).T
+            #d = pd.read_json(self.fname).T
+            #d = pd.read_json(self.fname).T
+
+            # FIXME: somehow, get the ios_apps.plist into a dataframe.
+            from plistlib import readPlist
+            APPS_PLIST = readPlist(self.fname)
+            # load into pd...
+            apps_json = json.dumps(APPS_PLIST)
+            d = pd.read_json(apps)
+
+            
             d.index.rename('appId', inplace=True)
             return d
         except Exception as ex:
@@ -218,24 +228,35 @@ class IosDump(PhoneDump):
             print("Could not load the json file: {}".format(self.fname))
 
     def info(self, appid):
+        '''
+            Returns dict containing the following:
+            'permission': tuple (all permissions of appid, developer
+            reasons for requesting the permissions)
+            'title': the human-friendly name of the app.
+            'jailbroken': tuple (whether or not phone is suspected to be jailbroken, rationale)
+            'phone_kind': tuple (make, OS version)
+        '''
         d = self.df
         res = {}
-        entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
+        
+        #entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
 
-        ''' remove kTCCService from beginning of string '''
-        def decruft(perms): 
-            return perms[11:]
-        if "com.apple.private.tcc.allow" in entitlements.keys():
-            permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow"]]
-            print(permissions)
-        elif "com.apple.private.tcc.allow.overridable" in entitlements.keys():
-            permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow.overridable"]]
-            print(permissions)
-        else:
-            print("Couldn't find any app permissions on '{}'".format(appid))
-            permissions = []
-        res['permissions'] = permissions
-        res['title'] = d[d['CFBundleIdentifier'] == appid]["CFBundleExecutable"].iloc[0]
+        #''' remove kTCCService from beginning of string '''
+        #def decruft(perms): 
+        #    return perms[11:]
+        #if "com.apple.private.tcc.allow" in entitlements.keys():
+        #    permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow"]]
+        #    print(permissions)
+        #elif "com.apple.private.tcc.allow.overridable" in entitlements.keys():
+        #    permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow.overridable"]]
+        #    print(permissions)
+        #else:
+        #    print("Couldn't find any app permissions on '{}'".format(appid))
+        #    permissions = []
+        
+        #res['permissions'] = permissions
+        #res['title'] = d[d['CFBundleIdentifier'] == appid]["CFBundleExecutable"].iloc[0]
+        
         return res
 
     def system_apps(self):
