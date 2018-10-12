@@ -341,8 +341,11 @@ class IosScan(AppScan):
         return s != -1
 
     def isrooted(self, serial):
-        with open(os.path.join(config.DUMP_DIR,"{serial}/ios_jailbroken.log",'r')) as fh:
+        with open(os.path.join(config.DUMP_DIR,"{serial}_ios/ios_jailbroken.log",'r')) as fh:
             JAILBROKEN_LOG = fh.readlines()
+
+
+        # if app["Path"].split("/")[-1] in ["Cydia.app"]
 
         ''' check for jailbroken status after attempts logged by ios_dump.sh '''
         if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
