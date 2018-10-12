@@ -1,7 +1,7 @@
 #!/bin/bash
 serial=$(idevice_id -l 2>&1 | tail -n 1)
-mkdir -p "$serial"
-cd $serial
+mkdir -p "$serial"_ios
+cd "$serial"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
 ideviceinstaller -u "$serial" -l -o xml -o list_all > ios_apps.plist
 # use with installer_parse.py

@@ -59,7 +59,9 @@ def get_permissions(app):
 
 # Get dumps by running ios_dump.sh first.
 def parse_dump():
+    dotapps = []
     for app in APPS_PLIST:
+        dotapps.append(app["Path"].split("/")[-1])
         party = app["ApplicationType"].lower()
         if party in ['system','user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
@@ -76,6 +78,22 @@ def parse_dump():
     except KeyError as e:
         make = DEVICE_INFO['DeviceClass']+" (Model "+DEVICE_INFO['ModelNumber']+DEVICE_INFO['RegionInfo']+")"
     print("Your device, an "+make+", is running version "+DEVICE_INFO['ProductVersion'])
+
+    
+    ''' Summary of jailbroken detection: checks for commonly installed jailbreak apps, 
+        tries to mount root filesystem (AFC2, by default on iOS 7 and lower,
+        tries to SSH into the phone (FIXME). iproxy 2222 22 `idevice_id -l` says
+        "waiting for connection" perpertually if not work. says "accepted connection" on next line if it does.
+        https://twitter.com/bellis1000/status/807527492810665984?lang=en
+    '''
+    # add to jailbroken log
+    for app in ["Cydia.app", "blackra1n.app", \
+            "FakeCarrier.app", "Icy.app", "IntelliScreen.app", \
+            "MxTube.app", "RockApp.app", "SBSettings.app", \
+            "WinterBoard.app"]:
+        if app in dotapps:
+            with open(JAILBROKEN_LOG, 'a') as fh:
+                fh.write("{} was found on the device.\n".format(app))
 
     # check for jailbroken status
     if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
