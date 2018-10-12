@@ -87,6 +87,7 @@ def parse_dump():
         https://twitter.com/bellis1000/status/807527492810665984?lang=en
     '''
     # add to jailbroken log
+    # FIXME: load from private data blacklist. More to be added.
     for app in ["Cydia.app", "blackra1n.app", \
             "FakeCarrier.app", "Icy.app", "IntelliScreen.app", \
             "MxTube.app", "RockApp.app", "SBSettings.app", \
