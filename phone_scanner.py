@@ -65,6 +65,20 @@ class AppScan(object):
         return []
 
     def dump_file_name(self, serial, fsuffix='json'):
+        if self.device_type == 'ios':
+            if fsuffix == 'jailbreak':
+                devicedumpsdir = os.path.join(config.DUMP_DIR, \
+                        '{}_{}'.format(serial, 'ios'))
+                return os.path.join(devicedumpsdir, 'ios_jailbroken.log')
+            elif fsuffix == 'devinfo':
+                devicedumpsdir = os.path.join(config.DUMP_DIR, \
+                        '{}_{}'.format(serial, 'ios'))
+                return os.path.join(devicedumpsdir, 'ios_info.xml')
+            else:
+                devicedumpsdir = os.path.join(config.DUMP_DIR, \
+                        '{}_{}'.format(serial, 'ios'))
+                return os.path.join(devicedumpsdir, 'ios_apps.plist')
+
         return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
             serial, self.device_type, fsuffix))
 
@@ -81,11 +95,15 @@ class AppScan(object):
             dfname = self.dump_file_name(serialno)
             if self.device_type == 'ios':
                 #ddump = parse_dump.IosDump(dfname)
-                dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
-                ddump = parse_dump.IosDump(dfname)
+                #dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
+                # FIXME: better suffix renaming scheme
+                devinfo = self.dump_file_name(serialno, 'devinfo')
+                ddump = parse_dump.IosDump(dfname, devinfo)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
+
             info = ddump.info(appid)
+            # FIXME: sloppy iOS hack but should fix later, just add these to DF directly.
             if self.device_type == 'ios':
                 d['permissions'] = [info['permissions']]
                 d['title'] = [info['title']]
@@ -180,7 +198,7 @@ class AndroidScan(AppScan):
 
     def setup(self):
         p = self.run_command(
-            '{cli} kill-server; {cli} start-server'
+            '{} kill-server; {} start-server'.format(cli,cli)
         )
         if p != 0:
             print("Setup failed with returncode={}. ~~ ex={!r}"
@@ -253,17 +271,34 @@ class AndroidScan(AppScan):
         return s != -1
 
     def isrooted(self, serial):
-        cmd = '{cli} -s {serial} shell su'
+        '''
+            Doesn't return all reasons by default. First match will return.
+        '''
+        cmd = "{cli} -s {serial} shell 'which su'"
         s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial)))
-        if s == -1 or 'su: not found' in s:
+        if s == -1 or 'su: not found' in s or len(s) == 0:
             print(config.error())
             reason = "couldn't find 'su' tool on the phone."
             return (False, reason)
         else:
-            reason = "found 'su' tool on the phone."
+            reason = "found '{}' tool on the phone.".format(s.strip())
             return (True, reason)
-
-
+        
+        installed_apps = self.installed_apps
+        if not installed_apps:
+            installed_apps = self.get_apps(serial)
+        
+        # FIXME: load these from a private database instead.
+        # from OWASP, 
+        #https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
+        root_pkgs = ['com.noshufou.android.su','com.thirdparty.superuser',\
+                'eu.chainfire.supersu', 'com.koushikdutta.superuser',\
+                'com.zachspong.temprootremovejb' ,'com.ramdroid.appquarantine']
+        root_pkgs_check = list(set(root_pkgs) & set(installed_apps))
+        if root_pkgs_check:
+            reason = "found the following app(s) on the phone: '{}'."\
+                    .format(str(root_pkgs_check))
+            return (True, reason)
     
 class IosScan(AppScan):
     """
@@ -293,15 +328,27 @@ class IosScan(AppScan):
         #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
 
         path = os.path.join(config.DUMP_DIR, serialno+"_ios")
-        cmd = 'ideviceinstaller -u {serial} -l -o xml -o list_all > {path}/ios_apps.plist'
+        #cmd = 'ideviceinstaller -u {} -l -o xml -o list_all > {}/ios_apps.plist'.format(serialno, path)
+        #print(cmd)
 
         #dumpf = self.dump_file_name(serialno, 'json')
         #dumpf = self.dump_file_name(serialno, 'xml')
         dumpf = path+"/ios_apps.plist"
+        dumpfinfo = path+"/ios_info.xml"
+        #cmd2 = "ideviceinfo -u {} -x > {}/ios_info.xml".format(serialno, path)
+
+
+        cmd = '{}/ios_dump.sh'.format(config.THISDIR)
+        #if self.catch_err(self.run_command(cmd2, serial=serialno, outf=dumpfinfo)) == -1:
+        #    connected, connected_reason = self.setup()
+        #    if not connected:
+        #        print(connected_reason)
+        #        # FIXME: error here?
 
         if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
             print("Dumped the data into: {}".format(dumpf))
-            s = parse_dump.IosDump(dumpf)
+            s = parse_dump.IosDump(dumpf, dumpfinfo)
+            print(s.load_file())
             self.installed_apps = s.installed_apps()
         else:
             connected, connected_reason = self.setup()
@@ -312,9 +359,11 @@ class IosScan(AppScan):
         return self.installed_apps
 
     def get_system_apps(self, serialno):
-        dumpf = self.dump_file_name(serialno, 'json')
+        dumpf = self.dump_file_name(serialno, 'plist')
+        dumpfinfo = self.dump_file_name(serialno, 'devinfo')
+        
         if os.path.exists(dumpf):
-            s = parse_dump.IosDump(dumpf)
+            s = parse_dump.IosDump(dumpf, dumpfinfo)
             return s.system_apps()
         else:
             return []
@@ -335,28 +384,44 @@ class IosScan(AppScan):
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
-        cmd = 'ideviceinstaller -udid {serial} -uninstall {appid!r}'
+        cmd = 'ideviceinstaller -udid {} -uninstall {!r}'.format(serial, appid)
         s = self.catch_err(self.run_command(cmd, serial=serial, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
     def isrooted(self, serial):
-        with open(os.path.join(config.DUMP_DIR,"{serial}_ios/ios_jailbroken.log",'r')) as fh:
+        with open(os.path.join(config.DUMP_DIR,"{}_ios/ios_jailbroken.log".format(serial)),'r') as fh:
             JAILBROKEN_LOG = fh.readlines()
 
-
         # if app["Path"].split("/")[-1] in ["Cydia.app"]
-
+        ''' Summary of jailbroken detection: checks for commonly installed jailbreak apps,
+        tries to mount root filesystem (AFC2, by default on iOS 7 and lower,
+        tries to SSH into the phone (FIXME). iproxy 2222 22 `idevice_id -l` says
+        "waiting for connection" perpertually if not work. says "accepted connection" on next line if it does.
+        https://twitter.com/bellis1000/status/807527492810665984?lang=en
+        # add to jailbroken log
+        # FIXME: load from private data blacklist. More to be added.
+        '''
+        # FIXME: NEED to apply first to df. self.installed_apps not sufficient. dotapps.append(app["Path"].split("/")[-1])
+        reasons = []
+        for app in ["Cydia.app", "blackra1n.app", 
+                "FakeCarrier.app", "Icy.app", "IntelliScreen.app", 
+                "MxTube.app", "RockApp.app", "SBSettings.app", 
+                "WinterBoard.app"]:
+            if app in self.installed_apps:
+                return (True, "{} was found on the device.".format(app))
+        reasons.append("Did not find popular jailbreak apps installed.")
         ''' check for jailbroken status after attempts logged by ios_dump.sh '''
+
         if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
-            reason = "Filesystem is not rooted. *Highly unlikely* to be jailbroken."
-            print(reason)
-            return (False, reason)
-	else:
-	    reason = "Filesystem has been rooted. This device is jailbroken."
+            reasons.append("Filesystem is not rooted. *Highly unlikely* to be jailbroken.")
+            print(reasons)
+            return (False, reasons)
+        else:
+            reason = "Filesystem has been rooted. This device is jailbroken."
             print(reason)
             return (True, reason)
-
+        return (False, reasons)
 
 class TestScan(AppScan):
     def __init__(self):

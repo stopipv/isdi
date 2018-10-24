@@ -60,6 +60,7 @@ def get_permissions(app):
 # Get dumps by running ios_dump.sh first.
 def parse_dump():
     dotapps = []
+    perms_c = 0
     for app in APPS_PLIST:
         dotapps.append(app["Path"].split("/")[-1])
         party = app["ApplicationType"].lower()
@@ -69,6 +70,7 @@ def parse_dump():
 
             permissions = get_permissions(app)
             for permission in permissions:
+                perms_c += 1
                 print("\t"+str(permission[0])+"\tReason: "+permission[1])
             print("")
 
@@ -101,6 +103,7 @@ def parse_dump():
         print("Filesystem not rooted. Highly unlikely to be jailbroken.")
     else:
         print("Filesystem has been rooted. This device is jailbroken.")
+    print(perms_c)
 
 if __name__ == "__main__":
     # Get dumps by running ios_dump.sh first.
