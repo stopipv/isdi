@@ -71,6 +71,7 @@ def store_str(st):
 
 
 def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
+    print(apps)
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
     _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     _td.loc[offstore_apps, 'flags'].apply(lambda x: x.append('offstore-app'))

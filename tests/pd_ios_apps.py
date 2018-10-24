@@ -21,9 +21,12 @@ def _retrieve(dict_, nest):
         Navigates dictionaries like dict_[nest0][nest1][nest2]...
         gracefully.
     '''
+    dict_ = dict_.to_dict() # for pandas
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
+        return ""
+    except TypeError as e:
         return ""
 
 def _check_unseen_permissions(permissions):
@@ -50,7 +53,7 @@ def get_permissions(app):
     
     # (permission used, developer reason for requesting the permission)
     all_permissions = list(set(map(lambda x: \
-            (PERMISSIONS_MAP[x], app.get(x, "permission granted by system")),\
+            (PERMISSIONS_MAP[x], app.get(x, default="permission granted by system")),\
             list(set(system_permissions) | \
             set(adjustable_system_permissions) | set(third_party_permissions)))))
     pii = _retrieve(app, ['Entitlements','com.apple.private.MobileGestalt.AllowedProtectedKeys'])
@@ -62,8 +65,9 @@ def get_permissions(app):
 def parse_dump():
     apps_json = json.dumps(APPS_PLIST)
     df = pd.read_json(apps_json)
+    
     for appidx in range(df.shape[0]):
-        app = df.iloc[appidx,:]
+        app = df.iloc[appidx,:].dropna()
         party = app.ApplicationType.lower()
         if party in ['system','user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
@@ -73,7 +77,6 @@ def parse_dump():
             for permission in permissions:
                 print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
             print("")
-
     # determine make and version
     try:
         make = MODEL_MAKE_MAP[DEVICE_INFO['ProductType']]

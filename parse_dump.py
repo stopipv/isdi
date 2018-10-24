@@ -4,6 +4,9 @@ import sys
 import os
 import pandas as pd
 import io
+import config
+from functools import reduce
+import operator
 
 
 def count_lspaces(l):
@@ -204,8 +207,27 @@ class IosDump(PhoneDump):
     #    'UIDeviceFamily', 'UIRequiredDeviceCapabilities',
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
-    def __init__(self, fname):
-        super(IosDump, self).__init__('ios', fname)
+    def __init__(self, fplist, finfo):
+        self.device_type = 'ios'
+        self.fname = fplist
+        self.finfo = None
+        if finfo:
+            self.finfo = finfo
+        self.df = self.load_file()
+        self.deviceinfo = self.load_deviceinfo()
+
+        # FIXME: not efficient to load here everytime?
+        # load permissions mappings and apps plist
+        self.permissions_map = {}
+        self.model_make_map = {}
+        with open(os.path.join(config.THISDIR, 'ios_permissions.json'), 'r') as fh:
+            self.permissions_map = json.load(fh)
+        with open(os.path.join(config.THISDIR, 'ios_device_identifiers.json'), 'r') as fh:
+            self.model_make_map = json.load(fh)
+
+    def load_deviceinfo(self):
+        from plistlib import readPlist
+        return readPlist(self.finfo)
 
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
@@ -216,17 +238,62 @@ class IosDump(PhoneDump):
             # FIXME: somehow, get the ios_apps.plist into a dataframe.
             from plistlib import readPlist
             APPS_PLIST = readPlist(self.fname)
+            print("fname is: {}".format(self.fname))
             # load into pd...
             apps_json = json.dumps(APPS_PLIST)
-            d = pd.read_json(apps)
-
+            d = pd.read_json(apps_json)
             
-            d.index.rename('appId', inplace=True)
+            d['appId'] = d['CFBundleIdentifier']
+            #d.index.rename('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
             print("Could not load the json file: {}".format(self.fname))
 
+    def retrieve(self, dict_, nest):
+        '''
+            Navigates dictionaries like dict_[nest0][nest1][nest2]...
+            gracefully.
+        '''
+        dict_ = dict_.to_dict() # for pandas
+        try:
+            return reduce(operator.getitem, nest, dict_)
+        except KeyError as e:
+            return ""
+        except TypeError as e:
+            return ""
+
+    def check_unseen_permissions(self, permissions):
+        for permission in permissions:
+            if permission not in self.permissions_map:
+                print('Have not seen '+str(permission)+' before. Making note of this...')
+                permission_human_readable = permission.replace('kTCCService','')
+                with open(os.path.join(config.THISDIR,'ios_permissions.json'), 'w') as fh:
+                    self.permissions_map[permission] = permission_human_readable
+                    fh.write(json.dumps(self.permissions_map))
+                print('Noted.')
+            #print('\t'+msg+": "+str(PERMISSIONS_MAP[permission])+"\tReason: "+app.get(permission,'system app'))
+
+    def get_permissions(self, app):
+        '''
+            Returns a list of tuples (permission, developer-provided reason for permission).
+            Could modify this function to include whether or not the permission can be adjusted
+            in Settings.
+        '''
+        system_permissions = self.retrieve(app, ['Entitlements','com.apple.private.tcc.allow'])
+        adjustable_system_permissions = self.retrieve(app, ['Entitlements','com.apple.private.tcc.allow.overridable'])
+        third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
+        self.check_unseen_permissions(list(system_permissions)+list(adjustable_system_permissions))
+
+        # (permission used, developer reason for requesting the permission)
+        all_permissions = list(set(map(lambda x: \
+                (self.permissions_map[x], app.get(x, default="permission granted by system")),\
+                list(set(system_permissions) | \
+                set(adjustable_system_permissions) | set(third_party_permissions)))))
+        pii = self.retrieve(app, ['Entitlements','com.apple.private.MobileGestalt.AllowedProtectedKeys'])
+        #print("\tPII: "+str(pii))
+        return all_permissions
+    
     def info(self, appid):
         '''
             Returns dict containing the following:
@@ -239,6 +306,33 @@ class IosDump(PhoneDump):
         d = self.df
         res = {}
         
+
+             
+        # determine make and version
+        try:
+            make = self.model_make_map[self.deviceinfo['ProductType']]
+        except KeyError as e:
+            make = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
+        print("Your device, an "+make+", is running version "+self.deviceinfo['ProductVersion'])
+        
+    
+        
+        #app = self.df.iloc[appidx,:].dropna()
+        app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
+        party = app.ApplicationType.lower()
+        if party in ['system','user']:
+            print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
+                    .format(party))
+
+            permissions = self.get_permissions(app)
+            for permission in permissions:
+                print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
+            print("")
+        res['permissions'] = permissions
+        res['title'] = app['CFBundleExecutable']
+        res['Your iOS Device'] = make
+        res['iOS Version'] = self.deviceinfo['ProductVersion']
+
         #entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
 
         #''' remove kTCCService from beginning of string '''
@@ -259,11 +353,26 @@ class IosDump(PhoneDump):
         
         return res
 
+    def all():
+        for appidx in range(self.df.shape[0]):
+            app = self.df.iloc[appidx,:].dropna()
+            party = app.ApplicationType.lower()
+            if party in ['system','user']:
+                print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
+                        .format(party))
+
+                permissions = get_permissions(app)
+                for permission in permissions:
+                    print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
+                print("")
+
     def system_apps(self):
-        return self.df.query('ApplicationType=="System"').index
+        #return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
+        return self.df.query('ApplicationType=="System"')['CFBundleIdentifier']
 
     def installed_apps(self):
-        return self.df.index
+        #return self.df.index
+        return self.df['appId']
 
 
 if __name__ == "__main__":
