@@ -125,6 +125,7 @@ class AppScan(object):
         Return the sorted dataframe
         """
         installed_apps = self.get_apps(serialno)
+        
         # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
         #     ', ?'*(len(installed_apps)-1)
         #     ), self.app_info_conn, params=(installed_apps,))
@@ -198,7 +199,7 @@ class AndroidScan(AppScan):
 
     def setup(self):
         p = self.run_command(
-            '{} kill-server; {} start-server'.format(cli,cli)
+            '{cli} kill-server; {cli} start-server'
         )
         if p != 0:
             print("Setup failed with returncode={}. ~~ ex={!r}"
@@ -309,18 +310,28 @@ class IosScan(AppScan):
         self.installed_apps = None
         self.serialno = None
 
-    def setup(self):
+    def setup(self, attempt_remount=False):
         ''' FIXME: iOS setup. '''
-        if config.PLATFORM == 'linux':
+        if config.PLATFORM == 'linux' and attempt_remount:
+            # FIXME: need to prompt system maintainer for sudo password?
             cmd = config.SCRIPT_DIR + '/ios_mount_linux.sh mount'
             #mountmsg = self.run_command(cmd).stderr.read().decode('utf-8')
             if self.catch_err(self.run_command(cmd)) == -1:
-                return (False, "Couldn't detect device. See ios_mount_linux.sh.")
+                return (False, "Couldn't detect device. See {}/ios_mount_linux.sh."\
+                        .format(config.SCRIPT_DIR))
         cmd = 'idevicepair pair'
         pairmsg = self.run_command(cmd).stdout.read().decode('utf-8')
         if "No device found, is it plugged in?" in pairmsg:
             return (False, pairmsg)
-        return (True, "Follow trust dialog on iOS deivce to continue.")
+        elif "Please enter the passcode on the device and retry." in pairmsg:
+            return (False, "Please unlock your device and follow the trust dialog"\
+                    " (you will need to enter your passcode). Then try to scan again.")
+        elif "SUCCESS: Paired with device" in pairmsg:
+            return (True, "Device successfully paired. Setup complete.")
+        elif "said that the user denied the trust dialog." in pairmsg:
+            return (False, "The trust dialog was denied. Please unplug the device"\
+                    ", reconnect it, and scan again -- accept the trust dialog to proceed.")
+        return (True, "Follow trust dialog on iOS device to continue.")
 
     def get_apps(self, serialno):
         self.serialno = serialno
@@ -345,12 +356,14 @@ class IosScan(AppScan):
         #        print(connected_reason)
         #        # FIXME: error here?
 
-        if self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)) != -1:
+        dumpres = self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)).strip()
+        if dumpres == serialno:
             print("Dumped the data into: {}".format(dumpf))
             s = parse_dump.IosDump(dumpf, dumpfinfo)
             print(s.load_file())
             self.installed_apps = s.installed_apps()
         else:
+            print("Couldn't connect to the device. Trying to reconnect.") 
             connected, connected_reason = self.setup()
             if not connected:
                 print(connected_reason)

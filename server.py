@@ -149,6 +149,12 @@ def scan():
     "If an Android device is connected, disconnect and reconnect the device, make sure "\
     "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
+    if device == 'ios':
+        isconnected, reason = sc.setup()
+        if not isconnected:
+            return render_template(
+                "main.html", task="home", apps={},
+                error="<b>{}</b>".format(reason))
     if not ser:
         # FIXME: add scripts/ios_mount_linux.sh workflow for iOS.
         return render_template(
