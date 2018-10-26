@@ -109,6 +109,15 @@ class AppScan(object):
                 d['title'] = [info['title']]
                 #print(info['permissions'])
                 del info['permissions']
+            elif self.device_type == 'android':
+                #cmd = '{cli} -s {serial} shell dumpsys appops' # gets everything FIXME: do this somewhere else, repeatedly
+                cmd = '{cli} -s {serial} shell appops get {app}'
+                perms = self.catch_err(self.run_command(cmd, serial=serialno, app=appid))
+                perms = perms.split("\n")
+                for perm in perms:
+                    print(perm.split(";"))
+
+
             print("AppInfo: ", info, appid, dfname, ddump)
             # p = self.run_command(
             #     'bash scripts/android_scan.sh info {ser} {appid}',
