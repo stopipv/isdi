@@ -5,41 +5,6 @@ from itertools import zip_longest
 MAP = 'Pixel2.permissions'
 DUMPPKG = 'dumppkg'
 
-'''
-def match_keys(d, keys, only_last=False):
-    ret = []
-    # print(keys)
-    # print(keys)
-    for sk in keys.split('//'):
-        sk = re.compile(sk)
-        for k, v in d.items():
-            if sk.match(k):
-                ret.append(k)
-                d = d[k]
-                break
-    if only_last:
-        return 'key=NOTFOUND' if not ret else ret[-1]
-    else:
-        return ret
-
-def extract(d, lkeys):
-    for k in lkeys:
-        d = d.get(k, {})
-    return d
-
-def split_equalto_delim(k):
-    return k.split('=', 1)
-
-package = extract(
-            d,
-            match_keys(d, '^package$//^Packages//^Package \[{}\].*'.format(appid))
-        )
-        res = dict(
-            split_equalto_delim(match_keys(package, v, only_last=True))
-            for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
-        )
-'''
-
 def permissions_used(appid):
     # FIXME: add check on all permissions, too.
     #cmd = '{cli} shell dumpsys package {app}'
@@ -68,8 +33,6 @@ def permissions_used(appid):
     # requested permissions:
     # install permissions:
     # runtime permissions:
-    
-     
 
     #cmd = '{cli} shell appops get {app}'
     #recently_used = catch_err(run_command(cmd, app=appid))
@@ -80,96 +43,57 @@ def permissions_used(appid):
     
 def gather_permissions_labels():
     # FIXME: would probably put in global db?
-
     cmd = '{cli} shell getprop ro.product.model'
     model = catch_err(run_command(cmd, outf=MAP)).strip().replace(' ','_')
     cmd = '{cli} shell pm list permissions -g -f > {outf}'
     perms = catch_err(run_command(cmd, outf=model+'.permissions'))
 
-def map_permissions():
-    cols = ['permission','package','label','description','protectionLevel']
-    df = pd.DataFrame(columns=cols)
-    with open(MAP, 'r') as fh:
-        # skip header
-        next(fh), next(fh)
-        record = {}
-        for line in fh:
-            record[cols[0]] = line.split(':')[1].strip()
-            for col in cols[1:]:
-                record[col] = next(fh).split(':')[1].strip()
-            df.loc[df.shape[0]] = record
-    return df
-
-
-def map_ungrouped_permissions():
-    # TODO: should store this as csv when done and keep it static.
-
+def permissions_map():
     groupcols = ['group','group_package','group_label','group_description']
     pcols = ['permission','package','label','description','protectionLevel']
+    sp = simpleparse(open('Pixel2.permissions','r').read())
     df = pd.DataFrame(columns=groupcols+pcols)
-    with open(MAP, 'r') as fh:
-        # skip header
-        next(fh), next(fh)
-        group_record = {}
-        record = {}
-        ungrouped = False
-        ungrouped_d = dict.fromkeys(groupcols, 'ungrouped')
-        for line in fh:
-            try:
-                if 'ungrouped' in line.split(':')[0]:
-                    ungrouped = True
-                    next(fh)
-                if not ungrouped:
-                    group_record[groupcols[0]] = line.split(':')[1].strip()
-                    for col in groupcols[1:]:
-                        group_record[col] = next(fh).split(':')[1].strip()
-                    permission = next(fh)
-                    while permission != '\n':
-                        record[pcols[0]] = permission.split(':')[1].strip()
-                        for col in pcols[1:]:
-                            record[col] = next(fh).split(':')[1].strip()
-                        df.loc[df.shape[0]] = {**group_record, **record}
-                        permission = next(fh)
+    record = {}
+    ungrouped_d = dict.fromkeys(groupcols, 'ungrouped')
+    for group in sp[1]:
+        record['group'] = group.split(':')[1]
+        if record['group'] == '':
+            for permission in sp[1][group]:
+                record['permission'] = permission.split(':')[1]
+                for permission_attr in sp[1][group][permission]:
+                    label, val = permission_attr.split(':')
+                    record[label.replace('+ ','')] = val
+                df.loc[df.shape[0]] = {**record, **ungrouped_d}
+        else:
+            for group_attr in sp[1][group]:
+                if isinstance(group_attr, str):
+                    label, val = group_attr.split(':')
+                    record['group_'+label.replace('+ ','')] = val
                 else:
-                    record[pcols[0]] = line.split(':')[1].strip()
-                    for col in pcols[1:]:
-                        record[col] = next(fh).split(':')[1].strip()
-                    df.loc[df.shape[0]] = {**record, **ungrouped_d}
-            except StopIteration:
-                continue
-    df.to_csv('static_data/android_permissions_labels.csv')
-    return df        
+                    for permission in group_attr:
+                        record['permission'] = permission.split(':')[1]
+                        for permission_attr in group_attr[permission]:
+                            label, val = permission_attr.split(':')
+                            record[label.replace('+ ','')] = val
+                        df.loc[df.shape[0]] = record
+    df.to_csv('static_data/android_permissions.csv')
+    return df
 
 if __name__ == '__main__':
-    app_perms = permissions_used('net.cybrook.trackview')
-    permsdf = map_ungrouped_permissions()
-    #print(permsdf)
-    #human_friendly = permsdf[permsdf['label'] != 'null']
-    #print(human_friendly['label'].tolist())
-    #hlabelsmap = human_friendly[human_friendly['permission'].isin(app_perms)]
-    #print(hlabelsmap['label'])
-    #print(hlabelsmap)
+    appid = 'net.cybrook.trackview'
+    app_perms = permissions_used(appid)
+    permsdf = permissions_map()
     labelsmap = permsdf[permsdf['permission'].isin(app_perms)]
-    print(labelsmap)
-    print(set(app_perms) - set(labelsmap['permission'].tolist()))
+    
+    hf_permissions = list(zip(labelsmap.permission, labelsmap.label))
 
-def test():
-    app_perms = permissions_used('net.cybrook.trackview')
-    #gather_permissions_labels()
+    # FIXME: delete 'null' labels from counting as human readable.
+    print("'{}' uses {} app permissions:".format(appid, len(app_perms)))
+    print('{} have human readable names:'.format(len(hf_permissions)))
+    for permission in hf_permissions:
+        print(permission)
 
-    permsdf = map_permissions()
-    human_friendly = permsdf[permsdf['label'] != 'null']
-    hlabelsmap = human_friendly[human_friendly['permission'].isin(app_perms)]
-    labelsmap = permsdf[permsdf['permission'].isin(app_perms)]
-    print(hlabelsmap['permission'])
-    print(hlabelsmap['label'])
-    #print(len(human_friendly))
-    #print(len(permsdf))
-
-    #print(len(app_perms))
-    #print(app_perms)
-
-    print(set(app_perms) - set(hlabelsmap['permission'].tolist()))
-    #print(human_friendly)
-    #human_friendly_desc = permsdf[permsdf['description'] != 'null']
-
+    no_hf = set(app_perms) - set(labelsmap['permission'].tolist())
+    print("Couldn't find human readable names for {} app permissions:".format(len(no_hf)))
+    for x in no_hf:
+        print(x)
