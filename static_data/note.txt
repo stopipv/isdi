@@ -1,4 +1,2 @@
 Add all these files to `static_data/` folder in your repo,
 and change `TEST=True` in `config.py`
-
-ln -s `which adb` static_data/adb-linux if adb-linux does not work

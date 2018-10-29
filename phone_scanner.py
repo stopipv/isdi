@@ -103,6 +103,10 @@ class AppScan(object):
                 ddump = parse_dump.AndroidDump(dfname)
 
             info = ddump.info(appid)
+
+            print('BEGIN INFO')
+            print(info)
+            print('END INFO')
             # FIXME: sloppy iOS hack but should fix later, just add these to DF directly.
             if self.device_type == 'ios':
                 d['permissions'] = [info['permissions']]

@@ -3,12 +3,14 @@ cd /tmp;
 command -v adb &>/dev/null
 if [[ "$?" -ne "0" ]]; then 
     if [[ ! -e "$HOME/.platform-tools" ]]; then 
-        if [[ "$uname" == "Linux" ]]; then 
-	    curl -O https://dl.google.com/android/repository/platform-tools_r26.0.0-linux.zip
-	    unzip -q platform-tools_r26.0.0-linux.zip
+        if [[ `uname` == "Linux" ]]; then 
+            echo "Installing Linux adb..."
+	    wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+	    unzip -q platform-tools-latest-linux.zip
         else
-	    curl -O https://dl.google.com/android/repository/platform-tools_r26.0.0-darwin.zip
-	    unzip -q platform-tools_r26.0.0-darwin.zip
+            echo "Installing macOS adb..."
+	    wget https://dl.google.com/android/repository/platform-tools-latest-darwin.zip
+	    unzip -q platform-tools-latest-darwin.zip
         fi
 	mv platform-tools "$HOME/.platform-tools"
     fi

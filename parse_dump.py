@@ -191,6 +191,9 @@ class AndroidDump(PhoneDump):
             uidu = uidu[0]
         res['data_usage'] = self.get_data_usage(d, process_uid)
         res['battery (mAh)'] = self.get_battery_stat(d, uidu)
+        print('RESULTS')
+        print(res)
+        print('END RESULTS')
         return res
 
 
