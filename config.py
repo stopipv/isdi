@@ -50,7 +50,8 @@ ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
 PLATFORM = 'darwin' if platform == 'darwin' else 'linux' if platform.startswith('linux') \
            else 'win32' if platform == 'win32' else None
 #ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
-ADB_PATH = '/usr/bin/adb'
+ADB_PATH = 'adb'
+
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
 MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "ios-deploy-" + PLATFORM))
