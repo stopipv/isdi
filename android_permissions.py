@@ -30,23 +30,33 @@ def recent_permissions_used(appid):
     df = pd.DataFrame(columns=['appId','op','mode','timestamp','time_ago','duration'])
     cmd = '{cli} shell appops get {app}'
     recently_used = catch_err(run_command(cmd, app=appid))
+    if 'No operations.' in recently_used:
+        return df
     record = {'appId':appid}
     now = datetime.datetime.now()
     for permission in recently_used.split('\n')[:-1]:
         permission_attrs = permission.split(';')
         record['op'] = permission_attrs[0].split(':')[0]
         record['mode'] = permission_attrs[0].split(':')[1].strip()
-        record['timestamp'] = now - _parse_time(permission_attrs[1].split('=')[1])
-        # TODO: keep time_ago? that leaks when the consultation was.
-        record['time_ago'] = permission_attrs[1].split('=')[1]
+
+        if len(permission_attrs) == 2:
+            record['timestamp'] = now - _parse_time(permission_attrs[1].split('=')[1].strip())
+            # TODO: keep time_ago? that leaks when the consultation was.
+            record['time_ago'] = permission_attrs[1].split('=')[1].strip()
+        else:
+            record['timestamp'] = 'unknown (op)'
+            record['time_ago'] = 'unknown (op)'
+            record['duration'] = 'unknown (op)'
+            df.loc[df.shape[0]] = record
+            continue
 
         # NOTE: can convert this with timestamp + _parse_time('duration')
         if len(permission_attrs) == 3:
-            record['duration'] = permission_attrs[2].split('=')[1]
+            record['duration'] = permission_attrs[2].split('=')[1].strip()
         else:
             record['duration'] = 'unspecified'
         df.loc[df.shape[0]] = record
-    return df
+    return df.sort_values(by=['time_ago']).reset_index(drop=True)
 
 def package_info(appid):
     # FIXME: add check on all permissions, too.
@@ -60,6 +70,8 @@ def package_info(appid):
     '''
     sp = simpleparse(package_dump)
     try:
+        print('THE PACKAGE IS:')
+        print(sp['Packages:'].items())
         pkg = [v for k,v in sp['Packages:'].items() if appid in k][0]
     except IndexError as e:
         print(e)
@@ -72,9 +84,11 @@ def package_info(appid):
     install_date = pkg['firstInstallTime']
     version_code = pkg['versionCode']
     version_name = pkg['versionName']
-    install_details = dict(item.split('=') for item in pkg['User 0: ceDataInode'].strip().split(' ')[1:])
-    install_details = {k:bool(strtobool(install_details[k])) for k in install_details}
-    print(install_details)
+    #('User 0:  installed', 'true hidden=false stopped=false notLaunched=false enabled=0\nlastDisabledCaller: com.android.vending\ngids=[3003]\nruntime permissions:')
+    #inst_det_key = [v for k,v in pkg.items() if 'User 0:' in k][0]
+    #install_details = dict(item.split('=') for item in inst_det_key.strip().split(' ')[1:])
+    #install_details = {k:bool(strtobool(install_details[k])) for k in install_details}
+    #print(install_details)
 
     all_perms = list(set(requested_perms) | set(install_perms))
 
@@ -124,8 +138,37 @@ def permissions_map():
     df.to_csv('static_data/android_permissions.csv')
     return df
 
+def all_permissions(appid):
+    '''
+        Returns a tuple of human-friendly permissions (including recently used), non human-friendly app ops,
+        non human-friendly permissions, and summary stats.
+    '''
+    app_perms = package_info(appid)
+    recent_permissions = recent_permissions_used(appid)
+
+    permissions = pd.read_csv(config.ANDROID_PERMISSIONS)
+    app_permissions_tbl = permissions[permissions['permission'].isin(app_perms)].reset_index(drop=True)
+
+    app_permissions_tbl['permission_abbrv'] = app_permissions_tbl['permission']\
+            .apply(lambda x: x.split('.')[-1])
+
+    # TODO: really 'unknown'?
+    hf_recent_permissions = pd.merge(recent_permissions, app_permissions_tbl, \
+            left_on='op', right_on='permission_abbrv', how='right').fillna('unknown')
+
+    no_hf_recent_permissions = recent_permissions[~recent_permissions['op'].isin(app_permissions_tbl['permission_abbrv'])]
+    no_hf = set(app_perms) - set(app_permissions_tbl['permission'].tolist())
+
+    stats = {'total_permissions':len(app_perms), 
+            'hf_permissions':app_permissions_tbl.shape[0],
+            'recent_permissions':recent_permissions.shape[0],
+            'not_hf_ops':no_hf_recent_permissions.shape[0],
+            'not_hf_permissions':len(no_hf)}
+    return hf_recent_permissions, no_hf_recent_permissions, no_hf, stats
+
 if __name__ == '__main__':
-    appid = 'net.cybrook.trackview'
+    import sys
+    appid = sys.argv[1]
     app_perms = package_info(appid)
     recent_permissions = recent_permissions_used(appid)
 
@@ -152,7 +195,9 @@ if __name__ == '__main__':
     #print(hf_recent_permissions.op == hf_recent_permissions.permission_abbrv)
     #print(hf_recent_permissions[['label','op','permission']])
     #print(hf_recent_permissions[['label','timestamp','time_ago','permission']])
-    print(hf_recent_permissions[['label','description','timestamp','time_ago', 'duration']])
+    
+    #print(hf_recent_permissions[['label','description','timestamp','time_ago', 'duration']])
+    print(hf_recent_permissions[['label','permission_abbrv','timestamp']])
 
     no_hf_recent_permissions = recent_permissions[~recent_permissions['op'].isin(app_permissions_tbl['permission_abbrv'])]
     print("\nCouldn't find human-friendly descriptions for {} recently used app operations:"\

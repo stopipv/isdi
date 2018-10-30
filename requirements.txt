@@ -2,3 +2,4 @@
 pandas
 flask
 dataset
+rsonlite==0.1.0
