@@ -130,7 +130,6 @@ def permissions_map():
                             label, val = permission_attr.split(':')
                             record[label.replace('+ ','')] = val
                         df.loc[df.shape[0]] = record
-    df.to_csv('static_data/android_permissions.csv')
     return df
 
 def _deprecated_map_ungrouped_permissions():
@@ -169,10 +168,15 @@ def _deprecated_map_ungrouped_permissions():
                     df.loc[df.shape[0]] = {**record, **ungrouped_d}
             except StopIteration:
                 continue
-    df.to_csv('static_data/android_permissions_labels.csv')
     return df        
 
 if __name__ == '__main__':
+    permsdf = permissions_map()
+    permsdf_d = _deprecated_map_ungrouped_permissions()
+    
+    diff = permsdf == permsdf_d
+    print(diff.sum())
+    exit()
     app_perms = permissions_used('net.cybrook.trackview')
     permsdf = permissions_map()
     labelsmap = permsdf[permsdf['permission'].isin(app_perms)]
@@ -188,7 +192,7 @@ def test():
     app_perms = permissions_used('net.cybrook.trackview')
     #gather_permissions_labels()
 
-    permsdf = map_permissions()
+    
     human_friendly = permsdf[permsdf['label'] != 'null']
 
     hlabelsmap = human_friendly[human_friendly['permission'].isin(app_perms)]
