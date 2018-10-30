@@ -6,6 +6,7 @@ import config
 import os
 import sqlite3
 from datetime import datetime
+from android_permissions import all_permissions
 import parse_dump
 import blacklist
 import re
@@ -114,13 +115,12 @@ class AppScan(object):
                 #print(info['permissions'])
                 del info['permissions']
             elif self.device_type == 'android':
-                #cmd = '{cli} -s {serial} shell dumpsys appops' # gets everything FIXME: do this somewhere else, repeatedly
-                cmd = '{cli} -s {serial} shell appops get {app}'
-                perms = self.catch_err(self.run_command(cmd, serial=serialno, app=appid))
-                perms = perms.split("\n")
-                for perm in perms:
-                    print(perm.split(";"))
+                hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
+                print(d)
+                print(hf_recent['label'].tolist())
 
+                # FIXME: if Unknown, use 'permission_abbrv' instead.
+                d.set_value(0, 'permissions', hf_recent['label'].tolist())
 
             print("AppInfo: ", info, appid, dfname, ddump)
             # p = self.run_command(
@@ -362,14 +362,16 @@ class IosScan(AppScan):
         #cmd2 = "ideviceinfo -u {} -x > {}/ios_info.xml".format(serialno, path)
 
 
+        print('DUMPING iOS INFO...')
         cmd = '{}/ios_dump.sh'.format(config.THISDIR)
+        print('iOS INFO DUMPED.')
         #if self.catch_err(self.run_command(cmd2, serial=serialno, outf=dumpfinfo)) == -1:
         #    connected, connected_reason = self.setup()
         #    if not connected:
         #        print(connected_reason)
         #        # FIXME: error here?
 
-        dumpres = self.catch_err(self.run_command(cmd, serial=serialno, outf=dumpf)).strip()
+        dumpres = self.catch_err(self.run_command(cmd, serial=serialno)).strip()
         if dumpres == serialno:
             print("Dumped the data into: {}".format(dumpf))
             s = parse_dump.IosDump(dumpf, dumpfinfo)
