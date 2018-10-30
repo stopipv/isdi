@@ -1,7 +1,6 @@
 from rsonlite import simpleparse
 from distutils.util import strtobool
 from run import run_command, catch_err
-from itertools import zip_longest
 import pandas as pd
 import datetime
 import config
@@ -92,7 +91,7 @@ def gather_permissions_labels():
     model = catch_err(run_command(cmd, outf=MAP)).strip().replace(' ','_')
     cmd = '{cli} shell pm list permissions -g -f > {outf}'
     #perms = catch_err(run_command(cmd, outf=model+'.permissions'))
-    perms = catch_err(run_command(cmd, outf='android_permissions.txt'))
+    perms = catch_err(run_command(cmd, outf='static_data/android_permissions.txt'))
 
 def permissions_map():
     groupcols = ['group','group_package','group_label','group_description']
