@@ -120,6 +120,8 @@ class AppScan(object):
                 print(hf_recent['label'].tolist())
 
                 # FIXME: if Unknown, use 'permission_abbrv' instead.
+                #hf_recent.apply()
+                hf_recent.loc[hf_recent['label'] == 'Unknown', 'label'] = hf_recent['permission_abbrv']
                 d.set_value(0, 'permissions', hf_recent['label'].tolist())
 
             print("AppInfo: ", info, appid, dfname, ddump)
@@ -137,7 +139,10 @@ class AppScan(object):
         """Finds the apps in the phone and add flags to them based on @blacklist.py
         Return the sorted dataframe
         """
-        installed_apps = self.get_apps(serialno)
+        if self.device_type == 'ios':
+            installed_apps, titles = self.get_apps(serialno, titles=True)
+        else:
+            installed_apps = self.get_apps(serialno)
         
         # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
         #     ', ?'*(len(installed_apps)-1)
@@ -150,7 +155,12 @@ class AppScan(object):
         )
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
+        
         r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
+
+        if self.device_type == 'ios':
+            r['title'] = titles
+
         r['html_flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
@@ -192,6 +202,9 @@ class AppScan(object):
         except Exception as ex:
             print(ex)
             return False
+
+    def device_info(self, serial):
+        pass
 
     def isrooted(self, serial):
         pass
@@ -264,6 +277,12 @@ class AndroidScan(AppScan):
         cmd = '{cli} devices -l'
         return self.run_command(cmd).stdout.read().decode('utf-8')
 
+    def device_info(self, serial):
+        cmd = '{cli} -s {serial} shell getprop ro.product.model'
+        model = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
+        version = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        return model+"(running Android "+version.strip()+")"
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]
@@ -346,7 +365,7 @@ class IosScan(AppScan):
                     ", reconnect it, and scan again -- accept the trust dialog to proceed.")
         return (True, "Follow trust dialog on iOS device to continue.")
 
-    def get_apps(self, serialno):
+    def get_apps(self, serialno, titles=False):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
         #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
@@ -377,6 +396,9 @@ class IosScan(AppScan):
             s = parse_dump.IosDump(dumpf, dumpfinfo)
             print(s.load_file())
             self.installed_apps = s.installed_apps()
+            if titles:
+                titles = s.installed_apps_titles()
+                return self.installed_apps, titles
         else:
             print("Couldn't connect to the device. Trying to reconnect.") 
             connected, connected_reason = self.setup()
@@ -409,6 +431,13 @@ class IosScan(AppScan):
                  if l.strip() and _is_device(l.strip())]
         print("Devices found:", d)
         return d
+
+    def device_info(self, serial):
+        dfname = self.dump_file_name(serial)
+        devinfo = self.dump_file_name(serial, 'devinfo')
+        ddump = parse_dump.IosDump(dfname, devinfo)
+        device_info = ddump.device_info()
+        return device_info
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
