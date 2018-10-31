@@ -121,8 +121,14 @@ class AppScan(object):
 
                 # FIXME: if Unknown, use 'permission_abbrv' instead.
                 #hf_recent.apply()
-                hf_recent.loc[hf_recent['label'] == 'Unknown', 'label'] = hf_recent['permission_abbrv']
+                hf_recent.loc[hf_recent['label'] == 'unknown', 'label'] = hf_recent['permission_abbrv']
+                
+                #hf_recent['label'] = hf_recent[['label', 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
+                hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+hf_recent['timestamp'].map(str)+")"
                 d.set_value(0, 'permissions', hf_recent['label'].tolist())
+
+                #d['recent_permissions'] = hf_recent['timestamp']
+                #print(d['recent_permissions'])
 
             print("AppInfo: ", info, appid, dfname, ddump)
             # p = self.run_command(
@@ -156,10 +162,10 @@ class AppScan(object):
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
         
-        r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
-
         if self.device_type == 'ios':
             r['title'] = titles
+        else:
+            r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
 
         r['html_flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
@@ -278,11 +284,15 @@ class AndroidScan(AppScan):
         return self.run_command(cmd).stdout.read().decode('utf-8')
 
     def device_info(self, serial):
+        cmd = '{cli} -s {serial} shell getprop ro.product.brand'
+        brand = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+
         cmd = '{cli} -s {serial} shell getprop ro.product.model'
         model = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+
         cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
         version = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
-        return model+"(running Android "+version.strip()+")"
+        return brand.title()+" "+model+"(running Android "+version.strip()+")"
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]
