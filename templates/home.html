@@ -68,6 +68,10 @@
     <div class="col-md-9 border py-2" style="height: 80vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
+          {% if device_name %}
+          <label>Device connected: <b>{{ device_name }}</b></label>
+          <br>
+          {% endif %}
 	    <label>Jailbroken/Rooted: <b>{{ isrooted }}</b></label>
             <table class="table table-bordered w-100 h-100">
                 <thead>

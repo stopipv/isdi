@@ -164,6 +164,8 @@ def scan():
     scanid = create_scan(clientid, ser, device)
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+    
+    device_name = sc.device_info(serial=ser)
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
                           for appid, info in apps.items()])
@@ -172,6 +174,7 @@ def scan():
         'main.html', task="home",
         isrooted = "Yes: {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
                 else "No: {}".format(rooted_reason),
+        device_name=device_name,
         apps=apps,
         scanid=scanid,
         clientid=clientid,

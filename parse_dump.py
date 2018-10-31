@@ -137,11 +137,17 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def get_data_usage(d, process_uid):
+        if 'net_stats' not in d:
+            return {
+                "foreground": "unknown",
+                "background": "unknown"
+            }
         net_stats = pd.read_csv(io.StringIO(
             '\n'.join(d['net_stats'].keys())
         ))
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
             ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']]
+        print(d)
         def s(c):
             return (d.query('cnt_set == {}'.format(c)).eval('rx_bytes+tx_bytes').sum()
                     /(1024*1024))
@@ -190,7 +196,7 @@ class AndroidDump(PhoneDump):
         else:
             uidu = uidu[0]
         res['data_usage'] = self.get_data_usage(d, process_uid)
-        res['battery (mAh)'] = self.get_battery_stat(d, uidu)
+        #res['battery (mAh)'] = self.get_battery_stat(d, uidu)
         print('RESULTS')
         print(res)
         print('END RESULTS')
@@ -297,6 +303,14 @@ class IosDump(PhoneDump):
         #print("\tPII: "+str(pii))
         return all_permissions
     
+    def device_info(self):
+        try:
+            make = self.model_make_map[self.deviceinfo['ProductType']]
+        except KeyError as e:
+            make = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
+        name = self.deviceinfo['DeviceName']
+        return name+" (an "+make + " running iOS "+self.deviceinfo['ProductVersion']+")"
+    
     def info(self, appid):
         '''
             Returns dict containing the following:
@@ -309,8 +323,6 @@ class IosDump(PhoneDump):
         d = self.df
         res = {}
         
-
-             
         # determine make and version
         try:
             make = self.model_make_map[self.deviceinfo['ProductType']]
@@ -372,6 +384,9 @@ class IosDump(PhoneDump):
     def system_apps(self):
         #return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
         return self.df.query('ApplicationType=="System"')['CFBundleIdentifier']
+
+    def installed_apps_titles(self):
+        return self.df['CFBundleExecutable']
 
     def installed_apps(self):
         #return self.df.index
