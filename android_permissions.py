@@ -68,7 +68,12 @@ def package_info(appid):
     package_dump = open(DUMPPKG, 'r').read()
     #print(package_dump)
     '''
-    sp = simpleparse(package_dump)
+    try:
+        sp = simpleparse(package_dump)
+    except AttributeError as e:
+        print(package_dump)
+        return []
+
     try:
         print('THE PACKAGE IS:')
         print(sp['Packages:'].items())
