@@ -9,6 +9,7 @@ from datetime import datetime
 from android_permissions import all_permissions
 import parse_dump
 import blacklist
+import datetime
 import re
 import shlex
 
@@ -116,6 +117,22 @@ class AppScan(object):
                 del info['permissions']
             elif self.device_type == 'android':
                 hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
+
+                #FIXME: 
+                # some appopps in not_hf_recent are not included in the output.
+                # maybe concat hf_recent with them?
+                info['Date of Scan'] = datetime.datetime.now()
+                info['Installation Date'] = stats['firstInstallTime']
+                info['Last Updated'] = stats['lastUpdateTime']
+                info['Last Used'] = stats['used']
+                
+                # TODO: what is the difference between usedScr and used? 
+                # Does a background process count as used? Probably not since
+                # appOps permissions have been more recent than 'used' on some scans.
+                #info['Last Used Screen'] = stats['usedScr']
+                info['App Version'] = stats['versionName']
+                #info['App Version Code'] = stats['versionCode']
+
                 print(d)
                 print(hf_recent['label'].tolist())
 

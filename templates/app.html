@@ -6,13 +6,25 @@
             <tbody>
                 <!-- <i class="material-icons">info</i> -->
 		<tr><td>AppId</td><td><code>{{ app.appId }}</code></td></tr>
+		{% if app.developer %}
 		<tr><td>Developer</td> <td><i>{{ app.developer }}</i> </td></tr>
+		{% endif %}
+		{% if app.website %}
 		<tr><td>Website</td> <td>{{ app.website }} </td></tr>
+		{% endif %}
                 {% for k, v in info.items() %}
 		<tr><td>{{ k }}</td> <td>{{ v }} </td></tr>
                 {% endfor %}
             </tbody>
         </table>
+	    <div class="text-sm-left">
+		{% if app.title %}
+		<h4> "{{ app.title | safe }}" uses {{ app.permissions| length }} app permissions:</h4>
+		{% else %}
+		<h4> Unnamed app uses {{ app.permissions| length }} app permissions:</h4>
+		{% endif %}
+		<br>
+	    </div>
         <ul class="list-group">
             {% for perm in app.permissions %}
             <li class="code">{{ perm | title | replace('_', ' ') }}</li>
@@ -28,13 +40,5 @@
         <h3>{% if device=="android" %} Google Play Store {% endif %} {% if device=="ios" %} Apple App Store {% endif %} Description of the app</h3>
         <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
         {{ app.descriptionHTML|safe }}
-    </div>
-    <div class="text-sm-left">
-        {% if app.title %}
-        <h4> "{{ app.title | safe }}" uses {{ app.permissions| length }} app permissions:</h4>
-        {% else %}
-        <h4> Unnamed app uses {{ app.permissions| length }} app permissions:</h4>
-        {% endif %}
-        <br>
     </div>
 </div>
