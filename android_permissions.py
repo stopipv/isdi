@@ -69,8 +69,8 @@ def package_info(appid):
     cmd = '{cli} shell dumpsys usagestats {app} | grep "App Standby States:" -A 1'\
             .format(cli='adb',app=appid)
     now = datetime.datetime.now()
-    usage_stats = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)\
-            .stdout.read().decode('utf-8')#.strip()
+    #usage_stats = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)\
+    #        .stdout.read().decode('utf-8')#.strip()
     
     '''
      App Standby States:
@@ -107,16 +107,16 @@ def package_info(appid):
     install_perms = [k.split(':')[0] for k,v in pkg['install permissions:'].items()]
     requested_perms = pkg['requested permissions:']
 
-    usage_stats = filter(None, usage_stats.split('\n')[1].split(' '))
-    usage_stats = dict(item.split('=') for item in usage_stats)
-    print(usage_stats)
+    #usage_stats = filter(None, usage_stats.split('\n')[1].split(' '))
+    #usage_stats = dict(item.split('=') for item in usage_stats)
+    #print(usage_stats)
     pkg_info = {}
     pkg_info['firstInstallTime'] = pkg['firstInstallTime']
     pkg_info['lastUpdateTime'] = pkg['lastUpdateTime']
     pkg_info['versionCode'] = pkg['versionCode']
     pkg_info['versionName'] = pkg['versionName']
-    pkg_info['used'] = now - _parse_time(usage_stats['used'])
-    pkg_info['usedScr'] = now - _parse_time(usage_stats['usedScr'])
+    #pkg_info['used'] = now - _parse_time(usage_stats['used'])
+    #pkg_info['usedScr'] = now - _parse_time(usage_stats['usedScr'])
     
     #('User 0:  installed', 'true hidden=false stopped=false notLaunched=false enabled=0\nlastDisabledCaller: com.android.vending\ngids=[3003]\nruntime permissions:')
     #inst_det_key = [v for k,v in pkg.items() if 'User 0:' in k][0]

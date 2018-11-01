@@ -47,6 +47,7 @@ is_mounted ()
 mount_iphone ()
 {
   # comments out the udev rule that exits usbmuxd when the last device is removed
+  # FIXME: binaries not install daemon and other files?
   sudo sed -i '/s*ACTION=="remove", RUN+="\/usr\/local\/sbin\/usbmuxd -x"/ s|^|#|' \
     /lib/udev/rules.d/39-usbmuxd.rules
   # sudo usbmuxd -f may also help. (https://bbs.archlinux.org/viewtopic.php?id=229475)
