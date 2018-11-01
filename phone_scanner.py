@@ -111,6 +111,7 @@ class AppScan(object):
             print('END INFO')
             # FIXME: sloppy iOS hack but should fix later, just add these to DF directly.
             if self.device_type == 'ios':
+                # TODO: add extra info about iOS? Like idevicediagnostics ioregentry AppleARMPMUCharger or IOPMPowerSource or AppleSmartBattery.
                 d['permissions'] = [info['permissions']]
                 d['title'] = [info['title']]
                 #print(info['permissions'])
@@ -124,7 +125,7 @@ class AppScan(object):
                 info['Date of Scan'] = datetime.datetime.now()
                 info['Installation Date'] = stats['firstInstallTime']
                 info['Last Updated'] = stats['lastUpdateTime']
-                info['Last Used'] = stats['used']
+                #info['Last Used'] = stats['used']
                 
                 # TODO: what is the difference between usedScr and used? 
                 # Does a background process count as used? Probably not since
@@ -491,7 +492,16 @@ class IosScan(AppScan):
         for app in ["Cydia.app", "blackra1n.app", 
                 "FakeCarrier.app", "Icy.app", "IntelliScreen.app", 
                 "MxTube.app", "RockApp.app", "SBSettings.app", 
-                "WinterBoard.app"]:
+                "WinterBoard.app", "3uTools.app", "Absinthe.app", 
+                "backr00m.app", "blackra1n.app", "Corona.app", 
+                "doubleH3lix.app", "Electra.app", "EtasonJB.app", 
+                "evasi0n.app", "evasi0n7.app", "G0blin.app", "Geeksn0w.app", 
+                "greenpois0n.app", "h3lix.app", "Home Depot.app", "ipwndfu.app", 
+                "JailbreakMe.app", "LiberiOS.app", "LiberTV.app", "limera1n.app", 
+                "Meridian.app", "p0sixspwn.app", "Pangu.app", "Pangu8.app", "Pangu9.app", 
+                "Phœnix.app", "PPJailbreak.app", "purplera1n.app", "PwnageTool.app", 
+                "redsn0w.app", "RockyRacoon.app","Rocky Racoon.app", "Saïgon.app", "Seas0nPass.app", 
+                "sn0wbreeze.app", "Spirit.app", "TaiG.app", "unthredera1n.app", "yalu.app"]:
             if app in self.installed_apps:
                 return (True, "{} was found on the device.".format(app))
         reasons.append("Did not find popular jailbreak apps installed.")

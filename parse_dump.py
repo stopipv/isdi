@@ -304,6 +304,10 @@ class IosDump(PhoneDump):
         return all_permissions
     
     def device_info(self):
+        # TODO: see idevicediagnostics mobilegestalt KEY
+        # https://blog.timac.org/2017/0124-deobfuscating-libmobilegestalt-keys/
+        # can detect Airplane Mode, PasswordConfigured, lots of details about hardware.
+        # https://gist.github.com/shu223/c108bd47b4c9271e55b5
         try:
             make = self.model_make_map[self.deviceinfo['ProductType']]
         except KeyError as e:
@@ -343,10 +347,18 @@ class IosDump(PhoneDump):
             for permission in permissions:
                 print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
             print("")
-        res['permissions'] = permissions
+        res['permissions'] =  [(p.title(), r) for p,r in permissions]
         res['title'] = app['CFBundleExecutable']
-        res['Your iOS Device'] = make
-        res['iOS Version'] = self.deviceinfo['ProductVersion']
+        res['App Version'] = app['CFBundleVersion']
+        res['Install Date'] = '''Apple does not officially record iOS app installation dates. 
+        To view when '{}' was *last used*: [Settings -> General -> {} Storage].
+        To view the *purchase date* of '{}', follow these instructions: https://www.ipvtechresearch.org/post/guides/apple/.
+        These are the closest possible approximations to installation date available to end-users.
+        '''.format(res['title'], self.deviceinfo['DeviceClass'], res['title'])
+        res['Battery Usage'] = '''To see recent battery usage of '{}': [Settings -> Battery -> Battery Usage].'''.format(res['title'])
+        res['Data Usage'] = "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(res['title'])
+        #res['Your iOS Device'] = make
+        #res['iOS Version'] = self.deviceinfo['ProductVersion']
 
         #entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
 
