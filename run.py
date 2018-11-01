@@ -4,10 +4,10 @@ import os
 import shlex
 import subprocess
 
-def catch_err(p, cmd='', msg=''):
+def catch_err(p, cmd='', msg='', time=10):
         """TODO: Therer are two different types. homogenize them"""
         try:
-            p.wait(10)
+            p.wait(time)
             print("Returncode: ", p.returncode)
             if p.returncode != 0:
                 m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
@@ -17,7 +17,9 @@ def catch_err(p, cmd='', msg=''):
                 return -1
             else:
                 s = p.stdout.read().decode()
-                if len(s) <= 100 and re.search('(?i)(fail|error)', s):
+                if (len(s) <= 100 and re.search('(?i)(fail|error)', s)) or \
+                        'insufficient permissions for device: user in plugdev group; are your udev rules wrong?'\
+                        in s:
                     config.add_to_error(s)
                     return -1
                 else:
