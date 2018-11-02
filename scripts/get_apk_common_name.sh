@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 function android_pull_apk() {
     if [ -z "$1" ]; then
         echo "You must pass a package to this function!"

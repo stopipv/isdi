@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 cd /tmp;
 command -v adb &>/dev/null
 if [[ "$?" -ne "0" ]]; then 

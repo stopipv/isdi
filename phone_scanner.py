@@ -7,6 +7,7 @@ import os
 import sqlite3
 from datetime import datetime
 from android_permissions import all_permissions
+from run import run_command, catch_err
 import parse_dump
 import blacklist
 import datetime
@@ -34,29 +35,6 @@ class AppScan(object):
         """If the device needs some setup to work."""
         pass
 
-    def catch_err(self, p, cmd='', msg=''):
-        """TODO: Therer are two different types. homogenize them"""
-        try:
-            p.wait(10)
-            print("Returncode: ", p.returncode)
-            if p.returncode != 0:
-                m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
-                    self.device_type, cmd, p.returncode, p.stderr.read(), msg
-                ))
-                config.add_to_error(m)
-                return -1
-            else:
-                s = p.stdout.read().decode()
-                if len(s) <= 100 and re.search('(?i)(fail|error)', s):
-                    config.add_to_error(s)
-                    return -1
-                else:
-                    return s
-        except Exception as ex:
-            config.add_to_error(ex)
-            print("Exception>>>", ex)
-            return -1
-
     def devices(self):
         raise Exception("Not implemented")
 
@@ -66,23 +44,22 @@ class AppScan(object):
     def get_offstore_apps(self, serialno):
         return []
 
-    def dump_file_name(self, serial, fsuffix='json'):
+    def dump_path(self, serial, fkind='json'):
         if self.device_type == 'ios':
-            if fsuffix == 'jailbreak':
-                devicedumpsdir = os.path.join(config.DUMP_DIR, \
+            devicedumpsdir = os.path.join(config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
-                return os.path.join(devicedumpsdir, 'ios_jailbroken.log')
-            elif fsuffix == 'devinfo':
-                devicedumpsdir = os.path.join(config.DUMP_DIR, \
-                        '{}_{}'.format(serial, 'ios'))
-                return os.path.join(devicedumpsdir, 'ios_info.xml')
+            if fkind == 'Jailbroken':
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Jailbroken'])
+            elif fkind == 'Device_Info':
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Info'])
+            elif fkind == 'Apps':
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
             else:
-                devicedumpsdir = os.path.join(config.DUMP_DIR, \
-                        '{}_{}'.format(serial, 'ios'))
-                return os.path.join(devicedumpsdir, 'ios_apps.plist')
+                # returns apps dumpfile if fkind isn't explicitly specified.
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
 
         return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
-            serial, self.device_type, fsuffix))
+            serial, self.device_type, fkind))
 
     def app_details(self, serialno, appid):
         try:
@@ -94,12 +71,12 @@ class AppScan(object):
                 d['permissions'] = d['permissions'].fillna('').str.split(', ')
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
-            dfname = self.dump_file_name(serialno)
+            dfname = self.dump_path(serialno)
             if self.device_type == 'ios':
                 #ddump = parse_dump.IosDump(dfname)
                 #dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
                 # FIXME: better suffix renaming scheme
-                devinfo = self.dump_file_name(serialno, 'devinfo')
+                devinfo = self.dump_path(serialno, 'Device_Info')
                 ddump = parse_dump.IosDump(dfname, devinfo)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
@@ -149,7 +126,7 @@ class AppScan(object):
                 #print(d['recent_permissions'])
 
             print("AppInfo: ", info, appid, dfname, ddump)
-            # p = self.run_command(
+            # p = run_command(
             #     'bash scripts/android_scan.sh info {ser} {appid}',
             #     ser=serialno, appid=appid
             # ); p.wait()
@@ -198,24 +175,6 @@ class AppScan(object):
     def uninstall(self, serial, appid):
         pass
 
-    def run_command(self, cmd, **kwargs):
-        _cmd = cmd.format(
-            cli=self.cli, **kwargs
-        )
-        print(_cmd)
-        if kwargs.get('nowait', False) or kwargs.get('NOWAIT', False):
-            pid = subprocess.Popen(
-                _cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-            ).pid
-            return pid
-        else:
-            p = subprocess.Popen(
-                _cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-            )
-            return p
-
     def save(self, table, **kwargs):
         try:
             tab = db.get_table(table)
@@ -248,7 +207,7 @@ class AndroidScan(AppScan):
         # self.setup()
 
     def setup(self):
-        p = self.run_command(
+        p = run_command(
             '{cli} kill-server; {cli} start-server'
         )
         if p != 0:
@@ -257,7 +216,7 @@ class AndroidScan(AppScan):
 
     def _get_apps_(self, serialno, flag):
         cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/^package://g' | sort"
-        s = self.catch_err(self.run_command(cmd, serial=serialno, flag=flag),
+        s = catch_err(run_command(cmd, serial=serialno, flag=flag),
                            msg="App search failed", cmd=cmd)
         if not s:
             self.setup()
@@ -269,7 +228,7 @@ class AndroidScan(AppScan):
     def get_apps(self, serialno):
         installed_apps = self._get_apps_(serialno, '-u')
         if installed_apps:
-            q = self.run_command(
+            q = run_command(
                 'bash scripts/android_scan.sh scan {ser}',
                 ser=serialno, nowait=True);
             self.installed_apps = installed_apps
@@ -294,28 +253,28 @@ class AndroidScan(AppScan):
 
     def devices(self):
         cmd = '{cli} devices | tail -n +2 | cut -f1'
-        return [l.strip() for l in self.run_command(cmd)
+        return [l.strip() for l in run_command(cmd)
                 .stdout.read().decode('utf-8').split('\n') if l.strip()]
 
     def devices_info(self):
         cmd = '{cli} devices -l'
-        return self.run_command(cmd).stdout.read().decode('utf-8')
+        return run_command(cmd).stdout.read().decode('utf-8')
 
     def device_info(self, serial):
         cmd = '{cli} -s {serial} shell getprop ro.product.brand'
-        brand = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        brand = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
 
         cmd = '{cli} -s {serial} shell getprop ro.product.model'
-        model = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        model = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
 
         cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
-        version = self.run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        version = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
         return brand.title()+" "+model+"(running Android "+version.strip()+")"
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]
     #     cmd = '{cli} -s {serial} shell dumpsys'
-    #     p = self.run_command(cmd, serial=serialno)
+    #     p = run_command(cmd, serial=serialno)
     #     outfname = os.path.join(config.DUMP_DIR, '{}.txt.gz'.format(serialno))
     #     # if p.returncode != 0:
     #     #     print("Dump command failed")
@@ -326,7 +285,7 @@ class AndroidScan(AppScan):
 
     def uninstall(self, serial, appid):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
-        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial),
+        s = catch_err(run_command(cmd, serial=shlex.quote(serial),
                                                 appid=shlex.quote(appid)),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
@@ -336,7 +295,7 @@ class AndroidScan(AppScan):
             Doesn't return all reasons by default. First match will return.
         '''
         cmd = "{cli} -s {serial} shell 'which su'"
-        s = self.catch_err(self.run_command(cmd, serial=shlex.quote(serial)))
+        s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
         if s == -1 or 'su: not found' in s or len(s) == 0:
             print(config.error())
             reason = "couldn't find 'su' tool on the phone."
@@ -373,14 +332,14 @@ class IosScan(AppScan):
     def setup(self, attempt_remount=False):
         ''' FIXME: iOS setup. '''
         if config.PLATFORM == 'linux' and attempt_remount:
-            # FIXME: need to prompt system maintainer for sudo password?
-            cmd = config.SCRIPT_DIR + '/ios_mount_linux.sh mount'
-            #mountmsg = self.run_command(cmd).stderr.read().decode('utf-8')
-            if self.catch_err(self.run_command(cmd)) == -1:
+            # should show GUI prompt for password. sudo apt install policykit-1 if not there.
+            cmd = 'pkexec '+config.SCRIPT_DIR + '/ios_mount_linux.sh mount'
+            #mountmsg = run_command(cmd).stderr.read().decode('utf-8')
+            if catch_err(run_command(cmd)) == -1:
                 return (False, "Couldn't detect device. See {}/ios_mount_linux.sh."\
                         .format(config.SCRIPT_DIR))
         cmd = 'idevicepair pair'
-        pairmsg = self.run_command(cmd).stdout.read().decode('utf-8')
+        pairmsg = run_command(cmd).stdout.read().decode('utf-8')
         if "No device found, is it plugged in?" in pairmsg:
             return (False, pairmsg)
         elif "Please enter the passcode on the device and retry." in pairmsg:
@@ -397,29 +356,18 @@ class IosScan(AppScan):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
         #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
-
         path = os.path.join(config.DUMP_DIR, serialno+"_ios")
-        #cmd = 'ideviceinstaller -u {} -l -o xml -o list_all > {}/ios_apps.plist'.format(serialno, path)
-        #print(cmd)
-
-        #dumpf = self.dump_file_name(serialno, 'json')
-        #dumpf = self.dump_file_name(serialno, 'xml')
-        dumpf = path+"/ios_apps.plist"
-        dumpfinfo = path+"/ios_info.xml"
-        #cmd2 = "ideviceinfo -u {} -x > {}/ios_info.xml".format(serialno, path)
-
+        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
+        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
 
         print('DUMPING iOS INFO...')
-        cmd = '{}/ios_dump.sh'.format(config.THISDIR)
+        # FIXME: pathlib migration at some point
+        cmd = '{}/ios_dump.sh {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
+                **config.IOS_DUMPFILES)
         print('iOS INFO DUMPED.')
-        #if self.catch_err(self.run_command(cmd2, serial=serialno, outf=dumpfinfo)) == -1:
-        #    connected, connected_reason = self.setup()
-        #    if not connected:
-        #        print(connected_reason)
-        #        # FIXME: error here?
 
-        dumpres = self.catch_err(self.run_command(cmd, serial=serialno)).strip()
-        if dumpres == serialno:
+        dumped = catch_err(run_command(cmd, serial=serialno)).strip()
+        if dumped == serialno:
             print("Dumped the data into: {}".format(dumpf))
             s = parse_dump.IosDump(dumpf, dumpfinfo)
             print(s.load_file())
@@ -437,8 +385,8 @@ class IosScan(AppScan):
         return self.installed_apps
 
     def get_system_apps(self, serialno):
-        dumpf = self.dump_file_name(serialno, 'plist')
-        dumpfinfo = self.dump_file_name(serialno, 'devinfo')
+        dumpf = self.dump_path(serialno, 'Apps')
+        dumpfinfo = self.dump_path(serialno, 'Device_Info')
         
         if os.path.exists(dumpf):
             s = parse_dump.IosDump(dumpf, dumpfinfo)
@@ -454,28 +402,28 @@ class IosScan(AppScan):
         #cmd = '{cli} --detect -t1 | tail -n 1'
         cmd = 'idevice_id -l | tail -n 1'
         self.serialno = None
-        s = self.catch_err(self.run_command(cmd), cmd=cmd, msg="")
+        s = catch_err(run_command(cmd), cmd=cmd, msg="")
         d = [l.strip() for l in s.split('\n')
                  if l.strip() and _is_device(l.strip())]
         print("Devices found:", d)
         return d
 
     def device_info(self, serial):
-        dfname = self.dump_file_name(serial)
-        devinfo = self.dump_file_name(serial, 'devinfo')
+        dfname = self.dump_path(serial)
+        devinfo = self.dump_path(serial, 'Device_Info')
         ddump = parse_dump.IosDump(dfname, devinfo)
         device_info = ddump.device_info()
         return device_info
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
-        cmd = 'ideviceinstaller -udid {} -uninstall {!r}'.format(serial, appid)
-        s = self.catch_err(self.run_command(cmd, serial=serial, appid=appid),
+        cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
+        s = catch_err(run_command(cmd, serial=serial, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
     def isrooted(self, serial):
-        with open(os.path.join(config.DUMP_DIR,"{}_ios/ios_jailbroken.log".format(serial)),'r') as fh:
+        with open(self.dump_path(serial, 'Jailbroken'),'r') as fh:
             JAILBROKEN_LOG = fh.readlines()
 
         # if app["Path"].split("/")[-1] in ["Cydia.app"]

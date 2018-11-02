@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## For scanning the phone and downloading some specific information of the phone
 ## Input: serial number 

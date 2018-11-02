@@ -92,6 +92,7 @@ application. I don't konw how to get install date, resource usage, etc.
 ## Dependencies
 Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
 Run `pip3 install -r requirements.txt` to get the required Python modules.
+Run 
 
 To scan Android and iOS we need third party software, as given below.
 #### Dependencies (iOS)

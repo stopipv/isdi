@@ -1,4 +1,5 @@
-#!/bin/bash 
+#!/usr/bin/env bash
+
 
 python2=(which python2)
 if [[ "$?" != "0" ]]; then

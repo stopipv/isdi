@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # mount-iphone.sh
 # This script attempts to mount or unmount the first connected ipod/iphone.

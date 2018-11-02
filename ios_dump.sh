@@ -3,11 +3,10 @@ serial=$(idevice_id -l 2>&1 | tail -n 1)
 mkdir -p phone_dumps/"$serial"_ios
 cd phone_dumps/"$serial"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -u "$serial" -l -o xml -o list_all > ios_apps.plist
-# use with installer_parse.py
+ideviceinstaller -u "$serial" -l -o xml -o list_all > $1
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
-ideviceinfo -u "$serial" -x > ios_info.xml
+ideviceinfo -u "$serial" -x > $2
 
 # try to check for jailbroken by mounting the entire filesystem. 
 # Gets output:
@@ -17,7 +16,7 @@ ideviceinfo -u "$serial" -x > ios_info.xml
 # if fails (so in that case not jailbroken -- or 'not sure' for false negative).
 rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
-ifuse -u "$serial" --root /tmp/phonescanmnt &> ios_jailbroken.log
+ifuse -u "$serial" --root /tmp/phonescanmnt &> $3
 cd ..
 
 # for consumption by python
