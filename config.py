@@ -19,6 +19,9 @@ TEST = False
 
 
 ANDROID_PERMISSIONS = 'static_data/android_permissions.csv'
+IOS_DUMPFILES = {'Jailbroken':'ios_jailbroken.log', 
+        'Apps':'ios_apps.plist','Info':'ios_info.xml'}
+
 TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 APP_FLAGS_FILE = 'static_data/app-flags.csv'

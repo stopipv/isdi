@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 echo -e "\033[31mDev-Jam 12/01/2015 - Script to build Libimobiledevice\033[0m"
 echo -e "\033[32m\033[1m\033[4m\033[5m\033[7mCreator Dev-Jam improved by matteyeux on 27/12/15\033[0m"
 
@@ -20,7 +20,7 @@ function depends(){
                 libgcc1 libreadline-dev libglib2.0-dev libreadline-dev \
                 libclutter-1.0-dev libzip-dev cython \
                 libfuse-dev python-dev python2.7 \
-                libncurses5
+                libncurses5 policykit-1
         else
                 echo "Package manager is not supported"
                 exit 1

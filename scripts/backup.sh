@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Adb creates a backup of an app and then creates a folder containing
 # All the data stored in that folder. 

@@ -9,8 +9,6 @@
 6. IOS how to uninstall the apps. 
 
 
-
-
 ## Data TODO
 1. A csv file containing all the `appIds`,
 `store`={'android', 'ios', 'offstpre'}, and `flag`={'dual-use', 'spyware'}
