@@ -1,13 +1,13 @@
 <div class="">
-    <h4><span style="color: green; font-family: monospace; font-size: 0.3in">PhoneScanner:</span>
-        Scan phones for IPS apps
+	<h4><span style="color: green; font-family: sans-serif; font-size: 1.2em">{{ title.title }} ({{ title.version_current }})</span>
     <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App</a></span>
     </h4>
 
-    <p>This application scans an Android and iOS phone for apps that can be used
-        to spy, track, or monitor a person.  To prepare the phones for scanning
-        follow the <a href="/instruction" target="_blank">instruction here.</a><br/>
-        Check built-in sharing features in your mobile using <a class="lead" href="/privacy"><u>Privacy Checkup</u></a>
+    <p>{{ title.title }} is an <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> webapp that 
+    scans mobile devices (e.g., Android and iOS devices) for apps that can be used
+        to spy on, track, or otherwise monitor a person. To prepare your device for a scan, please follow 
+	the <a href="/instruction" target="_blank">instructions here.</a><br/>
+        Review the built-in sharing feature settings of your device using <a class="lead" href="/privacy"><u>Privacy Checkup</u></a>
     </p>
         <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
@@ -16,7 +16,7 @@
 <div class="row  h-100">
     <div class="col-md-3 border py-2" style="height:80vh;">
         <div align="center">
-            <label class="font-weight-bold lead">Scan</label>
+            <label class="font-weight-bold lead">Which device do you have?</label>
             <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS", "Test"] %}
