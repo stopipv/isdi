@@ -7,7 +7,7 @@ import os
 import sqlite3
 from datetime import datetime
 from android_permissions import all_permissions
-from run import run_command, catch_err
+from runcmd import run_command, catch_err
 import parse_dump
 import blacklist
 import datetime

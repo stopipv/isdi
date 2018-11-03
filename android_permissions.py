@@ -1,6 +1,6 @@
 from rsonlite import simpleparse
 from distutils.util import strtobool
-from run import run_command, catch_err
+from runcmd import run_command, catch_err
 import pandas as pd
 import subprocess
 import datetime

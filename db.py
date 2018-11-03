@@ -23,6 +23,7 @@ def new_client_id():
         one=True
     )['cid']
     d, t = today(), 0
+    # FIXME: won't parse if different ClientID. 
     print("new_client_id >>>> {}".format(last_client_id))
     if last_client_id:
         d, t = last_client_id.rsplit('_', 1)

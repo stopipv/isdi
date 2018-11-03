@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import shlex
 from sys import platform
+from runcmd import run_command, catch_err
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 
@@ -23,7 +24,14 @@ IOS_DUMPFILES = {'Jailbroken':'ios_jailbroken.log',
         'Apps':'ios_apps.plist','Info':'ios_info.xml'}
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
-TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
+#TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
+
+VERSION_STABLE = catch_err(run_command('git describe --abbrev=0 --tags')).strip()
+VERSION_CURRENT = catch_err(run_command('git describe --tags')).strip()
+TITLE = {'title':"Mobile Device Privacy Scanner",
+        'version_current':VERSION_CURRENT,
+        'version_stable':VERSION_STABLE}
+
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_FILE = 'static_data/app-info.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + ("~test" if TEST else "")

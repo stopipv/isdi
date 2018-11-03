@@ -45,6 +45,7 @@ def close_connection(exception):
 def index():
     return render_template(
         'main.html',
+        title=config.TITLE,
         task = 'home',
         devices={
             'Android': android.devices(),
@@ -74,6 +75,7 @@ def app_details(device):
     print(d.keys())
     return render_template(
         'main.html', task="app",
+        title=config.TITLE,
         app=d,
         info=info,
         device=device
@@ -82,12 +84,12 @@ def app_details(device):
 
 @app.route('/instruction', methods=['GET'])
 def instruction():
-    return render_template('main.html', task="instruction")
+    return render_template('main.html', task="instruction",
+        title=config.TITLE)
 
 
 @app.route('/kill', methods=['POST', 'GET'])
 def killme():
-    print("I am here")
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
@@ -111,7 +113,7 @@ def privacy():
     TODO: Privacy scan. Think how should it flow. 
     Privacy is a seperate page. 
     """
-    return render_template('main.html', task="privacy")
+    return render_template('main.html', task="privacy", title=config.TITLE)
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
@@ -137,6 +139,7 @@ def scan():
     if not sc:
         return render_template("main.html",
                                task="home",
+                               title=config.TITLE,
                                apps={},
                                error="Please pick one device.",
                                clientid=clientid
@@ -153,12 +156,15 @@ def scan():
         isconnected, reason = sc.setup()
         if not isconnected:
             return render_template(
-                "main.html", task="home", apps={},
+                "main.html", task="home", 
+                apps={},
+                title=config.TITLE,
                 error="<b>{}</b>".format(reason))
     if not ser:
         # FIXME: add scripts/ios_mount_linux.sh workflow for iOS.
         return render_template(
             "main.html", task="home", apps={},
+            title=config.TITLE,
             error="<b>No device is connected!!</b> {}".format(error)
     )
     scanid = create_scan(clientid, ser, device)
@@ -174,6 +180,7 @@ def scan():
         'main.html', task="home",
         isrooted = "Yes: {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
                 else "No: {}".format(rooted_reason),
+        title=config.TITLE,
         device_name=device_name,
         apps=apps,
         scanid=scanid,
