@@ -18,6 +18,13 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 DEBUG = True
 TEST = False
 
+DEVICE_PRIMARY_USER = {
+        'me':'Me',
+        'child':'A child of mine',
+        'partner':'My current partner/spouse',
+        'family_other':'Another family member',
+        'other':'Someone else'
+        }
 
 ANDROID_PERMISSIONS = 'static_data/android_permissions.csv'
 IOS_DUMPFILES = {'Jailbroken':'ios_jailbroken.log', 
