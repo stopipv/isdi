@@ -35,5 +35,7 @@ else
 		echo "'unbind' will take away `uname -n`'s driver connection to the mobile device"\
 			"so that webUSB can claim it."
 		echo "'bind' will restore `uname -n`'s driver connection to the mobile device."
+		echo "HELPFUL HINT: to debug your chrome webUSB connection, check chrome://device-log"\
+			"and check the Debug checkbox."
 	exit -1;
 fi
