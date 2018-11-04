@@ -43,11 +43,12 @@
              return false;
          }
 
-         function reset_form(form) {
-             if (confirm("Do you want to reset the form?")) {
+         function new_client(form) {
+             if (confirm("Did you finish scanning ALL devices of the current client? Do you want to scan devices for a new client?")) {
                  window.location.href = "/";
              }
          }
+
          $(document).ready(function () {
              $('[data-toggle="tooltip"]').tooltip();
              $('input[type="text"]').on('keyup keypress', function (e) {

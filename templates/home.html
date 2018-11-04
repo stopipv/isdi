@@ -1,5 +1,5 @@
 <div class="">
-	<h4><span style="color: green; font-family: sans-serif; font-size: 1.2em">{{ title.title }} ({{ title.version_current }})</span>
+	<h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> ({{ title.version_current }})</span>
     <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App</a></span>
     </h4>
 
@@ -16,51 +16,71 @@
 <div class="row  h-100">
     <div class="col-md-3 border py-2" style="height:80vh;">
         <div align="center">
-            <label class="font-weight-bold lead">Which device do you have?</label>
+            <label class="font-weight-bold lead">Which kind of device do you have?</label>
             <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS", "Test"] %}
-                    <label class="btn btn-secondary {% if device==a.lower() %} active {% endif %}">
+                    <label class="btn btn-outline-primary {% if device==a.lower() %} active {% endif %}">
                         <input type="radio" name="device" id="{{ a | lower }}"
 			       value="{{ a| lower }}" autocomplete="off"
 			       {% if device==a.lower() %} checked {% endif %}
 			> {{ a }}
                     </label>
 		    {% endfor %}
-                    <!-- <label class="btn btn-secondary">
+                    <!-- <label class="btn btn-outline-primary">
                          <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
 			 </label>
-			 <label class="btn btn-secondary">
+			 <label class="btn btn-outline-primary">
                          <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
 			 </label>
-			 <label class="btn btn-secondary">
+			 <label class="btn btn-outline-primary">
                          <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
 			 </label> -->
                 </div>
-                <label><b>Client ID</b>
+		<br><br>
+            	<label class="font-weight-bold lead">Who primarily uses this device?</label>
+                <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+		    {% for k,v in device_primary_user.items() %}
+                    <label class="btn btn-outline-primary {% if device_primary_user_sel==k.lower() %} active {% endif %}">
+                        <input type="radio" name="device_primary_user" id="{{ k | lower }}"
+			       value="{{ k | lower }}" autocomplete="off"
+			       {% if device_primary_user==k.lower() %} checked {% endif %}
+			> {{ v }}
+                    </label>
+		    {% endfor %}
+                </div>
+		<br><br>
+                <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label>
+                <!--
+		<label><b>Client ID</b>
                 <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <br/>
-                <button class="btn btn-primary mx-2">Scan</button>
+		-->
+                <button class="btn btn-primary mx-2">Scan now</button>
             </form>
-            {% for t in ["Android", "iOS", "test"] %}
+	    <!-- {% for t in ["Android", "iOS", "test"] %} -->
                 <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
                             class="btn btn-primary mx-2">{{ t }}</button -->
-            {% endfor %}
+		    <!-- {% endfor %} -->
             <hr/>
+        </div>
+        <div class="border-warning visible">
+            <form onsubmit="return false" name="form-newclient" id="form-newclient">
+                <button onclick="new_client(this)" id="btn-newclient"
+                        class="btn btn-info btn-lg my-3">Start a new client session
+                </button>
+            </form>
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
                 <label> Phone Serial No:</label>
 		<input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
                                      value="{{ serial }}" readonly>
-                 <input type="hidden" name="clientid" type="text" value="{{ clientid }}"/></label>
+                 <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label>
                 <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
                           rows="10" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
-                        class="btn btn-primary btn-lg my-3">Save
-                </button>
-                <button onclick="reset_form(this)" id="btn-metainfo-reset"
-                        class="btn btn-outline-warning btn-lg my-3">Reset
+                        class="btn btn-primary btn-lg my-3">Save notes about this scan
                 </button>
             </form>
         </div>
@@ -69,14 +89,14 @@
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
           {% if device_name %}
-          <label>Device connected: <b>{{ device_name }}</b></label>
+          <label>Device scanned: <b>{{ device_name }}</b></label>
           <br>
           {% endif %}
-	    <label>Jailbroken/Rooted: <b>{{ isrooted }}</b></label>
+	    <label>Is this device jailbroken or rooted? <b>{{ isrooted }}</b></label>
             <table class="table table-bordered w-100 h-100">
                 <thead>
                 <tr>
-                    <th style="width: 3%">Delete</th>
+                    <th style="width: 3%">Uninstall?</th>
                     <th style="width: 23%">App Name</th>
                     <th style="width: 23%">App ID</th>
                     <th style="width: 20%">Flags</th>

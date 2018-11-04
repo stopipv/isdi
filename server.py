@@ -46,6 +46,7 @@ def index():
     return render_template(
         'main.html',
         title=config.TITLE,
+        device_primary_user=config.DEVICE_PRIMARY_USER,
         task = 'home',
         devices={
             'Android': android.devices(),
@@ -76,6 +77,7 @@ def app_details(device):
     return render_template(
         'main.html', task="app",
         title=config.TITLE,
+        device_primary_user=config.DEVICE_PRIMARY_USER,
         app=d,
         info=info,
         device=device
@@ -85,6 +87,7 @@ def app_details(device):
 @app.route('/instruction', methods=['GET'])
 def instruction():
     return render_template('main.html', task="instruction",
+        device_primary_user=config.DEVICE_PRIMARY_USER,
         title=config.TITLE)
 
 
@@ -113,7 +116,9 @@ def privacy():
     TODO: Privacy scan. Think how should it flow. 
     Privacy is a seperate page. 
     """
-    return render_template('main.html', task="privacy", title=config.TITLE)
+    return render_template('main.html', task="privacy", 
+            device_primary_user=config.DEVICE_PRIMARY_USER,
+            title=config.TITLE)
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
@@ -130,8 +135,11 @@ def scan():
     :return: a flask view template
     """
     clientid = request.form.get('clientid', request.args.get('clientid'))
+    device_primary_user = request.form.get('device_primary_user', \
+            request.args.get('device_primary_user'))
     device = request.form.get('device', request.args.get('device'))
     action = request.form.get('action', request.args.get('action'))
+    print('PRIMARY USER IS: {}'.format(device_primary_user))
     print("--> Action = ", action)
     # if action == "Privacy Check":
     #     return redirect(url_for(privacy, device=device), code=302)
@@ -140,8 +148,19 @@ def scan():
         return render_template("main.html",
                                task="home",
                                title=config.TITLE,
+                               device_primary_user=config.DEVICE_PRIMARY_USER,
                                apps={},
-                               error="Please pick one device.",
+                               error="Please choose one device to scan.",
+                               clientid=clientid
+        )
+    if not device_primary_user:
+        return render_template("main.html",
+                               task="home",
+                               title=config.TITLE,
+                               device_primary_user=config.DEVICE_PRIMARY_USER,
+                               apps={},
+                               device=device,
+                               error="Please identify the primary user of the device.",
                                clientid=clientid
         )
     ser = first_element_or_none(sc.devices())
@@ -153,20 +172,26 @@ def scan():
     "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
     if device == 'ios':
-        isconnected, reason = sc.setup()
+        isconnected, reason = sc.setup() # go through pairing process and do not scan until it is successful.
         if not isconnected:
             return render_template(
                 "main.html", task="home", 
                 apps={},
                 title=config.TITLE,
+                device_primary_user=config.DEVICE_PRIMARY_USER,
+                device_primary_user_sel=device_primary_user,
                 error="<b>{}</b>".format(reason))
     if not ser:
-        # FIXME: add scripts/ios_mount_linux.sh workflow for iOS.
+        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
         return render_template(
             "main.html", task="home", apps={},
             title=config.TITLE,
-            error="<b>No device is connected!!</b> {}".format(error)
+            device_primary_user=config.DEVICE_PRIMARY_USER,
+            device_primary_user_sel=device_primary_user,
+            error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank'>setup instructions here.</a></b> {}".format(error)
     )
+
+    # TODO: here, adjust client session.
     scanid = create_scan(clientid, ser, device)
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
@@ -178,9 +203,11 @@ def scan():
     rooted, rooted_reason = sc.isrooted(ser)
     return render_template(
         'main.html', task="home",
-        isrooted = "Yes: {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
-                else "No: {}".format(rooted_reason),
+        isrooted = "Yes. Reason(s): {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
+                else "No. Reason(s): {}".format(rooted_reason),
         title=config.TITLE,
+        device_primary_user=config.DEVICE_PRIMARY_USER,
+        device_primary_user_sel=device_primary_user,
         device_name=device_name,
         apps=apps,
         scanid=scanid,
@@ -211,7 +238,7 @@ def delete_app(scanid):
         )
         print("Update appinfo failed! r={}".format(r))
     else:
-        print("Uinstall failed. r={}".format(r))
+        print("Uninstall failed. r={}".format(r))
     return is_success(r, "Success!", config.error())
 
 
