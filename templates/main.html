@@ -18,6 +18,18 @@
          var serial = "{{ serial }}";
          var scanid = "{{ scanid }}";
          var clientid = "{{ clientid }}";
+         function close_window(msg) {
+		 if (confirm(msg)) {
+			 open('','_parent','');
+			 close();
+		 }
+	 }
+
+         function close_app(msg) {
+		 if (confirm(msg)) {
+			 close();
+		 }
+	 }
          
          function report_success(m) {
              $('#msg').html(m);

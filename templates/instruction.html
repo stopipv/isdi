@@ -1,6 +1,6 @@
 <div class="container">
     <div>
-        <a href="/">Home</a>
+    <a href="#" onclick="close_window('Close these device setup instructions?');return false;">close these instructions</a>
         <div class="row">
             <div class="border p-4">
 		    <h3>Documentation of <span style="color: green; font-family: monospace; font-size: 0.3in">{{ title.title }}</span></h3>
@@ -13,6 +13,7 @@
 		steps below for the type of device you own.<br><br>
 
                 <h5>Android Devices</h5>
+		<img src="/webstatic/images/android.resiz.png">
                 For an Android device, the <code>developer options</code> on the device need to be
 		activated. Developer options provide functionality for {{ title.title }} to communicate with 
 		the device. The exact steps might vary from device manufacturer and version of
@@ -73,6 +74,7 @@
                 </ol>
 
                 <h5>iOS (iPhone, iPad)</h5>
+		<img src="/webstatic/images/apple.resized.png">
                 There is not much preparation required for iOS, just connect the USB cable, on
                 the device you should see a prompt asking for the device passcode (sometimes called a "pin" code)
                 number. The passcode has to be entered to unlock the device, and trust the

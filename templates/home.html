@@ -1,13 +1,14 @@
 <div class="">
 	<h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> ({{ title.version_current }})</span>
-    <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App</a></span>
+		<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
+    <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a></span> 
     </h4>
 
     <p>{{ title.title }} is an <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> webapp that 
     scans mobile devices (e.g., Android and iOS devices) for apps that can be used
         to spy on, track, or otherwise monitor a person. To prepare your device for a scan, please follow 
-	the <a href="/instruction" target="_blank">instructions here.</a><br/>
-        Review the built-in sharing feature settings of your device using <a class="lead" href="/privacy"><u>Privacy Checkup</u></a>
+	the <a href="/instruction" target="_blank" rel="noopener">instructions here.</a><br/>
+        Review the built-in sharing feature settings of your device with this <a class="lead" href="/privacy" target="_blank" rel="noopener"><u>Privacy Checkup</u></a>.
     </p>
         <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
@@ -41,16 +42,16 @@
             	<label class="font-weight-bold lead">Who primarily uses this device?</label>
                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
 		    {% for k,v in device_primary_user.items() %}
-                    <label class="btn btn-outline-primary {% if device_primary_user_sel==k.lower() %} active {% endif %}">
-                        <input type="radio" name="device_primary_user" id="{{ k | lower }}"
-			       value="{{ k | lower }}" autocomplete="off"
-			       {% if device_primary_user==k.lower() %} checked {% endif %}
+                    <label class="btn btn-outline-primary {% if device_primary_user_sel==k %} active {% endif %}">
+                        <input type="radio" name="device_primary_user" id="{{ k }}"
+			       value="{{ k }}" autocomplete="off"
+			       {% if device_primary_user_sel == k %} checked {% endif %}
 			> {{ v }}
                     </label>
 		    {% endfor %}
                 </div>
 		<br><br>
-                <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label>
+		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <!--
 		<label><b>Client ID</b>
                 <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
@@ -64,21 +65,23 @@
 		    <!-- {% endfor %} -->
             <hr/>
         </div>
-        <div class="border-warning visible">
+        <div class="border-warning visible" align="center">
             <form onsubmit="return false" name="form-newclient" id="form-newclient">
                 <button onclick="new_client(this)" id="btn-newclient"
-                        class="btn btn-info btn-lg my-3">Start a new client session
+                        class="btn btn-success btn-lg my-3">Start a new client session
                 </button>
             </form>
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-                <label> Phone Serial No:</label>
-		<input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
-                                     value="{{ serial }}" readonly>
-                 <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label>
+		    <label><i>Session ID:</i></label>
+		<input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
+                                     value="{{ clientid }}" readonly>
+	  	<!-- <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label> -->
+		<!-- <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
+	  value="{{ serial }}" readonly> -->
                 <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
-                          rows="10" {% if not serial %}disabled{% endif %}></textarea>
+                          rows="7" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
                         class="btn btn-primary btn-lg my-3">Save notes about this scan
                 </button>
@@ -115,16 +118,16 @@
                                    title="Delete app">&otimes;</a></td>
                             {% endif %}
                             {% if info['title'] %}
-                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
+                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
 				class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
-  <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank"
+  <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
   class="text text-dark">Unnamed</a></td>
 
 
                             {% endif %}
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
-                                   target="_blank"><code>{{ appId }}</code></a></td>
+                                   target="_blank" rel="noopener"><code>{{ appId }}</code></a></td>
                             <td>{{ info['html_flags'] | safe }}</td>
                             <td><input type="text" placeholder="Remarks" class='form-control appnotes' name="{{ appId }}" /></td>
                         </tr>
