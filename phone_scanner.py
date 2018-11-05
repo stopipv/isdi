@@ -261,15 +261,16 @@ class AndroidScan(AppScan):
         return run_command(cmd).stdout.read().decode('utf-8')
 
     def device_info(self, serial):
+        m = {}
         cmd = '{cli} -s {serial} shell getprop ro.product.brand'
-        brand = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        m['brand'] = run_command(cmd, serial=serial).stdout.read().decode('utf-8').title()
 
         cmd = '{cli} -s {serial} shell getprop ro.product.model'
-        model = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
+        m['model'] = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
 
         cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
-        version = run_command(cmd, serial=serial).stdout.read().decode('utf-8')
-        return brand.title()+" "+model+"(running Android "+version.strip()+")"
+        m['version'] = run_command(cmd, serial=serial).stdout.read().decode('utf-8').strip()
+        return (m['brand']+" "+m['model']+"(running Android "+m['version']+")", m)
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]
@@ -412,8 +413,8 @@ class IosScan(AppScan):
         dfname = self.dump_path(serial)
         devinfo = self.dump_path(serial, 'Device_Info')
         ddump = parse_dump.IosDump(dfname, devinfo)
-        device_info = ddump.device_info()
-        return device_info
+        device_info_print, device_info_map = ddump.device_info()
+        return (device_info_print, device_info_map)
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'

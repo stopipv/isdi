@@ -136,7 +136,14 @@ def create_mult_appinfo(args):
     return insert_many("insert into app_info (scanid, appid, flags, remark, action_taken) values (?,?,?,?,?)",
                        args)
     
-    
+def get_client_devices_from_db(clientid):
+    # TODO: change 'select serial ...' to 'select device_model ...' (setup first)
+    d = query_db('select serial from scan_res where clientid=?', args=(clientid,), one=False)
+    if d:
+        # TODO: adjust set() when incorporating other features like 'device_primary_user'
+        return list(set([d_map['serial'] for d_map in d]))
+    else:
+        return ''
 
 def get_device_from_db(scanid):
     d = query_db('select device from scan_res where id=?', args=(scanid,), one=True)

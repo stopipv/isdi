@@ -14,7 +14,7 @@ from privacy_scan_android import do_privacy_check
 from db import (
     get_db, create_scan, save_note, create_appinfo, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
-    get_device_from_db, update_mul_appinfo, get_serial_from_db
+    get_client_devices_from_db, get_device_from_db, update_mul_appinfo, get_serial_from_db
 )
 
 
@@ -126,6 +126,22 @@ def privacy_scan(device, cmd):
     res = do_privacy_check(sc.serialno, cmd)
     return res
 
+@app.route("/view_results", methods=['POST', 'GET'])
+def view_results():
+    clientid = request.form.get('clientid', request.args.get('clientid'))
+    scan_res = request.form.get('scan_res', request.args.get('scan_res'))
+
+    # TODO: maybe unneccessary, but likely nice for returning without re-drawing screen.
+    last_serial = request.form.get('last_serial', request.args.get('last_serial'))
+
+    if scan_res == last_serial:
+        print('Should return same template as before.')
+        print("scan_res:"+str(scan_res))
+        print("last_serial:"+str(last_serial))
+    else:
+        print('Should return results of scan_res.')
+        print("scan_res:"+str(scan_res))
+        print("last_serial:"+str(last_serial))
 
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
@@ -134,11 +150,16 @@ def scan():
     :param device: "android" or "ios" or test
     :return: a flask view template
     """
+    # FIXME: prevent clientID modification (remove it from GET params?)
     clientid = request.form.get('clientid', request.args.get('clientid'))
     device_primary_user = request.form.get('device_primary_user', \
             request.args.get('device_primary_user'))
     device = request.form.get('device', request.args.get('device'))
     action = request.form.get('action', request.args.get('action'))
+
+    currently_scanned = get_client_devices_from_db(clientid)
+    # lookup devices scanned so far here. need to add this by model rather than by serial.
+    print('CURRENTLY SCANNED: {}'.format(currently_scanned))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
     print('-'*80)
     print('CLIENT ID IS: {}'.format(clientid))
@@ -153,6 +174,7 @@ def scan():
                                title=config.TITLE,
                                device_primary_user=config.DEVICE_PRIMARY_USER,
                                apps={},
+                               currently_scanned=currently_scanned,
                                error="Please choose one device to scan.",
                                device_primary_user_sel=device_primary_user,
                                clientid=clientid
@@ -164,6 +186,7 @@ def scan():
                                device_primary_user=config.DEVICE_PRIMARY_USER,
                                apps={},
                                device=device,
+                               currently_scanned=currently_scanned,
                                error="Please identify the primary user of the device.",
                                clientid=clientid
         )
@@ -186,6 +209,7 @@ def scan():
                 device_primary_user_sel=device_primary_user,
                 clientid=clientid,
                 device=device,
+                currently_scanned=currently_scanned,
                 error="<b>{}</b>".format(reason+"<b>Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here,</a> if needed.</b>"))
     if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
@@ -196,18 +220,26 @@ def scan():
             device_primary_user_sel=device_primary_user,
             clientid=clientid,
             device=device,
+            currently_scanned=currently_scanned,
             error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
     )
 
+    # TODO: model for 'devices scanned so far:' device_name_map['model']
+    # and save it to scan_res along with device_primary_user.
+    device_name_print, device_name_map = sc.device_info(serial=ser)
+
     # TODO: here, adjust client session.
     scanid = create_scan(clientid, ser, device)
+
+
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
-    
-    device_name = sc.device_info(serial=ser)
+
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
                           for appid, info in apps.items()])
+
+    currently_scanned = get_client_devices_from_db(clientid)
     rooted, rooted_reason = sc.isrooted(ser)
     return render_template(
         'main.html', task="home",
@@ -216,13 +248,14 @@ def scan():
         title=config.TITLE,
         device_primary_user=config.DEVICE_PRIMARY_USER,
         device_primary_user_sel=device_primary_user,
-        device_name=device_name,
+        device_name=device_name_print,
         apps=apps,
         scanid=scanid,
         clientid=clientid,
         sysapps=set(), #sc.get_system_apps(serialno=ser)),
         serial=ser,
         device=device,
+        currently_scanned=currently_scanned, # TODO: make this a map of model:link to display scan results for that scan.
         error=config.error(),
     )
 
