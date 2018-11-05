@@ -140,6 +140,9 @@ def scan():
     device = request.form.get('device', request.args.get('device'))
     action = request.form.get('action', request.args.get('action'))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
+    print('-'*80)
+    print('CLIENT ID IS: {}'.format(clientid))
+    print('-'*80)
     print("--> Action = ", action)
     # if action == "Privacy Check":
     #     return redirect(url_for(privacy, device=device), code=302)
@@ -151,6 +154,7 @@ def scan():
                                device_primary_user=config.DEVICE_PRIMARY_USER,
                                apps={},
                                error="Please choose one device to scan.",
+                               device_primary_user_sel=device_primary_user,
                                clientid=clientid
         )
     if not device_primary_user:
@@ -180,7 +184,9 @@ def scan():
                 title=config.TITLE,
                 device_primary_user=config.DEVICE_PRIMARY_USER,
                 device_primary_user_sel=device_primary_user,
-                error="<b>{}</b>".format(reason))
+                clientid=clientid,
+                device=device,
+                error="<b>{}</b>".format(reason+"<b>Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here,</a> if needed.</b>"))
     if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
         return render_template(
@@ -188,7 +194,9 @@ def scan():
             title=config.TITLE,
             device_primary_user=config.DEVICE_PRIMARY_USER,
             device_primary_user_sel=device_primary_user,
-            error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank'>setup instructions here.</a></b> {}".format(error)
+            clientid=clientid,
+            device=device,
+            error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
     )
 
     # TODO: here, adjust client session.
