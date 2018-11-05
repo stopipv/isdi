@@ -308,12 +308,14 @@ class IosDump(PhoneDump):
         # https://blog.timac.org/2017/0124-deobfuscating-libmobilegestalt-keys/
         # can detect Airplane Mode, PasswordConfigured, lots of details about hardware.
         # https://gist.github.com/shu223/c108bd47b4c9271e55b5
+        m = {}
         try:
-            make = self.model_make_map[self.deviceinfo['ProductType']]
+            m['model'] = self.model_make_map[self.deviceinfo['ProductType']]
         except KeyError as e:
-            make = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
-        name = self.deviceinfo['DeviceName']
-        return name+" (an "+make + " running iOS "+self.deviceinfo['ProductVersion']+")"
+            m['model'] = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
+        m['name'] = self.deviceinfo['DeviceName']
+        m['version'] = self.deviceinfo['ProductVersion']
+        return (m['name']+" (an "+m['model'] + " running iOS "+m['version']+")", m)
     
     def info(self, appid):
         '''

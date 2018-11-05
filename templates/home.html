@@ -21,20 +21,20 @@
             <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS", "Test"] %}
-                    <label class="btn btn-outline-primary {% if device==a.lower() %} active {% endif %}">
+                    <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
                         <input type="radio" name="device" id="{{ a | lower }}"
 			       value="{{ a| lower }}" autocomplete="off"
 			       {% if device==a.lower() %} checked {% endif %}
 			> {{ a }}
                     </label>
 		    {% endfor %}
-                    <!-- <label class="btn btn-outline-primary">
+                    <!-- <label class="btn btn-outline-secondary">
                          <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
 			 </label>
-			 <label class="btn btn-outline-primary">
+			 <label class="btn btn-outline-secondary">
                          <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
 			 </label>
-			 <label class="btn btn-outline-primary">
+			 <label class="btn btn-outline-secondary">
                          <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
 			 </label> -->
                 </div>
@@ -42,7 +42,7 @@
             	<label class="font-weight-bold lead">Who primarily uses this device?</label>
                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
 		    {% for k,v in device_primary_user.items() %}
-                    <label class="btn btn-outline-primary {% if device_primary_user_sel==k %} active {% endif %}">
+                    <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
                         <input type="radio" name="device_primary_user" id="{{ k }}"
 			       value="{{ k }}" autocomplete="off"
 			       {% if device_primary_user_sel == k %} checked {% endif %}
@@ -66,6 +66,23 @@
             <hr/>
         </div>
         <div class="border-warning visible" align="center">
+		{% if currently_scanned %}
+            	<form id="session_scans" method="GET" action="/view_results">
+			<label class="font-weight-bold lead">Devices scanned so far (same client):</label>
+		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+		<input style="display:none" name="last_serial" id="last-serial" type="text" value="{{ serial }}"/></label>
+                <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+		{% for scanned in currently_scanned %}
+		<label class="btn btn-outline-secondary {% if serial == scanned %} active {% endif %}">
+			<input type="radio" name="scan_res" id="scan_res" value="{{ scanned }}"
+			autocomplete="off" {% if serial == scanned %} checked {% endif %}>
+			{{ scanned }}
+		    </label>
+		{% endfor %}
+		<button class="btn btn-primary btn-sm">Review Selected Scan Results</button>
+		</div>
+		</form>
+		{% endif %}
             <form onsubmit="return false" name="form-newclient" id="form-newclient">
                 <button onclick="new_client(this)" id="btn-newclient"
                         class="btn btn-success btn-lg my-3">Start a new client session
