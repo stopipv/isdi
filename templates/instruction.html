@@ -12,6 +12,16 @@
 		the {{ title.title }}. In order to allow the scanner to communicate with your device, please follow the
 		steps below for the type of device you own.<br><br>
 
+                <h5>iOS (iPhone, iPad)</h5>
+		<img src="/webstatic/images/apple.resized.png">
+                There is not much preparation required for iOS, just connect the USB cable, on
+                the device you should see a prompt asking for the device passcode (sometimes called a "pin" code)
+                number. The passcode has to be entered to unlock the device, and trust the
+                computer to allow scan the iPhone. 
+                <b>Troubleshooting:</b> Sometimes the {{ title.title }} might fail to recognize the
+                iOS device. Try opening iTunes on macOS, and see if the device is
+                listed. Disconnect the device from the USB cable, reconnect, and try scanning again. 
+
                 <h5>Android Devices</h5>
 		<img src="/webstatic/images/android.resiz.png">
                 For an Android device, the <code>developer options</code> on the device need to be
@@ -39,7 +49,14 @@
                         scanning.)</li>
                     <li>Next step is to turning on <code>USB debugging</code>. Go to
                         <code>Settings</code>&rarr;<code>Developer options</code>&rarr;<code>USB debugging</code>.
-                        Tap on the toggle switch to turn it on. </li>
+                        Tap on the toggle switch to turn it on.
+
+			<br></br>
+			<img src="/webstatic/images/usb_android.resized.png" style="display: block; margin: 0 auto;"><br>
+			<b>Note:</b> You may need to check the device's notification tray to ensure the 
+			connection is being used for <code>'File Transfer'</code>. If there is a message from
+			the system with 'Charging this device via USB', tap it and select <code>'File Transfer'</code> under 'Use USB For'.
+		    </li>
                     <!-- 
                          the developer mode is turned on, connect the device to the laptop using the
                          correct USB cable. In the device a dialogue box will appear with message "Do you
@@ -72,16 +89,6 @@
                             might fail. So please check the settings again. developer options ,
                             but not all.]</li>
                 </ol>
-
-                <h5>iOS (iPhone, iPad)</h5>
-		<img src="/webstatic/images/apple.resized.png">
-                There is not much preparation required for iOS, just connect the USB cable, on
-                the device you should see a prompt asking for the device passcode (sometimes called a "pin" code)
-                number. The passcode has to be entered to unlock the device, and trust the
-                computer to allow scan the iPhone. 
-                <b>Troubleshooting:</b> Sometimes the {{ title.title }} might fail to recognize the
-                iOS device. Try opening iTunes on macOS, and see if the device is
-                listed. Disconnect the device from the USB cable, reconnect, and try scanning again. 
 
             </div>
         </div>
