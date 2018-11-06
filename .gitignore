@@ -138,3 +138,7 @@ webstatic/images/tmp.png
 scripts/ios_deps/*
 tests/serial/*
 tests/*/
+<<<<<<< HEAD
+=======
+static_data/kevins_approach.csv
+>>>>>>> 4a37b4b6497d1316d3e01ee166d3087ae0c0e982
