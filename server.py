@@ -190,7 +190,22 @@ def scan():
                                error="Please identify the primary user of the device.",
                                clientid=clientid
         )
-    ser = first_element_or_none(sc.devices())
+    ser = sc.devices()
+
+    if isinstance(ser, str):
+        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
+        return render_template(
+            "main.html", task="home", apps={},
+            title=config.TITLE,
+            device_primary_user=config.DEVICE_PRIMARY_USER,
+            device_primary_user_sel=device_primary_user,
+            clientid=clientid,
+            device=device,
+            currently_scanned=currently_scanned,
+            error="<b>Android device detected, but needs to be set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
+    )
+
+    ser = first_element_or_none(ser)
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
     error = "If an iPhone is connected, open iTunes, click through the connection dialog and wait for the \"Trust this computer\" prompt "\
@@ -228,19 +243,34 @@ def scan():
     # and save it to scan_res along with device_primary_user.
     device_name_print, device_name_map = sc.device_info(serial=ser)
 
-    # TODO: here, adjust client session.
-    scanid = create_scan(clientid, ser, device)
-
-
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+
+    scan_d = {'clientid':clientid, 'serial':ser, 'device':device,
+            'device_model':device_name_map['model'].strip(),
+            'device_version':device_name_map['version'].strip(),
+            'device_primary_user':device_primary_user,
+    }
+
+    if device == 'ios':
+        scan_d['device_manufacturer'] = 'Apple'
+        scan_d['last_full_charge'] = 'unknown'
+    else:
+        scan_d['device_manufacturer'] = device_name_map['brand'].strip()
+        scan_d['last_full_charge'] = device_name_map['last_full_charge']
+
+    rooted, rooted_reason = sc.isrooted(ser)
+    scan_d['is_rooted'] = rooted
+    scan_d['rooted_reasons'] = json.dumps(rooted_reason)
+
+    # TODO: here, adjust client session.
+    scanid = create_scan(scan_d)
 
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
                           for appid, info in apps.items()])
 
     currently_scanned = get_client_devices_from_db(clientid)
-    rooted, rooted_reason = sc.isrooted(ser)
     return render_template(
         'main.html', task="home",
         isrooted = "Yes. Reason(s): {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \

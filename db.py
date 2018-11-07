@@ -85,16 +85,19 @@ def save_note(scanid, note):
     return True
 
 
-def create_scan(clientid, serial, device):
+def create_scan(scan_d):
     """
     @scanr must have following fields.
     
     """
     return insert(
         "insert into scan_res "\
-        "(clientid, serial, device) "\
-        "values (?, ?, ?)",
-        args=(clientid, serial, device),
+        "(clientid, serial, device, device_model, device_version, device_manufacturer, last_full_charge, device_primary_user, is_rooted, rooted_reasons) "\
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args=(scan_d['clientid'], scan_d['serial'], scan_d['device'], \
+                scan_d['device_model'], scan_d['device_version'], \
+                scan_d['device_manufacturer'], scan_d['last_full_charge'],\
+                scan_d['device_primary_user'], scan_d['is_rooted'], scan_d['rooted_reasons'])
     )
 
 
@@ -138,10 +141,11 @@ def create_mult_appinfo(args):
     
 def get_client_devices_from_db(clientid):
     # TODO: change 'select serial ...' to 'select device_model ...' (setup first)
-    d = query_db('select serial from scan_res where clientid=?', args=(clientid,), one=False)
+    d = query_db('select device_model,serial from scan_res where clientid=?', args=(clientid,), one=False)
     if d:
         # TODO: adjust set() when incorporating other features like 'device_primary_user'
-        return list(set([d_map['serial'] for d_map in d]))
+        return d
+        #return list(set([d_map['device_model'] for d_map in d]))
     else:
         return ''
 

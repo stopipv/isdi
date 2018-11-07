@@ -252,6 +252,11 @@ class AndroidScan(AppScan):
         return offstore
 
     def devices(self):
+        # FIXME: check for errors related to err in runcmd.py.
+        cmd = '{cli} devices | tail -n +2 | cut -f2'
+        runcmd = catch_err(run_command(cmd), cmd=cmd)
+        if 'permission' in runcmd:
+            return runcmd
         cmd = '{cli} devices | tail -n +2 | cut -f1'
         return [l.strip() for l in run_command(cmd)
                 .stdout.read().decode('utf-8').split('\n') if l.strip()]
@@ -270,6 +275,10 @@ class AndroidScan(AppScan):
 
         cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
         m['version'] = run_command(cmd, serial=serial).stdout.read().decode('utf-8').strip()
+
+        cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:"'
+        runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
+        m['last_full_charge'] = datetime.datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
         return (m['brand']+" "+m['model']+"(running Android "+m['version']+")", m)
     # def dump_phone(self, serialno=None):
     #     if not serialno:
@@ -357,15 +366,14 @@ class IosScan(AppScan):
         self.serialno = serialno
         # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
         #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
-        path = os.path.join(config.DUMP_DIR, serialno+"_ios")
-        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
-        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
 
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         cmd = '{}/ios_dump.sh {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
                 **config.IOS_DUMPFILES)
-        print('iOS INFO DUMPED.')
+        path = os.path.join(config.DUMP_DIR, serialno+"_ios")
+        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
+        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
 
         dumped = catch_err(run_command(cmd, serial=serialno)).strip()
         if dumped == serialno:
@@ -383,6 +391,7 @@ class IosScan(AppScan):
                 print(connected_reason)
                 # FIXME: error here?
             self.installed_apps = []
+        print('iOS INFO DUMPED.')
         return self.installed_apps
 
     def get_system_apps(self, serialno):
@@ -410,6 +419,23 @@ class IosScan(AppScan):
         return d
 
     def device_info(self, serial):
+        print('DUMPING iOS INFO...')
+        # FIXME: pathlib migration at some point
+        cmd = '{}/ios_dump.sh {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
+                **config.IOS_DUMPFILES)
+        dumped = catch_err(run_command(cmd, serial=serial)).strip()
+        path = os.path.join(config.DUMP_DIR, serial+"_ios")
+        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
+        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
+        if dumped == serial:
+            print("Dumped the data into: {}".format(dumpf))
+        else:
+            print("Couldn't connect to the device. Trying to reconnect.") 
+            connected, connected_reason = self.setup()
+            if not connected:
+                print(connected_reason)
+                # FIXME: error here?
+        print('iOS INFO DUMPED.')
         dfname = self.dump_path(serial)
         devinfo = self.dump_path(serial, 'Device_Info')
         ddump = parse_dump.IosDump(dfname, devinfo)
