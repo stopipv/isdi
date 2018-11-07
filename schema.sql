@@ -15,16 +15,18 @@ CREATE TABLE IF NOT EXISTS scan_res (
   serial TEXT,
   note TEXT,
   device TEXT,
-  device_primary_user TEXT,
-  device_access TEXT, -- JSONdump of person, frequency of access
-  how_obtained TEXT,
   device_model TEXT,
-  device_version TEXT,
   device_manufacturer TEXT,
-  battery_avg_last_charged INTEGER, -- take out maybe
-  last_charged DATETIME,
+  device_version TEXT,
+  is_rooted INTEGER,
+  rooted_reasons TEXT,
+  last_full_charge DATETIME,
+  device_primary_user TEXT,
+  device_access TEXT, -- JSONdump of person, frequency of access / todo
+  how_obtained TEXT, -- todo
   time DATETIME DEFAULT (datetime('now', 'localtime')),
   FOREIGN KEY(clientid) REFERENCES clients(clientid)
+  --battery_avg_last_charged INTEGER, -- take out maybe
 );
 
 CREATE TABLE IF NOT EXISTS app_info (
@@ -38,6 +40,9 @@ CREATE TABLE IF NOT EXISTS app_info (
   install_date DATETIME,
   last_updated DATETIME,
   app_version TEXT,
+  permissions TEXT,
+  permissions_reason TEXT,
+  permissions_used DATETIME,
   data_usage INTEGER, -- Mobile total received: Wifi-Total
   battery_usage INTEGER, -- in mAh. show "not more than average app on your device" rather than actual amount on front-end.
   time DATETIME DEFAULT (datetime('now', 'localtime')),
@@ -47,10 +52,6 @@ CREATE TABLE IF NOT EXISTS app_info (
 -- https://stackoverflow.com/questions/45751387/how-do-i-calculate-the-battery-drain-for-a-particular-app-using-dumpsys-batterys
 CREATE INDEX IF NOT EXISTS idx_scan_res_clientid on scan_res  (clientid);
 CREATE INDEX IF NOT EXISTS idx_app_info_scanid on app_info  (scanid);
-
-
-
-
 --
 -- CREATE TABLE IF NOT EXISTS notes (
 -- 	id INTEGER PRIMARY KEY AUTOINCREMENT,
