@@ -253,13 +253,19 @@ class AndroidScan(AppScan):
 
     def devices(self):
         # FIXME: check for errors related to err in runcmd.py.
-        cmd = '{cli} devices | tail -n +2 | cut -f2'
-        runcmd = catch_err(run_command(cmd), cmd=cmd)
-        if 'permission' in runcmd:
-            return runcmd
-        cmd = '{cli} devices | tail -n +2 | cut -f1'
-        return [l.strip() for l in run_command(cmd)
-                .stdout.read().decode('utf-8').split('\n') if l.strip()]
+        #cmd = '{cli} devices | tail -n +2 | cut -f2'
+        #runcmd = catch_err(run_command(cmd), cmd=cmd).strip()
+        cmd = '{cli} devices | tail -n +2'
+        runcmd = catch_err(run_command(cmd), cmd=cmd).strip().split('\n')
+        conn_devices = []
+        for rc in runcmd:
+            d = rc.split()
+            if len(d) != 2: continue
+            device, state = rc.split()
+            device = device.strip()
+            if state.strip() == 'device':
+                 conn_devices.append(device)
+        return conn_devices
 
     def devices_info(self):
         cmd = '{cli} devices -l'

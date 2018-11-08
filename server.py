@@ -192,7 +192,8 @@ def scan():
         )
     ser = sc.devices()
 
-    if isinstance(ser, str):
+    print(ser)
+    if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
         return render_template(
             "main.html", task="home", apps={},
@@ -202,7 +203,7 @@ def scan():
             clientid=clientid,
             device=device,
             currently_scanned=currently_scanned,
-            error="<b>Android device detected, but needs to be set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
+            error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
     )
 
     ser = first_element_or_none(ser)
