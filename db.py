@@ -141,11 +141,9 @@ def create_mult_appinfo(args):
     
 def get_client_devices_from_db(clientid):
     # TODO: change 'select serial ...' to 'select device_model ...' (setup first)
-    d = query_db('select device_model,serial from scan_res where clientid=?', args=(clientid,), one=False)
+    d = query_db('select distinct device_model,serial from scan_res where clientid=?', args=(clientid,), one=False)
     if d:
-        # TODO: adjust set() when incorporating other features like 'device_primary_user'
         return d
-        #return list(set([d_map['device_model'] for d_map in d]))
     else:
         return ''
 

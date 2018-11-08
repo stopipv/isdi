@@ -83,3 +83,4 @@ There should be a view section which is `server.py`.  Finally there should be th
 for connecting components with views via models. 
 
 
+ideviceinfo | grep -i Internationalmobile
