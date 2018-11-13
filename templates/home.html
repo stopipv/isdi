@@ -10,6 +10,11 @@
 	the <a href="/instruction" target="_blank" rel="noopener">instructions here.</a><br/>
         Review the built-in sharing feature settings of your device with this <a class="lead" href="/privacy" target="_blank" rel="noopener"><u>Privacy Checkup</u></a>.
     </p>
+            <form style="margin: 0 auto; width:250px;" onsubmit="return false" name="form-newclient" id="form-newclient">
+                <button onclick="new_client(this)" id="btn-newclient"
+                        class="btn btn-success btn-lg my-3">Start a new client session
+                </button>
+            </form>
         <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
 	     </form> -->
@@ -39,7 +44,12 @@
 			 </label> -->
                 </div>
 		<br><br>
+                <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Nickname for device?"
+                          rows="3"></textarea>
+    <!--
             	<label class="font-weight-bold lead">Who primarily uses this device?</label>
+                <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
+                          rows="4"></textarea>
                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
 		    {% for k,v in device_primary_user.items() %}
                     <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
@@ -50,6 +60,7 @@
                     </label>
 		    {% endfor %}
                 </div>
+    -->
 		<br><br>
 		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <!--
@@ -76,18 +87,13 @@
 		<label class="btn btn-outline-secondary {% if serial == scanned %} active {% endif %}">
 			<input type="radio" name="scan_res" id="scan_res" value="{{ scanned }}"
 			autocomplete="off" {% if serial == scanned %} checked {% endif %}>
-			{{ scanned }}
+      {{ scanned.device_model }} ({{ scanned.device_primary_user }})
 		    </label>
 		{% endfor %}
 		<button class="btn btn-primary btn-sm">Review Selected Scan Results</button>
 		</div>
 		</form>
 		{% endif %}
-            <form onsubmit="return false" name="form-newclient" id="form-newclient">
-                <button onclick="new_client(this)" id="btn-newclient"
-                        class="btn btn-success btn-lg my-3">Start a new client session
-                </button>
-            </form>
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">

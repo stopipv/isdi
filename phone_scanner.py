@@ -120,6 +120,10 @@ class AppScan(object):
                 
                 #hf_recent['label'] = hf_recent[['label', 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
                 hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+hf_recent['timestamp'].map(str)+")"
+                #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
+                #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime.datetime) else 'nooo') +")"
+                
+                #print(~hf_recent['timestamp'].str.contains('unknown'))
                 d.set_value(0, 'permissions', hf_recent['label'].tolist())
 
                 #d['recent_permissions'] = hf_recent['timestamp']

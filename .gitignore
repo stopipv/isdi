@@ -1,3 +1,4 @@
+static_data/*.old
 dumppkg
 *.swp
 # Byte-compiled / optimized / DLL files
