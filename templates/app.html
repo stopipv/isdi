@@ -27,7 +27,7 @@
 	    </div>
         <ul class="list-group">
             {% for perm in app.permissions %}
-            <li class="code">{{ perm | title | replace('_', ' ') }}</li>
+            <li class="code">{{ perm | capitalize | replace('_', ' ') }}</li>
             {% endfor %}
         </ul>
 	<!-- label class="btn btn-danger">

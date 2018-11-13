@@ -315,7 +315,7 @@ class IosDump(PhoneDump):
             m['model'] = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
         m['name'] = self.deviceinfo['DeviceName']
         m['version'] = self.deviceinfo['ProductVersion']
-        return (m['name']+" (an "+m['model'] + " running iOS "+m['version']+")", m)
+        return (m['model'] + " (running iOS "+m['version']+")", m)
     
     def info(self, appid):
         '''
@@ -349,7 +349,7 @@ class IosDump(PhoneDump):
             for permission in permissions:
                 print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
             print("")
-        res['permissions'] =  [(p.title(), r) for p,r in permissions]
+        res['permissions'] =  [(p.capitalize(), r) for p,r in permissions]
         res['title'] = app['CFBundleExecutable']
         res['App Version'] = app['CFBundleVersion']
         res['Install Date'] = '''Apple does not officially record iOS app installation dates. 
