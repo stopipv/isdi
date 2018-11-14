@@ -9,8 +9,14 @@ ideviceinstaller -u "$serial" -l -o xml -o list_all > $1
 sed -i -e 's/<data>/<string>/g' $1
 sed -i -e 's/<\/data>/<\/string>/g' $1
 
+# maybe for macOS...
+# plutil -convert json $1 
+
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
 ideviceinfo -u "$serial" -x > $2
+
+sed -i -e 's/<data>/<string>/g' $2
+sed -i -e 's/<\/data>/<\/string>/g' $2
 
 # try to check for jailbroken by mounting the entire filesystem. 
 # Gets output:
