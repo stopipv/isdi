@@ -5,6 +5,10 @@ cd phone_dumps/"$serial"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
 ideviceinstaller -u "$serial" -l -o xml -o list_all > $1
 
+# get around bug in Python 3 that doesn't recognize utf-8 encodings.
+sed -i -e 's/<data>/<string>/g' $1
+sed -i -e 's/<\/data>/<\/string>/g' $1
+
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
 ideviceinfo -u "$serial" -x > $2
 

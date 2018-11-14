@@ -97,6 +97,8 @@ def package_info(appid):
         # FIXME: TypeError: list indices must be integers or slices, not str
         # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the Packages:.
         # for now, using sed to filter out potential hazards in parsing output.
+        if isinstance(sp, list):
+            sp = sp[0]
         pkg = [v for k,v in sp['Packages:'].items() if appid in k][0]
     except IndexError as e:
         print(e)
@@ -207,6 +209,9 @@ if __name__ == '__main__':
     import sys
     appid = sys.argv[1]
     app_perms, pkg_info = package_info(appid)
+
+    print(app_perms, pkg_info)
+    exit()
     recent_permissions = recent_permissions_used(appid)
 
     #permissions = permissions_map()
