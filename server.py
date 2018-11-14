@@ -156,13 +156,11 @@ def scan():
             request.args.get('device_primary_user'))
     device = request.form.get('device', request.args.get('device'))
     action = request.form.get('action', request.args.get('action'))
-    device_owner = request.form.get('device_owner', request.args.get('device_owner'))
 
     currently_scanned = get_client_devices_from_db(clientid)
     # lookup devices scanned so far here. need to add this by model rather than by serial.
     print('CURRENTLY SCANNED: {}'.format(currently_scanned))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
-    print('DEVICE OWNER IS: {}'.format(device_owner))
     print('-'*80)
     print('CLIENT ID IS: {}'.format(clientid))
     print('-'*80)
@@ -181,7 +179,7 @@ def scan():
                                device_primary_user_sel=device_primary_user,
                                clientid=clientid
         )
-    if not device_owner:
+    if not device_primary_user:
         return render_template("main.html",
                                task="home",
                                title=config.TITLE,
@@ -205,8 +203,7 @@ def scan():
             clientid=clientid,
             device=device,
             currently_scanned=currently_scanned,
-            error="<b>A device wasn't detected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
-            #error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
+            error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
     )
 
     ser = first_element_or_none(ser)
@@ -253,7 +250,7 @@ def scan():
     scan_d = {'clientid':clientid, 'serial':ser, 'device':device,
             'device_model':device_name_map['model'].strip(),
             'device_version':device_name_map['version'].strip(),
-            'device_primary_user':device_owner,
+            'device_primary_user':device_primary_user,
     }
 
     if device == 'ios':
