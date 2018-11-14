@@ -179,17 +179,17 @@ def scan():
                                device_primary_user_sel=device_primary_user,
                                clientid=clientid
         )
-    if not device_primary_user:
-        return render_template("main.html",
-                               task="home",
-                               title=config.TITLE,
-                               device_primary_user=config.DEVICE_PRIMARY_USER,
-                               apps={},
-                               device=device,
-                               currently_scanned=currently_scanned,
-                               error="Please identify the primary user of the device.",
-                               clientid=clientid
-        )
+    #if not device_primary_user:
+    #    return render_template("main.html",
+    #                           task="home",
+    #                           title=config.TITLE,
+    #                           device_primary_user=config.DEVICE_PRIMARY_USER,
+    #                           apps={},
+    #                           device=device,
+    #                           currently_scanned=currently_scanned,
+    #                           error="Please identify the primary user of the device.",
+    #                           clientid=clientid
+    #    )
     ser = sc.devices()
 
     print(ser)
