@@ -107,6 +107,7 @@ function full_scan {
 
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
+    $adb devices
     full_scan
     $adb $serial shell pm clear com.android.settings
 elif [[ "$1" == "info" ]]; then

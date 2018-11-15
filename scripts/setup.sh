@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 cd /tmp;
+# FIXME: if adb versions don't match, big problems. check first.
 command -v adb &>/dev/null
 if [[ "$?" -ne "0" ]]; then 
     if [[ ! -e "$HOME/.platform-tools" ]]; then 

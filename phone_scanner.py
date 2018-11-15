@@ -288,6 +288,8 @@ class AndroidScan(AppScan):
         # FIXME: check for errors related to err in runcmd.py.
         #cmd = '{cli} devices | tail -n +2 | cut -f2'
         #runcmd = catch_err(run_command(cmd), cmd=cmd).strip()
+        #cmd = '{cli} kill-server; {cli} start-server'
+        #s = catch_err(run_command(cmd), time=30, msg="ADB connection failed", cmd=cmd)
         cmd = '{cli} devices | tail -n +2'
         runcmd = catch_err(run_command(cmd), cmd=cmd).strip().split('\n')
         conn_devices = []
