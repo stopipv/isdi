@@ -7,7 +7,7 @@ import io
 import config
 from functools import reduce
 import operator
-
+from pathlib import Path
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -71,17 +71,13 @@ class PhoneDump(object):
 
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
-        txtfname = fname.rsplit('.', 1)[0] + '.txt'
-        jsonfname = fname.rsplit('.', 1)[0] + '.json'
-        fname = jsonfname
-        if not os.path.exists(fname):
-            d = self.parse_dump_file(txtfname)
-            with open(jsonfname, 'w') as f:
-                json.dump(d, f, indent=2)
         super(AndroidDump, self).__init__('android', fname)
+        self.df = self.load_file()
 
     @staticmethod
     def parse_dump_file(fname):
+        if not Path(fname).exists():
+            print("File: {!r} does not exists".format(fname))
         data = open(fname)
         d = {}
         service = ''
@@ -120,7 +116,7 @@ class AndroidDump(PhoneDump):
         return d
 
     def load_file(self):
-        fname = self.fname
+        fname = self.fname.rsplit('.', 1)[0] + '.txt'
         json_fname = fname.rsplit('.', 1)[0] + '.json'
         if os.path.exists(json_fname):
             with open(json_fname, 'r') as f:
@@ -131,8 +127,13 @@ class AndroidDump(PhoneDump):
                     return {}
         else:
             with open(json_fname, 'w') as f:
-                d = self.parse_dump_file(fname)
-                json.dump(d, f, indent=2)
+                try:
+                    d = self.parse_dump_file(fname)
+                    json.dump(d, f, indent=2)
+                except Exception as ex:
+                    print("File ({!r}) could not be opened or parsed.".format(fname))
+                    print("Exception: {}".format(ex))
+                    return pd.DataFrame([])
         return d
 
     @staticmethod
