@@ -223,6 +223,8 @@ class IosDump(PhoneDump):
             self.finfo = finfo
             self.deviceinfo = self.load_deviceinfo()
             self.device_class = self.deviceinfo['DeviceClass']
+        else:
+            self.device_class = 'iPhone/iPad'
         self.df = self.load_file()
 
         # FIXME: not efficient to load here everytime?

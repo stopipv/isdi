@@ -84,8 +84,9 @@ class AppScan(object):
                 # FIXME: better suffix renaming scheme
                 #devinfo = self.dump_path(serialno, 'Device_Info')
                 
-                #ddump = parse_dump.IosDump(dfname)
                 ddump = self.parse_dump
+                if not ddump:
+                    ddump = parse_dump.IosDump(dfname)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
 
