@@ -42,7 +42,8 @@ def recent_permissions_used(appid):
         record['mode'] = permission_attrs[0].split(':')[1].strip()
 
         if len(permission_attrs) == 2:
-            record['timestamp'] = now - _parse_time(permission_attrs[1].split('=')[1].strip())
+            record['timestamp'] = (now - _parse_time(permission_attrs[1].split('=')[1].strip())).strftime(config.DATE_STR)
+
             # TODO: keep time_ago? that leaks when the consultation was.
             record['time_ago'] = permission_attrs[1].split('=')[1].strip()
         else:

@@ -109,7 +109,7 @@ class AppScan(object):
                 #FIXME: 
                 # some appopps in not_hf_recent are not included in the output.
                 # maybe concat hf_recent with them?
-                info['Date of Scan'] = datetime.datetime.now()
+                info['Date of Scan'] = datetime.datetime.now().strftime(config.DATE_STR)
                 info['Installation Date'] = stats['firstInstallTime']
                 info['Last Updated'] = stats['lastUpdateTime']
                 #info['Last Used'] = stats['used']
@@ -121,16 +121,20 @@ class AppScan(object):
                 info['App Version'] = stats['versionName']
                 #info['App Version Code'] = stats['versionCode']
 
-                print(d)
-                print(hf_recent['label'].tolist())
+                print("App info dict:", d)
+                print("hf_recent['label']=", hf_recent['label'].tolist())
 
                 # FIXME: if Unknown, use 'permission_abbrv' instead.
                 #hf_recent.apply()
                 hf_recent.loc[hf_recent['label'] == 'unknown', 'label'] = hf_recent['permission_abbrv']
                 
                 #hf_recent['label'] = hf_recent[['label', 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
-                
-                hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+hf_recent['timestamp'].map(str)+")"
+
+                hf_recent['label'] = hf_recent.apply(
+                    lambda x: "{} (last used: {})".format(
+                        x['label'], 'never' if 'unknown' in x['timestamp'] else x['timestamp']),
+                    axis=1
+                )
                 #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
                 #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime.datetime) else 'nooo') +")"
                 
