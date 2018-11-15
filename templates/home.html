@@ -1,20 +1,24 @@
 <div class="">
 	<h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> ({{ title.version_current }})</span>
 		<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
-    <span style="float: right; font-size: 15px"><a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a></span> 
+    <span style="float: right; font-size: 15px">
+        <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
+    device for a scan."><u>Scan Instruction</u></a>
+        <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
+        <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
+    </span> 
     </h4>
 
-    <p>{{ title.title }} is an <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> webapp that 
-    scans mobile devices (e.g., Android and iOS devices) for apps that can be used
-        to spy on, track, or otherwise monitor a person. To prepare your device for a scan, please follow 
-	the <a href="/instruction" target="_blank" rel="noopener">instructions here.</a><br/>
-        Review the built-in sharing feature settings of your device with this <a class="lead" href="/privacy" target="_blank" rel="noopener"><u>Privacy Checkup</u></a>.
+    <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
+    for scanning mobile devices (e.g., Android and iOS devices) for apps that
+    can be used to spy on, track, or otherwise monitor a person.<br/>
     </p>
-            <form style="margin: 0 auto; width:250px;" onsubmit="return false" name="form-newclient" id="form-newclient">
-                <button onclick="new_client(this)" id="btn-newclient"
-                        class="btn btn-success btn-lg my-3">Start a new client session
-                </button>
-            </form>
+    <form style="margin: 0 auto; width:150px;" onsubmit="return false" name="form-newclient" id="form-newclient">
+        <button onclick="new_client(this)" id="btn-newclient"
+                class="btn btn-success btn-normal my-3">Start a new client session
+        </button>
+    </form>
+
         <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
 	     </form> -->
@@ -45,7 +49,7 @@
                 </div>
 		<br><br>
     <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Nickname for device? Whose is it?"
-                          rows="3"></textarea>
+                          rows="2"></textarea>
     <!--
             	<label class="font-weight-bold lead">Who primarily uses this device?</label>
                 <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
@@ -61,7 +65,7 @@
 		    {% endfor %}
                 </div>
     -->
-		<br><br>
+		<br>
 		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <!--
 		<label><b>Client ID</b>
