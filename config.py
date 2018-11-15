@@ -27,7 +27,7 @@ DEVICE_PRIMARY_USER = {
         'other':'Someone else'
         }
 
-ANDROID_PERMISSIONS = 'static_data/android_permissions.csv'
+ANDROID_PERMISSIONS_CSV = 'static_data/android_permissions.csv'
 IOS_DUMPFILES = {'Jailbroken':'ios_jailbroken.log', 
         'Apps':'ios_apps.plist','Info':'ios_info.xml'}
 
@@ -79,7 +79,7 @@ MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "ios-deploy-" + PLATFO
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
 
-DATE_STR = '%Y:%m:%d %I:%M %p'
+DATE_STR = '%Y-%m-%d %I:%M %p'
 ERROR_LOG = []
 
 APPROVED_INSTALLERS = {'com.android.vending', 'com.sec.android.preloadinstaller'}

@@ -130,11 +130,12 @@ class AppScan(object):
                 
                 #hf_recent['label'] = hf_recent[['label', 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
 
-                hf_recent['label'] = hf_recent.apply(
-                    lambda x: "{} (last used: {})".format(
-                        x['label'], 'never' if 'unknown' in x['timestamp'] else x['timestamp']),
-                    axis=1
-                )
+                if len(hf_recent['label']) > 0:
+                    hf_recent['label'] = hf_recent.apply(
+                        lambda x: "{} (last used: {})".format(
+                            x['label'], 'never' if 'unknown' in x['timestamp'] else x['timestamp']),
+                        axis=1
+                    )
                 #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
                 #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime.datetime) else 'nooo') +")"
                 
@@ -202,7 +203,7 @@ class AppScan(object):
             db.commit()
             return True
         except Exception as ex:
-            print(ex)
+            print("Exception:", ex)
             return False
 
     def device_info(self, serial):
