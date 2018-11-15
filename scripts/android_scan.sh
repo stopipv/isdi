@@ -20,7 +20,7 @@ fi
 if [[ $platform == 'darwin' ]]; then
    adb='static_data/adb-darwin'
 elif [[ $platform == 'linux' ]]; then
-   adb='static_data/adb-linux'
+   adb="static_data/adb-linux.$(uname -r)"
 fi
 echo "$platform" "$adb"
 
@@ -96,7 +96,7 @@ function dump {
 
 function full_scan {
     # If file older than 20 min then receate
-    if [[ $(find "$ofname" -mtime -20m -print) ]]; then 
+    if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
         echo "File is still pretty fresh"
         echo "Not re-dumping"
     else
