@@ -216,14 +216,14 @@ class IosDump(PhoneDump):
     #    'UIDeviceFamily', 'UIRequiredDeviceCapabilities',
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
-    def __init__(self, fplist, finfo):
+    def __init__(self, fplist, finfo=None):
         self.device_type = 'ios'
         self.fname = fplist
-        self.finfo = None
         if finfo:
             self.finfo = finfo
+            self.deviceinfo = self.load_deviceinfo()
+            self.device_class = self.deviceinfo['DeviceClass']
         self.df = self.load_file()
-        self.deviceinfo = self.load_deviceinfo()
 
         # FIXME: not efficient to load here everytime?
         # load permissions mappings and apps plist
@@ -313,7 +313,6 @@ class IosDump(PhoneDump):
             m['model'] = self.model_make_map[self.deviceinfo['ProductType']]
         except KeyError as e:
             m['model'] = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
-        m['name'] = self.deviceinfo['DeviceName']
         m['version'] = self.deviceinfo['ProductVersion']
         return (m['model'] + " (running iOS "+m['version']+")", m)
     
@@ -328,15 +327,6 @@ class IosDump(PhoneDump):
         '''
         d = self.df
         res = {}
-        
-        # determine make and version
-        try:
-            make = self.model_make_map[self.deviceinfo['ProductType']]
-        except KeyError as e:
-            make = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
-        print("Your device, an "+make+", is running version "+self.deviceinfo['ProductVersion'])
-        
-    
         
         #app = self.df.iloc[appidx,:].dropna()
         app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
@@ -356,7 +346,7 @@ class IosDump(PhoneDump):
         To view when '{}' was *last used*: [Settings -> General -> {} Storage].
         To view the *purchase date* of '{}', follow these instructions: https://www.ipvtechresearch.org/post/guides/apple/.
         These are the closest possible approximations to installation date available to end-users.
-        '''.format(res['title'], self.deviceinfo['DeviceClass'], res['title'])
+        '''.format(res['title'], self.device_class, res['title'])
         res['Battery Usage'] = '''To see recent battery usage of '{}': [Settings -> Battery -> Battery Usage].'''.format(res['title'])
         res['Data Usage'] = "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(res['title'])
         #res['Your iOS Device'] = make

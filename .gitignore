@@ -1,3 +1,4 @@
+static_data/pii.key
 static_data/*.old
 dumppkg
 *.swp
