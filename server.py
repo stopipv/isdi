@@ -2,6 +2,9 @@ from flask import (
     Flask, render_template, request, redirect, g, jsonify,
     url_for
 )
+import hmac
+import hashlib
+from runcmd import run_command, catch_err
 import logging
 from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
@@ -17,6 +20,14 @@ from db import (
     get_client_devices_from_db, get_device_from_db, update_mul_appinfo, get_serial_from_db
 )
 
+
+try:
+    pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
+except FileNotFoundError as e:
+    import secrets
+    with open(config.STATIC_DATA+'/pii.key', 'wb') as f:
+        f.write(secrets.token_bytes(32))
+    pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
 
 app = Flask(__name__, static_folder='webstatic')
 # app.config['STATIC_FOLDER'] = 'webstatic'
@@ -189,7 +200,7 @@ def scan():
                                apps={},
                                device=device,
                                currently_scanned=currently_scanned,
-                               error="Please identify the primary user of the device.",
+                               error="Please give the device a nickname.",
                                clientid=clientid
         )
     ser = sc.devices()
@@ -250,7 +261,11 @@ def scan():
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
 
-    scan_d = {'clientid':clientid, 'serial':ser, 'device':device,
+
+    
+    scan_d = {'clientid':clientid, 
+            'serial':hmac.new(pii_key, ser.encode('utf8'), digestmod=hashlib.sha256).hexdigest(),
+            'device':device,
             'device_model':device_name_map['model'].strip(),
             'device_version':device_name_map['version'].strip(),
             'device_primary_user':device_owner,
@@ -269,6 +284,13 @@ def scan():
 
     # TODO: here, adjust client session.
     scanid = create_scan(scan_d)
+
+    if device == 'ios':
+        pii_fpath = sc.dump_path(ser, 'Device_Info')
+        print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
+        cmd = "rm {}".format(pii_fpath)
+        s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
+        print('iOS PII deleted.')
 
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')

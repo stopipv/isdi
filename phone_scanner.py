@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import hmac
+import hashlib
 import subprocess
 import pandas as pd
 import config
@@ -30,6 +32,7 @@ class AppScan(object):
                 .format(dev_type, config.DEV_SUPPRTED)
         self.device_type = dev_type
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
+        self.pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
 
     def setup(self):
         """If the device needs some setup to work."""
@@ -45,6 +48,7 @@ class AppScan(object):
         return []
 
     def dump_path(self, serial, fkind='json'):
+        serial = hmac.new(self.pii_key, serial.encode('utf8'), digestmod=hashlib.sha256).hexdigest()
         if self.device_type == 'ios':
             devicedumpsdir = os.path.join(config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
@@ -54,6 +58,8 @@ class AppScan(object):
                 return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Info'])
             elif fkind == 'Apps':
                 return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
+            elif fkind == 'Dir':
+                return devicedumpsdir
             else:
                 # returns apps dumpfile if fkind isn't explicitly specified.
                 return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
@@ -76,8 +82,10 @@ class AppScan(object):
                 #ddump = parse_dump.IosDump(dfname)
                 #dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
                 # FIXME: better suffix renaming scheme
-                devinfo = self.dump_path(serialno, 'Device_Info')
-                ddump = parse_dump.IosDump(dfname, devinfo)
+                #devinfo = self.dump_path(serialno, 'Device_Info')
+                
+                #ddump = parse_dump.IosDump(dfname)
+                ddump = self.parse_dump
             else:
                 ddump = parse_dump.AndroidDump(dfname)
 
@@ -94,6 +102,7 @@ class AppScan(object):
                 #print(info['permissions'])
                 del info['permissions']
             elif self.device_type == 'android':
+                # part that requires android to be connected / store this somehow.
                 hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
 
                 #FIXME: 
@@ -232,10 +241,12 @@ class AndroidScan(AppScan):
 
     def get_apps(self, serialno):
         installed_apps = self._get_apps_(serialno, '-u')
+        hmac_serial = hmac.new(self.pii_key, serialno.encode('utf8'), \
+                digestmod=hashlib.sha256).hexdigest()
         if installed_apps:
             q = run_command(
-                'bash scripts/android_scan.sh scan {ser}',
-                ser=serialno, nowait=True);
+                'bash scripts/android_scan.sh scan {ser} {hmac_serial}',
+                ser=serialno, hmac_serial=hmac_serial, nowait=True);
             self.installed_apps = installed_apps
         return installed_apps
 
@@ -245,12 +256,23 @@ class AndroidScan(AppScan):
 
     def get_offstore_apps(self, serialno):
         offstore = []
+        rooted, reason = self.isrooted(serialno)
+        approved = config.APPROVED_INSTALLERS
+        if not rooted:
+            for l in self._get_apps_(serialno, '-i -u -s'):
+                l = l.split()
+                if len(l) == 2:
+                    apps, t = l
+                    installer = t.replace('installer=', '')
+                    if installer not in approved and installer != 'null':
+                        approved.add(installer) # if system is rooted, won't make any difference spoofing wise
+        print(approved)
         for l in self._get_apps_(serialno, '-i -u -3'):
             l = l.split()
             if len(l) == 2:
                 apps, t = l
                 installer = t.replace('installer=', '')
-                if installer not in config.APPROVED_INSTALLERS:
+                if installer not in approved:
                     offstore.append(apps)
             else:
                 print(">>>>>> ERROR: {}".format(l))
@@ -349,6 +371,7 @@ class IosScan(AppScan):
         super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
         self.installed_apps = None
         self.serialno = None
+        self.parse_dump = None
 
     def setup(self, attempt_remount=False):
         ''' FIXME: iOS setup. '''
@@ -380,20 +403,26 @@ class IosScan(AppScan):
 
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
-        cmd = '{}/ios_dump.sh {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
-                **config.IOS_DUMPFILES)
-        path = os.path.join(config.DUMP_DIR, serialno+"_ios")
+        hmac_serial = hmac.new(self.pii_key, serialno.encode('utf8'), \
+                digestmod=hashlib.sha256).hexdigest()
+        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
+                hmac_serial, **config.IOS_DUMPFILES)
+        
+        #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
+        path = self.dump_path(serialno, fkind='Dir')
+
         dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
         dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
 
-        dumped = catch_err(run_command(cmd, serial=serialno)).strip()
+        dumped = catch_err(run_command(cmd)).strip()
+        #dumped = catch_err(run_command(cmd, serial=serialno)).strip()
         if dumped == serialno:
             print("Dumped the data into: {}".format(dumpf))
-            s = parse_dump.IosDump(dumpf, dumpfinfo)
-            print(s.load_file())
-            self.installed_apps = s.installed_apps()
+            self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
+            print(self.parse_dump.load_file())
+            self.installed_apps = self.parse_dump.installed_apps()
             if titles:
-                titles = s.installed_apps_titles()
+                titles = self.parse_dump.installed_apps_titles()
                 return self.installed_apps, titles
         else:
             print("Couldn't connect to the device. Trying to reconnect.") 
@@ -409,9 +438,10 @@ class IosScan(AppScan):
         dumpf = self.dump_path(serialno, 'Apps')
         dumpfinfo = self.dump_path(serialno, 'Device_Info')
         
-        if os.path.exists(dumpf):
-            s = parse_dump.IosDump(dumpf, dumpfinfo)
-            return s.system_apps()
+        #if os.path.exists(dumpf):
+            #s = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
+        if self.parse_dump:
+            return self.parse_dump.system_apps()
         else:
             return []
 
@@ -432,12 +462,18 @@ class IosScan(AppScan):
     def device_info(self, serial):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
-        cmd = '{}/ios_dump.sh {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
-                **config.IOS_DUMPFILES)
-        dumped = catch_err(run_command(cmd, serial=serial)).strip()
-        path = os.path.join(config.DUMP_DIR, serial+"_ios")
+        hmac_serial = hmac.new(self.pii_key, serial.encode('utf8'), \
+                digestmod=hashlib.sha256).hexdigest()
+        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
+                hmac_serial, **config.IOS_DUMPFILES)
+        
+        #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
+        path = self.dump_path(serial, fkind='Dir')
         dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
         dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
+        dumped = catch_err(run_command(cmd)).strip()
+
+
         if dumped == serial:
             print("Dumped the data into: {}".format(dumpf))
         else:
@@ -449,8 +485,9 @@ class IosScan(AppScan):
         print('iOS INFO DUMPED.')
         dfname = self.dump_path(serial)
         devinfo = self.dump_path(serial, 'Device_Info')
-        ddump = parse_dump.IosDump(dfname, devinfo)
-        device_info_print, device_info_map = ddump.device_info()
+        self.parse_dump = parse_dump.IosDump(dfname, finfo=devinfo)
+
+        device_info_print, device_info_map = self.parse_dump.device_info()
         return (device_info_print, device_info_map)
 
     def uninstall(self, serial, appid):

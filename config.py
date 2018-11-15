@@ -6,6 +6,7 @@ from runcmd import run_command, catch_err
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 
+
 # Used by data_process only.
 source_files = {
     'playstore': 'static_data/android_apps_crawl.csv.gz',
@@ -80,7 +81,7 @@ SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
 
 ERROR_LOG = []
 
-APPROVED_INSTALLERS = {'com.android.vending', }
+APPROVED_INSTALLERS = {'com.android.vending', 'com.sec.android.preloadinstaller'}
 
 REPORT_PATH = os.path.join(THISDIR, 'reports')
 if not os.path.exists(REPORT_PATH):
