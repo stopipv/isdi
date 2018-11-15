@@ -79,6 +79,7 @@ MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "ios-deploy-" + PLATFO
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
 
+DATE_STR = '%Y:%m:%d %I:%M %p'
 ERROR_LOG = []
 
 APPROVED_INSTALLERS = {'com.android.vending', 'com.sec.android.preloadinstaller'}
