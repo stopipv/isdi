@@ -143,6 +143,8 @@ class AndroidDump(PhoneDump):
                 "foreground": "unknown",
                 "background": "unknown"
             }
+        # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
+        # parser error (tested on SM-G965U,Samsung,8.0.0)
         net_stats = pd.read_csv(io.StringIO(
             '\n'.join(d['net_stats'].keys())
         ))
@@ -196,7 +198,7 @@ class AndroidDump(PhoneDump):
             uidu = uidu[1]
         else:
             uidu = uidu[0]
-        res['data_usage'] = self.get_data_usage(d, process_uid)
+        #res['data_usage'] = self.get_data_usage(d, process_uid)
         #res['battery (mAh)'] = self.get_battery_stat(d, uidu)
         print('RESULTS')
         print(res)
