@@ -207,10 +207,11 @@ class AppScan(object):
             return False
 
     def device_info(self, serial):
+        return "Test Phone", {}
         pass
 
     def isrooted(self, serial):
-        pass
+        return (False, [])
 
 
 class AndroidScan(AppScan):
@@ -320,7 +321,7 @@ class AndroidScan(AppScan):
         cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:"'
         runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
         m['last_full_charge'] = datetime.datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
-        return (m['brand']+" "+m['model']+"(running Android "+m['version']+")", m)
+        return "{brand} {model} (running Android {version})".format(**m), m
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]

@@ -2,8 +2,6 @@ from flask import (
     Flask, render_template, request, redirect, g, jsonify,
     url_for
 )
-import hmac
-import hashlib
 from runcmd import run_command, catch_err
 import logging
 from logging.handlers import RotatingFileHandler
@@ -20,14 +18,6 @@ from db import (
     get_client_devices_from_db, get_device_from_db, update_mul_appinfo, get_serial_from_db
 )
 
-
-try:
-    pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
-except FileNotFoundError as e:
-    import secrets
-    with open(config.STATIC_DATA+'/pii.key', 'wb') as f:
-        f.write(secrets.token_bytes(32))
-    pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
 
 app = Flask(__name__, static_folder='webstatic')
 # app.config['STATIC_FOLDER'] = 'webstatic'
@@ -263,20 +253,21 @@ def scan():
 
 
     
-    scan_d = {'clientid':clientid, 
-            'serial':hmac.new(pii_key, ser.encode('utf8'), digestmod=hashlib.sha256).hexdigest(),
-            'device':device,
-            'device_model':device_name_map['model'].strip(),
-            'device_version':device_name_map['version'].strip(),
-            'device_primary_user':device_owner,
+    scan_d = {
+        'clientid':clientid, 
+        'serial': config.hmac_serial(ser),
+        'device': device,
+        'device_model': device_name_map.get('model', '<Unknown>').strip(),
+        'device_version': device_name_map.get('version', '<Unknown>').strip(),
+        'device_primary_user': device_owner,
     }
 
     if device == 'ios':
         scan_d['device_manufacturer'] = 'Apple'
         scan_d['last_full_charge'] = 'unknown'
     else:
-        scan_d['device_manufacturer'] = device_name_map['brand'].strip()
-        scan_d['last_full_charge'] = device_name_map['last_full_charge']
+        scan_d['device_manufacturer'] = device_name_map.get('brand', "<Unknown>").strip()
+        scan_d['last_full_charge'] = device_name_map.get('last_full_charge', "<Unknown>")
 
     rooted, rooted_reason = sc.isrooted(ser)
     scan_d['is_rooted'] = rooted
@@ -413,7 +404,6 @@ def after_request(response):
 
 
 if __name__ == "__main__":
-    from imp import reload
     import sys
     if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
         print("Running in test mode.")
