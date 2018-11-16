@@ -181,7 +181,7 @@ def scan():
                                error="Please choose one device to scan.",
                                device_primary_user_sel=device_primary_user,
                                clientid=clientid
-        )
+        ), 201
     if not device_owner:
         return render_template("main.html",
                                task="home",
@@ -192,7 +192,7 @@ def scan():
                                currently_scanned=currently_scanned,
                                error="Please give the device a nickname.",
                                clientid=clientid
-        )
+        ), 201
     ser = sc.devices()
 
     print(ser)
@@ -208,7 +208,7 @@ def scan():
             currently_scanned=currently_scanned,
             error="<b>A device wasn't detected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
             #error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
-    )
+    ), 201
 
     ser = first_element_or_none(ser)
     # clientid = new_client_id()
@@ -382,7 +382,6 @@ def after_request(response):
                       request.full_path,
                       response.status)
     return response
-
 
 # @app.errorhandler(Exception)
 # def exceptions(e):
