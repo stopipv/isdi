@@ -147,7 +147,7 @@ class AndroidDump(PhoneDump):
         # parser error (tested on SM-G965U,Samsung,8.0.0)
         net_stats = pd.read_csv(io.StringIO(
             '\n'.join(d['net_stats'].keys())
-        ))
+        ), error_bad_lines=False)
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
             ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']]
         print(d)
@@ -198,7 +198,7 @@ class AndroidDump(PhoneDump):
             uidu = uidu[1]
         else:
             uidu = uidu[0]
-        #res['data_usage'] = self.get_data_usage(d, process_uid)
+        res['data_usage'] = self.get_data_usage(d, process_uid)
         #res['battery (mAh)'] = self.get_battery_stat(d, uidu)
         print('RESULTS')
         print(res)
