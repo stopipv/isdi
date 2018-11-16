@@ -88,16 +88,17 @@ def save_note(scanid, note):
 def create_scan(scan_d):
     """
     @scanr must have following fields.
-    
     """
+    print(scan_d)
     return insert(
         "insert into scan_res "\
         "(clientid, serial, device, device_model, device_version, device_manufacturer, last_full_charge, device_primary_user, is_rooted, rooted_reasons) "\
         "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args=(scan_d['clientid'], scan_d['serial'], scan_d['device'], \
-                scan_d['device_model'], scan_d['device_version'], \
-                scan_d['device_manufacturer'], scan_d['last_full_charge'],\
-                scan_d['device_primary_user'], scan_d['is_rooted'], scan_d['rooted_reasons'])
+        args=(scan_d['clientid'], scan_d['serial'], scan_d['device'],
+                  scan_d['device_model'], scan_d['device_version'],
+                  scan_d['device_manufacturer'], scan_d['last_full_charge'],
+                  scan_d['device_primary_user'], scan_d['is_rooted'],
+                  scan_d['rooted_reasons'])
     )
 
 

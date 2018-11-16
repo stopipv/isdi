@@ -3,6 +3,8 @@ import os
 import shlex
 from sys import platform
 from runcmd import run_command, catch_err
+import hashlib
+import hmac
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 
@@ -16,8 +18,8 @@ source_files = {
 spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
-DEBUG = False
-TEST = False
+DEBUG = True
+TEST = True
 
 DEVICE_PRIMARY_USER = {
         'me':'Me',
@@ -85,8 +87,22 @@ ERROR_LOG = []
 APPROVED_INSTALLERS = {'com.android.vending', 'com.sec.android.preloadinstaller'}
 
 REPORT_PATH = os.path.join(THISDIR, 'reports')
+PII_KEY_PATH = os.path.join(STATIC_DATA, "pii.key")
+try:
+    PII_KEY = open(PII_KEY_PATH, 'rb').read()
+except FileNotFoundError as e:
+    import secrets
+    with open(PII_KEY_PATH, 'wb') as f:
+        f.write(secrets.token_bytes(32))
+    PII_KEY = open(PII_KEY_PATH, 'rb').read()
+
+
 if not os.path.exists(REPORT_PATH):
     os.mkdir(REPORT_PATH)
+
+def hmac_serial(ser):
+    return hmac.new(PII_KEY, ser.encode('utf8'),
+                    digestmod=hashlib.sha256).hexdigest(),
 
 def add_to_error(*args):
     global ERROR_LOG
