@@ -15,7 +15,8 @@ from privacy_scan_android import do_privacy_check
 from db import (
     get_db, create_scan, save_note, create_appinfo, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
-    get_client_devices_from_db, get_device_from_db, update_mul_appinfo, get_serial_from_db
+    get_client_devices_from_db, get_device_from_db, update_mul_appinfo, 
+    get_serial_from_db
 )
 
 
@@ -48,7 +49,7 @@ def index():
         'main.html',
         title=config.TITLE,
         device_primary_user=config.DEVICE_PRIMARY_USER,
-        task = 'home',
+        task='home',
         devices={
             'Android': android.devices(),
             'iOS': ios.devices(),
@@ -88,8 +89,8 @@ def app_details(device):
 @app.route('/instruction', methods=['GET'])
 def instruction():
     return render_template('main.html', task="instruction",
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        title=config.TITLE)
+                           device_primary_user=config.DEVICE_PRIMARY_USER,
+                           title=config.TITLE)
 
 
 @app.route('/kill', methods=['POST', 'GET'])
@@ -107,8 +108,9 @@ def is_success(b, msg_succ="", msg_err=""):
     else:
         return msg_err if msg_err else "Failed", 401
 
+
 def first_element_or_none(l):
-    if l and len(l)>0:
+    if l and len(l) > 0:
         return l[0]
 
 @app.route("/privacy", methods=['GET'])
@@ -117,9 +119,11 @@ def privacy():
     TODO: Privacy scan. Think how should it flow. 
     Privacy is a seperate page. 
     """
-    return render_template('main.html', task="privacy", 
-            device_primary_user=config.DEVICE_PRIMARY_USER,
-            title=config.TITLE)
+    return render_template(
+        'main.html', task="privacy", 
+        device_primary_user=config.DEVICE_PRIMARY_USER,
+        title=config.TITLE
+    )
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
@@ -137,12 +141,12 @@ def view_results():
 
     if scan_res == last_serial:
         print('Should return same template as before.')
-        print("scan_res:"+str(scan_res))
-        print("last_serial:"+str(last_serial))
+        print("scan_res:  {}".format(scan_res))
+        print("last_serial: {}".format(last_serial))
     else:
         print('Should return results of scan_res.')
-        print("scan_res:"+str(scan_res))
-        print("last_serial:"+str(last_serial))
+        print("scan_res: {}".format(scan_res))
+        print("last_serial: {}".format(last_serial))
 
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
@@ -411,8 +415,7 @@ if __name__ == "__main__":
               .format(config.TEST, config.APP_FLAGS_FILE,
                       config.SQL_DB_PATH))
 
-
-    init_db(app, force=(not config.TEST))
+    init_db(app, force=config.TEST)
     handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
                                   backupCount=30)
     logger = logging.getLogger(__name__)

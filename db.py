@@ -35,7 +35,6 @@ def make_dicts(cursor, row):
                 for idx, value in enumerate(row))
 
 
-
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -43,6 +42,7 @@ def get_db():
         db = g._database = sqlite3.connect(DATABASE)
         db.row_factory = make_dicts
     return db
+
 
 def init_db(app, force=False):
     with app.app_context():
