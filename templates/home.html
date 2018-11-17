@@ -1,17 +1,17 @@
 <div class="">
-	<h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> ({{ title.version_current }})</span>
-		<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
-    <span style="float: right; font-size: 15px">
-        <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
-    device for a scan."><u>Scan Instruction</u></a>
-        <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
-        <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
-    </span> 
+    <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> ({{ title.version_current }})</span>
+	<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
+        <span style="float: right; font-size: 15px">
+            <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
+                      device for a scan."><u>Scan Instruction</u></a>
+            <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
+            <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
+        </span> 
     </h4>
 
     <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
-    for scanning mobile devices (e.g., Android and iOS devices) for apps that
-    can be used to spy on, track, or otherwise monitor a person.<br/>
+        for scanning mobile devices (e.g., Android and iOS devices) for apps that
+        can be used to spy on, track, or otherwise monitor a person.<br/>
     </p>
     <form style="margin: 0 auto; width:150px;" onsubmit="return false" name="form-newclient" id="form-newclient">
         <button onclick="new_client(this)" id="btn-newclient"
@@ -19,9 +19,9 @@
         </button>
     </form>
 
-        <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
-	     <button value="submit" class="btn btn-primary mx-2">Close App</button>
-	     </form> -->
+    <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
+	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
+	 </form> -->
 </div>
 <div class="row  h-100">
     <div class="col-md-3 border py-2" style="height:80vh;">
@@ -37,76 +37,67 @@
 			> {{ a }}
                     </label>
 		    {% endfor %}
-                    <!-- <label class="btn btn-outline-secondary">
-                         <input type="radio" name="device" id="android" value="android" autocomplete="off"> Android
-			 </label>
-			 <label class="btn btn-outline-secondary">
-                         <input type="radio" name="device" id="ios" value="ios" autocomplete="off"> iOS
-			 </label>
-			 <label class="btn btn-outline-secondary">
-                         <input type="radio" name="device" id="test" value="test" autocomplete="off"> Test
-			 </label> -->
                 </div>
 		<br><br>
-    <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Nickname for device? Whose is it?"
+                <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Nickname for device? Whose is it?"
                           rows="2"></textarea>
-    <!--
-            	<label class="font-weight-bold lead">Who primarily uses this device?</label>
-                <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
-                          rows="4"></textarea>
-                <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-		    {% for k,v in device_primary_user.items() %}
-                    <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
-                        <input type="radio" name="device_primary_user" id="{{ k }}"
-			       value="{{ k }}" autocomplete="off"
-			       {% if device_primary_user_sel == k %} checked {% endif %}
-			> {{ v }}
-                    </label>
-		    {% endfor %}
-                </div>
-    -->
+                <!--
+            	     <label class="font-weight-bold lead">Who primarily uses this device?</label>
+                     <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
+                     rows="4"></textarea>
+                     <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+		     {% for k,v in device_primary_user.items() %}
+                     <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
+                     <input type="radio" name="device_primary_user" id="{{ k }}"
+		     value="{{ k }}" autocomplete="off"
+		     {% if device_primary_user_sel == k %} checked {% endif %}
+		     > {{ v }}
+                     </label>
+		     {% endfor %}
+                     </div>
+                -->
 		<br>
 		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
                 <!--
-		<label><b>Client ID</b>
-                <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
-                <br/>
+		     <label><b>Client ID</b>
+                     <input class="form-control col-sm-10 col-md-10" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+                     <br/>
 		-->
                 <button class="btn btn-primary mx-2">Scan now</button>
             </form>
 	    <!-- {% for t in ["Android", "iOS", "test"] %} -->
-                <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
-                            class="btn btn-primary mx-2">{{ t }}</button -->
-		    <!-- {% endfor %} -->
+            <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
+                 class="btn btn-primary mx-2">{{ t }}</button -->
+	    <!-- {% endfor %} -->
             <hr/>
         </div>
         <div class="border-warning visible" align="center">
-		{% if currently_scanned %}
-            	<form id="session_scans" method="GET" action="/view_results">
-			<label class="font-weight-bold lead">Devices scanned so far (same client):</label>
+	    {% if currently_scanned %}
+            <form id="session_scans" method="GET" action="/view_results">
+		<label class="font-weight-bold lead">Devices scanned so far (same client):</label>
 		<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
 		<input style="display:none" name="last_serial" id="last-serial" type="text" value="{{ serial }}"/></label>
                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-		{% for scanned in currently_scanned %}
-		<label class="btn btn-outline-secondary {% if serial == scanned %} active {% endif %}">
+		    {% for scanned in currently_scanned %}
+		    <label class="btn btn-outline-secondary {% if serial == scanned %} active {% endif %}">
 			<input type="radio" name="scan_res" id="scan_res" value="{{ scanned }}"
-			autocomplete="off" {% if serial == scanned %} checked {% endif %}>
-      {{ scanned.device_model }} ({{ scanned.device_primary_user }})
+			             autocomplete="off" {% if serial == scanned %} checked {% endif %}>
+                        {{ scanned.device_model }} ({{ scanned.device_primary_user }})
 		    </label>
-		{% endfor %}
-		<button class="btn btn-primary btn-sm">Review Selected Scan Results</button>
+		    {% endfor %}
+		    <button class="btn btn-primary btn-sm">Review Selected Scan Results</button>
 		</div>
-		</form>
-		{% endif %}
+	    </form>
+	    {% endif %}
         </div>
         <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-		    <label><i>Session ID:</i></label>
+		<label><i>Session ID:</i></label>
 		<input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
-                                     value="{{ clientid }}" readonly>
+                       value="{{ clientid }}" readonly>
 	  	<!-- <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label> -->
 		<!-- <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
-	  value="{{ serial }}" readonly> -->
+	             value="{{ serial }}" readonly> -->
                 <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
                           rows="7" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
@@ -118,20 +109,20 @@
     <div class="col-md-9 border py-2" style="height: 80vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
-          {% if device_name %}
-          <label>Device scanned: <b>{{ device_name }}</b></label>
-          <br>
-          {% endif %}
+            {% if device_name %}
+            <label>Device scanned: <b>{{ device_name }}</b></label>
+            <br>
+            {% endif %}
 	    <label>Is this device jailbroken or rooted? <b>{{ isrooted }}</b></label>
             <table class="table table-bordered w-100 h-100">
                 <thead>
-                <tr>
-                    <th style="width: 3%">Uninstall?</th>
-                    <th style="width: 23%">App Name</th>
-                    <th style="width: 23%">App ID</th>
-                    <th style="width: 20%">Flags</th>
-                    <th style="width: 30%">Remarks</th>
-                </tr>
+                    <tr>
+                        <th style="width: 3%">Uninstall?</th>
+                        <th style="width: 23%">App Name</th>
+                        <th style="width: 23%">App ID</th>
+                        <th style="width: 20%">Flags</th>
+                        <th style="width: 30%">Remarks</th>
+                    </tr>
                 </thead>
                 <form id="form-applist" onsubmit="" method="post" name="form-applist" >
                     <tbody id="applist" class="h-100">
@@ -139,19 +130,17 @@
                         <tr id="{{ appId.replace('.', '-') }}">
                             {% if appId in sysapps %}
                             <td align="center" ><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
-                                   title="System App! Cannot delete">&otimes;</a></td>
+                                                   title="System App! Cannot delete">&otimes;</a></td>
                             {%  else %}
                             <td align="center"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
-                                   title="Delete app">&otimes;</a></td>
+                                                  title="Delete app">&otimes;</a></td>
                             {% endif %}
                             {% if info['title'] %}
                             <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
-				class="text text-dark">{{ info['title'] }}</a></td>
+				         class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
-  <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
-  class="text text-dark">Unnamed</a></td>
-
-
+                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
+                                   class="text text-dark">Unnamed</a></td>
                             {% endif %}
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank" rel="noopener"><code>{{ appId }}</code></a></td>
@@ -163,7 +152,7 @@
                 </form>
             </table>
             <!-- <button onclick="postform(this)" id="btn-submit"
-                     class="btn btn-primary btn-lg">Submit</button> -->
+                 class="btn btn-primary btn-lg">Submit</button> -->
         </div>
         <div class="progress">
             <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
