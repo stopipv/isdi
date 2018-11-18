@@ -2,7 +2,6 @@
 
 import hmac
 import hashlib
-import subprocess
 import pandas as pd
 import config
 import os
@@ -12,7 +11,6 @@ from android_permissions import all_permissions
 from runcmd import run_command, catch_err
 import parse_dump
 import blacklist
-import datetime
 import re
 import shlex
 
@@ -25,7 +23,7 @@ class AppScan(object):
         config.APP_INFO_SQLITE_FILE.replace('sqlite:///', ''),
         check_same_thread=False
     )
-    
+
     def __init__(self, dev_type, cli):
         assert dev_type in config.DEV_SUPPRTED, \
             "dev={!r} is not supported yet. Allowed={}"\
@@ -69,7 +67,7 @@ class AppScan(object):
 
     def app_details(self, serialno, appid):
         try:
-            d = pd.read_sql('select * from apps where appid=?', 
+            d = pd.read_sql('select * from apps where appid=?',
                             self.app_info_conn,
                             params=(appid,))
             if not isinstance(d.get('permissions', ''), list):
@@ -83,7 +81,7 @@ class AppScan(object):
                 #dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
                 # FIXME: better suffix renaming scheme
                 #devinfo = self.dump_path(serialno, 'Device_Info')
-                
+
                 ddump = self.parse_dump
                 if not ddump:
                     ddump = parse_dump.IosDump(dfname)
@@ -93,23 +91,22 @@ class AppScan(object):
             info = ddump.info(appid)
 
             print('BEGIN INFO')
-            print(info)
+            print("info={}".format(info))
             print('END INFO')
             # FIXME: sloppy iOS hack but should fix later, just add these to DF directly.
             if self.device_type == 'ios':
                 # TODO: add extra info about iOS? Like idevicediagnostics ioregentry AppleARMPMUCharger or IOPMPowerSource or AppleSmartBattery.
                 d['permissions'] = [info['permissions']]
                 d['title'] = [info['title']]
-                #print(info['permissions'])
                 del info['permissions']
             elif self.device_type == 'android':
                 # part that requires android to be connected / store this somehow.
                 hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
 
-                #FIXME: 
+                #FIXME:
                 # some appopps in not_hf_recent are not included in the output.
                 # maybe concat hf_recent with them?
-                info['Date of Scan'] = datetime.datetime.now().strftime(config.DATE_STR)
+                info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
                 info['Installation Date'] = stats['firstInstallTime']
                 info['Last Updated'] = stats['lastUpdateTime']
                 #info['Last Used'] = stats['used']
@@ -121,9 +118,6 @@ class AppScan(object):
                 info['App Version'] = stats['versionName']
                 #info['App Version Code'] = stats['versionCode']
 
-                print("App info dict:", d)
-                print("hf_recent['label']=", hf_recent['label'].tolist())
-
                 # FIXME: if Unknown, use 'permission_abbrv' instead.
                 #hf_recent.apply()
                 hf_recent.loc[hf_recent['label'] == 'unknown', 'label'] = hf_recent['permission_abbrv']
@@ -133,11 +127,15 @@ class AppScan(object):
                 if len(hf_recent['label']) > 0:
                     hf_recent['label'] = hf_recent.apply(
                         lambda x: "{} (last used: {})".format(
-                            x['label'], 'never' if 'unknown' in x['timestamp'] else x['timestamp']),
+                            x['label'], 'never' if 'unknown' in x['timestamp'].lower() else x['timestamp']),
                         axis=1
                     )
+
+                print("App info dict:", d)
+                print("hf_recent['label']=", hf_recent['label'].tolist())
+
                 #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
-                #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime.datetime) else 'nooo') +")"
+                #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime) else 'nooo') +")"
                 
                 #print(~hf_recent['timestamp'].str.contains('unknown'))
                 d.set_value(0, 'permissions', hf_recent['label'].tolist())
@@ -164,7 +162,7 @@ class AppScan(object):
             installed_apps, titles = self.get_apps(serialno, titles=True)
         else:
             installed_apps = self.get_apps(serialno)
-        
+
         # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
         #     ', ?'*(len(installed_apps)-1)
         #     ), self.app_info_conn, params=(installed_apps,))
@@ -176,14 +174,16 @@ class AppScan(object):
         )
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
-        
+
         if self.device_type == 'ios':
             r['title'] = titles
         else:
-            r['title'] = r.title.str.encode('ascii', errors='ignore').str.decode('ascii')
-
+            r['title'] = r.title.str.encode('ascii', errors='ignore')\
+                                    .str.decode('ascii')
+        print(r['title'])
         r['html_flags'] = r.flags.apply(blacklist.flag_str)
-        r.sort_values(by=['score', 'appId'], ascending=[False, True], inplace=True, na_position='last')
+        r.sort_values(by=['score', 'appId'], ascending=[False, True],
+                      inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
         return r[['title', 'flags', 'score', 'class_', 'html_flags']]
 
@@ -208,7 +208,7 @@ class AppScan(object):
 
     def device_info(self, serial):
         return "Test Phone", {}
-        pass
+
 
     def isrooted(self, serial):
         return (False, [])
@@ -248,8 +248,7 @@ class AndroidScan(AppScan):
 
     def get_apps(self, serialno):
         installed_apps = self._get_apps_(serialno, '-u')
-        hmac_serial = hmac.new(self.pii_key, serialno.encode('utf8'), \
-                digestmod=hashlib.sha256).hexdigest()
+        hmac_serial = config.hmac_serial(serialno)
         if installed_apps:
             q = run_command(
                 'bash scripts/android_scan.sh scan {ser} {hmac_serial}',
@@ -320,7 +319,7 @@ class AndroidScan(AppScan):
 
         cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:"'
         runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
-        m['last_full_charge'] = datetime.datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
+        m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
         return "{brand} {model} (running Android {version})".format(**m), m
     # def dump_phone(self, serialno=None):
     #     if not serialno:
@@ -412,16 +411,15 @@ class IosScan(AppScan):
 
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
-        hmac_serial = hmac.new(self.pii_key, serialno.encode('utf8'), \
-                digestmod=hashlib.sha256).hexdigest()
+        hmac_serial = config.hmac_serial(serialno)
         cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
                 hmac_serial, **config.IOS_DUMPFILES)
-        
+
         #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
         path = self.dump_path(serialno, fkind='Dir')
 
-        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
-        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
+        dumpf = os.path.join(path, config.IOS_DUMPFILES['Apps'])
+        dumpfinfo = os.path.join(path, config.IOS_DUMPFILES['Info'])
 
         dumped = catch_err(run_command(cmd)).strip()
         #dumped = catch_err(run_command(cmd, serial=serialno)).strip()
@@ -471,8 +469,7 @@ class IosScan(AppScan):
     def device_info(self, serial):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
-        hmac_serial = hmac.new(self.pii_key, serial.encode('utf8'), \
-                digestmod=hashlib.sha256).hexdigest()
+        hmac_serial = config.hmac_serial(serial)
         cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
                 hmac_serial, **config.IOS_DUMPFILES)
         

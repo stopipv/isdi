@@ -22,29 +22,31 @@ DEBUG = True
 TEST = True
 
 DEVICE_PRIMARY_USER = {
-        'me':'Me',
-        'child':'A child of mine',
-        'partner':'My current partner/spouse',
-        'family_other':'Another family member',
-        'other':'Someone else'
-        }
+    'me': 'Me',
+    'child': 'A child of mine',
+    'partner': 'My current partner/spouse',
+    'family_other': 'Another family member',
+    'other': 'Someone else'
+}
 
 ANDROID_PERMISSIONS_CSV = 'static_data/android_permissions.csv'
-IOS_DUMPFILES = {'Jailbroken':'ios_jailbroken.log', 
-        'Apps':'ios_apps.plist','Info':'ios_info.xml'}
+IOS_DUMPFILES = {'Jailbroken': 'ios_jailbroken.log',
+                 'Apps': 'ios_apps.plist', 'Info': 'ios_info.xml'}
 
 TEST_APP_LIST = 'static_data/android.test.apps_list'
 #TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 
-VERSION_STABLE = catch_err(run_command('git describe --abbrev=0 --tags')).strip()
+VERSION_STABLE = catch_err(run_command(
+    'git describe --abbrev=0 --tags')).strip()
 VERSION_CURRENT = catch_err(run_command('git describe --tags')).strip()
-TITLE = {'title':"Mobile Device Privacy Scanner",
-        'version_current':'',
-        'version_stable':VERSION_STABLE}
+TITLE = {'title': "Mobile Device Privacy Scanner",
+         'version_current': '',
+         'version_stable': VERSION_STABLE}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_FILE = 'static_data/app-info.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + ("~test" if TEST else "")
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
+    ("~test" if TEST else "")
 SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
 
 
@@ -69,14 +71,19 @@ set_test_mode(TEST)
 THISDIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DATA = os.path.join(THISDIR, 'static_data')
 ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
-PLATFORM = 'darwin' if platform == 'darwin' else 'linux' if platform.startswith('linux') \
-           else 'win32' if platform == 'win32' else None
+PLATFORM = ('darwin' if platform == 'darwin'
+            else 'linux' if platform.startswith('linux')
+            else 'win32' if platform == 'win32' else None)
 ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
 #ADB_PATH = 'adb'
 
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(os.path.join(STATIC_DATA, "ios-deploy-" + PLATFORM))
+MOBILEDEVICE_PATH = shlex.quote(
+    os.path.join(
+        STATIC_DATA,
+        "ios-deploy-" +
+        PLATFORM))
 
 DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
 SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
@@ -84,7 +91,9 @@ SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
 DATE_STR = '%Y-%m-%d %I:%M %p'
 ERROR_LOG = []
 
-APPROVED_INSTALLERS = {'com.android.vending', 'com.sec.android.preloadinstaller'}
+APPROVED_INSTALLERS = {
+    'com.android.vending',
+    'com.sec.android.preloadinstaller'}
 
 REPORT_PATH = os.path.join(THISDIR, 'reports')
 PII_KEY_PATH = os.path.join(STATIC_DATA, "pii.key")
@@ -100,9 +109,11 @@ except FileNotFoundError as e:
 if not os.path.exists(REPORT_PATH):
     os.mkdir(REPORT_PATH)
 
+
 def hmac_serial(ser):
     return hmac.new(PII_KEY, ser.encode('utf8'),
-                    digestmod=hashlib.sha256).hexdigest(),
+                    digestmod=hashlib.sha256).hexdigest()
+
 
 def add_to_error(*args):
     global ERROR_LOG
@@ -114,9 +125,8 @@ def add_to_error(*args):
 def error():
     global ERROR_LOG
     e = ''
-    if len(ERROR_LOG)>0:
+    if len(ERROR_LOG) > 0:
         e, ERROR_LOG = ERROR_LOG[0], ERROR_LOG[1:]
 
         print("ERROR: {}".format(e))
     return e.replace("\n", "<br/>")
-

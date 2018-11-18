@@ -15,7 +15,7 @@ from privacy_scan_android import do_privacy_check
 from db import (
     get_db, create_scan, save_note, create_appinfo, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
-    get_client_devices_from_db, get_device_from_db, update_mul_appinfo, 
+    get_client_devices_from_db, get_device_from_db, update_mul_appinfo,
     get_serial_from_db
 )
 
@@ -33,7 +33,6 @@ def get_device(k):
         'ios': ios,
         'test': test
     }.get(k)
-
 
 
 @app.teardown_appcontext
@@ -69,12 +68,12 @@ def app_details(device):
     d = d.to_dict(orient='index').get(0, {})
     d['appId'] = appid
 
-    ## detect apple and put the key into d.permissions
-    #if "Ios" in str(type(sc)):
+    # detect apple and put the key into d.permissions
+    # if "Ios" in str(type(sc)):
     #    print("apple iphone")
-    #else:
+    # else:
     #    print(type(sc))
-    
+
     print(d.keys())
     return render_template(
         'main.html', task="app",
@@ -113,17 +112,19 @@ def first_element_or_none(l):
     if l and len(l) > 0:
         return l[0]
 
+
 @app.route("/privacy", methods=['GET'])
 def privacy():
     """
-    TODO: Privacy scan. Think how should it flow. 
-    Privacy is a seperate page. 
+    TODO: Privacy scan. Think how should it flow.
+    Privacy is a seperate page.
     """
     return render_template(
-        'main.html', task="privacy", 
+        'main.html', task="privacy",
         device_primary_user=config.DEVICE_PRIMARY_USER,
         title=config.TITLE
     )
+
 
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
@@ -131,13 +132,16 @@ def privacy_scan(device, cmd):
     res = do_privacy_check(sc.serialno, cmd)
     return res
 
+
 @app.route("/view_results", methods=['POST', 'GET'])
 def view_results():
     clientid = request.form.get('clientid', request.args.get('clientid'))
     scan_res = request.form.get('scan_res', request.args.get('scan_res'))
 
-    # TODO: maybe unneccessary, but likely nice for returning without re-drawing screen.
-    last_serial = request.form.get('last_serial', request.args.get('last_serial'))
+    # TODO: maybe unneccessary, but likely nice for returning without
+    # re-drawing screen.
+    last_serial = request.form.get(
+        'last_serial', request.args.get('last_serial'))
 
     if scan_res == last_serial:
         print('Should return same template as before.')
@@ -148,6 +152,7 @@ def view_results():
         print("scan_res: {}".format(scan_res))
         print("last_serial: {}".format(last_serial))
 
+
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
     """
@@ -157,20 +162,23 @@ def scan():
     """
     # FIXME: prevent clientID modification (remove it from GET params?)
     clientid = request.form.get('clientid', request.args.get('clientid'))
-    device_primary_user = request.form.get('device_primary_user', \
-            request.args.get('device_primary_user'))
+    device_primary_user = request.form.get(
+        'device_primary_user',
+        request.args.get('device_primary_user'))
     device = request.form.get('device', request.args.get('device'))
     action = request.form.get('action', request.args.get('action'))
-    device_owner = request.form.get('device_owner', request.args.get('device_owner'))
+    device_owner = request.form.get(
+        'device_owner', request.args.get('device_owner'))
 
     currently_scanned = get_client_devices_from_db(clientid)
-    # lookup devices scanned so far here. need to add this by model rather than by serial.
+    # lookup devices scanned so far here. need to add this by model rather
+    # than by serial.
     print('CURRENTLY SCANNED: {}'.format(currently_scanned))
     print('DEVICE OWNER IS: {}'.format(device_owner))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
-    print('-'*80)
+    print('-' * 80)
     print('CLIENT ID IS: {}'.format(clientid))
-    print('-'*80)
+    print('-' * 80)
     print("--> Action = ", action)
     # if action == "Privacy Check":
     #     return redirect(url_for(privacy, device=device), code=302)
@@ -185,7 +193,7 @@ def scan():
                                error="Please choose one device to scan.",
                                device_primary_user_sel=device_primary_user,
                                clientid=clientid
-        ), 201
+                               ), 201
     if not device_owner:
         return render_template("main.html",
                                task="home",
@@ -196,12 +204,13 @@ def scan():
                                currently_scanned=currently_scanned,
                                error="Please give the device a nickname.",
                                clientid=clientid
-        ), 201
+                               ), 201
     ser = sc.devices()
 
     print(ser)
     if not ser:
-        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
+        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
+        # needed.
         return render_template(
             "main.html", task="home", apps={},
             title=config.TITLE,
@@ -212,21 +221,23 @@ def scan():
             currently_scanned=currently_scanned,
             error="<b>A device wasn't detected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
             #error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
-    ), 201
+        ), 201
 
     ser = first_element_or_none(ser)
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
     error = "If an iPhone is connected, open iTunes, click through the connection dialog and wait for the \"Trust this computer\" prompt "\
-    "to pop up in the iPhone, and then scan again." if device == 'ios' else\
-    "If an Android device is connected, disconnect and reconnect the device, make sure "\
-    "developer options is activated and USB debugging is turned on on the device, and then scan again."
+        "to pop up in the iPhone, and then scan again." if device == 'ios' else\
+        "If an Android device is connected, disconnect and reconnect the device, make sure "\
+        "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
     if device == 'ios':
-        isconnected, reason = sc.setup() # go through pairing process and do not scan until it is successful.
+        # go through pairing process and do not scan until it is successful.
+        isconnected, reason = sc.setup()
         if not isconnected:
             return render_template(
-                "main.html", task="home", 
+                "main.html",
+                task="home",
                 apps={},
                 title=config.TITLE,
                 device_primary_user=config.DEVICE_PRIMARY_USER,
@@ -234,9 +245,12 @@ def scan():
                 clientid=clientid,
                 device=device,
                 currently_scanned=currently_scanned,
-                error="<b>{}</b>".format(reason+"<b>Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here,</a> if needed.</b>"))
+                error="<b>{}</b>".format(
+                    reason +
+                    "<b>Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here,</a> if needed.</b>"))
     if not ser:
-        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if needed.
+        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
+        # needed.
         return render_template(
             "main.html", task="home", apps={},
             title=config.TITLE,
@@ -246,7 +260,7 @@ def scan():
             device=device,
             currently_scanned=currently_scanned,
             error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
-    )
+        )
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
@@ -255,10 +269,8 @@ def scan():
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
 
-
-    
     scan_d = {
-        'clientid':clientid, 
+        'clientid': clientid,
         'serial': config.hmac_serial(ser),
         'device': device,
         'device_model': device_name_map.get('model', '<Unknown>').strip(),
@@ -270,8 +282,10 @@ def scan():
         scan_d['device_manufacturer'] = 'Apple'
         scan_d['last_full_charge'] = 'unknown'
     else:
-        scan_d['device_manufacturer'] = device_name_map.get('brand', "<Unknown>").strip()
-        scan_d['last_full_charge'] = device_name_map.get('last_full_charge', "<Unknown>")
+        scan_d['device_manufacturer'] = device_name_map.get(
+            'brand', "<Unknown>").strip()
+        scan_d['last_full_charge'] = device_name_map.get(
+            'last_full_charge', "<Unknown>")
 
     rooted, rooted_reason = sc.isrooted(ser)
     scan_d['is_rooted'] = rooted
@@ -288,14 +302,14 @@ def scan():
         print('iOS PII deleted.')
 
     print("Creating appinfo...")
-    create_mult_appinfo([(scanid, appid, json.dumps(info['flags']), '', '<new>')
-                          for appid, info in apps.items()])
+    create_mult_appinfo([(scanid, appid, json.dumps(
+        info['flags']), '', '<new>') for appid, info in apps.items()])
 
     currently_scanned = get_client_devices_from_db(clientid)
     return render_template(
         'main.html', task="home",
-        isrooted = "Yes. Reason(s): {}".format(rooted_reason) if rooted else "Don't know" if rooted is None \
-                else "No. Reason(s): {}".format(rooted_reason),
+        isrooted="Yes. Reason(s): {}".format(rooted_reason) if rooted else "Don't know" if rooted is None
+        else "No. Reason(s): {}".format(rooted_reason),
         title=config.TITLE,
         device_primary_user=config.DEVICE_PRIMARY_USER,
         device_primary_user_sel=device_primary_user,
@@ -303,10 +317,12 @@ def scan():
         apps=apps,
         scanid=scanid,
         clientid=clientid,
-        sysapps=set(), #sc.get_system_apps(serialno=ser)),
+        sysapps=set(),  # sc.get_system_apps(serialno=ser)),
         serial=ser,
         device=device,
-        currently_scanned=currently_scanned, # TODO: make this a map of model:link to display scan results for that scan.
+        currently_scanned=currently_scanned,
+        # TODO: make this a map of model:link to display scan results for that
+        # scan.
         error=config.error(),
     )
 
@@ -340,7 +356,8 @@ def delete_app(scanid):
 #     serial = request.form.get('serial')
 #     appId = request.form.get('appId')
 #     note = request.form.get('note')
-#     return is_success(sc.save('appinfo', serial=serial, appId=appId, note=note))
+# return is_success(sc.save('appinfo', serial=serial, appId=appId,
+# note=note))
 
 @app.route('/saveapps/<scanid>', methods=["POST"])
 def record_applist(scanid):
@@ -359,16 +376,17 @@ def record_scanres(scanid):
     note = request.form.get('notes')
     r = save_note(scanid, note)
     create_report(request.form.get('clientid'))
-    return is_success(r, "Success!", "Could not save the form. See logs in the terminal.")
-
-
+    return is_success(
+        r,
+        "Success!",
+        "Could not save the form. See logs in the terminal.")
 
 
 ################# For logging ##############################################
 @app.route("/error")
 def get_nothing():
     """ Route for intentional error. """
-    return "foobar" # intentional non-existent variable
+    return "foobar"  # intentional non-existent variable
 
 
 @app.after_request
@@ -379,12 +397,12 @@ def after_request(response):
     if response.status_code != 500:
         ts = strftime('[%Y-%b-%d %H:%M]')
         logger.error('%s %s %s %s %s %s',
-                      ts,
-                      request.remote_addr,
-                      request.method,
-                      request.scheme,
-                      request.full_path,
-                      response.status)
+                     ts,
+                     request.remote_addr,
+                     request.method,
+                     request.scheme,
+                     request.full_path,
+                     response.status)
     return response
 
 # @app.errorhandler(Exception)
@@ -401,9 +419,6 @@ def after_request(response):
 #                   tb)
 #     print(e, file=sys.stderr)
 #     return "Internal server error", 500
-
-
-
 
 
 if __name__ == "__main__":
@@ -423,4 +438,3 @@ if __name__ == "__main__":
     logger.addHandler(handler)
 
     app.run(host="0.0.0.0", port=5000, debug=config.DEBUG)
-
