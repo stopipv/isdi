@@ -55,6 +55,7 @@ def flag_str(flags):
                 'warning' if 'dual-use' in flag else
                 'info' if 'spy' in flag else ''
         )
+
     def _info(flag):
         return {
             "regex-spy": "App name or app-id contains words like 'spy', 'track', etc.",
@@ -62,8 +63,11 @@ def flag_str(flags):
             "Play Store or iTunes App Store"
         }.get(flag.lower(), flag)
     # If spyware <span class='text-danger'>{}</span>
-    return ',  '.join("<span class=\"text-{0}\"><abbr title=\"{1}\">{2}</abbr></span>"\
-                      .format(_add_class(flag), _info(flag), flag) for flag in flags)
+    return ',  '.join(
+        "<span class=\"text-{0}\"><abbr title=\"{1}\">{2}</abbr></span>"
+        .format(_add_class(flag), _info(flag), flag)
+        for flag in flags
+    )
 
 
 def store_str(st):
@@ -71,7 +75,8 @@ def store_str(st):
 
 
 def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
-    print(apps)
+    # print(apps)
+    print("Size of app-flags: {}".format(len(APP_FLAGS)))
     _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
     _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
     _td.loc[offstore_apps, 'flags'].apply(lambda x: x.append('offstore-app'))
