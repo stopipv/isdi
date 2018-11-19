@@ -122,12 +122,12 @@
             {% endif %}
             <table class="table table-bordered w-100">
                 <thead>
-                    <tr>
-                        <th style="width: 3%">Uninstall?</th>
-                        <th style="width: 23%">App Name</th>
-                        <th style="width: 23%">App ID</th>
-                        <th style="width: 20%">Flags</th>
-                        <th style="width: 30%">Remarks</th>
+                    <tr class="something">
+                        <th class="col-md-1" style="width: 3%">Uninstall?</th>
+                        <th class="col-md-2" style="width: 23%">App Name</th>
+                        <th class="col-md-2" style="width: 23%">App ID</th>
+                        <th class="col-md-2" style="width: 20%">Flags</th>
+                        <th class="col-md-3" style="width: 30%">Remarks</th>
                     </tr>
                 </thead>
                 <form id="form-applist" onsubmit="" method="post" name="form-applist" >
@@ -146,7 +146,7 @@
 		                   class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
                             <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
-                                   class="text text-dark">Unnamed</a></td>
+                                   class="text text-dark"> &lt;Unknown&gt;</a></td>
                             {% endif %}
                             <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank" rel="noopener"><code>{{ appId }}</code></a></td>

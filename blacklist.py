@@ -9,6 +9,7 @@ Flags added to them are from the following four classes
 2. "onstore-spyware": onstore apps which are clearly spyware based on our analysis
 3. "offstore-spyware": offstore spyware apps
 4. "regex-spy": Regex based spyware detection
+5. "odds-ratio": Spyware based on high co-occurrence with other offstore-spyware
 """
 import re
 import config
@@ -36,6 +37,7 @@ def score(flags):
         'offstore-spyware': 1.0,
         'offstore-app': 0.8,
         'regex-spy': 0.3,
+        'odds-ratio': 0.2,
         'system-app': 0.0
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
@@ -58,9 +60,12 @@ def flag_str(flags):
 
     def _info(flag):
         return {
-            "regex-spy": "App name or app-id contains words like 'spy', 'track', etc.",
-            "offstore-spyware": "Spyware apps distributed outside official applicate stores, e.g., "\
-            "Play Store or iTunes App Store"
+            "regex-spy": "This app's name or its app-id contain words like 'spy', 'track', etc.",
+            "offstore-spyware": ("Thsi app is a spyware app, distributed outside official applicate stores, e.g., "\
+                                 "Play Store or iTunes App Store"),
+            "co-occurrence": "This app appears very frequently with other offstore-spyware apps.",
+            "onstore-dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",
+            "offstore-app": "This app is installed outside Play Store. It might be a preinstalled app too."
         }.get(flag.lower(), flag)
     # If spyware <span class='text-danger'>{}</span>
     return ',  '.join(
@@ -71,7 +76,11 @@ def flag_str(flags):
 
 
 def store_str(st):
-    return 'onstore' if st in ('playstore', 'appstore') else 'offstore'
+    if st in ('playstore', 'appstore'):
+        return 'onstore'
+    else:
+        return 'offstore'
+
 
 
 def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
@@ -84,9 +93,12 @@ def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
     # print(apps, flagged_apps)
     spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
     _td.loc[spy_regex_app, 'flags'].apply(lambda x: x.extend(['regex-spy']))
+    # Seperate kevin's list from app-flags, here is a dirty hack
+    odds_ratio_apps = _td['source'] == 'odds-ratio'
+    _td.loc[odds_ratio_apps, 'flags'] = _td.loc[odds_ratio_apps, 'flags'].apply(lambda x: [y.replace('onstore-', '') for y in x])
     ret = _td[['title', 'flags']].reset_index()
     return ret
-    
+
 
 
 def flag_apps(apps, device=''):
