@@ -84,7 +84,9 @@ def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
     # print(apps, flagged_apps)
     spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
     _td.loc[spy_regex_app, 'flags'].apply(lambda x: x.extend(['regex-spy']))
-    return _td[['title', 'flags']].reset_index()
+    ret = _td[['title', 'flags']].reset_index()
+    return ret
+    
 
 
 def flag_apps(apps, device=''):
