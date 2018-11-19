@@ -19,7 +19,7 @@ def today():
 def new_client_id():
     last_client_id = query_db(
         'select max(clientid) as cid from scan_res '
-        'where time > datetime("now", "localtime", "-1 day")',
+        'where time > datetime("now", "localtime", "-1 hour")',
         one=True
     )['cid']
     d, t = today(), 0

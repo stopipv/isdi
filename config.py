@@ -18,8 +18,8 @@ source_files = {
 spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
-DEBUG = True
-TEST = True
+DEBUG = False
+TEST = False
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',

@@ -420,7 +420,7 @@ class IosScan(AppScan):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         hmac_serial = config.hmac_serial(serialno)
-        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
+        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.SCRIPT_DIR,\
                 hmac_serial, **config.IOS_DUMPFILES)
 
         #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
@@ -545,7 +545,7 @@ class IosScan(AppScan):
         ''' check for jailbroken status after attempts logged by ios_dump.sh '''
 
         if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
-            reasons.append("Filesystem is not rooted. *Highly unlikely* to be jailbroken.")
+            reasons.append("Filesystem is not rooted. <b>Highly unlikely</b> to be jailbroken.")
             print(reasons)
             return (False, reasons)
         else:
@@ -553,6 +553,7 @@ class IosScan(AppScan):
             print(reason)
             return (True, reason)
         return (False, reasons)
+
 
 class TestScan(AppScan):
     def __init__(self):
