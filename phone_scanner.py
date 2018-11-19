@@ -163,15 +163,22 @@ class AppScan(object):
         else:
             installed_apps = self.get_apps(serialno)
 
-        # r = pd.read_sql('select appid, title from apps where appid in (?{})'.format(
-        #     ', ?'*(len(installed_apps)-1)
-        #     ), self.app_info_conn, params=(installed_apps,))
-        # r.rename({'appid': 'appId'}, axis='columns', copy=False, inplace=True)
         r = blacklist.app_title_and_flag(
             pd.DataFrame({'appId': installed_apps}),
             offstore_apps=self.get_offstore_apps(serialno),
             system_apps=self.get_system_apps(serialno)
         )
+        r['title'] = r.title.fillna('')
+        td = pd.read_sql(
+            'select appid, title from apps where appid in (?{})'.format(
+                ', ?'*(len(installed_apps)-1)
+            ), self.app_info_conn, params=(installed_apps)).set_index('appid')
+        td.index.rename('appId', inplace=True)
+        r.set_index('appId', inplace=True)
+        print("td=", td)
+        r.loc[td.index, 'title'] = td['title']
+        r.reset_index(inplace=True)
+
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
 
@@ -180,11 +187,12 @@ class AppScan(object):
         else:
             r['title'] = r.title.str.encode('ascii', errors='ignore')\
                                     .str.decode('ascii')
-        print(r['title'])
+        r['title'] = r.title.fillna('')
         r['html_flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True],
                       inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
+
         return r[['title', 'flags', 'score', 'class_', 'html_flags']]
 
     def flag_apps(self, serialno):
