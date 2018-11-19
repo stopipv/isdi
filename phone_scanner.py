@@ -420,9 +420,10 @@ class IosScan(AppScan):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         hmac_serial = config.hmac_serial(serialno)
-        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.SCRIPT_DIR,\
+        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
                 hmac_serial, **config.IOS_DUMPFILES)
 
+        print("cmd=", cmd)
         #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
         path = self.dump_path(serialno, fkind='Dir')
 
@@ -480,11 +481,12 @@ class IosScan(AppScan):
         hmac_serial = config.hmac_serial(serial)
         cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
                 hmac_serial, **config.IOS_DUMPFILES)
-        
+        print(cmd)
         #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
         path = self.dump_path(serial, fkind='Dir')
         dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
         dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
+        # dumped = catch_err(run_command(cmd)).strip()
         dumped = catch_err(run_command(cmd)).strip()
 
 

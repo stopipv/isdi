@@ -399,8 +399,9 @@ class IosDump(PhoneDump):
 
     def installed_apps(self):
         #return self.df.index
-        print(self.df)
-        print(self.df.columns)
+        if self.df:
+            print(self.df)
+            print(self.df.columns)
         return self.df['appId']
 
 
