@@ -142,3 +142,4 @@ scripts/ios_deps/*
 tests/serial/*
 tests/*/
 static_data/kevins_approach.csv
+static_data/app-flags.with-sources.csv
