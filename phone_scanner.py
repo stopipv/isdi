@@ -547,7 +547,7 @@ class IosScan(AppScan):
         ''' check for jailbroken status after attempts logged by ios_dump.sh '''
 
         if "Your device needs to be jailbroken and have the AFC2 service installed.\n" in JAILBROKEN_LOG:
-            reasons.append("Filesystem is not rooted. <b>Highly unlikely</b> to be jailbroken.")
+            reasons.append("Filesystem is not rooted. *Highly unlikely* to be jailbroken.")
             print(reasons)
             return (False, reasons)
         else:
