@@ -204,9 +204,10 @@ def scan():
     if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
         # needed.
-        error="<b>A device wasn't detected. Please follow the "\
+        error = "<b>A device wasn't detected. Please follow the "\
             "<a href='/instruction' target='_blank' rel='noopener'>"\
             "setup instructions here.</a></b>"
+        template_d["error"] = error
         return render_template("main.html", **template_d), 201
 
     ser = first_element_or_none(ser)
@@ -235,8 +236,18 @@ def scan():
     # and save it to scan_res along with device_primary_user.
     device_name_print, device_name_map = sc.device_info(serial=ser)
 
+    # Finds all the apps in the device
     # @apps have appid, title, flags, TODO: add icon
     apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+    if len(apps) <= 0:
+        print("The scanning failed for some reason.")
+        error = "The scanning failed. This could be due to many reasons. Try"\
+            " rerunning the scan from the beginning. If the problem persists,"\
+            " please report it in the file. <code>report_failed.md</code> in the<code>"\
+            "phone_scanner/</code> directory. Checn the phone manually. Sorry for"\
+            " the inconvenience."
+        template_d["error"] = error
+        return render_template("main.html", **template_d), 201
 
     scan_d = {
         'clientid': clientid,

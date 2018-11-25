@@ -254,6 +254,12 @@ class IosDump(PhoneDump):
         with open(os.path.join(config.THISDIR, 'ios_device_identifiers.json'), 'r') as fh:
             self.model_make_map = json.load(fh)
 
+    def __nonzero__(self):
+        return len(self.df) > 0
+
+    def __len__(self):
+        return len(self.df)
+
     def load_deviceinfo(self):
         from plistlib import readPlist
         try:
@@ -400,7 +406,8 @@ class IosDump(PhoneDump):
         return self.df.query('ApplicationType=="System"')['CFBundleIdentifier']
 
     def installed_apps_titles(self):
-        return self.df['CFBundleExecutable']
+        if self:
+            return self.df['CFBundleExecutable']
 
     def installed_apps(self):
         #return self.df.index

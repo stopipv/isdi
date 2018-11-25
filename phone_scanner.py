@@ -30,7 +30,6 @@ class AppScan(object):
                 .format(dev_type, config.DEV_SUPPRTED)
         self.device_type = dev_type
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
-        self.pii_key = open(config.STATIC_DATA+"/pii.key", 'rb').read()
 
     def setup(self):
         """If the device needs some setup to work."""
@@ -46,7 +45,7 @@ class AppScan(object):
         return []
 
     def dump_path(self, serial, fkind='json'):
-        serial = hmac.new(self.pii_key, serial.encode('utf8'), digestmod=hashlib.sha256).hexdigest()
+        serial = config.hmac_serial(serial)
         if self.device_type == 'ios':
             devicedumpsdir = os.path.join(config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
@@ -76,12 +75,8 @@ class AppScan(object):
             if 'descriptionHTML' not in d:
                 d['descriptionHTML'] = d['description']
             dfname = self.dump_path(serialno)
-            if self.device_type == 'ios':
-                #ddump = parse_dump.IosDump(dfname)
-                #dfname = os.path.join(config.DUMP_DIR, serialno+"_ios")
-                # FIXME: better suffix renaming scheme
-                #devinfo = self.dump_path(serialno, 'Device_Info')
 
+            if self.device_type == 'ios':
                 ddump = self.parse_dump
                 if not ddump:
                     ddump = parse_dump.IosDump(dfname)
@@ -93,62 +88,16 @@ class AppScan(object):
             print('BEGIN INFO')
             print("info={}".format(info))
             print('END INFO')
-            # FIXME: sloppy iOS hack but should fix later, just add these to DF directly.
+            # FIXME: sloppy iOS hack but should fix later, just add these to DF
+            # directly.
             if self.device_type == 'ios':
-                # TODO: add extra info about iOS? Like idevicediagnostics ioregentry AppleARMPMUCharger or IOPMPowerSource or AppleSmartBattery.
+                # TODO: add extra info about iOS? Like idevicediagnostics
+                # ioregentry AppleARMPMUCharger or IOPMPowerSource or
+                # AppleSmartBattery.
                 d['permissions'] = [info['permissions']]
                 d['title'] = [info['title']]
                 del info['permissions']
-            elif self.device_type == 'android':
-                # part that requires android to be connected / store this somehow.
-                hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
-
-                #FIXME:
-                # some appopps in not_hf_recent are not included in the output.
-                # maybe concat hf_recent with them?
-                info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
-                info['Installation Date'] = stats['firstInstallTime']
-                info['Last Updated'] = stats['lastUpdateTime']
-                #info['Last Used'] = stats['used']
-                
-                # TODO: what is the difference between usedScr and used? 
-                # Does a background process count as used? Probably not since
-                # appOps permissions have been more recent than 'used' on some scans.
-                #info['Last Used Screen'] = stats['usedScr']
-                info['App Version'] = stats['versionName']
-                #info['App Version Code'] = stats['versionCode']
-
-                # FIXME: if Unknown, use 'permission_abbrv' instead.
-                #hf_recent.apply()
-                hf_recent.loc[hf_recent['label'] == 'unknown', 'label'] = hf_recent['permission_abbrv']
-                
-                #hf_recent['label'] = hf_recent[['label', 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
-
-                if len(hf_recent['label']) > 0:
-                    hf_recent['label'] = hf_recent.apply(
-                        lambda x: "{} (last used: {})".format(
-                            x['label'], 'never' if 'unknown' in x['timestamp'].lower() else x['timestamp']),
-                        axis=1
-                    )
-
-                print("App info dict:", d)
-                print("hf_recent['label']=", hf_recent['label'].tolist())
-
-                #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
-                #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime) else 'nooo') +")"
-                
-                #print(~hf_recent['timestamp'].str.contains('unknown'))
-                d.set_value(0, 'permissions', hf_recent['label'].tolist())
-
-                #d['recent_permissions'] = hf_recent['timestamp']
-                #print(d['recent_permissions'])
-
             print("AppInfo: ", info, appid, dfname, ddump)
-            # p = run_command(
-            #     'bash scripts/android_scan.sh info {ser} {appid}',
-            #     ser=serialno, appid=appid
-            # ); p.wait()
-            # d['info'] = p.stdout.read().decode().replace('\n', '<br/>')
             return d.fillna(''), info
         except KeyError as ex:
             print("Exception:::", ex)
@@ -163,6 +112,11 @@ class AppScan(object):
         else:
             installed_apps = self.get_apps(serialno)
 
+        if not installed_apps:
+            return pd.DataFrame(
+                [], 
+                columns=['title', 'flags', 'score', 'class_', 'html_flags']
+            )
         r = blacklist.app_title_and_flag(
             pd.DataFrame({'appId': installed_apps}),
             offstore_apps=self.get_offstore_apps(serialno),
@@ -350,6 +304,52 @@ class AndroidScan(AppScan):
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
+    def app_details(self, serialno, appid):
+        d, info = super(AndroidScan, self).app_details(serialno, appid)
+        # part that requires android to be connected / store this somehow.
+        hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
+
+        # FIXME: some appopps in not_hf_recent are not included in the
+        # output.  maybe concat hf_recent with them?
+        info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
+        info['Installation Date'] = stats['firstInstallTime']
+        info['Last Updated'] = stats['lastUpdateTime']
+        # info['Last Used'] = stats['used']
+
+        # TODO: what is the difference between usedScr and used?  Does a
+        # background process count as used? Probably not since appOps
+        # permissions have been more recent than 'used' on some scans.
+        # info['Last Used Screen'] = stats['usedScr']
+        info['App Version'] = stats['versionName']
+        # info['App Version Code'] = stats['versionCode']
+
+        # FIXME: if Unknown, use 'permission_abbrv' instead.
+        hf_recent.loc[hf_recent['label']=='unknown', 'label'] = hf_recent['permission_abbrv']
+
+        # hf_recent['label'] = hf_recent[['label',
+        # 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
+
+        if len(hf_recent['label']) > 0:
+            hf_recent['label'] = hf_recent.apply(
+                lambda x: "{} (last used: {})".format(
+                    x['label'], 'never' if 'unknown' in x['timestamp'].lower() else x['timestamp']),
+                axis=1
+            )
+
+        print("App info dict:", d)
+        print("hf_recent['label']=", hf_recent['label'].tolist())
+
+        #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
+        #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime) else 'nooo') +")"
+
+        #print(~hf_recent['timestamp'].str.contains('unknown'))
+        d.set_value(0, 'permissions', hf_recent['label'].tolist())
+
+        #d['recent_permissions'] = hf_recent['timestamp']
+        #print(d['recent_permissions'])
+        return d, info
+
+
     def isrooted(self, serial):
         '''
             Doesn't return all reasons by default. First match will return.
@@ -368,9 +368,8 @@ class AndroidScan(AppScan):
         if not installed_apps:
             installed_apps = self.get_apps(serial)
         
-        # FIXME: load these from a private database instead.
-        # from OWASP, 
-        #https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
+        # FIXME: load these from a private database instead.  from OWASP,
+        # https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
         root_pkgs = ['com.noshufou.android.su','com.thirdparty.superuser',\
                 'eu.chainfire.supersu', 'com.koushikdutta.superuser',\
                 'com.zachspong.temprootremovejb' ,'com.ramdroid.appquarantine']
@@ -437,12 +436,16 @@ class IosScan(AppScan):
             print("Dumped the data into: {}".format(dumpf))
             self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
             print(self.parse_dump.load_file())
-            self.installed_apps = self.parse_dump.installed_apps()
+            if not self.parse_dump:
+                print("Couldn't connect to the device. Trying to reconnect.")
+                self.installed_apps = []
+            else:
+                self.installed_apps = self.parse_dump.installed_apps()
             if titles:
                 titles = self.parse_dump.installed_apps_titles()
                 return self.installed_apps, titles
         else:
-            print("Couldn't connect to the device. Trying to reconnect.") 
+            print("Couldn't connect to the device. Trying to reconnect.")
             connected, connected_reason = self.setup()
             if not connected:
                 print(connected_reason)
