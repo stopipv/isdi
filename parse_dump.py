@@ -63,7 +63,7 @@ def split_equalto_delim(k):
     return k.split('=', 1)
 
 
-def retrieve(self, dict_, nest):
+def retrieve(dict_, nest):
     '''
     Navigates dictionaries like dict_[nest0][nest1][nest2]...
     gracefully.
