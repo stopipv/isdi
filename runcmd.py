@@ -20,7 +20,9 @@ def error():
     return e.replace("\n", "<br/>")
 '''
 
-
+# TODO: @sam the catch_err should only catch the os level errors, not
+# application level errors. They should go to particular application specific
+# handling.
 def catch_err(p, cmd='', msg='', time=10):
     """TODO: Therer are two different types. homogenize them"""
     try:
@@ -43,17 +45,17 @@ def catch_err(p, cmd='', msg='', time=10):
                     'insufficient permissions for device: user in plugdev group; are your udev rules wrong?'\
                     in s:
                 # config.add_to_error(s)
-                return -1
+                return ""
             if 'insufficient permissions for device: user in plugdev group; are your udev rules wrong?'\
                     in s:
                 print('Need USB for Charging.')
-                return -1
+                return ""
             else:
                 return s
     except Exception as ex:
         # config.add_to_error(ex)
         print("Exception>>>", ex)
-        return -1
+        return ""
 
 
 def run_command(cmd, **kwargs):

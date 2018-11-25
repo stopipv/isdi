@@ -107,14 +107,11 @@ class AppScan(object):
         """Finds the apps in the phone and add flags to them based on @blacklist.py
         Return the sorted dataframe
         """
-        if self.device_type == 'ios':
-            installed_apps, titles = self.get_apps(serialno, titles=True)
-        else:
-            installed_apps = self.get_apps(serialno)
+        installed_apps = self.get_apps(serialno)
 
         if not installed_apps:
             return pd.DataFrame(
-                [], 
+                [],
                 columns=['title', 'flags', 'score', 'class_', 'html_flags']
             )
         r = blacklist.app_title_and_flag(
@@ -137,7 +134,7 @@ class AppScan(object):
         r['score'] = r.flags.apply(blacklist.score)
 
         if self.device_type == 'ios':
-            r['title'] = titles
+            r['title'] = self.get_app_titles(serialno)
         else:
             r['title'] = r.title.str.encode('ascii', errors='ignore')\
                                     .str.decode('ascii')
@@ -214,7 +211,7 @@ class AndroidScan(AppScan):
         if installed_apps:
             q = run_command(
                 'bash scripts/android_scan.sh scan {ser} {hmac_serial}',
-                ser=serialno, hmac_serial=hmac_serial, nowait=True);
+                ser=serialno, hmac_serial=hmac_serial, nowait=True)
             self.installed_apps = installed_apps
         return installed_apps
 
@@ -300,14 +297,16 @@ class AndroidScan(AppScan):
     def uninstall(self, serial, appid):
         cmd = '{cli} -s {serial} uninstall {appid!r}'
         s = catch_err(run_command(cmd, serial=shlex.quote(serial),
-                                                appid=shlex.quote(appid)),
-                           cmd=cmd, msg="Could not uninstall")
+                                  appid=shlex.quote(appid)),
+                      cmd=cmd, msg="Could not uninstall")
         return s != -1
 
     def app_details(self, serialno, appid):
         d, info = super(AndroidScan, self).app_details(serialno, appid)
         # part that requires android to be connected / store this somehow.
-        hf_recent, not_hf_recent, not_hf, stats = all_permissions(appid)
+        hf_recent, not_hf_recent, not_hf, stats = all_permissions(
+            self.dump_path(serialno), appid
+        )
 
         # FIXME: some appopps in not_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
@@ -349,7 +348,6 @@ class AndroidScan(AppScan):
         #print(d['recent_permissions'])
         return d, info
 
-
     def isrooted(self, serial):
         '''
             Doesn't return all reasons by default. First match will return.
@@ -379,6 +377,7 @@ class AndroidScan(AppScan):
                     .format(str(root_pkgs_check))
             return (True, reason)
     
+
 class IosScan(AppScan):
     """
     Run `bash scripts/setup.sh to get libimobiledevice dependencies`
@@ -412,38 +411,23 @@ class IosScan(AppScan):
                     ", reconnect it, and scan again -- accept the trust dialog to proceed.")
         return (True, "Follow trust dialog on iOS device to continue.")
 
-    def get_apps(self, serialno, titles=False):
+    # TODO: This might send titles out of order. Fix this to send both appid and
+    # titles.
+    def get_app_titles(self, serialno):
+        if not self.parse_dump:
+            self._dump_phone(serialno)
+        return self.parse_dump.installed_apps_titles()
+
+    def get_apps(self, serialno):
         self.serialno = serialno
-        # cmd = '{cli} -i {serial} install browse | tail -n +2 > {outf}'
-        #cmd = '{cli} -i {serial} -B | tail -n +3 > {outf}'
-
-        print('DUMPING iOS INFO...')
-        # FIXME: pathlib migration at some point
-        hmac_serial = config.hmac_serial(serialno)
-        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
-                hmac_serial, **config.IOS_DUMPFILES)
-
-        print("cmd=", cmd)
-        #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
-        path = self.dump_path(serialno, fkind='Dir')
-
-        dumpf = os.path.join(path, config.IOS_DUMPFILES['Apps'])
-        dumpfinfo = os.path.join(path, config.IOS_DUMPFILES['Info'])
-
-        dumped = catch_err(run_command(cmd)).strip()
-        #dumped = catch_err(run_command(cmd, serial=serialno)).strip()
-        if dumped == serialno:
-            print("Dumped the data into: {}".format(dumpf))
-            self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
-            print(self.parse_dump.load_file())
+        dumped = self._dump_phone(self.serialno)
+        if dumped:
+            # print(self.parse_dump.load_file())
             if not self.parse_dump:
                 print("Couldn't connect to the device. Trying to reconnect.")
                 self.installed_apps = []
             else:
                 self.installed_apps = self.parse_dump.installed_apps()
-            if titles:
-                titles = self.parse_dump.installed_apps_titles()
-                return self.installed_apps, titles
         else:
             print("Couldn't connect to the device. Trying to reconnect.")
             connected, connected_reason = self.setup()
@@ -455,11 +439,6 @@ class IosScan(AppScan):
         return self.installed_apps
 
     def get_system_apps(self, serialno):
-        dumpf = self.dump_path(serialno, 'Apps')
-        dumpfinfo = self.dump_path(serialno, 'Device_Info')
-        
-        #if os.path.exists(dumpf):
-            #s = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
         if self.parse_dump:
             return self.parse_dump.system_apps()
         else:
@@ -480,35 +459,41 @@ class IosScan(AppScan):
         return d
 
     def device_info(self, serial):
+        dumped = self._dump_phone(serial)
+        if dumped:
+            device_info_print, device_info_map = self.parse_dump.device_info()
+            return (device_info_print, device_info_map)
+        else:
+            return ("", {})
+
+
+    def _dump_phone(self, serial):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         hmac_serial = config.hmac_serial(serial)
-        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'.format(config.THISDIR,\
-                hmac_serial, **config.IOS_DUMPFILES)
+        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'\
+            .format(config.SCRIPT_DIR, hmac_serial, **config.IOS_DUMPFILES)
         print(cmd)
-        #path = os.path.join(config.DUMP_DIR, serialno+"_ios")
         path = self.dump_path(serial, fkind='Dir')
-        dumpf = path+"/"+config.IOS_DUMPFILES['Apps']
-        dumpfinfo = path+"/"+config.IOS_DUMPFILES['Info']
         # dumped = catch_err(run_command(cmd)).strip()
+        dumpf = os.path.join(path, config.IOS_DUMPFILES['Apps'])
+        dumpfinfo = os.path.join(path, config.IOS_DUMPFILES['Info'])
+
         dumped = catch_err(run_command(cmd)).strip()
-
-
+        print('iOS INFO DUMPED.')
         if dumped == serial:
             print("Dumped the data into: {}".format(dumpf))
+            self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
+            return True
         else:
-            print("Couldn't connect to the device. Trying to reconnect.") 
+            print("Couldn't connect to the device. Trying to reconnect.")
             connected, connected_reason = self.setup()
             if not connected:
                 print(connected_reason)
+            return False
                 # FIXME: error here?
-        print('iOS INFO DUMPED.')
-        dfname = self.dump_path(serial)
-        devinfo = self.dump_path(serial, 'Device_Info')
-        self.parse_dump = parse_dump.IosDump(dfname, finfo=devinfo)
 
-        device_info_print, device_info_map = self.parse_dump.device_info()
-        return (device_info_print, device_info_map)
+
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
