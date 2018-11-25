@@ -109,7 +109,7 @@ class AppScan(object):
         """
         installed_apps = self.get_apps(serialno)
 
-        if not installed_apps:
+        if len(installed_apps) <= 0:
             return pd.DataFrame(
                 [],
                 columns=['title', 'flags', 'score', 'class_', 'html_flags']
