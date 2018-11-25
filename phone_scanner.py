@@ -329,6 +329,7 @@ class AndroidScan(AppScan):
         runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
         m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
         return "{brand} {model} (running Android {version})".format(**m), m
+
     # def dump_phone(self, serialno=None):
     #     if not serialno:
     #         serialno = self.devices()[0]

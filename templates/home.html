@@ -45,8 +45,9 @@
 		    {% endfor %}
                 </div>
                 <br/><br/>
-                <input class="form-control" name="device_owner" id="device_owner" type="text" placeholder="Nickname for device? Whose is it?"
-                       rows="2" value="{% if False %}asdf {% endif %}"/>
+                <input class="form-control" name="device_owner" id="device_owner" 
+                       placeholder="Nickname for device? Whose is it?"
+                       rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
                 <!--
             	     <label class="font-weight-bold lead">Who primarily uses this device?</label>
                      <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."

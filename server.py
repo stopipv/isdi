@@ -2,18 +2,17 @@ from flask import (
     Flask, render_template, request, redirect, g, jsonify,
     url_for
 )
-from runcmd import run_command, catch_err
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
 import json
-import blacklist
 import config
 from time import strftime
-import traceback
+# import traceback
 from privacy_scan_android import do_privacy_check
 from db import (
-    get_db, create_scan, save_note, create_appinfo, update_appinfo,
+    create_scan, save_note, update_appinfo,
     create_report, new_client_id, init_db, create_mult_appinfo,
     get_client_devices_from_db, get_device_from_db, update_mul_appinfo,
     get_serial_from_db
@@ -171,6 +170,16 @@ def scan():
         'device_owner', request.args.get('device_owner'))
 
     currently_scanned = get_client_devices_from_db(clientid)
+    template_d = dict(
+        task="home",
+        title=config.TITLE,
+        device=device,
+        device_primary_user=config.DEVICE_PRIMARY_USER,   # TODO: Why is this sent
+        device_primary_user_sel=device_primary_user,
+        apps={},
+        currently_scanned=currently_scanned,
+        clientid=clientid
+    )
     # lookup devices scanned so far here. need to add this by model rather
     # than by serial.
     print('CURRENTLY SCANNED: {}'.format(currently_scanned))
@@ -180,87 +189,47 @@ def scan():
     print('CLIENT ID IS: {}'.format(clientid))
     print('-' * 80)
     print("--> Action = ", action)
-    # if action == "Privacy Check":
-    #     return redirect(url_for(privacy, device=device), code=302)
+
     sc = get_device(device)
     if not sc:
-        return render_template("main.html",
-                               task="home",
-                               title=config.TITLE,
-                               device_primary_user=config.DEVICE_PRIMARY_USER,
-                               apps={},
-                               currently_scanned=currently_scanned,
-                               error="Please choose one device to scan.",
-                               device_primary_user_sel=device_primary_user,
-                               clientid=clientid
-                               ), 201
+        template_d["error"] = "Please choose one device to scan."
+        return render_template("main.html", **template_d), 201
     if not device_owner:
-        return render_template("main.html",
-                               task="home",
-                               title=config.TITLE,
-                               device_primary_user=config.DEVICE_PRIMARY_USER,
-                               apps={},
-                               device=device,
-                               currently_scanned=currently_scanned,
-                               error="Please give the device a nickname.",
-                               clientid=clientid
-                               ), 201
+        template_d["error"] = "Please give the device a nickname."
+        return render_template("main.html", **template_d), 201
+
     ser = sc.devices()
 
-    print(ser)
+    print("Devices: {}".format(ser))
     if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
         # needed.
-        return render_template(
-            "main.html", task="home", apps={},
-            title=config.TITLE,
-            device_primary_user=config.DEVICE_PRIMARY_USER,
-            device_primary_user_sel=device_primary_user,
-            clientid=clientid,
-            device=device,
-            currently_scanned=currently_scanned,
-            error="<b>A device wasn't detected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
-            #error="<b>Android device detected, but needs to be unlocked, in USB debugging mode, and set to File Transer Mode. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b>"
-        ), 201
+        error="<b>A device wasn't detected. Please follow the "\
+            "<a href='/instruction' target='_blank' rel='noopener'>"\
+            "setup instructions here.</a></b>"
+        return render_template("main.html", **template_d), 201
 
     ser = first_element_or_none(ser)
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
-    error = "If an iPhone is connected, open iTunes, click through the connection dialog and wait for the \"Trust this computer\" prompt "\
-        "to pop up in the iPhone, and then scan again." if device == 'ios' else\
-        "If an Android device is connected, disconnect and reconnect the device, make sure "\
-        "developer options is activated and USB debugging is turned on on the device, and then scan again."
 
+    if device == "ios":
+        error = "If an iPhone is connected, open iTunes, click through the "\
+                "connection dialog and wait for the \"Trust this computer\" "\
+                "prompt to pop up in the iPhone, and then scan again."
+    else:
+        error = "If an Android device is connected, disconnect and reconnect "\
+                "the device, make sure developer options is activated and USB "\
+                "debugging is turned on on the device, and then scan again."
+    error += "{} <b>Please follow the <a href='/instruction' target='_blank'"\
+             " rel='noopener'>setup instructions here,</a> if needed.</b>"
     if device == 'ios':
         # go through pairing process and do not scan until it is successful.
         isconnected, reason = sc.setup()
+        template_d["error"] = error.format(reason)
+        template_d["currently_scanned"] = currently_scanned
         if not isconnected:
-            return render_template(
-                "main.html",
-                task="home",
-                apps={},
-                title=config.TITLE,
-                device_primary_user=config.DEVICE_PRIMARY_USER,
-                device_primary_user_sel=device_primary_user,
-                clientid=clientid,
-                device=device,
-                currently_scanned=currently_scanned,
-                error="<b>{}</b>".format(
-                    reason +
-                    "<b>Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here,</a> if needed.</b>"))
-    if not ser:
-        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
-        # needed.
-        return render_template(
-            "main.html", task="home", apps={},
-            title=config.TITLE,
-            device_primary_user=config.DEVICE_PRIMARY_USER,
-            device_primary_user_sel=device_primary_user,
-            clientid=clientid,
-            device=device,
-            currently_scanned=currently_scanned,
-            error="<b>No device is connected. Please follow the <a href='/instruction' target='_blank' rel='noopener'>setup instructions here.</a></b> {}".format(error)
-        )
+            return render_template("main.html", **template_d), 201
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
@@ -297,8 +266,8 @@ def scan():
     if device == 'ios':
         pii_fpath = sc.dump_path(ser, 'Device_Info')
         print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
-        cmd = "rm {}".format(pii_fpath)
-        s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
+        cmd = os.unlink(pii_fpath)
+        # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
         print('iOS PII deleted.')
 
     print("Creating appinfo...")
@@ -306,26 +275,22 @@ def scan():
         info['flags']), '', '<new>') for appid, info in apps.items()])
 
     currently_scanned = get_client_devices_from_db(clientid)
-    return render_template(
-        'main.html', task="home",
-        isrooted="Yes. Reason(s): {}".format(rooted_reason) if rooted else "Don't know" if rooted is None
-        else "No. Reason(s): {}".format(rooted_reason),
-        title=config.TITLE,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        device_primary_user_sel=device_primary_user,
+    template_d.update(dict(
+        isrooted=(
+            "Yes. Reason(s): {}".format(rooted_reason) if rooted
+            else "Don't know" if rooted is None 
+            else "No. Reason(s): {}".format(rooted_reason)
+        ),
         device_name=device_name_print,
         apps=apps,
         scanid=scanid,
-        clientid=clientid,
         sysapps=set(),  # sc.get_system_apps(serialno=ser)),
         serial=ser,
-        device=device,
-        currently_scanned=currently_scanned,
         # TODO: make this a map of model:link to display scan results for that
         # scan.
-        error=config.error(),
-    )
-
+        error=config.error()
+    ))
+    return render_template("main.html", **template_d), 200
 
 ##############  RECORD DATA PART  ###############################
 

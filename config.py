@@ -39,7 +39,7 @@ TEST_APP_LIST = 'static_data/android.test.apps_list'
 VERSION_STABLE = catch_err(run_command(
     'git describe --abbrev=0 --tags')).strip()
 VERSION_CURRENT = catch_err(run_command('git describe --tags')).strip()
-TITLE = {'title': "Mobile Device Privacy Scanner",
+TITLE = {'title': "Mobile Device Privacy Scanner{}".format(" (test)" if TEST else ''),
          'version_current': '',
          'version_stable': VERSION_STABLE}
 

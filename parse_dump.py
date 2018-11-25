@@ -56,10 +56,25 @@ def extract(d, lkeys):
 def split_equalto_delim(k):
     return k.split('=', 1)
 
+
+def retrieve(self, dict_, nest):
+    '''
+    Navigates dictionaries like dict_[nest0][nest1][nest2]...
+    gracefully.
+    '''
+    dict_ = dict_.to_dict() # for pandas
+    try:
+        return reduce(operator.getitem, nest, dict_)
+    except KeyError as e:
+        return ""
+    except TypeError as e:
+        return ""
+
 class PhoneDump(object):
     def __init__(self, dev_type, fname):
         self.device_type = dev_type
         self.fname = fname
+        # df must be a dictionary
         self.df = self.load_file()
 
     def load_file(self):
@@ -225,7 +240,7 @@ class IosDump(PhoneDump):
         if finfo:
             self.finfo = finfo
             self.deviceinfo = self.load_deviceinfo()
-            self.device_class = self.deviceinfo['DeviceClass']
+            self.device_class = self.deviceinfo.get('DeviceClass', "")
         else:
             self.device_class = 'iPhone/iPad'
         self.df = self.load_file()
@@ -241,42 +256,32 @@ class IosDump(PhoneDump):
 
     def load_deviceinfo(self):
         from plistlib import readPlist
-        return readPlist(self.finfo)
+        try:
+            return readPlist(self.finfo)
+        except Exception as ex:
+            print("Load_deviceinfo in parse_dump failed with exception {!r}".format(ex))
+            return {
+                "DeviceClass": "",
+                "ProductType": "",
+                "ModelNumber": "",
+                "RegionInfo": "",
+                "ProductVersion": ""
+            }
 
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
         try:
-            #d = pd.read_json(self.fname).T
-            #d = pd.read_json(self.fname).T
-
             # FIXME: somehow, get the ios_apps.plist into a dataframe.
             from plistlib import readPlist
-            APPS_PLIST = readPlist(self.fname)
             print("fname is: {}".format(self.fname))
-            # load into pd...
-            # apps_json = json.dumps(APPS_PLIST)
-            # d = pd.read_json(apps_json)
-            d = pd.DataFrame(APPS_PLIST)    # quick fix at QFJC
-
+            apps_plist = readPlist(self.fname)
+            d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
-            #d.index.rename('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
             print("Could not load the json file: {}".format(self.fname))
-
-    def retrieve(self, dict_, nest):
-        '''
-            Navigates dictionaries like dict_[nest0][nest1][nest2]...
-            gracefully.
-        '''
-        dict_ = dict_.to_dict() # for pandas
-        try:
-            return reduce(operator.getitem, nest, dict_)
-        except KeyError as e:
-            return ""
-        except TypeError as e:
-            return ""
+            return pd.DataFrame([], columns=["appId"])
 
     def check_unseen_permissions(self, permissions):
         for permission in permissions:
@@ -295,8 +300,8 @@ class IosDump(PhoneDump):
             Could modify this function to include whether or not the permission can be adjusted
             in Settings.
         '''
-        system_permissions = self.retrieve(app, ['Entitlements','com.apple.private.tcc.allow'])
-        adjustable_system_permissions = self.retrieve(app, ['Entitlements','com.apple.private.tcc.allow.overridable'])
+        system_permissions = retrieve(app, ['Entitlements', 'com.apple.private.tcc.allow'])
+        adjustable_system_permissions = retrieve(app, ['Entitlements','com.apple.private.tcc.allow.overridable'])
         third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
         self.check_unseen_permissions(list(system_permissions)+list(adjustable_system_permissions))
 
@@ -305,10 +310,11 @@ class IosDump(PhoneDump):
                 (self.permissions_map[x], app.get(x, default="permission granted by system")),\
                 list(set(system_permissions) | \
                 set(adjustable_system_permissions) | set(third_party_permissions)))))
-        pii = self.retrieve(app, ['Entitlements','com.apple.private.MobileGestalt.AllowedProtectedKeys'])
+        pii = retrieve(app, ['Entitlements',
+                             'com.apple.private.MobileGestalt.AllowedProtectedKeys'])
         #print("\tPII: "+str(pii))
         return all_permissions
-    
+
     def device_info(self):
         # TODO: see idevicediagnostics mobilegestalt KEY
         # https://blog.timac.org/2017/0124-deobfuscating-libmobilegestalt-keys/
@@ -318,46 +324,45 @@ class IosDump(PhoneDump):
         try:
             m['model'] = self.model_make_map[self.deviceinfo['ProductType']]
         except KeyError as e:
-            m['model'] = self.deviceinfo['DeviceClass']+" (Model "+self.deviceinfo['ModelNumber']+self.deviceinfo['RegionInfo']+")"
+            m['model'] = "{DeviceClass} (Model {ModelNumber} {RegionInfo})"\
+                .format(**self.deviceinfo)
         m['version'] = self.deviceinfo['ProductVersion']
-        return (m['model'] + " (running iOS "+m['version']+")", m)
-    
+        return "{model} (running iOS {version})".format(**m), m
+
     def info(self, appid):
-        '''
+        """
             Returns dict containing the following:
             'permission': tuple (all permissions of appid, developer
             reasons for requesting the permissions)
             'title': the human-friendly name of the app.
             'jailbroken': tuple (whether or not phone is suspected to be jailbroken, rationale)
             'phone_kind': tuple (make, OS version)
-        '''
+        """
         d = self.df
         res = {}
-        
         #app = self.df.iloc[appidx,:].dropna()
         app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
         party = app.ApplicationType.lower()
-        if party in ['system','user']:
+        if party in ['system', 'user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
                     .format(party))
-
+            # permissions are an array that returns the permission id and an explanation. 
             permissions = self.get_permissions(app)
-            for permission in permissions:
-                print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
-            print("")
-        res['permissions'] =  [(p.capitalize(), r) for p,r in permissions]
+        res['permissions'] = [(p.capitalize(), r) for p, r in permissions]
         res['title'] = app['CFBundleExecutable']
         res['App Version'] = app['CFBundleVersion']
-        res['Install Date'] = '''Apple does not officially record iOS app installation dates. 
-        To view when '{}' was *last used*: [Settings -> General -> {} Storage].
-        To view the *purchase date* of '{}', follow these instructions: https://www.ipvtechresearch.org/post/guides/apple/.
-        These are the closest possible approximations to installation date available to end-users.
-        '''.format(res['title'], self.device_class, res['title'])
-        res['Battery Usage'] = '''To see recent battery usage of '{}': [Settings -> Battery -> Battery Usage].'''.format(res['title'])
+        res['Install Date'] = '''
+        Apple does not officially record iOS app installation dates.  To view when
+        '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
+        *purchase date* of '{}', follow these instructions:
+        https://www.ipvtechresearch.org/post/guides/apple/.  These are the
+        closest possible approximations to installation date available to
+        end-users.  '''.format(res['title'], self.device_class, res['title'])
+        res['Battery Usage'] = "To see recent battery usage of '{title}': "\
+                               "[Settings -> Battery -> Battery Usage].".format(**res)
         res['Data Usage'] = "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(res['title'])
-        #res['Your iOS Device'] = make
-        #res['iOS Version'] = self.deviceinfo['ProductVersion']
 
+        ## TODO: Remove the following. (@Sam Is any of the following useful?)
         #entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
 
         #''' remove kTCCService from beginning of string '''
@@ -372,24 +377,23 @@ class IosDump(PhoneDump):
         #else:
         #    print("Couldn't find any app permissions on '{}'".format(appid))
         #    permissions = []
-        
         #res['permissions'] = permissions
         #res['title'] = d[d['CFBundleIdentifier'] == appid]["CFBundleExecutable"].iloc[0]
-        
         return res
 
-    def all():
-        for appidx in range(self.df.shape[0]):
-            app = self.df.iloc[appidx,:].dropna()
-            party = app.ApplicationType.lower()
-            if party in ['system','user']:
-                print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
-                        .format(party))
+    # TODO: The following function is incorrect or incomplete. Commenting out for now. 
+    # def all(self):
+    #     for appidx in range(self.df.shape[0]):
+    #         app = self.df.iloc[appidx,:].dropna()
+    #         party = app.ApplicationType.lower()
+    #         if party in ['system','user']:
+    #             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
+    #                     .format(party))
 
-                permissions = get_permissions(app)
-                for permission in permissions:
-                    print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
-                print("")
+    #             permissions = get_permissions(app)
+    #             for permission in permissions:
+    #                 print("\t"+str(permission[0])+"\tReason: "+str(permission[1]))
+    #             print("")
 
     def system_apps(self):
         #return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
@@ -403,7 +407,8 @@ class IosDump(PhoneDump):
         if self.df is None:
             return []
         print(self.df)
-        print(self.df.columns)
+        if self.df is not None:
+            print(self.df.columns)
         return self.df['appId']
 
 
