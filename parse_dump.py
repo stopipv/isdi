@@ -254,9 +254,10 @@ class IosDump(PhoneDump):
             APPS_PLIST = readPlist(self.fname)
             print("fname is: {}".format(self.fname))
             # load into pd...
-            apps_json = json.dumps(APPS_PLIST)
-            d = pd.read_json(apps_json)
-            
+            # apps_json = json.dumps(APPS_PLIST)
+            # d = pd.read_json(apps_json)
+            d = pd.DataFrame(APPS_PLIST)    # quick fix at QFJC
+
             d['appId'] = d['CFBundleIdentifier']
             #d.index.rename('appId', inplace=True)
             return d
@@ -399,9 +400,10 @@ class IosDump(PhoneDump):
 
     def installed_apps(self):
         #return self.df.index
-        if self.df:
-            print(self.df)
-            print(self.df.columns)
+        if self.df is None:
+            return []
+        print(self.df)
+        print(self.df.columns)
         return self.df['appId']
 
 
