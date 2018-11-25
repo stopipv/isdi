@@ -15,7 +15,8 @@ import re
 import config
 import pandas as pd
 
-APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE)
+APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE, index_col='appId')
+APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurence odds', 'spyware'})]
 SPY_REGEX = {
     "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
     "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
