@@ -64,6 +64,7 @@ def app_details(device):
     appid = request.args.get('appId')
     ser = request.args.get('serial')
     d, info = sc.app_details(ser, appid)
+    d = d.fillna('')
     d = d.to_dict(orient='index').get(0, {})
     d['appId'] = appid
 

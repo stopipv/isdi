@@ -8,6 +8,8 @@ import config
 from functools import reduce
 import operator
 from pathlib import Path
+from rsonlite import simpleparse
+import runcmd 
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -21,6 +23,7 @@ def get_d_at_level(d, lvl):
         d = d[l]
     return d
 
+
 def clean_json(d):
     if not any(d.values()):
         return list(d.keys())
@@ -29,13 +32,14 @@ def clean_json(d):
             d[k] = clean_json(v)
 
 
-
 def match_keys(d, keys, only_last=False):
     ret = []
     # print(keys)
     # print(keys)
     for sk in keys.split('//'):
         sk = re.compile(sk)
+        if isinstance(d, list):
+            d = d[0]
         for k, v in d.items():
             if sk.match(k):
                 ret.append(k)
@@ -49,6 +53,8 @@ def match_keys(d, keys, only_last=False):
 
 def extract(d, lkeys):
     for k in lkeys:
+        if isinstance(d, list):
+            d = d[0]
         d = d.get(k, {})
     return d
 
@@ -86,8 +92,64 @@ class PhoneDump(object):
 
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
+        self.dumpf = fname
         super(AndroidDump, self).__init__('android', fname)
         self.df = self.load_file()
+
+    def _extract_lines(self, service):
+        """Extract lines for te DUMP OF SERVICE <service> """
+        cmd = "sed -n -e '/DUMP OF SERVICE {}/,/DUMP OF SERVICE/p' {fname} "\
+              "| head -n -1"
+        s = "DUMP OF SERVICE {}".format(service)
+        started = False
+        with open(self.dumpf) as f:
+            for l in f:
+                if started:
+                    if "DUMP OF SERVICE" in l:
+                        break
+                    else:
+                        yield l
+                elif s in l:
+                    started = True
+
+    @staticmethod
+    def custom_parse(service, lines):
+        if service == 'appops':
+            return lines
+
+    @staticmethod
+    def new_parse_dump_file(fname):
+        """Not used working using simple parse to parse the files. """
+        if not Path(fname).exists():
+            print("File: {!r} does not exists".format(fname))
+        data = open(fname)
+        d = {}
+        service = ''
+        join_lines = []
+        custom_parse_services = {"appops"}
+        def _parse(lines):
+            try:
+                if service in custom_parse_services:
+                    return AndroidDump.custom_parse(service, lines)
+                else:
+                    return simpleparse('\n'.join(join_lines))
+            except Exception as ex:
+                print("Could not parse for {} service={}. Exception={}"\
+                      .format(fname, service, ex))
+                return lines
+
+        for i, l in enumerate(data):
+            if l.startswith('----'): continue
+            if l.startswith('DUMP OF SERVICE'):
+                if service:
+                    d[service] = _parse(join_lines)
+                service = l.strip().rsplit(' ', 1)[1]
+                join_lines = []
+            else:
+                join_lines.append(l)
+        if len(join_lines) > 0 and len(d.get(service, [])) == 0:
+            d[service] = _parse(join_lines)
+        return d
 
     @staticmethod
     def parse_dump_file(fname):
@@ -168,7 +230,7 @@ class AndroidDump(PhoneDump):
         print(d)
         def s(c):
             return (d.query('cnt_set == {}'.format(c)).eval('rx_bytes+tx_bytes').sum()
-                    /(1024*1024))
+                    / (1024*1024))
         return {
             "foreground": "{:.2f} MB".format(s(1)),
             "background": "{:.2f} MB".format(s(0))

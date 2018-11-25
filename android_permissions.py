@@ -5,7 +5,6 @@ Must work completely from the dumps, no interaction with the device is required.
 from rsonlite import simpleparse
 from runcmd import run_command, catch_err
 import pandas as pd
-import subprocess
 import datetime
 import config
 import re
@@ -51,6 +50,7 @@ def recent_permissions_used(appid):
         return df
     record = {'appId': appid}
     now = datetime.datetime.now()
+    print(recently_used)
     for permission in recently_used.split('\n')[:-1]:
         permission_attrs = permission.split(';')
         record['op'] = permission_attrs[0].split(':')[0]
@@ -81,22 +81,21 @@ def recent_permissions_used(appid):
     return df.sort_values(by=['time_ago']).reset_index(drop=True)
 
 
-def package_info(appid):
+def package_info(dumpf, appid):
     # FIXME: add check on all permissions, too.
     # need to get
     # requested permissions:
     # install permissions:
     # runtime permissions:
+    cmd = "sed -n -e '/Package \[{appid}\]/,/Package \[/p' {dumpf}"\
+        .format(appid=appid, dumpf=dumpf.replace('.json', '.txt'))
+    print(cmd)
+    # TODO: Need to udpate it once the catch_err function is fixed.
+    package_dump = run_command(cmd).stdout.read().decode()
 
-    # TODO: Remove call to adb, replace it with parsing from the dump
-    cmd = "{cli} shell dumpsys package {app} | sed -n -e '/Packages:/,$p'".format(
-        cli=config.ADB_PATH, app=appid)
-    package_dump = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)\
-        .stdout.read().decode('utf-8')  # .strip()
-
-    cmd = '{cli} shell dumpsys usagestats {app} | grep "App Standby States:" -A 1'\
-        .format(cli=config.ADB_PATH, app=appid)
-    now = datetime.datetime.now()
+    # cmd = '{cli} shell dumpsys usagestats {app} | grep "App Standby States:" -A 1'\
+    #     .format(cli=config.ADB_PATH, app=appid)
+    # now = datetime.datetime.now()
     #usage_stats = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)\
     #        .stdout.read().decode('utf-8')#.strip()
 
@@ -120,14 +119,15 @@ def package_info(appid):
         return []
 
     try:
-        #print('THE PACKAGE IS:')
-        # print(sp['Packages:'].items())
         # FIXME: TypeError: list indices must be integers or slices, not str
-        # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the Packages:.
-        # for now, using sed to filter out potential hazards in parsing output.
+        # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the
+        # Packages:.  for now, using sed to filter out potential hazards in
+        # parsing output.
         if isinstance(sp, list):
             sp = sp[0]
-        pkg = [v for k, v in sp['Packages:'].items() if appid in k][0]
+        _, pkg = sp.popitem()
+        if isinstance(pkg, list):
+            pkg = pkg[0]
     except IndexError as e:
         print(e)
         print('Didn\'t parse correctly. Not sure why.')
@@ -141,10 +141,10 @@ def package_info(appid):
     #usage_stats = dict(item.split('=') for item in usage_stats)
     # print(usage_stats)
     pkg_info = {}
-    pkg_info['firstInstallTime'] = pkg['firstInstallTime']
-    pkg_info['lastUpdateTime'] = pkg['lastUpdateTime']
-    pkg_info['versionCode'] = pkg['versionCode']
-    pkg_info['versionName'] = pkg['versionName']
+    pkg_info['firstInstallTime'] = pkg.get('firstInstallTime', '')
+    pkg_info['lastUpdateTime'] = pkg.get('lastUpdateTime', '')
+    pkg_info['versionCode'] = pkg.get('versionCode', '')
+    pkg_info['versionName'] = pkg.get('versionName', '')
     #pkg_info['used'] = now - _parse_time(usage_stats['used'])
     #pkg_info['usedScr'] = now - _parse_time(usage_stats['usedScr'])
 
@@ -208,12 +208,12 @@ def permissions_map():
     return df
 
 
-def all_permissions(appid):
+def all_permissions(dumpf, appid):
     '''
         Returns a tuple of human-friendly permissions (including recently used), non human-friendly app ops,
         non human-friendly permissions, and summary stats.
     '''
-    app_perms, pkg_info = package_info(appid)
+    app_perms, pkg_info = package_info(dumpf, appid)
     recent_permissions = recent_permissions_used(appid)
 
     permissions = pd.read_csv(config.ANDROID_PERMISSIONS_CSV)
@@ -249,6 +249,10 @@ def all_permissions(appid):
 
 if __name__ == '__main__':
     import sys
+
+    print(package_info('./phone_dumps/83c6500a47585595f72d654829cab29edd2c4f5253e6c05d5576cf04661fd6eb_android.txt', 'net.cybrook.trackview'))
+    exit()
+
     appid = sys.argv[1]
     app_perms, pkg_info = package_info(appid)
 
@@ -303,3 +307,4 @@ if __name__ == '__main__':
         hf = x.split('.')[-1]
         hf = hf[:1] + hf[1:].lower().replace('_', ' ')
         print("\t" + str(x) + " (" + str(hf) + ")")
+
