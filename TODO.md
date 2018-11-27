@@ -13,3 +13,12 @@
 1. A csv file containing all the `appIds`,
 `store`={'android', 'ios', 'offstpre'}, and `flag`={'dual-use', 'spyware'}
 2. A file containing `appId`, `name`, and `url` of all apps we have seen so far.
+
+## Data visualization
+1. Create an interface for retrieveing and viewing the stored data. 
+   a. The stored scan results
+   b. Dumps of phones associated with the client
+   c. Technograph, TAQ10 results, and summary form
+   d. All notes associated with the client
+
+
