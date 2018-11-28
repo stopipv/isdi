@@ -1,4 +1,7 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+export PATH=${DIR}/../static_data/libimobiledevice-darwin/:$PATH
+
 serial=$(idevice_id -l 2>&1 | tail -n 1)
 mkdir -p "$serial"_ios
 cd "$serial"_ios

@@ -15,7 +15,7 @@ import re
 import config
 import pandas as pd
 
-APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE, index_col='appId')
+APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE, index_col='appId', encoding='latin1')
 APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurence odds', 'spyware'})]
 SPY_REGEX = {
     "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
@@ -39,7 +39,7 @@ def score(flags):
         'offstore-app': 0.8,
         'regex-spy': 0.3,
         'odds-ratio': 0.2,
-        'system-app': 0.0
+        'system-app': -0.1
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
 

@@ -121,9 +121,9 @@ class AppScan(object):
         )
         r['title'] = r.title.fillna('')
         td = pd.read_sql(
-            'select appid, title from apps where appid in (?{})'.format(
+            'select appid as appId, title from apps where appid in (?{})'.format(
                 ', ?'*(len(installed_apps)-1)
-            ), self.app_info_conn, params=(installed_apps)).set_index('appid')
+            ), self.app_info_conn, params=(installed_apps)).set_index('appId')
         td.index.rename('appId', inplace=True)
         r.set_index('appId', inplace=True)
         print("td=", td)
@@ -311,15 +311,15 @@ class AndroidScan(AppScan):
         # FIXME: some appopps in not_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
         info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
-        info['Installation Date'] = stats['firstInstallTime']
-        info['Last Updated'] = stats['lastUpdateTime']
+        info['Installation Date'] = stats.get('firstInstallTime', '')
+        info['Last Updated'] = stats.get('lastUpdateTime', '')
         # info['Last Used'] = stats['used']
 
         # TODO: what is the difference between usedScr and used?  Does a
         # background process count as used? Probably not since appOps
         # permissions have been more recent than 'used' on some scans.
         # info['Last Used Screen'] = stats['usedScr']
-        info['App Version'] = stats['versionName']
+        info['App Version'] = stats.get('versionName', '')
         # info['App Version Code'] = stats['versionCode']
 
         # FIXME: if Unknown, use 'permission_abbrv' instead.
