@@ -311,15 +311,15 @@ class AndroidScan(AppScan):
         # FIXME: some appopps in not_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
         info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
-        info['Installation Date'] = stats['firstInstallTime']
-        info['Last Updated'] = stats['lastUpdateTime']
+        info['Installation Date'] = stats.get('firstInstallTime', '')
+        info['Last Updated'] = stats.get('lastUpdateTime', '')
         # info['Last Used'] = stats['used']
 
         # TODO: what is the difference between usedScr and used?  Does a
         # background process count as used? Probably not since appOps
         # permissions have been more recent than 'used' on some scans.
         # info['Last Used Screen'] = stats['usedScr']
-        info['App Version'] = stats['versionName']
+        info['App Version'] = stats.get('versionName', '')
         # info['App Version Code'] = stats['versionCode']
 
         # FIXME: if Unknown, use 'permission_abbrv' instead.

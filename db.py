@@ -151,16 +151,17 @@ def create_mult_appinfo(args):
 def get_client_devices_from_db(clientid):
     # TODO: change 'select serial ...' to 'select device_model ...' (setup
     # first)
-    d = query_db(
-        'select distinct device_model,serial,device_primary_user from scan_res where clientid=?',
-        args=(
-            clientid,
-        ),
-        one=False)
+    try:
+        d = query_db(
+            'select distinct device_model,serial,device_primary_user from scan_res where clientid=?',
+            args=(clientid,), one=False
+        )
+    except Exception as e:
+        return []
     if d:
-        return d
+        return 
     else:
-        return ''
+        return []
 
 
 def get_device_from_db(scanid):
