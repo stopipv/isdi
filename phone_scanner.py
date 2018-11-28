@@ -121,9 +121,9 @@ class AppScan(object):
         )
         r['title'] = r.title.fillna('')
         td = pd.read_sql(
-            'select appid, title from apps where appid in (?{})'.format(
+            'select appid as appId, title from apps where appid in (?{})'.format(
                 ', ?'*(len(installed_apps)-1)
-            ), self.app_info_conn, params=(installed_apps)).set_index('appid')
+            ), self.app_info_conn, params=(installed_apps)).set_index('appId')
         td.index.rename('appId', inplace=True)
         r.set_index('appId', inplace=True)
         print("td=", td)
