@@ -311,9 +311,9 @@ class IosDump(PhoneDump):
         # load permissions mappings and apps plist
         self.permissions_map = {}
         self.model_make_map = {}
-        with open(os.path.join(config.THISDIR, 'ios_permissions.json'), 'r') as fh:
+        with open(os.path.join(config.STATIC_DATA, 'ios_permissions.json'), 'r') as fh:
             self.permissions_map = json.load(fh)
-        with open(os.path.join(config.THISDIR, 'ios_device_identifiers.json'), 'r') as fh:
+        with open(os.path.join(config.STATIC_DATA, 'ios_device_identifiers.json'), 'r') as fh:
             self.model_make_map = json.load(fh)
 
     def __nonzero__(self):
