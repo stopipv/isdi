@@ -1,4 +1,23 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+platform='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+   platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+    platform='darwin'
+elif [[ "$unamestr" == 'FreeBSD' ]]; then
+   platform='freebsd'
+fi
+
+if [[ $platform == 'darwin' ]]; then
+    export PATH=${DIR}/../static_data/libimobiledevice-darwin/:$PATH
+elif [[ $platform == 'linux' ]]; then
+    export PATH=${DIR}/../static_data/libimobiledevice-linux/:$PATH
+fi
+echo "$platform" "$adb"
+echo $(which idevice_id)
+
 serial=$(idevice_id -l 2>&1 | tail -n 1)
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
