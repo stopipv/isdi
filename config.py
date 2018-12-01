@@ -18,8 +18,8 @@ source_files = {
 spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
-DEBUG = False
-TEST = False
+DEBUG = os.getenv("DEBUG", True)
+TEST = os.getenv("TEST", True)
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',

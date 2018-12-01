@@ -48,40 +48,39 @@ def recent_permissions_used(appid):
 
     if 'No operations.' in recently_used:
         return df
-    try:
-        record = {'appId': appid}
-        now = datetime.datetime.now()
-        print(recently_used)
-        for permission in recently_used.split('\n')[:-1]:
-            permission_attrs = permission.split(';')
-            record['op'] = permission_attrs[0].split(':')[0]
-            record['mode'] = permission_attrs[0].split(':')[1].strip()
+    record = {'appId': appid}
+    now = datetime.datetime.now()
+    print(recently_used)
+    for permission in recently_used.split('\n')[:-1]:
+        permission_attrs = permission.split(';')
+        t = permission_attrs[0].split(':')
+        if len(t) != 2:    # Could not parse
+            continue
+        record['op'] = t[0].strip()
+        record['mode'] = t[1].strip()
 
-            if len(permission_attrs) == 2:
-                record['timestamp'] = (
-                    now -
-                    _parse_time(
-                        permission_attrs[1].split('=')[1].strip())).strftime(
-                    config.DATE_STR)
+        if len(permission_attrs) == 2:
+            record['timestamp'] = (
+                now -
+                _parse_time(
+                    permission_attrs[1].split('=')[1].strip())).strftime(
+                config.DATE_STR)
 
-                # TODO: keep time_ago? that leaks when the consultation was.
-                record['time_ago'] = permission_attrs[1].split('=')[1].strip()
-            else:
-                record['timestamp'] = 'unknown (op)'
-                record['time_ago'] = 'unknown (op)'
-                record['duration'] = 'unknown (op)'
-                df.loc[df.shape[0]] = record
-                continue
+            # TODO: keep time_ago? that leaks when the consultation was.
+            record['time_ago'] = permission_attrs[1].split('=')[1].strip()
+        else:
+            record['timestamp'] = 'unknown (op)'
+            record['time_ago'] = 'unknown (op)'
+            record['duration'] = 'unknown (op)'
+            df.loc[df.shape[0]] = record
+            continue
 
             # NOTE: can convert this with timestamp + _parse_time('duration')
             if len(permission_attrs) == 3:
                 record['duration'] = permission_attrs[2].split('=')[1].strip()
             else:
                 record['duration'] = 'unspecified'
-            df.loc[df.shape[0]] = record
-        return df.sort_values(by=['time_ago']).reset_index(drop=True)
-    except Exception as e:
-        return pd.DataFrame( columns=[ 'appId', 'op', 'mode', 'timestamp', 'time_ago', 'duration'])
+    return df.sort_values(by=['time_ago']).reset_index(drop=True)
 
 def package_info(dumpf, appid):
     # FIXME: add check on all permissions, too.

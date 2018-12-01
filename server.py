@@ -289,9 +289,10 @@ def scan():
     currently_scanned = get_client_devices_from_db(clientid)
     template_d.update(dict(
         isrooted=(
-            "Yes. Reason(s): {}".format(rooted_reason) if rooted
+            "<strong class='text-danger'>Yes.</strong> Reason(s): {}"
+            .format(rooted_reason) if rooted
             else "Don't know" if rooted is None 
-            else "No. Reason(s): {}".format(rooted_reason)
+            else "No"
         ),
         device_name=device_name_print,
         apps=apps,
@@ -303,7 +304,7 @@ def scan():
         error=config.error()
     ))
     return render_template("main.html", **template_d), 200
-
+    
 ##############  RECORD DATA PART  ###############################
 
 

@@ -119,7 +119,7 @@
         <div class="w-100" style="height: 70vh; overflow: auto;">
             {% if device_name %}
             <label>Device scanned: <b>{{ device_name }}</b></label>
-	    <label>Is this device jailbroken or rooted? <b>{{ isrooted }}</b></label>
+	    <label>Is this device jailbroken or rooted? {{ isrooted | safe }}</label>
             {% endif %}
             <table class="table table-bordered w-100">
                 <thead>
