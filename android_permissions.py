@@ -48,13 +48,17 @@ def recent_permissions_used(appid):
 
     if 'No operations.' in recently_used:
         return df
+
     record = {'appId': appid}
     now = datetime.datetime.now()
     print(recently_used)
     for permission in recently_used.split('\n')[:-1]:
         permission_attrs = permission.split(';')
-        record['op'] = permission_attrs[0].split(':')[0]
-        record['mode'] = permission_attrs[0].split(':')[1].strip()
+        t = permission_attrs[0].split(':')
+        if len(t) != 2:    # Could not parse
+            continue
+        record['op'] = t[0].strip()
+        record['mode'] = t[1].strip()
 
         if len(permission_attrs) == 2:
             record['timestamp'] = (
