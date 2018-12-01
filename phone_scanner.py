@@ -231,7 +231,8 @@ class AndroidScan(AppScan):
                     apps, t = l
                     installer = t.replace('installer=', '')
                     if installer not in approved and installer != 'null':
-                        approved.add(installer) # if system is rooted, won't make any difference spoofing wise
+                        # if system is rooted, won't make any difference spoofing wise
+                        approved.add(installer)
         print(approved)
         for l in self._get_apps_(serialno, '-i -u -3'):
             l = l.split()
@@ -277,7 +278,7 @@ class AndroidScan(AppScan):
         cmd = '{cli} -s {serial} shell getprop ro.build.version.release'
         m['version'] = run_command(cmd, serial=serial).stdout.read().decode('utf-8').strip()
 
-        cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:"'
+        cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:" | head -n1'
         runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
         #m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
         m['last_full_charge'] = datetime.now()
@@ -354,9 +355,9 @@ class AndroidScan(AppScan):
         '''
             Doesn't return all reasons by default. First match will return.
         '''
-        cmd = "{cli} -s {serial} shell 'which su'"
+        cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
-        if s == -1 or 'su: not found' in s or len(s) == 0:
+        if s == -1 or 'not found' in s or len(s) == 0:
             print(config.error())
             reason = "couldn't find 'su' tool on the phone."
             return (False, reason)

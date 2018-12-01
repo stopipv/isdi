@@ -35,53 +35,35 @@ s = 'VIBRATE: allow; time=+29d3h41m32s800ms ago; duration=+1s13ms\nCAMERA: allow
 
 
 def recent_permissions_used(appid):
-    df = pd.DataFrame(
-        columns=[
-            'appId',
-            'op',
-            'mode',
-            'timestamp',
-            'time_ago',
-            'duration'])
+    cols = ['appId', 'op', 'mode', 'timestamp', 'time_ago', 'duration']
+    df = pd.DataFrame([], columns=cols)
     cmd = '{cli} shell appops get {app}'
     recently_used = catch_err(run_command(cmd, app=appid))
 
     if 'No operations.' in recently_used:
         return df
-    try:
-        record = {'appId': appid}
-        now = datetime.datetime.now()
-        print(recently_used)
-        for permission in recently_used.split('\n')[:-1]:
-            permission_attrs = permission.split(';')
-            record['op'] = permission_attrs[0].split(':')[0]
-            record['mode'] = permission_attrs[0].split(':')[1].strip()
+    record = {'appId': appid}
+    now = datetime.datetime.now()
+    print(recently_used)
+    for permission in recently_used.split('\n')[:-1]:
+        permission_attrs = permission.split(';')
+        t = permission_attrs[0].split(':')
+        if len(t) != 2:    # Could not parse
+            continue
+        record = {c: '' for c in cols}
+        record['op'] = t[0].strip()
+        record['mode'] = t[1].strip()
+        tt = permission_attrs[1].split('=')
+        if len(tt) != 2:
+            continue
+        if len(permission_attrs) == 2:
+            record['timestamp'] = (now - _parse_time(tt[1].strip()))\
+                .strftime(config.DATE_STR)
+            # TODO: keep time_ago? that leaks when the consultation was.
+            record['time_ago'] = tt[1].strip()
+        df.loc[df.shape[0]] = record
+    return df.sort_values(by=['time_ago']).reset_index(drop=True)
 
-            if len(permission_attrs) == 2:
-                record['timestamp'] = (
-                    now -
-                    _parse_time(
-                        permission_attrs[1].split('=')[1].strip())).strftime(
-                    config.DATE_STR)
-
-                # TODO: keep time_ago? that leaks when the consultation was.
-                record['time_ago'] = permission_attrs[1].split('=')[1].strip()
-            else:
-                record['timestamp'] = 'unknown (op)'
-                record['time_ago'] = 'unknown (op)'
-                record['duration'] = 'unknown (op)'
-                df.loc[df.shape[0]] = record
-                continue
-
-            # NOTE: can convert this with timestamp + _parse_time('duration')
-            if len(permission_attrs) == 3:
-                record['duration'] = permission_attrs[2].split('=')[1].strip()
-            else:
-                record['duration'] = 'unspecified'
-            df.loc[df.shape[0]] = record
-        return df.sort_values(by=['time_ago']).reset_index(drop=True)
-    except Exception as e:
-        return pd.DataFrame( columns=[ 'appId', 'op', 'mode', 'timestamp', 'time_ago', 'duration'])
 
 def package_info(dumpf, appid):
     # FIXME: add check on all permissions, too.
