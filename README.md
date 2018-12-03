@@ -26,31 +26,16 @@ Connect a
 device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
 connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
 
-If there are errors, please send your server error output to <havron@cs.cornell.edu>.
-
-
-## Dependencies
-Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
-Run `pip3 install -r requirements.txt` to get the required Python modules.
-Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
-
-![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
-
-
-Connect a
-device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
-connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
-
 ## Debugging tips
 If there are errors, please send your server error output to <havron@cs.cornell.edu>. If you feel confident enough in the codebase to try to fix them yourself, do so, but don't push to this repo until emailing Sam.
 Inspect apps on the device manually if you cannot resolve a failure.
 
 
-### Android tips
+#### Android tips
 In the terminal of the computer, run `adb devices` to see if the device is connected properly.
 
 
-### iOS tips
+#### iOS tips
 In the terminal of the computer, run `idevice_id -l` to see if the device is connected properly.
 
 
@@ -130,11 +115,6 @@ application. I don't konw how to get install date, resource usage, etc.
 * `templates/` folder contains the html templates rendering in the UI
 * `webstatic/` folder contains the `.css` and `.js` files 
 * `phone_dumps/` folder will contain the data recorded from the phone.
-
-
-
-## Debug tips
-
 
 
 
