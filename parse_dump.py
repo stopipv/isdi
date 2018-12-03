@@ -256,6 +256,7 @@ class AndroidDump(PhoneDump):
             d,
             match_keys(d, '^package$//^Packages//^Package \[{}\].*'.format(appid))
         )
+        #res = {'userId':'','firstInstallTime':'','lastUpdateTime':''}
         res = dict(
             split_equalto_delim(match_keys(package, v, only_last=True))
             for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
@@ -407,7 +408,10 @@ class IosDump(PhoneDump):
             'phone_kind': tuple (make, OS version)
         """
         d = self.df
-        res = {}
+        res = {'permission':'',
+                'title':'',
+                'jailbroken':'',
+                'phone_kind':''}
         #app = self.df.iloc[appidx,:].dropna()
         app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
         party = app.ApplicationType.lower()

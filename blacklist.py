@@ -16,7 +16,8 @@ import config
 import pandas as pd
 
 APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE, index_col='appId', encoding='latin1', error_bad_lines=False)
-APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurence odds', 'spyware'})]
+#{APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurrence odds', 'spyware'})]
+APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'spyware'})]
 SPY_REGEX = {
     "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
     "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
@@ -62,7 +63,7 @@ def flag_str(flags):
     def _info(flag):
         return {
             "regex-spy": "This app's name or its app-id contain words like 'spy', 'track', etc.",
-            "offstore-spyware": ("Thsi app is a spyware app, distributed outside official applicate stores, e.g., "\
+            "offstore-spyware": ("This app is a spyware app, distributed outside official applicate stores, e.g., "\
                                  "Play Store or iTunes App Store"),
             "co-occurrence": "This app appears very frequently with other offstore-spyware apps.",
             "onstore-dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",

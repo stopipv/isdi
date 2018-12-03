@@ -278,7 +278,8 @@ class AndroidScan(AppScan):
 
         cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:"'
         runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
-        m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
+        #m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
+        m['last_full_charge'] = datetime.now()
         return "{brand} {model} (running Android {version})".format(**m), m
 
     # def dump_phone(self, serialno=None):
@@ -424,12 +425,16 @@ class IosScan(AppScan):
         if dumped:
             # print(self.parse_dump.load_file())
             if not self.parse_dump:
-                print("Couldn't connect to the device. Trying to reconnect.")
+                print("Couldn't connect to the device. Trying to reconnect. Here.")
+                connected, connected_reason = self.setup()
+                if not connected:
+                    print(connected_reason)
+                    # FIXME: error here?
                 self.installed_apps = []
             else:
                 self.installed_apps = self.parse_dump.installed_apps()
         else:
-            print("Couldn't connect to the device. Trying to reconnect.")
+            print("Couldn't connect to the device. Trying to reconnect. Over here.")
             connected, connected_reason = self.setup()
             if not connected:
                 print(connected_reason)
@@ -481,15 +486,15 @@ class IosScan(AppScan):
 
         dumped = catch_err(run_command(cmd)).strip()
         print('iOS INFO DUMPED.')
-        if dumped == serial:
+        if dumped == serial or True:
             print("Dumped the data into: {}".format(dumpf))
             self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
             return True
         else:
-            print("Couldn't connect to the device. Trying to reconnect.")
-            connected, connected_reason = self.setup()
-            if not connected:
-                print(connected_reason)
+            print("Couldn't connect to the device. Trying to reconnect. This way.")
+            #connected, connected_reason = self.setup()
+            #if not connected:
+            #    print(connected_reason)
             return False
                 # FIXME: error here?
 
@@ -497,7 +502,8 @@ class IosScan(AppScan):
 
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
-        cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
+        #cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
+        cmd = 'ideviceinstaller --udid {serial} --uninstall {appid!r}'
         s = catch_err(run_command(cmd, serial=serial, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
