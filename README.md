@@ -15,7 +15,14 @@ $ python3 server.py
 ```
 
 Navigate to `http://localhost:5000` on a browser. You
-will see the page of the `PhoneScanner` tool running. Connect a
+will see the page of the `PhoneScanner` tool running. 
+
+It should look something like this:
+
+![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
+
+
+Connect a
 device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
 connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
 
@@ -26,7 +33,6 @@ If there are errors, please send your server error output to <havron@cs.cornell.
 Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
 Run `pip3 install -r requirements.txt` to get the required Python modules.
 Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
-
 
 ![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
 
@@ -52,6 +58,7 @@ In the terminal of the computer, run `idevice_id -l` to see if the device is con
 Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
 Run `pip3 install -r requirements.txt` to get the required Python modules.
 Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
+
 
 #### Prepare the mobile device for scanning
 **Android**
