@@ -1,4 +1,5 @@
 # Mobile Device Scanner
+
 Simple tool to check Android or iOS devices for IPS-spyware.
 
 
@@ -14,9 +15,18 @@ $ python3 server.py
 ```
 
 Navigate to `http://localhost:5000` on a browser. You
-will see the page of the `PhoneScanner` tool running. 
+will see the page of the `PhoneScanner` tool running. Connect a
+device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
+connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
 
-It should look something like this:
+If there are errors, please send your server error output to <havron@cs.cornell.edu>.
+
+
+## Dependencies
+Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
+Run `pip3 install -r requirements.txt` to get the required Python modules.
+Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
+
 
 ![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
 
@@ -113,6 +123,10 @@ application. I don't konw how to get install date, resource usage, etc.
 * `templates/` folder contains the html templates rendering in the UI
 * `webstatic/` folder contains the `.css` and `.js` files 
 * `phone_dumps/` folder will contain the data recorded from the phone.
+
+
+
+## Debug tips
 
 
 
