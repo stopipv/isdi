@@ -1,27 +1,36 @@
-# Phone Scanner
-Simple tool to check Android or iOS phones for IPS-spyware.
+# Mobile device Scanner
+Simple tool to check Android or iOS devices for IPS-spyware.
 
 
 ## Use the tool
-Get the application data from the [private repo](https://bitbucket.org/rchatterjee/appscraper/).
-If you dont't have access to it, then you should not get the data :-) (Send me an email).
+Get the scraped app data and LR outputs from the [private repo](https://bitbucket.org/rchatterjee/appscraper/); then place it in `static_data/`.
+If you don't have access to that repo, send an email to <rahul@cs.cornell.edu> with a request for it.
 
 After [dependencies](#dependencies) are installed, with an Android or iOS device plugged in and
-unlocked, run the following command in the terminal
+unlocked, run the following command in the terminal (in the base directory of this repository)
 
 ```bash
-$ ./run.sh
+$ python3 server.py
 ```
 
-Navigate to `http://localhost:5000`, on the Google Chrome browser, you
-will see the page of the `PhoneScanner` tool running.  Connect a
-device and click on the suitable button `Android` or `iOS`. (**Please
-connect one device at a time.**)
+Navigate to `http://localhost:5000` on a browser. You
+will see the page of the `PhoneScanner` tool running. Connect a
+device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
+connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
+
+If there are errors, please send your server error output to <havron@cs.cornell.edu>.
+
+
+## Dependencies
+Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
+Run `pip3 install -r requirements.txt` to get the required Python modules.
+Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
 
 ![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
 
 #### Prepare the phone for scanning
 **Android**
+(also see `localhost:5000/instruction` for more details step-by-step.)
 1. You will need to activate [`developer options`](https://developer.android.com/studio/debug/dev-options.html)
 in the phone. Follow the above link to activate the developer option.
 **TODO**: how to hide it back after the scan.
@@ -45,11 +54,11 @@ listed inside `Storage`).
 **iOS**
 
 There is not much preparation required for iOS. Once the USB
-cabel is connected, refresh the page; on the device you have to enter
-the passcode to unlock the device. Even if you use touchID, passcode is
-required to enable the USB access. If you don't see the device, refresh
+cable is connected, refresh the page; on the device you have to enter
+the passcode to unlock the device, and then once more to accept the "trust this computer" dialog. 
+Even if you use touchID, passcode is required to enable the USB access. If you don't see the device, refresh
 the page couple of times, and check the phone if it went to
-"Enter passcode" mode.
+"Enter passcode" mode and the "trust this computer" dialog.
 
 
 ## Cast iOS Screens or Mirror Android Screens 
@@ -81,34 +90,17 @@ application. I don't konw how to get install date, resource usage, etc.
 (Any help will be greatly welcomed.)
 
 
-## Code struture  
-* `phone_scanner.py` has all the logic rquired to communicate with Android and
-  iOS phones.
-* `server.py` is the flask server. 
+## Code structure  
+* `phone_scanner.py` has all the logic required to communicate with Android and
+  iOS devices.
+* `parse_dump.py` has all of the logic required to extract dumped info from the devices. After the initial scan, the server will rely on this parser rather than needing an active connection to the device (work in progress). For now, please keep your device plugged in when looking at scan results.
+* `server.py` is the flask webserver. 
 * `templates/` folder contains the html templates rendering in the UI
 * `webstatic/` folder contains the `.css` and `.js` files 
 * `phone_dumps/` folder will contain the data recorded from the phone.
 
-## Dependencies
-Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
-Run `pip3 install -r requirements.txt` to get the required Python modules.
-Run 
 
-To scan Android and iOS we need third party software, as given below.
-#### Dependencies (iOS)
-Must be using a computer running macOS. We are using [`ios-deploy`](https://github.com/rchatterjee/ios-deploy
-for accessing ios devices via USB. The tool is added as submodule to this project.
-If after so do `git clone <url> --recursive`, or (if you have already cloned),
-`git submodules update --init`.The command
-`run.sh` automatically compiles `ios-deploy` too.
-
-#### Dependencies (Android)
-Install the Android Debug Bridge (`adb`).  Download [adb from
-here](https://androidsdkoffline.blogspot.com/p/android-sdk-platform-tools.html)
-(for correct platform), unzip it in the folder and set `ANDROID_HOME`
-environment variable to the location of the unzipped folder.
-If you run `run.sh`, it will be automatically set.
-See [below prepare the phone for scanning](#prepare-the-phone-for-scanning).
+## Debug tips
 
 In the terminal of the computer, run `adb devices` to see if the device is connected properly.
 
