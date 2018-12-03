@@ -50,16 +50,16 @@ class AppScan(object):
             devicedumpsdir = os.path.join(config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
             if fkind == 'Jailbroken':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Jailbroken'])
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken',''))
             elif fkind == 'Device_Info':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Info'])
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Info',''))
             elif fkind == 'Apps':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Apps',''))
             elif fkind == 'Dir':
                 return devicedumpsdir
             else:
                 # returns apps dumpfile if fkind isn't explicitly specified.
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES['Apps'])
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Apps',''))
 
         return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
             serial, self.device_type, fkind))
@@ -94,8 +94,9 @@ class AppScan(object):
                 # TODO: add extra info about iOS? Like idevicediagnostics
                 # ioregentry AppleARMPMUCharger or IOPMPowerSource or
                 # AppleSmartBattery.
-                d['permissions'] = [info['permissions']]
-                d['title'] = [info['title']]
+                d['permissions'] = pd.Series(info.get('permissions',''))
+                #d['permissions'] = [info.get('permissions','')]
+                d['title'] = pd.Series(info.get('title',''))
                 del info['permissions']
             print("AppInfo: ", info, appid, dfname, ddump)
             return d.fillna(''), info
@@ -127,7 +128,7 @@ class AppScan(object):
         td.index.rename('appId', inplace=True)
         r.set_index('appId', inplace=True)
         print("td=", td)
-        r.loc[td.index, 'title'] = td['title']
+        r.loc[td.index, 'title'] = td.get('title','')
         r.reset_index(inplace=True)
 
         r['class_'] = r.flags.apply(blacklist.assign_class)
@@ -324,12 +325,12 @@ class AndroidScan(AppScan):
         # info['App Version Code'] = stats['versionCode']
 
         # FIXME: if Unknown, use 'permission_abbrv' instead.
-        hf_recent.loc[hf_recent['label']=='unknown', 'label'] = hf_recent['permission_abbrv']
+        hf_recent.loc[hf_recent['label']=='unknown', 'label'] = hf_recent.get('permission_abbrv','')
 
         # hf_recent['label'] = hf_recent[['label',
         # 'timestamp']].apply(lambda x: ''.join(str(x), axis=1))
 
-        if len(hf_recent['label']) > 0:
+        if len(hf_recent.get('label','')) > 0:
             hf_recent['label'] = hf_recent.apply(
                 lambda x: "{} (last used: {})".format(
                     x['label'], 'never' if 'unknown' in x['timestamp'].lower() else x['timestamp']),
