@@ -35,7 +35,7 @@
             <label class="font-weight-bold lead">What type of device is this?</label>
             <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-		    {% for a in ["Android", "iOS", "Test"] %}
+		    {% for a in ["Android", "iOS"] %}
                     <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
                         <input type="radio" name="device" id="{{ a | lower }}"
 			       value="{{ a| lower }}" autocomplete="off"
