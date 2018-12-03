@@ -34,8 +34,8 @@ def clean_json(d):
 
 def match_keys(d, keys, only_last=False):
     ret = []
-    # print(keys)
-    # print(keys)
+    print(keys)
+    
     for sk in keys.split('//'):
         sk = re.compile(sk)
         if isinstance(d, list):
@@ -192,16 +192,19 @@ class AndroidDump(PhoneDump):
                 curr[lvls[curr_lvl]] = {}
         return d
 
-    def load_file(self):
+    def load_file(self, failed_before=False):
         fname = self.fname.rsplit('.', 1)[0] + '.txt'
         json_fname = fname.rsplit('.', 1)[0] + '.json'
+        d = {}
         if os.path.exists(json_fname):
             with open(json_fname, 'r') as f:
                 try:
                     d = json.load(f)
                 except Exception as ex:
                     print(ex)
-                    return {}
+                    if not failed_before:
+                        os.unlink(json_fname)
+                        return self.load_file(failed_before=True)
         else:
             with open(json_fname, 'w') as f:
                 try:
@@ -247,6 +250,17 @@ class AndroidDump(PhoneDump):
         else:
             b = "Not known"
         return b
+
+    def apps(self):
+        d = self.df
+        if not d:
+            return {}
+
+        package = extract(
+            d,
+            match_keys(d, '^package$//^Packages//^Package .*')
+        )
+        return package
 
     def info(self, appid):
         d = self.df
