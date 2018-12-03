@@ -1,25 +1,3 @@
-#!/usr/bin/env bash
-cd /tmp;
-# FIXME: if adb versions don't match, big problems. check first.
-command -v adb &>/dev/null
-if [[ "$?" -ne "0" ]]; then 
-    if [[ ! -e "$HOME/.platform-tools" ]]; then 
-        if [[ `uname` == "Linux" ]]; then 
-            echo "Installing Linux adb..."
-	    wget https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-	    unzip -q platform-tools-latest-linux.zip
-        else
-            echo "Installing macOS adb..."
-	    wget https://dl.google.com/android/repository/platform-tools-latest-darwin.zip
-	    unzip -q platform-tools-latest-darwin.zip
-        fi
-	mv platform-tools "$HOME/.platform-tools"
-    fi
-    export ANDROID_HOME=$HOME/.platform-tools
-else
-    export ANDROID_HOME=$(dirname $(which adb))
-fi
-
 cd -
 command -v ideviceinfo >/dev/null 2>&1 || ./scripts/ios_dependencies.sh
 #if [ ! -e ios-deploy/build/Release/ios-deploy ]; then
@@ -34,7 +12,7 @@ command -v ideviceinfo >/dev/null 2>&1 || ./scripts/ios_dependencies.sh
 # fi
 
 export PATH=$PATH:$ANDROID_HOME
-
+which adb
 cd static_data
 ln -sf ./app-flags.csv  ./app-flags.csv~test
 ln -sf ./app-info.db ./app-info.db~test
