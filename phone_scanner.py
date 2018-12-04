@@ -504,8 +504,8 @@ class IosScan(AppScan):
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         #cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
-        cmd = 'ideviceinstaller --udid {serial} --uninstall {appid!r}'
-        s = catch_err(run_command(cmd, serial=serial, appid=appid),
+        cmd = 'ideviceinstaller --uninstall {appid!r}'
+        s = catch_err(run_command(cmd, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
 
