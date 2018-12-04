@@ -67,7 +67,7 @@ class TestAndroidDump(object):
             'firstInstallTime': '2018-10-09 05:52:01',
             'lastUpdateTime': '2018-11-01 01:31:48',
             'data_usage': {'foreground': '0.00 MB', 'background': '0.01 MB'},
-            'battery_usage': "Didn't run"
+            'battery_usage': "0 (mAh)"
         }
         for k, v in expected.items():
             assert info[k] == v

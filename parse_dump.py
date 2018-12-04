@@ -282,7 +282,7 @@ class AndroidDump(PhoneDump):
             "//^Uid {}:.*".format(uidu))
         ))
         if not b:
-            return "Didn't run"
+            return "0 (mAh)"
         else:
             t = b[0].split(':')
             return t[1]
