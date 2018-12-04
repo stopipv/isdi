@@ -15,20 +15,40 @@ import re
 import config
 import pandas as pd
 
-APP_FLAGS = pd.read_csv(config.APP_FLAGS_FILE, index_col='appId', encoding='latin1', error_bad_lines=False)
+APP_FLAGS = pd.read_csv(
+    config.APP_FLAGS_FILE,
+    index_col='appId', encoding='latin1',
+    error_bad_lines=False).fillna({
+        'title': '',
+        'store': '',
+        'flag': '',
+        'human': 0,
+        'ml_score': 0.0,
+        'source': ''
+    })
 #{APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurrence odds', 'spyware'})]
-APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'spyware'})]
+APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({
+    'dual-use', 'spyware', 'co-occurrence'
+})].replace('<Unknown>', '')
 SPY_REGEX = {
     "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
     "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
 }
 
 
+def dedup_app_flags(df):
+    return df.fillna('').groupby('appId').agg({
+        'title': lambda x: ' '.join(set(x)),
+        'flag': list,
+    }).reset_index()
+
+
 def _regex_blacklist(app):
     # print("_regex_balcklist: {}".format(app))
     # return ['regex-spy'] if (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) \
     #     else []
-    return (SPY_REGEX['pos'].search(app) and not SPY_REGEX['neg'].search(app)) is not None
+    return (SPY_REGEX['pos'].search(app) is not None and
+            SPY_REGEX['neg'].search(app) is None)
 
 
 def score(flags):
@@ -46,8 +66,10 @@ def score(flags):
 
 
 def assign_class(flags):
+    """Assigns bootstrap text-classes to each flag. """
+    # TODO: This is a view function, should not be here
     w = score(flags)
-    norm_w = 0 if w<=0 else 1 if w<=0.3 else 2 if w<=0.8 else 3
+    norm_w = 0 if w <= 0 else 1 if w <= 0.3 else 2 if w <= 0.8 else 3
     _classes = ['', 'alert-info', 'alert-warning', 'alert-primary']
     return _classes[norm_w]
 
@@ -84,34 +106,42 @@ def store_str(st):
         return 'offstore'
 
 
-
 def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
+    """Gets app flags and title from app-flags.csv file. """
     # print(apps)
     print("Size of app-flags: {}".format(len(APP_FLAGS)))
-    _td = apps.merge(APP_FLAGS, on='appId', how="left").set_index('appId')
-    _td['flags'] = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+    _td = dedup_app_flags(
+        apps.merge(APP_FLAGS, on='appId', how="left")
+    ).set_index('appId')
+
+    _td['flags'] = _td['flag'].fillna('')
+
     _td.loc[offstore_apps, 'flags'].apply(lambda x: x.append('offstore-app'))
     _td.loc[system_apps, 'flags'].apply(lambda x: x.append('system-app'))
+
     # print(apps, flagged_apps)
-    spy_regex_app = _td.index.map(_regex_blacklist).values | _td.title.fillna('').apply(_regex_blacklist).values
+    spy_regex_app = (_td.index.map(_regex_blacklist).values |
+                     _td.title.fillna('').apply(_regex_blacklist).values)
     _td.loc[spy_regex_app, 'flags'].apply(lambda x: x.extend(['regex-spy']))
+
     # Seperate kevin's list from app-flags, here is a dirty hack
-    odds_ratio_apps = _td['source'] == 'odds-ratio'
-    _td.loc[odds_ratio_apps, 'flags'] = _td.loc[odds_ratio_apps, 'flags'].apply(lambda x: [y.replace('onstore-', '') for y in x])
+    # odds_ratio_apps = set(APP_FLAGS.query('source == "odds-ratio"').index)\
+    #                   .intersection(set(apps['appId']))
+    # _td.loc[odds_ratio_apps, 'flags'].apply(lambda x: set(x) | {'co-occurrence'})
+
     ret = _td[['title', 'flags']].reset_index()
+
     return ret
 
 
-
-def flag_apps(apps, device=''):
-    """Flag a list of apps based on the APP_FLAGS obtained from the csv file, or spy regex flags"""
-    _td = (pd.DataFrame({'appId': apps})
-           .join(APP_FLAGS, on='appId', how="left", rsuffix='_r')).set_index('appId')
-    flagged_apps = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
-    # print(apps, flagged_apps)
-    a = flagged_apps + flagged_apps.index.map(_regex_blacklist)
-    return a
+# def flag_apps(apps, device=''):
+#     """Flag a list of apps based on the APP_FLAGS obtained from the csv file, or spy regex flags"""
+#     _td = APP_FLAGS.loc[set(apps) & set(APP_FLAGS.index)]
+#     flagged_apps = (_td['store'].apply(store_str) + '-' + _td['flag']).fillna('').apply(lambda x: [x] if x else [])
+#     # print(apps, flagged_apps)
+#     a = flagged_apps + flagged_apps.index.map(_regex_blacklist)
+#     return a
 
 
-def flag_app(app, device=''):
-    return flag_apps([app], device=device).iloc[0]
+# def flag_app(app, device=''):
+#     return flag_apps([app], device=device).iloc[0]
