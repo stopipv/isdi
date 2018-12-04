@@ -42,6 +42,7 @@ def recent_permissions_used(appid):
 
     if 'No operations.' in recently_used:
         return df
+
     record = {'appId': appid}
     now = datetime.datetime.now()
     print(recently_used)
