@@ -297,8 +297,8 @@ class AndroidScan(AppScan):
     #     print("Dump success! Written to={}".format(outfname))
 
     def uninstall(self, serial, appid):
-        cmd = '{cli} -s {serial} uninstall {appid!r}'
-        s = catch_err(run_command(cmd, serial=shlex.quote(serial),
+        cmd = '{cli} uninstall {appid!r}'
+        s = catch_err(run_command(cmd,
                                   appid=shlex.quote(appid)),
                       cmd=cmd, msg="Could not uninstall")
         return s != -1
