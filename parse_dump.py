@@ -9,7 +9,8 @@ from functools import reduce
 import operator
 from pathlib import Path
 from rsonlite import simpleparse
-import runcmd 
+import itertools
+from collections import OrderedDict
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -32,26 +33,60 @@ def clean_json(d):
             d[k] = clean_json(v)
 
 
-def match_keys(d, keys, only_last=False):
-    ret = []
-    print(keys)
-    
-    for sk in keys.split('//'):
-        sk = re.compile(sk)
-        if isinstance(d, list):
-            d = d[0]
-        for k, v in d.items():
-            if sk.match(k):
-                ret.append(k)
-                d = d[k]
-                break
+def _match_keys_w_one(d, key, only_last=False):
+    """Returns a list of keys that matches @key"""
+    sk = re.compile(key)
+    if not d: return []
+    if isinstance(d, list):
+        d = d[0]
+    ret = [k for k in d if sk.match(k) is not None]
     if only_last:
-        return 'key=NOTFOUND' if not ret else ret[-1]
+        return ret[-1:]
     else:
         return ret
 
 
-def extract(d, lkeys):
+def match_keys(d, keys):
+    """d is a dictionary, and finds all keys that matches @keys
+    Returns a list of lists
+    """
+    if isinstance(keys, str):
+        keys = keys.split('//')
+    ret = _match_keys_w_one(d, keys[0])
+    if len(keys) == 1:
+        return ret
+    return OrderedDict((k, match_keys(d[k], keys[1:])) for k in ret)
+
+
+def prune_empty_leaves(dkeys):
+    """Remove the entries from dkeys all the paths that lead to empty keys"""
+    if isinstance(dkeys, list):
+        return dkeys
+    for k, v in dkeys.items():
+        dkeys[k] = prune_empty_leaves(v)
+    return {k: v for k, v in dkeys.items() if v}
+
+
+def get_all_leaves(d):
+    if not isinstance(d, dict):
+        return d
+    return itertools.chain(*(get_all_leaves(v) for v in d.values()))
+
+
+def extract(d, lkeys_dict):
+    """This is super inefficient"""
+    if isinstance(d, list):
+        d = d[0]
+    if isinstance(lkeys_dict, list):
+        return [d[k] for k in lkeys_dict if k in d]
+    r = []
+    for k, v in lkeys_dict.items():
+        if k in d:
+            r.extend(extract(d[k], v))
+    return r
+
+
+def _extract_one(d, lkeys):
     for k in lkeys:
         if isinstance(d, list):
             d = d[0]
@@ -161,7 +196,8 @@ class AndroidDump(PhoneDump):
         lvls = ['' for _ in range(20)]  # Max 100 levels allowed
         curr_spcnt, curr_lvl = 0, 0
         for i, l in enumerate(data):
-            if l.startswith('----'): continue
+            if l.startswith('----'):
+                continue
             if l.startswith('DUMP OF SERVICE'):
                 service = l.strip().rsplit(' ', 1)[1]
                 d[service] = res = {}
@@ -170,7 +206,7 @@ class AndroidDump(PhoneDump):
             else:
                 if not l.strip():  # subsection ends
                     continue
-                l = l.replace('\t', '     ')
+                l = l.replace('\t', ' '*5)
                 t_spcnt = count_lspaces(l)
                 # print(t_spcnt, curr_spcnt, curr_lvl)
                 # if t_spcnt == 1:
@@ -229,10 +265,10 @@ class AndroidDump(PhoneDump):
             '\n'.join(d['net_stats'].keys())
         ), error_bad_lines=False)
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
-            ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']]
-        print(d)
+            ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']].astype(int)
+
         def s(c):
-            return (d.query('cnt_set == {}'.format(c)).eval('rx_bytes+tx_bytes').sum()
+            return (d[d['cnt_set'] == c].eval('rx_bytes+tx_bytes').sum()
                     / (1024*1024))
         return {
             "foreground": "{:.2f} MB".format(s(1)),
@@ -241,14 +277,15 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def get_battery_stat(d, uidu):
-        b = (match_keys(
+        b = list(get_all_leaves(match_keys(
             d, "batterystats//Statistics since last charge//Estimated power use .*"
             "//^Uid {}:.*".format(uidu))
-        )[-1].split(':')
-        if len(b) > 1:
-            b = b[1]
+        ))
+        if not b:
+            return "Didn't run"
         else:
-            b = "Not known"
+            t = b[0].split(':')
+            return t[1]
         return b
 
     def apps(self):
@@ -256,11 +293,15 @@ class AndroidDump(PhoneDump):
         if not d:
             return {}
 
-        package = extract(
-            d,
-            match_keys(d, '^package$//^Packages//^Package .*')
+        def get_appid_h(txt):
+            m = re.match(r'Package \[(?P<appId>.*)\] \((?P<h>.*)\)', txt)
+            if m:
+                return m.groups()
+        packages = map(
+            get_appid_h,
+            get_all_leaves(match_keys(d, '^package$//^Packages//^Package .*'))
         )
-        return package
+        return [c for c in packages if c]
 
     def info(self, appid):
         d = self.df
@@ -270,18 +311,23 @@ class AndroidDump(PhoneDump):
             d,
             match_keys(d, '^package$//^Packages//^Package \[{}\].*'.format(appid))
         )
-        #res = {'userId':'','firstInstallTime':'','lastUpdateTime':''}
-        res = dict(
-            split_equalto_delim(match_keys(package, v, only_last=True))
-            for v in ['userId', 'firstInstallTime', 'lastUpdateTime']
-        )
+
+        other_info = [get_all_leaves(match_keys(package, v))
+                      for v in ['userId', 'firstInstallTime', 'lastUpdateTime']]
+        res = dict(map(
+            split_equalto_delim, [x[0] for x in other_info if x]
+        ))
+
         if 'userId' not in res:
             print("UserID not found in res={}".format(res))
             return {}
         process_uid = res['userId']
         del res['userId']
         memory = match_keys(d, 'meminfo//Total PSS by process//.*: {}.*'.format(appid))
-        uidu_match = match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
+        uidu_match = list(get_all_leaves(
+            match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
+        ))
+        print(uidu_match)
         if uidu_match:
             uidu = uidu_match[-1].split(' / ')
         else:
@@ -291,10 +337,10 @@ class AndroidDump(PhoneDump):
         else:
             uidu = uidu[0]
         res['data_usage'] = self.get_data_usage(d, process_uid)
-        #res['battery (mAh)'] = self.get_battery_stat(d, uidu)
-        print('RESULTS')
-        print(res)
-        print('END RESULTS')
+        res['battery_usage'] = self.get_battery_stat(d, uidu)  # (mAh)
+        # print('RESULTS')
+        # print(res)
+        # print('END RESULTS')
         return res
 
 
