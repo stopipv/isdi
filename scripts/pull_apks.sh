@@ -7,9 +7,9 @@ mkdir -p "${PKG_DIR}"
 serial="$1"
 
 function pkg_version {
-    pkg="$1"
+    _pkg="$1"
     # echo "$adb $serial shell dumpsys package $pkg | grep versionName | cut -d '=' -f 2"
-    echo $("$adb" $serial shell dumpsys package "$pkg" | grep versionName | cut -d '=' -f 2)
+    echo $("$adb" $serial shell dumpsys package "${_pkg}" | grep versionName | cut -d '=' -f 2)
 }
 
 mkdir -p pkgs/
@@ -19,22 +19,22 @@ mkdir -p pkgs/
 t=0
 for i in $("$adb" shell pm list packages -3 -f); 
 do
-    t=$((t+1))
     a=(${i//=/ })
     pkg_path=${a[0]//*:}
     echo "pkg_path = ${pkg_path}"
-    pkg=${a[1]}
+    pkg="$(echo ${a[1]} | tr -d '\r')"
     ignore=$(python $BASE_DIR/ignore.py "$pkg")
     if [[ "$ignore" == "1" ]]; then
         echo "Ignoring $pkg"
         continue
     fi
-
     h=$("$adb" shell sha1sum $pkg_path | awk '{print $1}')
-    version=$(pkg_version ${pkg})
-    out_pkg_name="${pkg}__${version}__${h}.apk"
-    echo $pkg $out_pkg_name
+    # version=$(pkg_version "${pkg}")
+    # out_pkg_name="${pkg}__${version}__${h}.apk"
+    out_pkg_name="${pkg}__${h}.apk"
+    echo "sssss $pkg $out_pkg_name"
     if [[ ! -e "${PKG_DIR}/${out_pkg_name}" ]]; then 
+	t=$((t+1))
         echo "$adb" shell "cp $pkg_path /sdcard/apps/${out_pkg_name}"
         "$adb" shell "cp $pkg_path /sdcard/apps/${out_pkg_name}"
     else

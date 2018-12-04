@@ -66,7 +66,7 @@ def run_command(cmd, **kwargs):
     if kwargs.get('nowait', False) or kwargs.get('NOWAIT', False):
         pid = subprocess.Popen(
             _cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
         ).pid
         return pid
     else:
