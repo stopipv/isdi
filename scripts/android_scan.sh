@@ -21,8 +21,12 @@ if [[ $platform == 'darwin' ]]; then
    adb='static_data/adb-darwin'
 elif [[ $platform == 'linux' ]]; then
    adb="static_data/adb-linux.$(uname -r)"
+   if [[ ! -e $adb ]]; then
+       adb="static_data/adb-linux"
+   fi
 fi
 echo "$platform" "$adb"
+export adb=$adb
 
 
 serial="-s $2"
@@ -102,6 +106,7 @@ function full_scan {
     else
 	dump  > "$ofname" 2> error.txt
     fi
+    bash ./scripts/pull_apks.sh "$serial"
     # Clear the settings to remove developer options
 }
 
