@@ -35,6 +35,6 @@ command -v ideviceinfo >/dev/null 2>&1 || ./ios_dependencies.sh
 
 export PATH=$PATH:$ANDROID_HOME
 
-cd stati_data
+cd static_data
 ln -sf ./app-flags.csv  ./app-flags.csv~test
 ln -sf ./app-info.db ./app-info.db~test
