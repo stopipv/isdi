@@ -54,7 +54,7 @@ def _regex_blacklist(app):
 def score(flags):
     """The weights are completely arbitrary"""
     weight = {
-        'onstore-dual-use': 0.5,
+        'onstore-dual-use': 0.8,
         'onstore-spyware': 1.0,
         'offstore-spyware': 1.0,
         'offstore-app': 0.8,
@@ -145,3 +145,6 @@ def app_title_and_flag(apps, offstore_apps=[], system_apps=[]):
 
 # def flag_app(app, device=''):
 #     return flag_apps([app], device=device).iloc[0]
+if __name__ == "__main__":
+    apps = pd.DataFrame({'appId': ['com.TrackView', 'com.apple.mobileme.fmf1']})
+    print(app_title_and_flag(apps, system_apps=['com.apple.mobileme.fmf1']))

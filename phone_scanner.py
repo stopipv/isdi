@@ -122,11 +122,15 @@ class AppScan(object):
             system_apps=self.get_system_apps(serialno)
         )
         r['title'] = r.title.fillna('')
-        td = pd.read_sql(
-            'select appid as appId, title from apps where appid in (?{})'.format(
-                ', ?'*(len(installed_apps)-1)
-            ), self.app_info_conn, params=(installed_apps)).set_index('appId')
-        td.index.rename('appId', inplace=True)
+        if self.device_type == 'android':
+            td = pd.read_sql(
+                'select appid as appId, title from apps where appid in (?{})'.format(
+                    ', ?'*(len(installed_apps)-1)
+                    ), self.app_info_conn, params=(installed_apps)).set_index('appId')
+            td.index.rename('appId', inplace=True)
+        elif self.device_type == 'ios':
+            td = self.get_app_titles(serialno)
+
         r.set_index('appId', inplace=True)
         print("td=", td)
         r.loc[td.index, 'title'] = td.get('title','')
@@ -134,12 +138,8 @@ class AppScan(object):
 
         r['class_'] = r.flags.apply(blacklist.assign_class)
         r['score'] = r.flags.apply(blacklist.score)
-
-        if self.device_type == 'ios':
-            r['title'] = self.get_app_titles(serialno)
-        else:
-            r['title'] = r.title.str.encode('ascii', errors='ignore')\
-                                    .str.decode('ascii')
+        r['title'] = r.title.str.encode('ascii', errors='ignore')\
+          .str.decode('ascii')
         r['title'] = r.title.fillna('')
         r['html_flags'] = r.flags.apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True],

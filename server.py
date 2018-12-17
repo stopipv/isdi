@@ -414,5 +414,5 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
-
-    app.run(host="0.0.0.0", port=5000, debug=config.DEBUG)
+    port = 5000 if not config.TEST else 5002
+    app.run(host="0.0.0.0", port=port, debug=config.DEBUG)

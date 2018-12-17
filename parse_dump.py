@@ -533,13 +533,16 @@ class IosDump(PhoneDump):
 
     def installed_apps_titles(self):
         if self:
-            return self.df['CFBundleExecutable']
+            t = self.df.set_index('appId')
+            t.rename(index=str, columns={'CFBundleExecutable': 'title'},
+                        inplace=True)
+            return t
 
     def installed_apps(self):
         #return self.df.index
         if self.df is None:
             return []
-        print(self.df)
+        print("parse_dump (installed_apps): >>", self.df)
         if self.df is not None:
             print(self.df.columns)
         return self.df['appId']
@@ -547,7 +550,12 @@ class IosDump(PhoneDump):
 
 if __name__ == "__main__":
     fname = sys.argv[1]
-    #data = [l.strip() for l in open(fname)]
-    ddump = AndroidDump(fname)
-    json.dump(ddump.parse_dump_file(fname), open(fname.rsplit('.', 1)[0] + '.json', 'w'), indent=2)
-    print(json.dumps(ddump.info('ru.kidcontrol.gpstracker'), indent=2))
+    # data = [l.strip() for l in open(fname)]
+    if sys.argv[2] == 'android':
+        ddump = AndroidDump(fname)
+        json.dump(ddump.parse_dump_file(fname), open(fname.rsplit('.', 1)[0] + '.json', 'w'), indent=2)
+        print(json.dumps(ddump.info('ru.kidcontrol.gpstracker'), indent=2))
+    elif sys.argv[2] == 'ios':
+        ddump = IosDump(fname)
+        # print(ddump.installed_apps())
+        print(ddump.installed_apps_titles().to_csv())
