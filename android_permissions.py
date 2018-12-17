@@ -42,6 +42,7 @@ def recent_permissions_used(appid):
 
     if 'No operations.' in recently_used:
         return df
+
     record = {'appId': appid}
     now = datetime.datetime.now()
     print(recently_used)
@@ -61,10 +62,12 @@ def recent_permissions_used(appid):
                 .strftime(config.DATE_STR)
             # TODO: keep time_ago? that leaks when the consultation was.
             record['time_ago'] = tt[1].strip()
+
         if len(permission_attrs) == 3:
             tt = permission_attrs[2].split('=')
             if len(tt) == 2:
                 record['duration'] = tt[1].strip()
+
         df.loc[df.shape[0]] = record
     return df.sort_values(by=['time_ago']).reset_index(drop=True)
 
