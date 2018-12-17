@@ -106,6 +106,7 @@ function full_scan {
     else
 	dump  > "$ofname" 2> error.txt
     fi
+    echo "Pulling apks."
     bash ./scripts/pull_apks.sh "$serial"
     # Clear the settings to remove developer options
 }
@@ -113,7 +114,7 @@ function full_scan {
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
     $adb devices
-    full_scan >> /tmp/dump.logs
+    full_scan >> ./dump/android_scan.logs
     $adb $serial shell pm clear com.android.settings
 elif [[ "$1" == "info" ]]; then
     (>&2 echo "------ Running app info ------- $2 $3")

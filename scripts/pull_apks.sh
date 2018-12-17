@@ -17,7 +17,7 @@ mkdir -p pkgs/
 # pkg_version com.amazon.mShop.android.shopping
 # exit 0;
 t=0
-for i in $("$adb" shell pm list packages -3 -f); 
+for i in $("$adb" shell pm list packages -3 -f | tr -d '\r'); 
 do
     a=(${i//=/ })
     pkg_path=${a[0]//*:}
