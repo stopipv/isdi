@@ -468,10 +468,11 @@ class IosDump(PhoneDump):
             'phone_kind': tuple (make, OS version)
         """
         d = self.df
-        res = {'permission':'',
-                'title':'',
-                'jailbroken':'',
-                'phone_kind':''}
+        res = {
+            'title':'',
+            'jailbroken':'', #TODO: These are never set: phone_kind and jailbroken
+            'phone_kind':''
+        }
         #app = self.df.iloc[appidx,:].dropna()
         app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
         party = app.ApplicationType.lower()
@@ -494,23 +495,6 @@ class IosDump(PhoneDump):
                                "[Settings -> Battery -> Battery Usage].".format(**res)
         res['Data Usage'] = "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(res['title'])
 
-        ## TODO: Remove the following. (@Sam Is any of the following useful?)
-        #entitlements = dict(d[d['CFBundleIdentifier'] == appid]["Entitlements"].tolist()[0])
-
-        #''' remove kTCCService from beginning of string '''
-        #def decruft(perms): 
-        #    return perms[11:]
-        #if "com.apple.private.tcc.allow" in entitlements.keys():
-        #    permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow"]]
-        #    print(permissions)
-        #elif "com.apple.private.tcc.allow.overridable" in entitlements.keys():
-        #    permissions = [decruft(perms) for perms in entitlements["com.apple.private.tcc.allow.overridable"]]
-        #    print(permissions)
-        #else:
-        #    print("Couldn't find any app permissions on '{}'".format(appid))
-        #    permissions = []
-        #res['permissions'] = permissions
-        #res['title'] = d[d['CFBundleIdentifier'] == appid]["CFBundleExecutable"].iloc[0]
         return res
 
     # TODO: The following function is incorrect or incomplete. Commenting out for now. 

@@ -55,6 +55,7 @@ def score(flags):
     """The weights are completely arbitrary"""
     weight = {
         'onstore-dual-use': 0.8,
+        'dual-use': 0.8,
         'onstore-spyware': 1.0,
         'offstore-spyware': 1.0,
         'offstore-app': 0.8,
@@ -89,13 +90,16 @@ def flag_str(flags):
                                  "Play Store or iTunes App Store"),
             "co-occurrence": "This app appears very frequently with other offstore-spyware apps.",
             "onstore-dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",
-            "offstore-app": "This app is installed outside Play Store. It might be a preinstalled app too."
+            "offstore-app": "This app is installed outside Play Store. It might be a preinstalled app too.",
+            "dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",
+            "system-app": "This app came preinstalled with the device.",
         }.get(flag.lower(), flag)
     # If spyware <span class='text-danger'>{}</span>
+    flags = [y.strip() for y in flags]
     return ',  '.join(
         "<span class=\"text-{0}\"><abbr title=\"{1}\">{2}</abbr></span>"
         .format(_add_class(flag), _info(flag), flag)
-        for flag in flags
+        for flag in flags if len(flag) > 0
     )
 
 
