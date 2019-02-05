@@ -22,7 +22,8 @@ serial=$(idevice_id -l 2>&1 | tail -n 1)
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -u "$serial" -l -o xml -o list_all > $2
+# ideviceinstaller -u "'""$serial"'"' -l -o xml -o list_all > $2
+ideviceinstaller -l -o xml -o list_all > $2
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 sed -i -e 's/<data>/<string>/g' $2
@@ -32,7 +33,8 @@ sed -i -e 's/<\/data>/<\/string>/g' $2
 # plutil -convert json $2 
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
-ideviceinfo -u "$serial" -x > $3
+#ideviceinfo -u "$serial" -x > $3
+ideviceinfo -x > $3
 
 sed -i -e 's/<data>/<string>/g' $3
 sed -i -e 's/<\/data>/<\/string>/g' $3

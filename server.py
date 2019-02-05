@@ -407,7 +407,7 @@ if __name__ == "__main__":
         print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
               .format(config.TEST, config.APP_FLAGS_FILE,
                       config.SQL_DB_PATH))
-
+    print("TEST={}".format(config.TEST))
     init_db(app, force=config.TEST)
     handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
                                   backupCount=30)

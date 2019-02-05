@@ -20,9 +20,10 @@ def _parse_time(time_str):
     Modified from virhilo's answer at https://stackoverflow.com/a/4628148/851699
     :param time_str: A string identifying a duration.  (eg. 2h13m)
     :return datetime.timedelta: A datetime.timedelta object
+        r'^\+((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
     """
     timedelta_re = re.compile(
-        r'^\+((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
+        r'^.((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
     parts = timedelta_re.match(time_str)
     assert parts is not None, "Could not parse any time information from '{}'."\
         "Examples of valid strings: '+8h', '+2d8h5m20s', '+2m4s'".format(time_str)

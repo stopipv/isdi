@@ -108,13 +108,14 @@ function full_scan {
     fi
     echo "Pulling apks."
     bash ./scripts/pull_apks.sh "$serial"
-    # Clear the settings to remove developer options
 }
 
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
     $adb devices
-    full_scan >> ./dumps/android_scan.logs
+    full_scan >> ./dumps/android_scan.logs & 
+    sleep 120;  # sleep for 2 minutes
+    # Clear the settings to remove developer options
     $adb $serial shell pm clear com.android.settings
 elif [[ "$1" == "info" ]]; then
     (>&2 echo "------ Running app info ------- $2 $3")
