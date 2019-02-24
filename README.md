@@ -1,4 +1,4 @@
-# Mobile Device Scanner
+# IPV Spyware Discovery (ISDi) Tool
 
 Simple tool to check Android or iOS devices for IPS-spyware.
 
@@ -11,11 +11,11 @@ After [dependencies](#dependencies) are installed, with an Android or iOS device
 unlocked, run the following command in the terminal (in the base directory of this repository)
 
 ```bash
-$ python3 server.py
+$ bash run.sh
 ```
 
 Navigate to `http://localhost:5000` on a browser. You
-will see the page of the `PhoneScanner` tool running. 
+will see the page of the ISDi tool running. 
 
 It should look something like this:
 
