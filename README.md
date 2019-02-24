@@ -19,7 +19,7 @@ will see the page of the ISDi tool running.
 
 It should look something like this:
 
-![Phone Scanner UI](webstatic/phone_scanner-ui.png "Phone Scanner UI")
+![Phone Scanner UI](webstatic/ISDi.png "Phone Scanner UI")
 
 
 Connect a
