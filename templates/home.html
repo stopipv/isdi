@@ -1,9 +1,9 @@
 <div class="">
-    <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> <!-- ({{ title.version_current }}) --></span>
+  <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> <!-- ({{ title.version_current }}) --></span>
 	<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
-        <span style="float: right; font-size: 15px">
+        <span style="float: center; font-size: 15px">
             <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
-                      device for a scan."><u>Scan Instruction</u></a>
+                      device for a scan."><u>Scan Instructions</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
             <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
         </span> 
@@ -11,7 +11,7 @@
 
     <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
         for scanning mobile devices (e.g., Android and iOS devices) for apps that
-        can be used to spy on, track, or otherwise monitor a person.<br/>
+        can be used to spy on, track, or <br>otherwise monitor a person.<br/>
     </p>
     <div class="row container">
         <form onsubmit="return false" name="form-newclient" id="form-newclient">
@@ -118,8 +118,8 @@
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 70vh; overflow: auto;">
             {% if device_name %}
-            <label>Device scanned: <b>{{ device_name }}</b></label>
-	    <label>Is this device jailbroken or rooted? {{ isrooted | safe }}</label>
+            <label>Scanned: <b>{{ device_name }}</b></label>
+	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
             {% endif %}
             <table class="table table-bordered w-100">
                 <thead>
@@ -131,7 +131,7 @@
                         <th class="col-md-3" style="width: 30%">Remarks</th>
                     </tr>
                 </thead>
-                <form id="form-applist" onsubmit="" method="post" name="form-applist" >
+                <form style="font-size: 76px;" id="form-applist" onsubmit="" method="post" name="form-applist" >
                     <tbody id="applist" class="h-100">
                         {% for appId, info in apps.items() %}
                         <tr id="{{ appId.replace('.', '-') }}">
