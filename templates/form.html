@@ -1,0 +1,20 @@
+<label class="font-weight-bold lead">FJC</label>
+<form id="scan_select" method="POST" action="{{ url_for('client_forms') }}">
+<div class="btn-group btn-group-toggle" data-toggle="buttons">
+    {% for a in ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"] %}
+    <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
+	<input type="radio" name="fjc" id="{{ a | lower }}"
+	       value="{{ a | lower }}" autocomplete="off"
+	       {% if device==a.lower() %} checked {% endif %}
+	> {{ a }}
+    </label>
+    {% endfor %}
+</div>
+<br/><br/>
+<input class="form-control" name="consultant_initials" id="consultant_initials" 
+       placeholder="Consultant Initials"
+       rows="2" value=""/>
+<br>
+<!-- <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label> -->
+<button class="btn btn-primary mx-2">Scan now</button>
+</form>
