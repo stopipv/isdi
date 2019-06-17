@@ -18,8 +18,33 @@ from db import (
     get_serial_from_db
 )
 
+from flask import Flask, render_template, redirect, flash
+from flask_wtf import Form
+from flask_sqlalchemy import SQLAlchemy
+from wtforms_alchemy import ModelForm
+from werkzeug.datastructures import MultiDict
 
 app = Flask(__name__, static_folder='webstatic')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/doesitwork.db'
+app.config['SQLALCHEMY_ECHO'] = True
+alc_db=SQLAlchemy(app)
+# alc_db.create_all() # run in init_db()
+
+
+class Client(alc_db.Model):
+    __tablename__ = 'clients_notes'
+    id = alc_db.Column(alc_db.Integer, primary_key=True)
+    fjc = alc_db.Column(alc_db.String(100), nullable=False)
+    consultant_initials = alc_db.Column(alc_db.String(100), nullable=False)
+
+    def __repr__(self):
+        return 'client {}'.format(self.fjc)
+
+ClientForm = ModelForm(Client, base_class=Form, field_args=MultiDict([('fjc','class')]))
+
+
+
+
 # app.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
 ios = IosScan()
@@ -56,6 +81,51 @@ def index():
         apps={},
         clientid=new_client_id()
     )
+
+
+@app.route('/form/', methods=['GET', 'POST'])
+def client_forms():
+    # retrieve form defaults from db schema
+    form = ClientForm()
+    try:
+        if form_validate_on_submit():
+            client = Client()
+            form.populate_obj(Client)
+            alc_db.session.add(client)
+            alc_db.session.commit()
+            flash('it worked')
+            return redirect('/')
+    except Exception as e:
+        alc_db.session.rollback()
+        flash('oh no!.')
+
+        clients_list = Client.query.all()
+        return render_template('main.html', task="form", form=form, client_list=clients_list, title=config.TITLE)
+
+    # if the form was submitted
+    if request.method == 'POST':
+        resp = dict(request.form)
+        # (1) check if all the responses are valid/non-empty
+    
+        # get this from db instead, table client_form
+        form_fields = ['device', 'device_owner']
+        
+        # (2) write them to the sqlite db in a new table
+        # (3) (separately from this method) script to allow db results to be transformed into XLSX format
+        #     and appended to the Google Drive sheet
+        
+
+        print(resp)
+        print("The submitted form results:",resp)
+        #if not all(resp.values()) and resp
+        #print(all(resp.values()))
+    else:
+        print('Form')
+        # fill default values in the form         
+
+    
+    # whether or not the  
+    return render_template('main.html', task="form", title=config.TITLE)
 
 
 @app.route('/details/app/<device>', methods=['GET'])

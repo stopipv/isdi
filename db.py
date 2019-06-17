@@ -51,6 +51,8 @@ def init_db(app, force=False):
             with app.open_resource('schema.sql', mode='r') as f:
                 db.cursor().executescript(f.read())
             db.commit()
+        # add with sqlachemy the new models stuff
+        # can it get the schema sql // make a table
 
 
 def insert(query, args):
