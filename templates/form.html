@@ -18,3 +18,12 @@
 <!-- <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label> -->
 <button class="btn btn-primary mx-2">Scan now</button>
 </form>
+
+{% from "_formhelpers.html" import render_field %}
+<form method=post>
+  <dl>
+    {{ render_field(form.fjc, 'btn-group btn-group-toggle') }}
+    {{ render_field(form.consultant_initials) }}
+  </dl>
+  <p><input type=submit value=Register>
+</form>
