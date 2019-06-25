@@ -20,9 +20,13 @@ from db import (
 
 from flask import flash
 from flask_wtf import Form
+from flask_sqlalchemy import Model
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
+from sqlalchemy import *
 from wtforms_alchemy import ModelForm
+from wtforms.validators import Email
+from wtforms.fields import SelectMultipleField
 
 app = Flask(__name__, static_folder='webstatic')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/doesitwork.db'
@@ -32,18 +36,23 @@ app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
 # sa.create_all() # run in init_db()
 
-
-
-
 class Client(sa.Model):
     __tablename__ = 'clients_notes'
     id = sa.Column(sa.Integer, primary_key=True)
-    #fjc = sa.Column(sa.String(100), nullable=False)
-    fjc = sa.Column(sa.Enum('brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island'), nullable=False)
+    fjc = sa.Column(sa.Enum('brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island'),
+            nullable=False,
+            info={'label': 'FJC'})
     consultant_initials = sa.Column(sa.String(100), nullable=False,
-            info={'label': 'Consultant Initials'}
-            )
+            info={'label': 'Consultant Initials'})
+    referring_professional = sa.Column(sa.String(100), nullable=False,
+            info={'label': 'Name of Referring Professional'})
+    referring_professional_email = sa.Column(sa.String(255), nullable=True,
+            info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
+
+    chief_concerns = sa.Column(sa.String(400), nullable=False,
+            info={'label': 'Chief concerns'})
     #referring_professional = sa.C
+
 
     #@validates('fjc')
     #def validate_fjc(self, key, data):
@@ -56,11 +65,7 @@ class Client(sa.Model):
 class ClientForm(ModelForm):
     class Meta:
         model = Client
-        labels = {
-          "fjc":"FJC",
-          "consultant_initials":'Consultant'
-        }
-
+    #chief_concerns = SelectMultipleField(choices=['spyware','sms','Abuser hacked accounts or knows secrets'])
 
 # app.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
@@ -118,35 +123,8 @@ def client_forms():
             print(e)
             sa.session.rollback()
 
-    clients_list = Client.query.all()
-    return render_template('main.html', task="form", form=form, client_list=clients_list, title=config.TITLE)
-    
-    '''
-    # if the form was submitted
-    if request.method == 'POST':
-        resp = dict(request.form)
-        # (1) check if all the responses are valid/non-empty
-    
-        # get this from db instead, table client_form
-        form_fields = ['device', 'device_owner']
-        
-        # (2) write them to the sqlite db in a new table
-        # (3) (separately from this method) script to allow db results to be transformed into XLSX format
-        #     and appended to the Google Drive sheet
-        
-
-        print(resp)
-        print("The submitted form results:",resp)
-        #if not all(resp.values()) and resp
-        #print(all(resp.values()))
-    else:
-        print('Form')
-        # fill default values in the form         
-
-    
-    # whether or not the  
-    return render_template('main.html', task="form", title=config.TITLE)
-    '''
+    #clients_list = Client.query.all()
+    return render_template('main.html', task="form", form=form, title=config.TITLE)
 
 @app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):
