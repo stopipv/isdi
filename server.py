@@ -40,7 +40,10 @@ class Client(sa.Model):
     id = sa.Column(sa.Integer, primary_key=True)
     #fjc = sa.Column(sa.String(100), nullable=False)
     fjc = sa.Column(sa.Enum('brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island'), nullable=False)
-    consultant_initials = sa.Column(sa.String(100), nullable=False)
+    consultant_initials = sa.Column(sa.String(100), nullable=False,
+            info={'label': 'Consultant Initials'}
+            )
+    #referring_professional = sa.C
 
     #@validates('fjc')
     #def validate_fjc(self, key, data):
@@ -496,6 +499,7 @@ if __name__ == "__main__":
                       config.SQL_DB_PATH))
     print("TEST={}".format(config.TEST))
     init_db(app, force=config.TEST)
+    #sa.create_all() 
     handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
                                   backupCount=30)
     logger = logging.getLogger(__name__)
