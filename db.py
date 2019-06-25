@@ -1,4 +1,5 @@
 import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 import config
 from flask import g
 from datetime import datetime as dt
@@ -51,6 +52,8 @@ def init_db(app, force=False):
             with app.open_resource('schema.sql', mode='r') as f:
                 db.cursor().executescript(f.read())
             db.commit()
+            #sa = SQLAlchemy(app)
+            #sa.create_all()
         # add with sqlachemy the new models stuff
         # can it get the schema sql // make a table
 
