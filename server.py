@@ -3,6 +3,7 @@ from flask import (
     url_for
 )
 import os
+from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
@@ -18,40 +19,51 @@ from db import (
     get_serial_from_db
 )
 
-from flask import flash
-from flask_wtf import Form
-from flask_sqlalchemy import Model
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import validates
-from sqlalchemy import *
+#from flask_wtf import Form
+#from sqlalchemy.orm import validates
+from flask_migrate import Migrate
+from flask_sqlalchemy import Model, SQLAlchemy
 from wtforms_alchemy import ModelForm
+from sqlalchemy import *
 from wtforms.validators import Email
 from wtforms.fields import SelectMultipleField
+from wtforms.widgets import CheckboxInput, ListWidget
 
 app = Flask(__name__, static_folder='webstatic')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/doesitwork.db'
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'secret key (CHANGE before production)'
 app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
+Migrate(app, sa)
 # sa.create_all() # run in init_db()
 
 class Client(sa.Model):
     __tablename__ = 'clients_notes'
     id = sa.Column(sa.Integer, primary_key=True)
+    created_at = sa.Column(
+        sa.DateTime,
+        default=datetime.utcnow,
+        server_default=sa.func.now(),
+    )
     fjc = sa.Column(sa.Enum('brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island'),
             nullable=False,
-            info={'label': 'FJC'})
+            info={'label': 'FJC'}, default="")
     consultant_initials = sa.Column(sa.String(100), nullable=False,
-            info={'label': 'Consultant Initials'})
+            info={'label': 'Consultant Initials'}, default="")
     referring_professional = sa.Column(sa.String(100), nullable=False,
-            info={'label': 'Name of Referring Professional'})
+            info={'label': 'Name of Referring Professional'}, default="")
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
 
+    recorded = sa.Column(sa.Enum('Yes', 'No'),
+            nullable=False,
+            info={'label': 'Permission to audio-record clinic'}, default="")
+
     chief_concerns = sa.Column(sa.String(400), nullable=False,
-            info={'label': 'Chief concerns'})
-    #referring_professional = sa.C
+            info={'label': 'Chief concerns'}, default="")
+
 
 
     #@validates('fjc')
@@ -65,7 +77,9 @@ class Client(sa.Model):
 class ClientForm(ModelForm):
     class Meta:
         model = Client
-    #chief_concerns = SelectMultipleField(choices=['spyware','sms','Abuser hacked accounts or knows secrets'])
+    chief_concerns = SelectMultipleField('Chief concerns', choices=[('spyware','Spyware'),
+        ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets')],
+        coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
 
 # app.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
@@ -114,6 +128,10 @@ def client_forms():
         try:
             if form.validate():
                 print('VALIDATED')
+                # convert checkbox lists to json-friendly strings
+                for field in form:
+                    if field.type == 'SelectMultipleField':
+                        field.data = json.dumps(field.data)
                 form.populate_obj(client)
                 sa.session.add(client)
                 sa.session.commit()
