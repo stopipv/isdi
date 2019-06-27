@@ -2,8 +2,6 @@
     <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> <!-- ({{ title.version_current }}) --></span>
   <!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
         <span style="float: right; font-size: 15px">
-            <a class='btn btn-normal'  href="/" data-toggle="tooltip" title="
-                      Home"><u>Return to scanner home</u></a>
             <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instruction</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
@@ -17,28 +15,17 @@
     </p>
 </div>
 
+<div class="">
+          <label for="clientid"><i>Session (Client) ID:</i>
+              <input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
+                           value="{{ clientid }}" readonly/>
+                </label>
+                <a class='btn btn-primary'  href="/?clientid={{ clientid }}" target="_blank" rel="noopener" 
+                      >Scan client devices (opens in new tab)</a>
+              </div>
 
-<!--<label class="font-weight-bold lead">FJC</label>
-<form id="scan_select" method="POST" action="{{ url_for('client_forms') }}">
-<div class="btn-group btn-group-toggle" data-toggle="buttons">
-    {% for a in ["Manhattan", "Brooklyn", "Queens", "The Bronx", "Staten Island"] %}
-    <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
-	<input type="radio" name="fjc" id="{{ a | lower }}"
-	       value="{{ a | lower }}" autocomplete="off"
-	       {% if device==a.lower() %} checked {% endif %}
-	> {{ a }}
-    </label>
-    {% endfor %}
-</div>
-<br/><br/>
-<input class="form-control" name="consultant_initials" id="consultant_initials" 
-       placeholder="Consultant Initials"
-       rows="2" value=""/>
-<br>
-<input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
-<button class="btn btn-primary mx-2">Scan now</button>
-</form>-->
 {% from "_formhelpers.html" import render_field %}
+<div class="">
 <form method=post>
   <dl>
     {% for f in form %}
@@ -49,7 +36,10 @@
       {{ render_field(form.consultant_initials) }} -->
   </dl>
   <!-- <p><input type=submit value=Register> -->
+  <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
   <button class="btn btn-primary mx-2">Submit</button>
 </form>
+<br>
     <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
       {{ render_field(form.consultant_initials) }} -->
+</div>

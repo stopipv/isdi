@@ -30,7 +30,7 @@ from wtforms.fields import SelectMultipleField
 from wtforms.widgets import CheckboxInput, ListWidget
 
 app = Flask(__name__, static_folder='webstatic')
-app.config['SQLALCHEMY_DATABASE_URI'] = config.SQL_DB_CONSULT_PATH
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQL_DB_PATH
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #app.secret_key = 'secret key' # doesn't seem to be necessary
@@ -40,7 +40,9 @@ Migrate(app, sa)
 # sa.create_all() # run in init_db()
 
 # If changes are made to this model, please run 
-# `flask db migrate && flask db upgrade` before using the server.
+# `flask db migrate` and then delete the drops to other tables from the upgrade() method in 
+# migrations/versions/<version>.py
+# before running `flask db upgrade` and re-launching the server.
 # if the migrations folder isn't present, run `flask db init` first.
 # _order in ClientForm should be modified .
 class Client(sa.Model):
@@ -50,8 +52,8 @@ class Client(sa.Model):
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
         sa.DateTime,
-        default=datetime.now(),
-        server_default=sa.func.now(),
+        default=datetime.now()
+        #server_default=str(datetime.now()),
     )
 
     # TODO: link to session ClientID for scans, with foreignkey? across different db?
@@ -68,6 +70,12 @@ class Client(sa.Model):
 
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
+
+    caseworker_present = sa.Column(sa.Enum('Yes', 'No'),
+            nullable=False, info=_lr('Caseworker present for entire consult', 'r'), **_d)
+
+    caseworker_present_safety_planning = sa.Column(sa.Enum('Yes', 'No'),
+            nullable=False, info=_lr('Caseworker present for safety planning', 'r'), **_d)
 
     recorded = sa.Column(sa.Enum('Yes', 'No'),
             nullable=False, info=_lr('Permission to audio-record clinic', 'r'), **_d)
@@ -91,6 +99,7 @@ class ClientForm(ModelForm):
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
 
     __order = ('fjc','consultant_initials','referring_professional','referring_professional_email',
+            'caseworker_present','caseworker_present_safety_planning',
             'recorded','chief_concerns','chief_concerns_other')
 
     def __iter__(self): # https://stackoverflow.com/a/25323199
@@ -121,6 +130,10 @@ def close_connection(exception):
 
 @app.route("/", methods=['GET'])
 def index():
+    clientid = request.form.get('clientid', request.args.get('clientid'))
+    if not clientid: # if not coming from notes
+        clientid=new_client_id()
+
     return render_template(
         'main.html',
         title=config.TITLE,
@@ -132,12 +145,15 @@ def index():
             'Test': test.devices()
         },
         apps={},
-        clientid=new_client_id()
+        clientid=clientid
     )
 
 
 @app.route('/form/', methods=['GET', 'POST'])
 def client_forms():
+    clientid = request.form.get('clientid', request.args.get('clientid'))
+    print("FORM CLIENT ID IS:{}".format(clientid))
+
     # retrieve form defaults from db schema
     client = Client()
     form = ClientForm(request.form)
@@ -159,7 +175,7 @@ def client_forms():
             sa.session.rollback()
 
     #clients_list = Client.query.all()
-    return render_template('main.html', task="form", form=form, title=config.TITLE)
+    return render_template('main.html', task="form", form=form, title=config.TITLE, clientid=clientid)
 
 @app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):
