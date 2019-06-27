@@ -55,6 +55,7 @@ class Client(sa.Model):
     )
 
     # TODO: link to session ClientID for scans, with foreignkey? across different db?
+    # try using fieldstudy.db, creating table not dropping existing things. use ~test.
 
     consultant_initials = sa.Column(sa.String(100), nullable=False,
             info=_lr('Consultant Initials','r'), **_d)
