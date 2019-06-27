@@ -170,7 +170,7 @@ def client_forms():
                 form.populate_obj(client)
                 sa.session.add(client)
                 sa.session.commit()
-                return redirect('/')
+                return redirect('/?clientid={}'.format(clientid))
         except Exception as e:
             print('NOT VALIDATED')
             print(e)
