@@ -14,6 +14,10 @@
         can be used to spy on, track, or <br>otherwise monitor a person.<br/>
     </p>
     <div class="row container">
+            <a class="btn btn-info" href="/form?clientid={{ clientid }}" target="_blank" rel="noopener">Start Consult Form</a>
+    </div>
+    <br>
+    <div class="row container">
         <form onsubmit="return false" name="form-newclient" id="form-newclient">
             <div class="pull-left">
 	        <label for="clientid"><i>Session ID:</i>
@@ -24,6 +28,7 @@
                      class="btn btn-success btn-small">Start a new client session</div>
             </div>
         </form>
+
     </div>
     <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
@@ -98,21 +103,17 @@
 	    </form>
 	    {% endif %}
         </div>
-        <div class="border-warning visible">
+        <!-- <div class="border-warning visible">
             <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-		<!-- <label><i>Session ID:</i></label> -->
 		<input type="hidden" class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
                        value="{{ clientid }}" readonly>
-	  	<!-- <input style="display:none" name="clientid" type="text" value="{{ clientid }}"/></label> -->
-		<!-- <input class="form-control" name="serial" id="serial" type="text" placeholder="Device Id"
-	             value="{{ serial }}" readonly> -->
                 <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
                           rows="4" {% if not serial %}disabled{% endif %}></textarea>
                 <button onclick="postform(this)" id="btn-metainfo-submit"
                         class="btn btn-primary btn-lg my-3">Save notes about this scan
                 </button>
             </form>
-        </div>
+        </div>-->
     </div>
     <div class="col-md-9 border py-2" style="height: 80vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
