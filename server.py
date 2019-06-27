@@ -30,10 +30,10 @@ from wtforms.fields import SelectMultipleField
 from wtforms.widgets import CheckboxInput, ListWidget
 
 app = Flask(__name__, static_folder='webstatic')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/doesitwork.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQL_DB_CONSULT_PATH
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'secret key (CHANGE before production)'
+#app.secret_key = 'secret key' # doesn't seem to be necessary
 app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
 Migrate(app, sa)
@@ -42,24 +42,29 @@ Migrate(app, sa)
 # If changes are made to this model, please run 
 # `flask db migrate && flask db upgrade` before using the server.
 # if the migrations folder isn't present, run `flask db init` first.
+# _order in ClientForm should be modified .
 class Client(sa.Model):
     __tablename__ = 'clients_notes'
     _d = {'default':'', 'server_default':''} # makes migrations smooth
     _lr = lambda label,req: {'label':label,'validators':InputRequired() if req=='r' else ''}
-
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
         sa.DateTime,
         default=datetime.now(),
         server_default=sa.func.now(),
     )
+
+    # TODO: link to session ClientID for scans, with foreignkey? across different db?
+
     consultant_initials = sa.Column(sa.String(100), nullable=False,
             info=_lr('Consultant Initials','r'), **_d)
+
     fjc = sa.Column(sa.Enum('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
-            nullable=False,
-            info=_lr('FJC', 'r'), **_d)
+            nullable=False, info=_lr('FJC', 'r'), **_d)
+
     referring_professional = sa.Column(sa.String(100), nullable=False,
             info=_lr('Name of Referring Professional', 'r'), **_d)
+
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
 
@@ -68,6 +73,7 @@ class Client(sa.Model):
 
     chief_concerns = sa.Column(sa.String(400), nullable=False,
             info=_lr('Chief concerns', 'r'), **_d)
+
     chief_concerns_other = sa.Column(sa.String(400), nullable=False,
             info=_lr('Chief concerns if not listed above (Optional)', ''), **_d)
 
@@ -77,6 +83,7 @@ class Client(sa.Model):
 class ClientForm(ModelForm): 
     class Meta:
         model = Client
+
     chief_concerns = SelectMultipleField('Chief concerns', choices=[('spyware','Spyware'),
         ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets'),
         ('other','Other chief concern (write in next question)')],
@@ -503,8 +510,7 @@ if __name__ == "__main__":
               .format(config.TEST, config.APP_FLAGS_FILE,
                       config.SQL_DB_PATH))
     print("TEST={}".format(config.TEST))
-    init_db(app, force=config.TEST)
-    #sa.create_all() 
+    init_db(app, sa, force=config.TEST)
     handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
                                   backupCount=30)
     logger = logging.getLogger(__name__)
