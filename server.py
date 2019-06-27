@@ -25,7 +25,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import Model, SQLAlchemy
 from wtforms_alchemy import ModelForm
 from sqlalchemy import *
-from wtforms.validators import Email
+from wtforms.validators import Email, InputRequired
 from wtforms.fields import SelectMultipleField
 from wtforms.widgets import CheckboxInput, ListWidget
 
@@ -39,47 +39,56 @@ sa=SQLAlchemy(app)
 Migrate(app, sa)
 # sa.create_all() # run in init_db()
 
+# If changes are made to this model, please run 
+# `flask db migrate && flask db upgrade` before using the server.
+# if the migrations folder isn't present, run `flask db init` first.
 class Client(sa.Model):
     __tablename__ = 'clients_notes'
+    _d = {'default':'', 'server_default':''} # makes migrations smooth
+    _lr = lambda label,req: {'label':label,'validators':InputRequired() if req=='r' else ''}
+
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
         sa.DateTime,
-        default=datetime.utcnow,
+        default=datetime.now(),
         server_default=sa.func.now(),
     )
-    fjc = sa.Column(sa.Enum('brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island'),
-            nullable=False,
-            info={'label': 'FJC'}, default="")
     consultant_initials = sa.Column(sa.String(100), nullable=False,
-            info={'label': 'Consultant Initials'}, default="")
+            info=_lr('Consultant Initials','r'), **_d)
+    fjc = sa.Column(sa.Enum('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
+            nullable=False,
+            info=_lr('FJC', 'r'), **_d)
     referring_professional = sa.Column(sa.String(100), nullable=False,
-            info={'label': 'Name of Referring Professional'}, default="")
+            info=_lr('Name of Referring Professional', 'r'), **_d)
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
 
     recorded = sa.Column(sa.Enum('Yes', 'No'),
-            nullable=False,
-            info={'label': 'Permission to audio-record clinic'}, default="")
+            nullable=False, info=_lr('Permission to audio-record clinic', 'r'), **_d)
 
     chief_concerns = sa.Column(sa.String(400), nullable=False,
-            info={'label': 'Chief concerns'}, default="")
-
-
-
-    #@validates('fjc')
-    #def validate_fjc(self, key, data):
-    #    assert data in ['brooklyn', 'queens', 'the bronx', 'manhattan', 'staten island']
-    #    return data
+            info=_lr('Chief concerns', 'r'), **_d)
+    chief_concerns_other = sa.Column(sa.String(400), nullable=False,
+            info=_lr('Chief concerns if not listed above (Optional)', ''), **_d)
 
     def __repr__(self):
-        return 'client {}'.format(self.fjc)
+        return 'client seen on {}'.format(self.created_at)
 
-class ClientForm(ModelForm):
+class ClientForm(ModelForm): 
     class Meta:
         model = Client
     chief_concerns = SelectMultipleField('Chief concerns', choices=[('spyware','Spyware'),
-        ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets')],
+        ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets'),
+        ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
+
+    __order = ('fjc','consultant_initials','referring_professional','referring_professional_email',
+            'recorded','chief_concerns','chief_concerns_other')
+
+    def __iter__(self): # https://stackoverflow.com/a/25323199
+        fields = list(super(ClientForm, self).__iter__())
+        get_field = lambda field_id: next((fld for fld in fields if fld.id == field_id))
+        return (get_field(field_id) for field_id in self.__order)
 
 # app.config['STATIC_FOLDER'] = 'webstatic'
 android = AndroidScan()
