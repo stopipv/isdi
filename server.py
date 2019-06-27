@@ -72,6 +72,9 @@ class Client(sa.Model):
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
 
+    referring_professional_phone = sa.Column(sa.String(255), nullable=True,
+            info={'label': 'Phone number of Referring Professional (Optional)'})
+
     caseworker_present = sa.Column(sa.Enum('Yes', 'No'),
             nullable=False, info=_lr('Caseworker present for entire consult', 'r'), **_d)
 
@@ -98,9 +101,8 @@ class ClientForm(ModelForm):
         ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets'),
         ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
-
     __order = ('fjc','consultant_initials','referring_professional','referring_professional_email',
-            'caseworker_present','caseworker_present_safety_planning',
+            'referring_professional_email', 'caseworker_present','caseworker_present_safety_planning',
             'recorded','chief_concerns','chief_concerns_other')
 
     def __iter__(self): # https://stackoverflow.com/a/25323199
@@ -153,7 +155,6 @@ def index():
 @app.route('/form/', methods=['GET', 'POST'])
 def client_forms():
     clientid = request.form.get('clientid', request.args.get('clientid'))
-    print("FORM CLIENT ID IS:{}".format(clientid))
 
     # retrieve form defaults from db schema
     client = Client()
