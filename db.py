@@ -52,7 +52,7 @@ def init_db(app, sa, force=False):
             with app.open_resource('schema.sql', mode='r') as f:
                 db.cursor().executescript(f.read())
             db.commit()
-            sa.create_all() # TODO replace in schema.sql
+            #sa.create_all() # TODO replace in schema.sql
             # TODO how to repopulate?
         #if not os.path.exists(CONSULTS_DATABASE):
         #    sa.create_all()

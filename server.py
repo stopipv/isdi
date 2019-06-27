@@ -58,6 +58,7 @@ class Client(sa.Model):
 
     # TODO: link to session ClientID for scans, with foreignkey? across different db?
     # try using fieldstudy.db, creating table not dropping existing things. use ~test.
+    clientid = sa.Column(sa.String(100), nullable=False, **_d)
 
     consultant_initials = sa.Column(sa.String(100), nullable=False,
             info=_lr('Consultant Initials','r'), **_d)
@@ -165,6 +166,7 @@ def client_forms():
                 for field in form:
                     if field.type == 'SelectMultipleField':
                         field.data = json.dumps(field.data)
+                form.clientid = clientid
                 form.populate_obj(client)
                 sa.session.add(client)
                 sa.session.commit()
