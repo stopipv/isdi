@@ -48,6 +48,7 @@ APP_INFO_FILE = 'static_data/app-info.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
     ("~test" if TEST else "")
 SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
+SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
 
 
 def set_test_mode(test):
