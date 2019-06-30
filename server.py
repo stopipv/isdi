@@ -97,8 +97,17 @@ class ClientForm(ModelForm):
     class Meta:
         model = Client
 
-    chief_concerns = SelectMultipleField('Chief concerns', choices=[('spyware','Spyware'),
-        ('sms','SMS texts'),('hacked','Abuser hacked accounts or knows secrets'),
+    chief_concerns = SelectMultipleField('Chief concerns', choices=[
+        ('spyware','Worried about spyware/tracking'),
+        ('hacked','Abuser hacked accounts or knows secrets'),
+        ('location','Worried abuser was tracking their location'),
+        ('glitchy','Phone is glitchy'),
+        ('unknown_calls','Abuser calls/texts from unknown numbers'),
+        ('social_media','Social media concerns (e.g., fake accounts, harassment)'),
+        ('child_devices','Concerns about child device(s), e.g., unknown apps'),
+        ('financial_concerns','Financial concerns, e.g., fraud, money missing from bank account'),
+        ('curious','Curious and want to learn about privacy'),
+        ('sms','SMS texts'),
         ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
     __order = ('fjc','consultant_initials','referring_professional','referring_professional_email',
