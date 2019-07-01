@@ -3,13 +3,13 @@ from flask import (
     url_for
 )
 import os
+import json
+import config
+from time import strftime
 from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
-import json
-import config
-from time import strftime
 # import traceback
 from privacy_scan_android import do_privacy_check
 from db import (
@@ -23,6 +23,9 @@ from db import (
 #from sqlalchemy.orm import validates
 from flask_migrate import Migrate
 from flask_sqlalchemy import Model, SQLAlchemy
+import json
+import config
+from time import strftime
 from wtforms_alchemy import ModelForm
 from sqlalchemy import *
 from wtforms.validators import Email, InputRequired
@@ -47,7 +50,8 @@ Migrate(app, sa)
 # _order in ClientForm should be modified .
 class Client(sa.Model):
     __tablename__ = 'clients_notes'
-    _d = {'default':'', 'server_default':''} # makes migrations smooth
+    _d = {'default': '', 'server_default': ''} # makes migrations smooth
+    _d0 = {'default': '0', 'server_default': '0'}
     _lr = lambda label,req: {'label':label,'validators':InputRequired() if req=='r' else ''}
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
@@ -66,13 +70,16 @@ class Client(sa.Model):
     fjc = sa.Column(sa.Enum('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
             nullable=False, info=_lr('FJC', 'r'), **_d)
 
+    preferred_language = sa.Column(sa.String(100), nullable=False,
+            info=_lr('Preferred language','r'), default='English', server_default='English')
+
     referring_professional = sa.Column(sa.String(100), nullable=False,
             info=_lr('Name of Referring Professional', 'r'), **_d)
 
     referring_professional_email = sa.Column(sa.String(255), nullable=True,
             info={'label': 'Email of Referring Professional (Optional)', 'validators':Email()})
 
-    referring_professional_phone = sa.Column(sa.String(255), nullable=True,
+    referring_professional_phone = sa.Column(sa.String(50), nullable=True,
             info={'label': 'Phone number of Referring Professional (Optional)'})
 
     caseworker_present = sa.Column(sa.Enum('Yes', 'No'),
@@ -89,6 +96,58 @@ class Client(sa.Model):
 
     chief_concerns_other = sa.Column(sa.String(400), nullable=False,
             info=_lr('Chief concerns if not listed above (Optional)', ''), **_d)
+
+    android_phones = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of Android phones brought in','r'), **_d0)
+
+    android_tablets = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of Android tablets brought in','r'), **_d0)
+
+    iphone_devices = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of iPhones brought in','r'), **_d0)
+
+    ipad_devices = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of iPads brought in','r'), **_d0)
+
+    macbook_devices = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of MacBooks brought in','r'), **_d0)
+
+    windows_devices = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of Windows laptops brought in','r'), **_d0)
+
+    echo_devices = sa.Column(sa.Integer, nullable=False, 
+            info=_lr('# of Amazon Echoes brought in','r'), **_d0)
+
+    other_devices = sa.Column(sa.String(400), nullable=True,
+            info=_lr('Other devices brought in if not listed above (Optional)', ''), **_d)
+
+    # consider adding checkboxes for this
+    checkups = sa.Column(sa.String(400), nullable=True,
+            info=_lr('List apps/accounts manually checked (Optional)', ''), **_d)
+
+    vulnerabilities = sa.Column(sa.String(600), nullable=False,
+            info=_lr('Vulnerabilities discovered', 'r'), **_d)
+
+    vulnerabilities_trusted_devices = sa.Column(sa.String(300), nullable=True,
+            info=_lr('List accounts with unknown trusted devices if discovered (Optional)', ''), **_d)
+
+    vulnerabilities_other = sa.Column(sa.Text, nullable=True,
+            info=_lr('Other vulnerabilities discovered (Optional)', ''), **_d)
+
+    safety_planning_onsite = sa.Column(sa.Enum('Yes', 'No', 'Not applicable'),
+            nullable=False, info=_lr('Safety planning conducted onsite', 'r'), **_d)
+
+    changes_made_onsite = sa.Column(sa.Text, nullable=True,
+            info=_lr('Changes made onsite (Optional)', ''), **_d)
+
+    unresolved_issues = sa.Column(sa.Text, nullable=True,
+            info=_lr('Unresolved issues (Optional)', ''), **_d)
+
+    follow_ups_todo = sa.Column(sa.Text, nullable=True,
+            info=_lr('Follow-ups To-do (Optional)', ''), **_d)
+
+    general_notes = sa.Column(sa.Text, nullable=True,
+            info=_lr('General notes (Optional)', ''), **_d)
 
     def __repr__(self):
         return 'client seen on {}'.format(self.created_at)
@@ -110,9 +169,29 @@ class ClientForm(ModelForm):
         ('sms','SMS texts'),
         ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
-    __order = ('fjc','consultant_initials','referring_professional','referring_professional_email',
-            'referring_professional_email', 'caseworker_present','caseworker_present_safety_planning',
-            'recorded','chief_concerns','chief_concerns_other')
+
+    vulnerabilities = SelectMultipleField('Vulnerabilities discovered', choices=[
+        ('none','None'),
+        ('shared plan','Shared plan / abuser pays for plan'),
+        ('password:observed compromise','Observed compromise (e.g., client reports abuser shoulder-surfed, or told them password)'),
+        ('password:guessable','Surfaced guessable passwords'),
+        ('cloud:stored passwords','Stored passwords in app that is synced to cloud (e.g., passwords written in Notes and backed up)'),
+        ('cloud:passwords synced/password manager','Password syncing (e.g., iCloud Keychain)'),
+        ('unknown trusted device','Found an account with an active login from a device not under client\'s control; trusted device'),
+        ('ISDi:found dual-use apps/spyware','ISDi found dual-use apps/spyware'),
+        ('ISDi:false positive','ISDi false positive by way of confirming with client'),
+        ('browser extension','Browser extension potential spyware'),
+        ('desktop potential spyware','Desktop application potential spyware')
+        ],
+        coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
+
+    __order = ('fjc','consultant_initials','preferred_language','referring_professional','referring_professional_email',
+            'referring_professional_phone', 'caseworker_present','caseworker_present_safety_planning',
+            'recorded','chief_concerns','chief_concerns_other','android_phones','android_tablets',
+            'iphone_devices','ipad_devices','macbook_devices','windows_devices','echo_devices',
+            'other_devices','checkups','vulnerabilities','vulnerabilities_trusted_devices',
+            'vulnerabilities_other','safety_planning_onsite','changes_made_onsite',
+            'unresolved_issues','follow_ups_todo','general_notes')
 
     def __iter__(self): # https://stackoverflow.com/a/25323199
         fields = list(super(ClientForm, self).__iter__())

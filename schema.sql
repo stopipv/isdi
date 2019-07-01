@@ -4,18 +4,38 @@ CREATE TABLE IF NOT EXISTS clients_notes (
 	clientid VARCHAR(100) DEFAULT '' NOT NULL, 
 	consultant_initials VARCHAR(100) DEFAULT '' NOT NULL, 
 	fjc VARCHAR(13) DEFAULT '' NOT NULL, 
+	preferred_language VARCHAR(100) DEFAULT 'English' NOT NULL, 
 	referring_professional VARCHAR(100) DEFAULT '' NOT NULL, 
 	referring_professional_email VARCHAR(255), 
+	referring_professional_phone VARCHAR(50), 
 	caseworker_present VARCHAR(3) DEFAULT '' NOT NULL, 
 	caseworker_present_safety_planning VARCHAR(3) DEFAULT '' NOT NULL, 
 	recorded VARCHAR(3) DEFAULT '' NOT NULL, 
 	chief_concerns VARCHAR(400) DEFAULT '' NOT NULL, 
 	chief_concerns_other VARCHAR(400) DEFAULT '' NOT NULL, 
+	android_phones INTEGER DEFAULT '' NOT NULL, 
+	android_tablets INTEGER DEFAULT '' NOT NULL, 
+	iphone_devices INTEGER DEFAULT '' NOT NULL, 
+	ipad_devices INTEGER DEFAULT '' NOT NULL, 
+	macbook_devices INTEGER DEFAULT '' NOT NULL, 
+	windows_devices INTEGER DEFAULT '' NOT NULL, 
+	echo_devices INTEGER DEFAULT '' NOT NULL, 
+	other_devices VARCHAR(400) DEFAULT '', 
+	checkups VARCHAR(400) DEFAULT '', 
+	vulnerabilities VARCHAR(600) DEFAULT '' NOT NULL, 
+	vulnerabilities_trusted_devices VARCHAR(300) DEFAULT '', 
+	vulnerabilities_other TEXT DEFAULT '', 
+	safety_planning_onsite VARCHAR(14) DEFAULT '' NOT NULL, 
+	changes_made_onsite TEXT DEFAULT '', 
+	unresolved_issues TEXT DEFAULT '', 
+	follow_ups_todo TEXT DEFAULT '', 
+	general_notes TEXT DEFAULT '', 
 	PRIMARY KEY (id), 
 	CHECK (fjc IN ('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island')), 
 	CHECK (caseworker_present IN ('Yes', 'No')), 
 	CHECK (caseworker_present_safety_planning IN ('Yes', 'No')), 
-	CHECK (recorded IN ('Yes', 'No'))
+	CHECK (recorded IN ('Yes', 'No')), 
+	CHECK (safety_planning_onsite IN ('Yes', 'No', 'Not applicable'))
 );
 
 
@@ -47,6 +67,7 @@ CREATE TABLE IF NOT EXISTS scan_res (
   how_obtained TEXT, -- todo
   time DATETIME DEFAULT (datetime('now', 'localtime')),
   FOREIGN KEY(clientid) REFERENCES clients_notes(clientid)
+  --FOREIGN KEY(clientid) REFERENCES clients(clientid)
   --battery_avg_last_charged INTEGER, -- take out maybe
 );
 
