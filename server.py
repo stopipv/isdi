@@ -94,7 +94,7 @@ class Client(sa.Model):
     chief_concerns = sa.Column(sa.String(400), nullable=False,
             info=_lr('Chief concerns', 'r'), **_d)
 
-    chief_concerns_other = sa.Column(sa.String(400), nullable=False,
+    chief_concerns_other = sa.Column(sa.Text, nullable=False,
             info=_lr('Chief concerns if not listed above (Optional)', ''), **_d)
 
     android_phones = sa.Column(sa.Integer, nullable=False, 
@@ -128,7 +128,7 @@ class Client(sa.Model):
     vulnerabilities = sa.Column(sa.String(600), nullable=False,
             info=_lr('Vulnerabilities discovered', 'r'), **_d)
 
-    vulnerabilities_trusted_devices = sa.Column(sa.String(300), nullable=True,
+    vulnerabilities_trusted_devices = sa.Column(sa.Text, nullable=True,
             info=_lr('List accounts with unknown trusted devices if discovered (Optional)', ''), **_d)
 
     vulnerabilities_other = sa.Column(sa.Text, nullable=True,
@@ -151,6 +151,8 @@ class Client(sa.Model):
 
     def __repr__(self):
         return 'client seen on {}'.format(self.created_at)
+
+from wtforms import TextAreaField
 
 class ClientForm(ModelForm): 
     class Meta:
@@ -192,6 +194,15 @@ class ClientForm(ModelForm):
             'other_devices','checkups','vulnerabilities','vulnerabilities_trusted_devices',
             'vulnerabilities_other','safety_planning_onsite','changes_made_onsite',
             'unresolved_issues','follow_ups_todo','general_notes')
+
+    chief_concerns_other = TextAreaField('Chief concerns if not listed above (Optional)', render_kw={"rows": 5, "cols": 70})
+    vulnerabilities_trusted_devices = TextAreaField('List accounts with unknown trusted devices if discovered (Optional)', render_kw={"rows": 5, "cols": 70})
+    vulnerabilities_other = TextAreaField('Other vulnerabilities discovered (Optional)', render_kw={"rows": 5, "cols": 70})
+    changes_made_onsite = TextAreaField('Changes made onsite (Optional)', render_kw={"rows": 5, "cols": 70})
+    unresolved_issues = TextAreaField('Unresolved issues (Optional)', render_kw={"rows": 5, "cols": 70})
+    follow_ups_todo = TextAreaField('Follow-ups To-do (Optional)', render_kw={"rows": 5, "cols": 70})
+    general_notes = TextAreaField('General notes (Optional)', render_kw={"rows": 10, "cols": 70})
+
 
     def __iter__(self): # https://stackoverflow.com/a/25323199
         fields = list(super(ClientForm, self).__iter__())
