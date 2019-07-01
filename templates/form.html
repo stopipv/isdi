@@ -26,20 +26,20 @@
 
 {% from "_formhelpers.html" import render_field %}
 <div class="">
-<form method=post>
-  <dl>
-    {% for f in form %}
-      {{ render_field(f) }}
-    {% endfor %}
-    <!-- for custom CSS class, load these individually or attempt to make rules for sa Types -->
-    <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
-      {{ render_field(form.consultant_initials) }} -->
-  </dl>
-  <!-- <p><input type=submit value=Register> -->
-  <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
-  <button class="btn btn-primary mx-2">Submit</button>
-</form>
-<br>
-    <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
-      {{ render_field(form.consultant_initials) }} -->
+  <form method=post>
+    <div class="form-row align-items-center">
+      <dl>
+        {% for f in form %}
+          {{ render_field(f) }}
+        {% endfor %}
+        <!-- for custom CSS class, load these individually or attempt to make rules for sa Types -->
+        <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
+          {{ render_field(form.consultant_initials) }} -->
+      </dl>
+      <!-- <p><input type=submit value=Register> -->
+      <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+    </div>
+      <button class="btn btn-primary mx-2">Submit</button>
+  </form>
+  <br>
 </div>

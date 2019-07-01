@@ -1,6 +1,8 @@
 {% macro render_field(field, class_to_use) %}
   <dt>{{ field.label }}</dt>
-  <dd>{{ field(class_=class_to_use, **kwargs)|safe }}
+  <div class="col-auto">
+    <dd>{{ field(class_=class_to_use, **kwargs)|safe }}
+  </div>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}

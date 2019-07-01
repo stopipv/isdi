@@ -52,7 +52,7 @@ class Client(sa.Model):
     __tablename__ = 'clients_notes'
     _d = {'default': '', 'server_default': ''} # makes migrations smooth
     _d0 = {'default': '0', 'server_default': '0'}
-    _lr = lambda label,req: {'label':label,'validators':InputRequired() if req=='r' else ''}
+    _lr = lambda label,req: {'label':label+'*' if req=='r' else label,'validators':InputRequired() if req=='r' else ''}
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
         sa.DateTime,
@@ -158,7 +158,7 @@ class ClientForm(ModelForm):
     class Meta:
         model = Client
 
-    chief_concerns = SelectMultipleField('Chief concerns', choices=[
+    chief_concerns = SelectMultipleField('Chief concerns*', choices=[
         ('spyware','Worried about spyware/tracking'),
         ('hacked','Abuser hacked accounts or knows secrets'),
         ('location','Worried abuser was tracking their location'),
@@ -172,7 +172,7 @@ class ClientForm(ModelForm):
         ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
 
-    vulnerabilities = SelectMultipleField('Vulnerabilities discovered', choices=[
+    vulnerabilities = SelectMultipleField('Vulnerabilities discovered*', choices=[
         ('none','None'),
         ('shared plan','Shared plan / abuser pays for plan'),
         ('password:observed compromise','Observed compromise (e.g., client reports abuser shoulder-surfed, or told them password)'),
