@@ -20,8 +20,8 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "1")))
 TEST = bool(int(os.getenv("TEST", "1")))
-#DEBUG = True
-#TEST = True
+DEBUG = False
+TEST = False
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',

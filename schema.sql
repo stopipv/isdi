@@ -31,11 +31,11 @@ CREATE TABLE IF NOT EXISTS clients_notes (
 	follow_ups_todo TEXT DEFAULT '', 
 	general_notes TEXT DEFAULT '', 
 	PRIMARY KEY (id), 
-	CHECK (fjc IN ('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island')), 
-	CHECK (caseworker_present IN ('Yes', 'No')), 
-	CHECK (caseworker_present_safety_planning IN ('Yes', 'No')), 
-	CHECK (recorded IN ('Yes', 'No')), 
-	CHECK (safety_planning_onsite IN ('Yes', 'No', 'Not applicable'))
+	CHECK (fjc IN ('', 'Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island')), 
+	CHECK (caseworker_present IN ('', 'Yes', 'No')), 
+	CHECK (caseworker_present_safety_planning IN ('', 'Yes', 'No')), 
+	CHECK (recorded IN ('', 'Yes', 'No')), 
+	CHECK (safety_planning_onsite IN ('', 'Yes', 'No', 'Not applicable'))
 );
 
 

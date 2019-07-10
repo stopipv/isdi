@@ -67,7 +67,7 @@ class Client(sa.Model):
     consultant_initials = sa.Column(sa.String(100), nullable=False,
             info=_lr('Consultant Initials','r'), **_d)
 
-    fjc = sa.Column(sa.Enum('Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
+    fjc = sa.Column(sa.Enum('', 'Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
             nullable=False, info=_lr('FJC', 'r'), **_d)
 
     preferred_language = sa.Column(sa.String(100), nullable=False,
@@ -82,13 +82,13 @@ class Client(sa.Model):
     referring_professional_phone = sa.Column(sa.String(50), nullable=True,
             info={'label': 'Phone number of Referring Professional (Optional)'})
 
-    caseworker_present = sa.Column(sa.Enum('Yes', 'No'),
+    caseworker_present = sa.Column(sa.Enum('', 'Yes', 'No'),
             nullable=False, info=_lr('Caseworker present for entire consult', 'r'), **_d)
 
-    caseworker_present_safety_planning = sa.Column(sa.Enum('Yes', 'No'),
+    caseworker_present_safety_planning = sa.Column(sa.Enum('', 'Yes', 'No'),
             nullable=False, info=_lr('Caseworker present for safety planning', 'r'), **_d)
 
-    recorded = sa.Column(sa.Enum('Yes', 'No'),
+    recorded = sa.Column(sa.Enum('', 'Yes', 'No'),
             nullable=False, info=_lr('Permission to audio-record clinic', 'r'), **_d)
 
     chief_concerns = sa.Column(sa.String(400), nullable=False,
@@ -134,7 +134,7 @@ class Client(sa.Model):
     vulnerabilities_other = sa.Column(sa.Text, nullable=True,
             info=_lr('Other vulnerabilities discovered (Optional)', ''), **_d)
 
-    safety_planning_onsite = sa.Column(sa.Enum('Yes', 'No', 'Not applicable'),
+    safety_planning_onsite = sa.Column(sa.Enum('', 'Yes', 'No', 'Not applicable'),
             nullable=False, info=_lr('Safety planning conducted onsite', 'r'), **_d)
 
     changes_made_onsite = sa.Column(sa.Text, nullable=True,
