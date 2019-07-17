@@ -79,7 +79,7 @@ def package_info(dumpf, appid):
     # requested permissions:
     # install permissions:
     # runtime permissions:
-    cmd = "sed -n -e '/Package \[{appid}\]/,/Package \[/p' {dumpf}"\
+    cmd = "sed -n -e '/Package \[{appid}\]/,/Package \[/p' '{dumpf}'"\
         .format(appid=appid, dumpf=dumpf.replace('.json', '.txt'))
     print(cmd)
     # TODO: Need to udpate it once the catch_err function is fixed.

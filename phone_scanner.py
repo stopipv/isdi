@@ -396,7 +396,7 @@ class IosScan(AppScan):
         ''' FIXME: iOS setup. '''
         if config.PLATFORM == 'linux' and attempt_remount:
             # should show GUI prompt for password. sudo apt install policykit-1 if not there.
-            cmd = 'pkexec '+config.SCRIPT_DIR + '/ios_mount_linux.sh mount'
+            cmd = "pkexec '"+config.SCRIPT_DIR + "/ios_mount_linux.sh' mount"
             #mountmsg = run_command(cmd).stderr.read().decode('utf-8')
             if catch_err(run_command(cmd)) == -1:
                 return (False, "Couldn't detect device. See {}/ios_mount_linux.sh."\
@@ -479,7 +479,7 @@ class IosScan(AppScan):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         hmac_serial = config.hmac_serial(serial)
-        cmd = '{}/ios_dump.sh {} {Apps} {Info} {Jailbroken}'\
+        cmd = "'{}/ios_dump.sh' {} {Apps} {Info} {Jailbroken}"\
             .format(config.SCRIPT_DIR, hmac_serial, **config.IOS_DUMPFILES)
         print(cmd)
         path = self.dump_path(serial, fkind='Dir')

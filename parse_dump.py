@@ -133,7 +133,7 @@ class AndroidDump(PhoneDump):
 
     def _extract_lines(self, service):
         """Extract lines for te DUMP OF SERVICE <service> """
-        cmd = "sed -n -e '/DUMP OF SERVICE {}/,/DUMP OF SERVICE/p' {fname} "\
+        cmd = "sed -n -e '/DUMP OF SERVICE {}/,/DUMP OF SERVICE/p' '{fname}' "\
               "| head -n -1"
         s = "DUMP OF SERVICE {}".format(service)
         started = False
