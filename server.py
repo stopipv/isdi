@@ -65,7 +65,7 @@ class Client(sa.Model):
     clientid = sa.Column(sa.String(100), nullable=False, **_d)
 
     consultant_initials = sa.Column(sa.String(100), nullable=False,
-            info=_lr('Consultant Initials','r'), **_d)
+            info=_lr('Consultant Names (separate with commas)','r'), **_d)
 
     fjc = sa.Column(sa.Enum('', 'Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island'),
             nullable=False, info=_lr('FJC', 'r'), **_d)
@@ -82,11 +82,14 @@ class Client(sa.Model):
     referring_professional_phone = sa.Column(sa.String(50), nullable=True,
             info={'label': 'Phone number of Referring Professional (Optional)'})
 
-    caseworker_present = sa.Column(sa.Enum('', 'Yes', 'No'),
-            nullable=False, info=_lr('Caseworker present for entire consult', 'r'), **_d)
+    caseworker_present = sa.Column(sa.Enum('', 'For entire consult', 'For part of the consult', 'No'),
+            nullable=False, info=_lr('Caseworker present', 'r'), **_d)
 
     caseworker_present_safety_planning = sa.Column(sa.Enum('', 'Yes', 'No'),
             nullable=False, info=_lr('Caseworker present for safety planning', 'r'), **_d)
+
+    caseworker_recorded = sa.Column(sa.Enum('', 'Yes', 'No'),
+            nullable=False, info=_lr('If caseworker present, permission to audio-record them', 'r'), **_d)
 
     recorded = sa.Column(sa.Enum('', 'Yes', 'No'),
             nullable=False, info=_lr('Permission to audio-record clinic', 'r'), **_d)
@@ -125,6 +128,9 @@ class Client(sa.Model):
     checkups = sa.Column(sa.String(400), nullable=True,
             info=_lr('List apps/accounts manually checked (Optional)', ''), **_d)
 
+    checkups_other = sa.Column(sa.String(400), nullable=True,
+            info=_lr('Other apps/accounts manually checked (Optional)', ''), **_d)
+
     vulnerabilities = sa.Column(sa.String(600), nullable=False,
             info=_lr('Vulnerabilities discovered', 'r'), **_d)
 
@@ -149,6 +155,8 @@ class Client(sa.Model):
     general_notes = sa.Column(sa.Text, nullable=True,
             info=_lr('General notes (Optional)', ''), **_d)
 
+    # way to edit data/add case summaries afterwards? Or keep text files.
+
     def __repr__(self):
         return 'client seen on {}'.format(self.created_at)
 
@@ -172,6 +180,16 @@ class ClientForm(ModelForm):
         ('other','Other chief concern (write in next question)')],
         coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
 
+    checkups = SelectMultipleField('List apps/accounts manually checked (Optional)', choices=[
+        ('facebook','Facebook'),
+        ('instagram','Instagram'),
+        ('snapchat','SnapChat'),
+        ('google','Google (including GMail)'),
+        ('icloud','iCloud'),
+        ('whatsapp','WhatsApp'),
+        ('other','Other apps/accounts (write in next question)')],
+        coerce = str, option_widget = CheckboxInput(), widget = ListWidget(prefix_label=False))
+
     vulnerabilities = SelectMultipleField('Vulnerabilities discovered*', choices=[
         ('none','None'),
         ('shared plan','Shared plan / abuser pays for plan'),
@@ -189,9 +207,9 @@ class ClientForm(ModelForm):
 
     __order = ('fjc','consultant_initials','preferred_language','referring_professional','referring_professional_email',
             'referring_professional_phone', 'caseworker_present','caseworker_present_safety_planning',
-            'recorded','chief_concerns','chief_concerns_other','android_phones','android_tablets',
+            'recorded','caseworker_recorded','chief_concerns','chief_concerns_other','android_phones','android_tablets',
             'iphone_devices','ipad_devices','macbook_devices','windows_devices','echo_devices',
-            'other_devices','checkups','vulnerabilities','vulnerabilities_trusted_devices',
+            'other_devices','checkups','checkups_other','vulnerabilities','vulnerabilities_trusted_devices',
             'vulnerabilities_other','safety_planning_onsite','changes_made_onsite',
             'unresolved_issues','follow_ups_todo','general_notes')
 
