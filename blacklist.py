@@ -15,17 +15,21 @@ import re
 import config
 import pandas as pd
 
-APP_FLAGS = pd.read_csv(
-    config.APP_FLAGS_FILE,
-    index_col='appId', encoding='latin1',
-    error_bad_lines=False).fillna({
-        'title': '',
-        'store': '',
-        'flag': '',
-        'human': 0,
-        'ml_score': 0.0,
-        'source': ''
-    })
+try:
+    APP_FLAGS = pd.read_csv(
+        config.APP_FLAGS_FILE,
+        index_col='appId', encoding='latin1',
+        error_bad_lines=False).fillna({
+            'title': '',
+            'store': '',
+            'flag': '',
+            'human': 0,
+            'ml_score': 0.0,
+            'source': ''
+        })
+except FileNotFoundError as e:
+    print("You do not currently have the blacklist ISDi uses.\n Please contact the repository authors (https://github.com/stopipv/isdi) with a legitimate request for it.")
+    exit(0)
 #{APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurrence odds', 'spyware'})]
 APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({
     'dual-use', 'spyware', 'co-occurrence'

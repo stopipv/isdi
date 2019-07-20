@@ -38,12 +38,7 @@ IOS_DUMPFILES = {'Jailbroken': 'ios_jailbroken.log',
 TEST_APP_LIST = 'static_data/android.test.apps_list'
 #TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 
-VERSION_STABLE = catch_err(run_command(
-    'git describe --abbrev=0 --tags')).strip()
-VERSION_CURRENT = catch_err(run_command('git describe --tags')).strip()
-TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else ''),
-         'version_current': '',
-         'version_stable': VERSION_STABLE}
+TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_FILE = 'static_data/app-info.csv'

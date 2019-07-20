@@ -26,6 +26,12 @@ Connect a
 device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
 connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
 
+## Consultation form data
+Some consult form data may not be relevant for use in other organizations.
+Please consider adapting it for your needs (modify the `Client` class in
+`server.py` and use `sa.create_all()` to obtain the new schema. Place the new
+schema in `schema.sql`.
+
 ## Debugging tips
 If there are errors, please send your server error output to <havron@cs.cornell.edu>. If you feel confident enough in the codebase to try to fix them yourself, do so, but don't push to this repo until emailing Sam.
 Inspect apps on the device manually if you cannot resolve a failure.
