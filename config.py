@@ -20,8 +20,8 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "1")))
 TEST = bool(int(os.getenv("TEST", "1")))
-DEBUG = True
-TEST = True
+DEBUG = False
+TEST = False
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',
@@ -106,6 +106,14 @@ except FileNotFoundError as e:
         f.write(secrets.token_bytes(32))
     PII_KEY = open(PII_KEY_PATH, 'rb').read()
 
+FLASK_SECRET_PATH = os.path.join(STATIC_DATA, "flask.secret")
+try:
+    FLASK_SECRET = open(FLASK_SECRET_PATH, 'rb').read()
+except FileNotFoundError as e:
+    import secrets
+    with open(FLASK_SECRET_PATH, 'wb') as f:
+        f.write(secrets.token_bytes(32))
+    FLASK_SECRET = open(FLASK_SECRET_PATH, 'rb').read()
 
 if not os.path.exists(REPORT_PATH):
     os.mkdir(REPORT_PATH)

@@ -1,6 +1,6 @@
 from flask import (
     Flask, render_template, request, redirect, g, jsonify,
-    url_for
+    url_for, session
 )
 import os
 import json
@@ -36,7 +36,8 @@ app = Flask(__name__, static_folder='webstatic')
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQL_DB_PATH
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#app.secret_key = 'secret key' # doesn't seem to be necessary
+app.secret_key = config.FLASK_SECRET # doesn't seem to be necessary
+app.config['SECRET_KEY'] = config.FLASK_SECRET # doesn't seem to be necessary
 app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
 Migrate(app, sa)
@@ -306,17 +307,15 @@ def edit_forms():
     if request.method == 'POST':
         clientnote = request.form.get('clientnote', request.args.get('clientnote'))
         if clientnote: # if requesting a form to edit
+            session['form_edit_pk'] = clientnote # set session cookie
             form_obj = Client.query.get(clientnote)
             form = ClientForm(obj=form_obj)
             for field in form:
                 if field.type == 'SelectMultipleField':
                     field.data = json.loads(''.join(field.data))
-
-            # TODO: need logic to seperate POST forms
-            return render_template('main.html', task="form",form=form, pk=clientnote, title=config.TITLE, clientid=form_obj.clientid)
+            return render_template('main.html', task="form",form=form, title=config.TITLE, clientid=form_obj.clientid)
         else:
-            pk = request.form.get('pk', request.args.get('pk'))
-            form_obj = Client.query.get(pk)
+            form_obj = Client.query.get(session['form_edit_pk'])
             form = ClientForm(request.form)
             if form.validate():
                 print('VALIDATED')
