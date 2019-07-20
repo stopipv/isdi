@@ -65,12 +65,12 @@ refreshing the page, and see if the phone ask for "Do you trust this computer?" 
 message.
 3. Do the scan.  If `PhoneScanner` does not identify the device (that is
 no device enlisted under `Android` group on the left of the page),
-disconnect the USB cabel from the phone, reconnect, and refresh the page.
+disconnect the USB cable from the phone, reconnect, and refresh the page.
 4. The scanner will automatically reset the developer option. Restart the phone
 to get to original state.
-If you still see the developer optinos (a.k.a, `dveloper mode`) is on, open
+If you still see the developer options (a.k.a, `developer mode`) is on, open
 `Settings -> Apps`, you will see list of apps installed in your device.
-Find `Settings` app in the list, tap on it, and tap `clear data` (some times
+Find `Settings` app in the list, tap on it, and tap `clear data` (sometimes
 listed inside `Storage`).
 
 
@@ -80,7 +80,7 @@ There is not much preparation required for iOS. Once the USB
 cable is connected, refresh the page; on the device you have to enter
 the passcode to unlock the device, and then once more to accept the "trust this computer" dialog. 
 Even if you use touchID, passcode is required to enable the USB access. If you don't see the device, refresh
-the page couple of times, and check the phone if it went to
+the page a couple of times, and check the phone if it went to
 "Enter passcode" mode and the "trust this computer" dialog.
 
 
@@ -93,9 +93,9 @@ It is possible to view your device screen(s) in real time on the macOS computer 
 
 ## Downloaded data ##
 The data downloaded and stored in the study are the following.
-1. A `sqlite` database containing the feed back and actions taken by the user.
+1. A `sqlite` database containing the feedback and actions taken by the user.
 2. `phone_dump/` folder will have dump of some services in the phone.
-(For Android I have figured out what are these, for Ios I don't know how to get those information.)
+(For Android I have figured out what are these, for iOS I don't know how to get those information.)
 
 ##### Android
 The services that we can dump safely using `dumpsys` are the following.
@@ -105,11 +105,11 @@ The services that we can dump safely using `dumpsys` are the following.
 * Resource consumption: `procstats`, `batterystats`, `netstats`, `usagestats`
 * App running information: `activity`, `appops`
 
-See a details about the services in [notes.md](notes.md)
+See details about the services in [notes.md](notes.md)
 
 ##### iOS
 Only the `appIds`, and their names. Also, I got "permissions" granted to the
-application. I don't konw how to get install date, resource usage, etc.
+application. I don't know how to get install date, resource usage, etc.
 (Any help will be greatly welcomed.)
 
 
@@ -117,7 +117,7 @@ application. I don't konw how to get install date, resource usage, etc.
 * `phone_scanner.py` has all the logic required to communicate with Android and
   iOS devices.
 * `parse_dump.py` has all of the logic required to extract dumped info from the devices. After the initial scan, the server will rely on this parser rather than needing an active connection to the device (work in progress). For now, please keep your device plugged in when looking at scan results.
-* `server.py` is the flask webserver. 
+* `server.py` is the Flask web server. 
 * `templates/` folder contains the html templates rendering in the UI
 * `webstatic/` folder contains the `.css` and `.js` files 
 * `phone_dumps/` folder will contain the data recorded from the phone.
