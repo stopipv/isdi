@@ -1,3 +1,4 @@
+logs/app.log.1
 notes/
 static_data/pii.key
 static_data/flask.secret
