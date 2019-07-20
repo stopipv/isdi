@@ -20,8 +20,8 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "1")))
 TEST = bool(int(os.getenv("TEST", "1")))
-DEBUG = False
-TEST = False
+DEBUG = True
+TEST = True
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',
@@ -44,6 +44,7 @@ APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_FILE = 'static_data/app-info.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
     ("~test" if TEST else "")
+
 SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
 #SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
 

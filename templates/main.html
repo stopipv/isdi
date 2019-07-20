@@ -17,7 +17,6 @@
          var device = "{{ device }}";
          var serial = "{{ serial }}";
          var scanid = "{{ scanid }}";
-         var clientid = "{{ clientid }}";
 	
          function close_window(msg) {
 		 if (confirm(msg)) {
@@ -58,7 +57,7 @@
 
          function new_client(form) {
              if (confirm("Did you finish scanning ALL devices of the current client? Do you want to scan devices for a new client?")) {
-                 window.location.href = "/";
+                 window.location.href = "/?newid=y";
              }
 
          function consult_form(form) {

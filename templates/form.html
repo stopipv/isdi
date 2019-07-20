@@ -34,7 +34,7 @@ window.onbeforeunload = function (e) {
               <input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
                            value="{{ clientid }}" readonly/>
                 </label>
-                <a class='btn btn-primary'  href="/?clientid={{ clientid }}" target="_blank" rel="noopener" 
+                <a class='btn btn-primary'  href="/" target="_blank" rel="noopener" 
                       >Scan client devices (opens in new tab)</a>
               </div>
 
@@ -52,7 +52,6 @@ window.onbeforeunload = function (e) {
 
       </dl>
       <!-- <p><input type=submit value=Register> -->
-      <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
     </div>
 
       <button class="btn btn-primary mx-2">Submit</button>

@@ -255,9 +255,13 @@ def close_connection(exception):
 
 @app.route("/", methods=['GET'])
 def index():
-    clientid = request.form.get('clientid', request.args.get('clientid'))
-    if not clientid: # if not coming from notes
-        clientid=new_client_id()
+    #clientid = request.form.get('clientid', request.args.get('clientid'))
+    #if not clientid: # if not coming from notes
+
+    newid = request.args.get('newid')
+    if 'clientid' not in session or (newid is not None):
+        print('If at least one device, scanned, a new clientID will be made:')
+        session['clientid']=new_client_id()
 
     return render_template(
         'main.html',
@@ -270,14 +274,16 @@ def index():
             'Test': test.devices()
         },
         apps={},
-        clientid=clientid
+        clientid=session['clientid']
     )
 
 
 @app.route('/form/', methods=['GET', 'POST'])
 def client_forms():
-    clientid = request.form.get('clientid', request.args.get('clientid'))
+    #clientid = request.form.get('clientid', request.args.get('clientid'))
 
+    print('CLIENTID IS:')
+    print(session['clientid'])
     # retrieve form defaults from db schema
     client = Client()
     form = ClientForm(request.form)
@@ -289,18 +295,19 @@ def client_forms():
                 for field in form:
                     if field.type == 'SelectMultipleField':
                         field.data = json.dumps(field.data)
-                form.clientid = clientid
                 form.populate_obj(client)
+                client.clientid = session['clientid']
                 sa.session.add(client)
                 sa.session.commit()
-                return redirect('/?clientid={}'.format(clientid))
+                #return redirect('/?clientid={}'.format(clientid))
+                return redirect('/')
         except Exception as e:
             print('NOT VALIDATED')
             print(e)
             sa.session.rollback()
 
     #clients_list = Client.query.all()
-    return render_template('main.html', task="form", form=form, title=config.TITLE, clientid=clientid)
+    return render_template('main.html', task="form", form=form, title=config.TITLE, clientid=session['clientid'])
 
 @app.route('/form/edit/', methods=['GET', 'POST'])
 def edit_forms():
@@ -407,7 +414,8 @@ def privacy_scan(device, cmd):
 
 @app.route("/view_results", methods=['POST', 'GET'])
 def view_results():
-    clientid = request.form.get('clientid', request.args.get('clientid'))
+    #clientid = request.form.get('clientid', request.args.get('clientid'))
+
     scan_res = request.form.get('scan_res', request.args.get('scan_res'))
 
     # TODO: maybe unneccessary, but likely nice for returning without
@@ -432,8 +440,10 @@ def scan():
     :param device: "android" or "ios" or test
     :return: a flask view template
     """
-    # FIXME: prevent clientID modification (remove it from GET params?)
-    clientid = request.form.get('clientid', request.args.get('clientid'))
+    #clientid = request.form.get('clientid', request.args.get('clientid'))
+    if 'clientid' not in session:
+        return redirect('/')
+
     device_primary_user = request.form.get(
         'device_primary_user',
         request.args.get('device_primary_user'))
@@ -442,7 +452,7 @@ def scan():
     device_owner = request.form.get(
         'device_owner', request.args.get('device_owner'))
 
-    currently_scanned = get_client_devices_from_db(clientid)
+    currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d = dict(
         task="home",
         title=config.TITLE,
@@ -451,7 +461,7 @@ def scan():
         device_primary_user_sel=device_primary_user,
         apps={},
         currently_scanned=currently_scanned,
-        clientid=clientid
+        clientid=session['clientid']
     )
     # lookup devices scanned so far here. need to add this by model rather
     # than by serial.
@@ -459,7 +469,7 @@ def scan():
     print('DEVICE OWNER IS: {}'.format(device_owner))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
     print('-' * 80)
-    print('CLIENT ID IS: {}'.format(clientid))
+    print('CLIENT ID IS: {}'.format(session['clientid']))
     print('-' * 80)
     print("--> Action = ", action)
 
@@ -523,7 +533,7 @@ def scan():
         return render_template("main.html", **template_d), 201
 
     scan_d = {
-        'clientid': clientid,
+        'clientid': session['clientid'],
         'serial': config.hmac_serial(ser),
         'device': device,
         'device_model': device_name_map.get('model', '<Unknown>').strip(),
@@ -558,7 +568,7 @@ def scan():
     create_mult_appinfo([(scanid, appid, json.dumps(
         info['flags']), '', '<new>') for appid, info in apps.items()])
 
-    currently_scanned = get_client_devices_from_db(clientid)
+    currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d.update(dict(
         isrooted=(
             "<strong class='text-danger'>Yes.</strong> Reason(s): {}"
@@ -625,7 +635,8 @@ def record_scanres(scanid):
     sc = get_device(device)
     note = request.form.get('notes')
     r = save_note(scanid, note)
-    create_report(request.form.get('clientid'))
+    create_report(session['clientid'])
+    #create_report(request.form.get('clientid'))
     return is_success(
         r,
         "Success!",
