@@ -17,6 +17,7 @@ window.onbeforeunload = function (e) {
         <span style="float: right; font-size: 15px">
             <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instruction</u></a>
+            <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
             <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
         </span> 
@@ -48,9 +49,13 @@ window.onbeforeunload = function (e) {
         <!-- for custom CSS class, load these individually or attempt to make rules for sa Types -->
         <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
           {{ render_field(form.consultant_initials) }} -->
+
       </dl>
       <!-- <p><input type=submit value=Register> -->
       <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></label>
+      {% if pk %}
+      <input style="display:none" name="pk" id="pk" type="text" value="{{ pk }}"/></label>
+      {% endif %}
     </div>
 
       <button class="btn btn-primary mx-2">Submit</button>

@@ -155,6 +155,9 @@ class Client(sa.Model):
     general_notes = sa.Column(sa.Text, nullable=True,
             info=_lr('General notes (Optional)', ''), **_d)
 
+    case_summary = sa.Column(sa.Text, nullable=True,
+            info=_lr('Case Summary (Can fill out after consult, see "Edit previous forms")', ''), **_d)
+
     # way to edit data/add case summaries afterwards? Or keep text files.
 
     def __repr__(self):
@@ -211,7 +214,7 @@ class ClientForm(ModelForm):
             'iphone_devices','ipad_devices','macbook_devices','windows_devices','echo_devices',
             'other_devices','checkups','checkups_other','vulnerabilities','vulnerabilities_trusted_devices',
             'vulnerabilities_other','safety_planning_onsite','changes_made_onsite',
-            'unresolved_issues','follow_ups_todo','general_notes')
+            'unresolved_issues','follow_ups_todo','general_notes', 'case_summary')
 
     chief_concerns_other = TextAreaField('Chief concerns if not listed above (Optional)', render_kw={"rows": 5, "cols": 70})
     vulnerabilities_trusted_devices = TextAreaField('List accounts with unknown trusted devices if discovered (Optional)', render_kw={"rows": 5, "cols": 70})
@@ -220,6 +223,7 @@ class ClientForm(ModelForm):
     unresolved_issues = TextAreaField('Unresolved issues (Optional)', render_kw={"rows": 5, "cols": 70})
     follow_ups_todo = TextAreaField('Follow-ups To-do (Optional)', render_kw={"rows": 5, "cols": 70})
     general_notes = TextAreaField('General notes (Optional)', render_kw={"rows": 10, "cols": 70})
+    case_summary = TextAreaField('Case Summary (Can fill out after consult, see "Edit previous forms")', render_kw={"rows": 10, "cols": 70})
 
 
     def __iter__(self): # https://stackoverflow.com/a/25323199
@@ -296,6 +300,36 @@ def client_forms():
 
     #clients_list = Client.query.all()
     return render_template('main.html', task="form", form=form, title=config.TITLE, clientid=clientid)
+
+@app.route('/form/edit/', methods=['GET', 'POST'])
+def edit_forms():
+    if request.method == 'POST':
+        clientnote = request.form.get('clientnote', request.args.get('clientnote'))
+        if clientnote: # if requesting a form to edit
+            form_obj = Client.query.get(clientnote)
+            form = ClientForm(obj=form_obj)
+            for field in form:
+                if field.type == 'SelectMultipleField':
+                    field.data = json.loads(''.join(field.data))
+
+            # TODO: need logic to seperate POST forms
+            return render_template('main.html', task="form",form=form, pk=clientnote, title=config.TITLE, clientid=form_obj.clientid)
+        else:
+            pk = request.form.get('pk', request.args.get('pk'))
+            form_obj = Client.query.get(pk)
+            form = ClientForm(request.form)
+            if form.validate():
+                print('VALIDATED')
+                # convert checkbox lists to json-friendly strings
+                for field in form:
+                    if field.type == 'SelectMultipleField':
+                        field.data = json.dumps(field.data)
+            form.populate_obj(form_obj)
+            sa.session.commit()
+            return redirect('/')
+
+    clients = Client.query.all()
+    return render_template('main.html', clients=clients, task="formedit", title=config.TITLE)
 
 @app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):
