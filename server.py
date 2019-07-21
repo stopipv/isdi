@@ -25,7 +25,6 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import Model, SQLAlchemy
 import json
 import config
-import requests
 from time import strftime
 from wtforms_alchemy import ModelForm
 from sqlalchemy import *
