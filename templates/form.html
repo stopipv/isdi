@@ -1,4 +1,8 @@
+{% if form %}
 <script>
+  $(document).on("submit", "form", function(event){
+        window.onbeforeunload = null;
+});
 window.onbeforeunload = function (e) {
     e = e || window.event;
 
@@ -11,6 +15,7 @@ window.onbeforeunload = function (e) {
     return 'Sure?';
 };
 </script>
+{% endif %}
 <div class="">
     <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title.title }}</b> <!-- ({{ title.version_current }}) --></span>
   <!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
@@ -29,6 +34,7 @@ window.onbeforeunload = function (e) {
     </p>
 </div>
 
+{% if form %}
 <div class="">
           <label for="clientid"><i>Session (Client) ID:</i>
               <input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
@@ -58,3 +64,11 @@ window.onbeforeunload = function (e) {
   </form>
   <br>
 </div>
+{% else %}
+  {% if formdone %}
+  <h2>Form submitted successfully!</h2>
+    <br><a href="/">Return to the homepage</a> to scan devices or choose to start a new client session.
+  {% else %}
+  No form generated. Please go back to the <a href="/">homepage</a>.
+  {% endif %}
+{% endif %}

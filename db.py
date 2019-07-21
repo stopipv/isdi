@@ -13,7 +13,7 @@ DATABASE = config.SQL_DB_PATH.replace('sqlite:///', '')
 def today():
     db = get_db()
     t = dt.now()
-    today = t.strftime('%Y%m%d_%H')
+    today = t.strftime('%Y%m%d')
     return today
 
 
