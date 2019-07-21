@@ -280,7 +280,7 @@ def index():
 @app.route('/form/', methods=['GET', 'POST'])
 def client_forms():
     if 'clientid' not in session:
-        return redirect('/')
+        return redirect(url_for('index'))
 
     prev_submitted = Client.query.filter_by(clientid=session['clientid']).first()
     if prev_submitted:
@@ -302,7 +302,6 @@ def client_forms():
                 client.clientid = session['clientid']
                 sa.session.add(client)
                 sa.session.commit()
-                #return redirect('/?clientid={}'.format(clientid))
                 return render_template('main.html', task="form", formdone='yes', title=config.TITLE)
         except Exception as e:
             print('NOT VALIDATED')
@@ -338,7 +337,7 @@ def edit_forms():
             form.populate_obj(form_obj)
             form_obj.clientid = cid
             sa.session.commit()
-            return redirect('/')
+            return render_template('main.html', task="form", formdone='yes', title=config.TITLE)
 
     clients = Client.query.all()
     return render_template('main.html', clients=clients, task="formedit", title=config.TITLE)
@@ -448,7 +447,7 @@ def scan():
     """
     #clientid = request.form.get('clientid', request.args.get('clientid'))
     if 'clientid' not in session:
-        return redirect('/')
+        return redirect(url_for('index'))
 
     device_primary_user = request.form.get(
         'device_primary_user',
