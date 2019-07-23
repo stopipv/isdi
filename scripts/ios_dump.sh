@@ -12,19 +12,21 @@ fi
 
 if [[ $platform == 'darwin' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-darwin/:$PATH
-    export DYLD_LIBRARY_PATH=${DIR}/../static_data/libimobiledevice-darwin/
+    libi=${DIR}/../static_data/libimobiledevice-darwin/
+    export DYLD_LIBRARY_PATH=${DIR}/../static_data/libimobiledevice-darwin
 elif [[ $platform == 'linux' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-linux/:$PATH
+    libi=${DIR}/../static_data/libimobiledevice-linux
 fi
 echo "$platform" "$adb"
-echo $(which idevice_id)
+#echo $(which idevice_id)
 
-serial=$(idevice_id -l 2>&1 | tail -n 1)
+serial=$(${libi}/idevice_id -l 2>&1 | tail -n 1)
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
 # ideviceinstaller -u "'""$serial"'"' -l -o xml -o list_all > $2
-ideviceinstaller -l -o xml -o list_all > $2
+${libi}/ideviceinstaller -l -o xml -o list_all > $2
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 sed -i -e 's/<data>/<string>/g' $2
@@ -35,7 +37,7 @@ sed -i -e 's/<\/data>/<\/string>/g' $2
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
 #ideviceinfo -u "$serial" -x > $3
-ideviceinfo -x > $3
+${libi}/ideviceinfo -x > $3
 
 sed -i -e 's/<data>/<string>/g' $3
 sed -i -e 's/<\/data>/<\/string>/g' $3
@@ -62,7 +64,7 @@ sed -i -e 's/<\/data>/<\/string>/g' $3
 # if fails (so in that case not jailbroken -- or 'not sure' for false negative).
 rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
-ifuse -u "$serial" --root /tmp/phonescanmnt &> $4
+${libi}/ifuse -u "$serial" --root /tmp/phonescanmnt &> $4
 cd ..
 
 # for consumption by python
