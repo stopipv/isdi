@@ -76,6 +76,9 @@ PLATFORM = ('darwin' if platform == 'darwin'
 ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
 #ADB_PATH = 'adb'
 
+LIBIMOBILEDEVICE_PATH = shlex.quote(os.path.join(
+    STATIC_DATA, "libimobiledevice-" + PLATFORM + '/'
+))
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
 MOBILEDEVICE_PATH = shlex.quote(os.path.join(

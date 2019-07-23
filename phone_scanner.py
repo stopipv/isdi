@@ -387,7 +387,7 @@ class IosScan(AppScan):
     Run `bash scripts/setup.sh to get libimobiledevice dependencies`
     """
     def __init__(self):
-        super(IosScan, self).__init__('ios', config.MOBILEDEVICE_PATH)
+        super(IosScan, self).__init__('ios', config.LIBIMOBILEDEVICE_PATH)
         self.installed_apps = None
         self.serialno = None
         self.parse_dump = None
@@ -401,7 +401,7 @@ class IosScan(AppScan):
             if catch_err(run_command(cmd)) == -1:
                 return (False, "Couldn't detect device. See {}/ios_mount_linux.sh."\
                         .format(config.SCRIPT_DIR))
-        cmd = 'idevicepair pair'
+        cmd = '{cli}idevicepair pair'
         pairmsg = run_command(cmd).stdout.read().decode('utf-8')
         if "No device found, is it plugged in?" in pairmsg:
             return (False, pairmsg)
@@ -458,7 +458,7 @@ class IosScan(AppScan):
             return re.match(r'[a-f0-9]+', x) is not None
 
         #cmd = '{cli} --detect -t1 | tail -n 1'
-        cmd = 'idevice_id -l | tail -n 1'
+        cmd = '{cli}idevice_id -l | tail -n 1'
         self.serialno = None
         s = catch_err(run_command(cmd), cmd=cmd, msg="")
         d = [l.strip() for l in s.split('\n')
@@ -506,7 +506,7 @@ class IosScan(AppScan):
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         #cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
-        cmd = 'ideviceinstaller --uninstall {appid!r}'
+        cmd = '{cli}ideviceinstaller --uninstall {appid!r}'
         s = catch_err(run_command(cmd, appid=appid),
                            cmd=cmd, msg="Could not uninstall")
         return s != -1
