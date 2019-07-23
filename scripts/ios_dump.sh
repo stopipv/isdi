@@ -13,6 +13,9 @@ fi
 if [[ $platform == 'darwin' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-darwin/:$PATH
     libi=${DIR}/../static_data/libimobiledevice-darwin/
+    temp="${libi%\"}"
+    temp="${libi#\"}"
+    libi=$temp 
     export DYLD_LIBRARY_PATH=${DIR}/../static_data/libimobiledevice-darwin
 elif [[ $platform == 'linux' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-linux/:$PATH
@@ -26,7 +29,8 @@ mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
 # ideviceinstaller -u "'""$serial"'"' -l -o xml -o list_all > $2
-${libi}/ideviceinstaller -l -o xml -o list_all > $2
+echo "${libi}ideviceinstaller"
+"${libi}ideviceinstaller" -l -o xml -o list_all > $2
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 sed -i -e 's/<data>/<string>/g' $2
