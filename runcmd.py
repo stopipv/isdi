@@ -1,5 +1,6 @@
 #import config
 import re
+import os
 # import shlex
 import subprocess
 
@@ -59,6 +60,10 @@ def catch_err(p, cmd='', msg='', time=10):
 
 
 def run_command(cmd, **kwargs):
+    e = os.environ.copy()
+    THISDIR = os.path.dirname(os.path.abspath(__file__))
+    e['DYLD_LIBRARY_PATH'] = os.path.join(THISDIR, \
+            'static_data/libimobiledevice-darwin') # DYLD not necessary for linux?
     _cmd = cmd.format(
         cli='adb', **kwargs
     )
@@ -66,12 +71,12 @@ def run_command(cmd, **kwargs):
     if kwargs.get('nowait', False) or kwargs.get('NOWAIT', False):
         pid = subprocess.Popen(
             _cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=e
         ).pid
         return pid
     else:
         p = subprocess.Popen(
             _cmd,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=e
         )
         return p
