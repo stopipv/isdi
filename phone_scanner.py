@@ -548,6 +548,10 @@ class IosScan(AppScan):
             reasons.append("Filesystem is not rooted. *Highly unlikely* to be jailbroken.")
             print(reasons)
             return (False, reasons)
+        elif 'No such file or directory' in JAILBROKEN_LOG:
+            reasons.append("Unable to check device.")
+            print(reasons)
+            return (False, reasons)
         else:
             reason = "Filesystem has been rooted. This device is jailbroken."
             print(reason)
