@@ -6,7 +6,7 @@ for Victims of Intimate Partner Violence" (USENIX
 2019)](https://havron.dev/pubs/clinicalsec.pdf).
 
 
-## Install
+## How can I install ISDi?
 
 1. You will need Python 3.6 or higher. Then, run `pip3 install -r requirements.txt` 
 in the base directory of this repository to get the required Python modules.
@@ -15,7 +15,7 @@ in the base directory of this repository to get the required Python modules.
 We will provide `static_data.zip`, which should be unzipped and replacing the
 public facing `static_data` directory in this repository.
 
-## How to run
+## How can I run ISDi?
 
 After [dependencies](#dependencies) are installed, with an Android or iOS device plugged in and
 unlocked, run the following command in the terminal (in the base directory of this repository)
@@ -28,12 +28,13 @@ Navigate to `http://localhost:5000` on a browser (or `http://localhost:5002` if 
 
 It should look something like this:
 
-![Phone Scanner UI](webstatic/ISDi.png "Phone Scanner UI")
+![Phone Scanner UI before scan](webstatic/ISDi_before_scan.png "Phone Scanner UI before scan")
 
+Connect a device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
 
-Connect a
-device and click on the suitable button `Android` or `iOS`. Give it a nickname and click "Scan now". (**Please
-connect one device at a time.**) It will take a few seconds for the scan to complete. We are working to have all scan results done at once on Android, but for the time being please leave the device plugged in when clicking on apps on the scan results table.
+After the scan, the UI will look something like this:
+
+![Phone Scanner UI after scan](webstatic/ISDi_after_scan.png "Phone Scanner UI")
 
 ## Consultation form data
 Some consult form data may not be relevant for use in other organizations.
