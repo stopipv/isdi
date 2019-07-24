@@ -24,8 +24,7 @@ unlocked, run the following command in the terminal (in the base directory of th
 $ bash run.sh
 ```
 
-Navigate to `http://localhost:5000` on a browser. You
-will see the page of the ISDi tool running. 
+Navigate to `http://localhost:5000` on a browser (or `http://localhost:5002` if in test mode). You will see the page of the ISDi tool running. 
 
 It should look something like this:
 
