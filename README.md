@@ -1,11 +1,21 @@
 # IPV Spyware Discovery (ISDi) Tool
 
-Simple tool to check Android or iOS devices for IPS-spyware.
+Checks Android or iOS devices for apps used to surveil or track victims
+("stalkerware", "spouseware", "spyware"). ISDi's technical details are included in ["Clinical Computer Security
+for Victims of Intimate Partner Violence" (USENIX
+2019)](https://havron.dev/pubs/clinicalsec.pdf).
 
 
-## Use the tool
-Get the scraped app data and LR outputs from the [private repo](https://bitbucket.org/rchatterjee/appscraper/); then place it in `static_data/`.
-If you don't have access to that repo, send an email to <rahul@cs.cornell.edu> with a request for it.
+## Install
+
+1. You will need Python 3.6 or higher. Then, run `pip3 install -r requirements.txt` 
+in the base directory of this repository to get the required Python modules.
+
+2. Contact the authors (<havron@cs.cornell.edu> or <rahul@cs.cornell.edu>) with a legitimate request for the blacklist ISDi requires to run.
+We will provide `static_data.zip`, which should be unzipped and replacing the
+public facing `static_data` directory in this repository.
+
+## How to run
 
 After [dependencies](#dependencies) are installed, with an Android or iOS device plugged in and
 unlocked, run the following command in the terminal (in the base directory of this repository)
@@ -43,12 +53,6 @@ In the terminal of the computer, run `adb devices` to see if the device is conne
 
 #### iOS tips
 In the terminal of the computer, run `idevice_id -l` to see if the device is connected properly.
-
-
-## Dependencies
-Need `python3.6+`, `xcode`, and `brew` installed in a Mac running OSX 10.9+.
-Run `pip3 install -r requirements.txt` to get the required Python modules.
-Run `./scripts/setup.sh` to get the iOS and Android dependencies (takes several minutes to build the iOS dependencies, go get a coffee while you wait).
 
 
 #### Prepare the mobile device for scanning

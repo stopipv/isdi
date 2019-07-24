@@ -1,4 +1,4 @@
-command -v ideviceinfo >/dev/null 2>&1 || ./scripts/ios_dependencies.sh
+#command -v ideviceinfo >/dev/null 2>&1 || ./scripts/ios_dependencies.sh
 cd -
 #if [ ! -e ios-deploy/build/Release/ios-deploy ]; then
 #   git submodule update --recursive --remote && cd ios-deploy && xcodebuild && cd -

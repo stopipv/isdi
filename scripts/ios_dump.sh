@@ -12,8 +12,6 @@ fi
 
 if [[ $platform == 'darwin' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-darwin/:$PATH
-    libi="${DIR}/../static_data/libimobiledevice-darwin/"
-    export DYLD_LIBRARY_PATH=${DIR}/../static_data/libimobiledevice-darwin
 elif [[ $platform == 'linux' ]]; then
     export PATH=${DIR}/../static_data/libimobiledevice-linux/:$PATH
     libi=${DIR}/../static_data/libimobiledevice-linux
