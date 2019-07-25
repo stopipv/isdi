@@ -28,7 +28,5 @@ if [[ $platform == 'darwin' ]]; then
       install_name_tool -change /usr/local/opt/libplist/lib/libplist.3.dylib @executable_path/libplist.3.dylib "$f"
 elif [[ $platform == 'linux' ]]; then
   echo "Run this on a Mac (or figure out how to get equivalent of install_name_tool)"
+  echo "Consider patchelf: https://nixos.org/patchelf.html (source at https://github.com/NixOS/patchelf)"
 fi
-
-
-
