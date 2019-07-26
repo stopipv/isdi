@@ -11,7 +11,9 @@ for Victims of Intimate Partner Violence" (USENIX
 1. You will need Python 3.6 or higher. Then, run `pip3 install -r requirements.txt` 
 in the base directory of this repository to get the required Python modules.
 
-2. Contact the authors (<havron@cs.cornell.edu> or <rahul@cs.cornell.edu>) with a legitimate request for the blacklist ISDi requires to run.
+2. Install ADB for your system (via https://developer.android.com/studio/releases/platform-tools.html). On Mac, try `brew cask install android-platform-tools`.
+
+3. Contact the authors (<havron@cs.cornell.edu> or <rahul@cs.cornell.edu>) with a legitimate request for the blacklist ISDi requires to run.
 We will provide `static_data.zip`, which should be unzipped and replacing the
 public facing `static_data` directory in this repository.
 
