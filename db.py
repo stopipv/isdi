@@ -7,7 +7,7 @@ import config
 import os
 import pandas as pd
 
-DATABASE = config.SQL_DB_PATH.replace('sqlite:///', '')
+DATABASE = config.SQL_DB_PATH.replace('sqlite:///', '').strip()
 #CONSULTS_DATABASE = config.SQL_DB_CONSULT_PATH.replace('sqlite:///', '')
 
 def today():
@@ -47,8 +47,8 @@ def get_db():
 
 def init_db(app, sa, force=False):
     with app.app_context():
-        db = get_db()
         if force or not os.path.exists(DATABASE):
+            db = get_db()
             with app.open_resource('schema.sql', mode='r') as f:
                 db.cursor().executescript(f.read())
             db.commit()
@@ -58,6 +58,8 @@ def init_db(app, sa, force=False):
         #    sa.create_all()
         # add with sqlachemy the new models stuff
         # can it get the schema sql // make a table
+        else:
+            db = get_db()
 
 
 def insert(query, args):
