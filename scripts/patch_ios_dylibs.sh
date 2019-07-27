@@ -11,6 +11,7 @@ elif [[ "$unamestr" == 'FreeBSD' ]]; then
    platform='freebsd'
 fi
 
+echo "Check the dylibs via otool -L <file> and add the rules here."
 if [[ $platform == 'darwin' ]]; then
     for f in "${DIR}"/../static_data/libimobiledevice-darwin/*
     do

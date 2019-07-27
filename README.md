@@ -44,7 +44,7 @@ the base directory of this repository)
 
 ```$ bash run.sh ```
 
-Then navigate to `http://localhost:5000` on the browser of your choice (or `http://localhost:5002` if
+Then navigate to `http://localhost:5000` in the browser of your choice (or `http://localhost:5002` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
 the instructions to prepare your device for the scan.
 
