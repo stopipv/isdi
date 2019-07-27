@@ -45,7 +45,7 @@ the base directory of this repository)
 ```$ bash run.sh ```
 
 Then navigate to `http://localhost:5000` on the browser of your choice (or `http://localhost:5002` if
-in test mode). You will see ISDi running as a web app. Click on `"Scan instructions"` and follow 
+in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
 the instructions to prepare your device for the scan.
 
 It should look something like this:
@@ -65,9 +65,12 @@ After the scan, the UI will look something like this:
 UI")
 
 ## Consultation form data 
-ISDi is intended to be used by advocates for victims of intimate partner violence; 
-you can add detailed notes about a victim's tech abuse by clicking `"Start Consult Form"` 
-on ISDi's homepage.
+ISDi is intended to be used by advocates for victims of intimate partner violence in 
+a [clinical setting](https://havron.dev/pubs/clinicalsec.pdf); 
+you can add detailed notes about a victim's tech abuse situation 
+by clicking `"Start Consult Form"` on ISDi's homepage. The results
+will be saved in `data/fieldstudy.db` and can be viewed/edited
+by navigating to `/form/edit`.
 
 Some consult form data may not be relevant for use in
 other organizations (e.g., the meeting location being 
@@ -133,12 +136,14 @@ to the application. I don't know how to get install date, resource usage, etc.
 * `phone_scanner.py` has all the logic required to communicate with Android and
   iOS devices.
 * `parse_dump.py` has all of the logic required to extract dumped info from the
-* devices. After the initial scan, the server will rely on this parser rather
-* than needing an active connection to the device (work in progress). For now,
-* please keep your device plugged in when looking at scan results.  `server.py`
-* is the Flask web server.  `templates/` folder contains the html templates
-* rendering in the UI `webstatic/` folder contains the `.css` and `.js` files
-* `phone_dumps/` folder will contain the data recorded from the phone.
+ devices. After the initial scan, the server will rely on this parser rather
+ than needing an active connection to the device (work in progress). For now,
+ please keep your device plugged in when looking at scan results.  
+* `server.py` is the Flask web server.  
+* `templates/` folder contains the html templates rendering in the UI 
+* `webstatic/` folder contains the `.css` and `.js` files
+* `phone_dumps/` folder will contain the data recorded from the phone (as well as in 
+`data/fieldstudy.db`.
 
 
 
