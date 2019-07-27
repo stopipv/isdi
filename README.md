@@ -6,7 +6,7 @@ in ["Clinical Computer Security for Victims of Intimate Partner Violence"
 (USENIX 2019)](https://havron.dev/pubs/clinicalsec.pdf).
 
 
-## How can I install ISDi?
+## Installing ISDi :computer:
 
 Right now, ISDi currently only supports **macOS and Linux**. If you are using a
 Windows device, it will probably be sufficient to install 
@@ -14,11 +14,12 @@ Windows device, it will probably be sufficient to install
 and then follow the remaining instructions as a Linux user would, cloning/running 
 ISDi inside the Linux container of your choice. If it works, let us know!
 
-0. You will need Python 3.6 or higher. On macOS, you can get this by
-running the following commands in your Terminal application: `xcode-select
---install` (installs developer tools); followed by `/usr/bin/ruby -e "$(curl
--fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"` to
-get Brew (a software package manager); finally, `brew install python` to get Python
+0. You will need Python 3.6 or higher (check by running `python3` in your
+Terminal and see what happens).  On macOS, you can get this by running the
+following commands in your Terminal application: `xcode-select --install`
+(installs developer tools); followed by `/usr/bin/ruby -e "$(curl -fsSL
+https://raw.githubusercontent.com/Homebrew/install/master/install)"` to get
+Brew (a software package manager); finally, `brew install python` to get Python
 3.6+.
 
 1. Run `pip3 install -r
@@ -27,7 +28,7 @@ Python modules.
 
 2. Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
-Macintosh, try `brew cask install android-platform-tools`. On Debian-based
+macOS, try `brew cask install android-platform-tools`. On Debian-based
 systems, try `sudo apt install adb`.
 
 3. Contact the authors (<havron@cs.cornell.edu> or <rahul@cs.cornell.edu>) with
@@ -35,16 +36,16 @@ a legitimate request for the blacklist ISDi requires to run.  We will provide
 `static_data.zip`, which should be unzipped and replacing the public facing
 `static_data` directory in this repository.
 
-## How can I run ISDi?
+## Running ISDi
 
-After [dependencies](#dependencies) are installed, with an Android or iOS
+After ISDi is installed, with an Android or iOS
 device plugged in and unlocked, run the following command in the terminal (in
 the base directory of this repository)
 
-```bash $ bash run.sh ```
+```$ bash run.sh ```
 
-Navigate to `http://localhost:5000` on a browser (or `http://localhost:5002` if
-in test mode). You will see the page of the ISDi tool running. 
+Then navigate to `http://localhost:5000` on the browser of your choice (or `http://localhost:5002` if
+in test mode). You will see ISDi running as a web app. 
 
 It should look something like this:
 
@@ -62,26 +63,36 @@ After the scan, the UI will look something like this:
 ![Phone Scanner UI after scan](webstatic/ISDi_after_scan.png "Phone Scanner
 UI")
 
-## Consultation form data Some consult form data may not be relevant for use in
-other organizations.  Please consider adapting it for your needs (modify the
-`Client` class in `server.py` and use `sa.create_all()` to obtain the new
-schema. Place the new schema in `schema.sql`.
+## Consultation form data 
+ISDi is intended to be used by advocates for victims of intimate partner violence; 
+you can add detailed notes about a victim's tech abuse by clicking `"Start Consult Form"` 
+on ISDi's homepage.
 
-## Debugging tips If there are errors, please send your server error output to
-<havron@cs.cornell.edu>. If you feel confident enough in the codebase to try to
-fix them yourself, do so, but don't push to this repo until emailing Sam.
+Some consult form data may not be relevant for use in
+other organizations (e.g., the meeting location being 
+in a borough of New York City). Please consider adapting the form 
+for your needs. One can do this by modifying the `Client` class in 
+`server.py` and use `sa.create_all()` (`sa` is obtained by wrapping SQLAlchemy over 
+the Flask app) to obtain the new
+schema. Then place the new schema in `schema.sql` by updating the `clients_notes` table.
+
+## Debugging tips 
+If you encounter errors, please file a [GitHub issue](../../issues/) with the server error output 
+(or send it as an email to <havron@cs.cornell.edu>). Pull requests are welcome.
 Inspect apps on the device manually if you cannot resolve a failure.
 
-
-#### Android tips In the terminal of the computer, run `adb devices` to see if
+#### Android tips 
+In the terminal of the computer, run `adb devices` to see if
 the device is connected properly.
 
 
-#### iOS tips In the terminal of the computer, run `idevice_id -l` to see if
+#### iOS tips 
+In the terminal of the computer, run `idevice_id -l` to see if
 the device is connected properly.
 
 
-#### Prepare the mobile device for scanning **Android** (also see
+#### Prepare the mobile device for scanning 
+**Android** (also see
 `localhost:5000/instruction` for more details step-by-step.) 1. You will need
 to activate [`developer
 options`](https://developer.android.com/studio/debug/dev-options.html) in the
@@ -114,30 +125,35 @@ check the phone if it went to "Enter passcode" mode and the "trust this
 computer" dialog.
 
 
-## Cast iOS Screens or Mirror Android Screens It is possible to view your
+## Cast iOS Screens or Mirror Android Screens 
+It is possible to view your
 device screen(s) in real time on the macOS computer in a new window. This may
 be useful to have while you are running the scan (and especially if you use the
 privacy checkup feature), as it will be easy for you to see the mobile device
 screen(s) in real time on the Mac side-by-side with the scanner.
 
-**"Mirroring" vs "Casting":** Mirroring Android devices allows you to not only
+**"Mirroring" vs "Casting":** 
+Mirroring Android devices allows you to not only
 view the mobile device’s screen, but also maneuver the screen directly with
 your mouse and even use your keyboard to input to the Android device. Casting
 iOS devices only allows you to view the device screen -- the iOS device itself
 must be maneuvered by hand.
 
-**How to do it:** you can mirror Android device screens in a new window using
+**How to do it:** 
+you can mirror Android device screens in a new window using
 [scrcpy](https://github.com/Genymobile/scrcpy), and cast iOS device screens on
 macOS with QuickTime 10 (launch it and click File --> New Movie Recording -->
 (on dropdown by red button) the iPhone/iPad name).
 
-## Downloaded data ## The data downloaded and stored in the study are the
+## Downloaded data ## 
+The data downloaded and stored in the study are the
 following.  1. A `sqlite` database containing the feedback and actions taken by
 the user.  2. `phone_dump/` folder will have dump of some services in the
 phone.  (For Android I have figured out what are these, for iOS I don't know
 how to get those information.)
 
-##### Android The services that we can dump safely using `dumpsys` are the
+##### Android 
+The services that we can dump safely using `dumpsys` are the
 following.
 * Application static details: `package` Sensor and configuration info:
 * `location`, `media.camera`, `netpolicy`, `mount` Resource information:
@@ -147,7 +163,8 @@ following.
 
 See details about the services in [notes.md](notes.md)
 
-##### iOS Only the `appIds`, and their names. Also, I got "permissions" granted
+##### iOS 
+Only the `appIds`, and their names. Also, I got "permissions" granted
 to the application. I don't know how to get install date, resource usage, etc.
 (Any help will be greatly welcomed.)
 
@@ -174,6 +191,3 @@ resource usage, etc?  4. Explore viability of
 [WebADB](https://github.com/webadb/webadb.js).
 
 See [notes.md](notes.md) for other developer helps.
-
-
-
