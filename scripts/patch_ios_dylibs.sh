@@ -1,5 +1,19 @@
 #!/bin/bash
 
+dylibs=(
+	/usr/local/Cellar/libimobiledevice/HEAD-b34e343_3/lib/libimobiledevice.6.dylib
+	/usr/local/opt/libimobiledevice/lib/libimobiledevice.6.dylib 
+	/usr/local/opt/usbmuxd/lib/libusbmuxd.4.dylib 
+	/usr/local/opt/usbmuxd/lib/libusbmuxd.4.dylib 
+	/usr/local/opt/libplist/lib/libplist.3.dylib 
+	/usr/local/opt/libzip/lib/libzip.5.dylib 
+	/usr/local/lib/libosxfuse.2.dylib 
+	/usr/local/opt/libplist/lib/libplist++.3.dylib 
+	/usr/local/Cellar/libplist/2.0.0_1/lib/libplist.3.dylib 
+	/usr/local/opt/libusb/lib/libusb-1.0.0.dylib 
+	/usr/local/opt/libzip/lib/libzip.5.dylib 
+)
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 platform='unknown'
 unamestr=`uname`
@@ -15,18 +29,10 @@ echo "Check the dylibs via otool -L <file> and add the rules here."
 if [[ $platform == 'darwin' ]]; then
     for f in "${DIR}"/../static_data/libimobiledevice-darwin/*
     do
-      echo "Patching $f..."
-      install_name_tool -change /usr/local/Cellar/libimobiledevice/HEAD-b34e343_3/lib/libimobiledevice.6.dylib @executable_path/libimobiledevice.6.dylib "$f"
-      install_name_tool -change /usr/local/opt/libimobiledevice/lib/libimobiledevice.6.dylib @executable_path/libimobiledevice.6.dylib "$f"
-      install_name_tool -change /usr/local/opt/usbmuxd/lib/libusbmuxd.4.dylib @executable_path/libusbmuxd.4.dylib "$f"
-      install_name_tool -change /usr/local/opt/usbmuxd/lib/libusbmuxd.4.dylib @executable_path/libusbmuxd.4.dylib "$f"
-      install_name_tool -change /usr/local/opt/libplist/lib/libplist.3.dylib @executable_path/libplist.3.dylib "$f"
-      install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib "$f"
-      install_name_tool -change /usr/local/lib/libosxfuse.2.dylib @executable_path/libosxfuse.2.dylib "$f"
-      install_name_tool -change /usr/local/opt/libplist/lib/libplist++.3.dylib @executable_path/libplist++.3.dylib "$f"
-      install_name_tool -change /usr/local/Cellar/libplist/2.0.0_1/lib/libplist.3.dylib @executable_path/libplist.3.dylib "$f"
-      install_name_tool -change /usr/local/opt/libusb/lib/libusb-1.0.0.dylib @executable_path/libusb-1.0.0.dylib "$f"
-      install_name_tool -change /usr/local/opt/libzip/lib/libzip.5.dylib @executable_path/libzip.5.dylib "$f"
+    echo "Patching $f..."
+	for i in "${dylibs[@]}"; do
+	    install_name_tool -change $i @executable_path/${i##*/} "$f"
+	done
     done
 elif [[ $platform == 'linux' ]]; then
   echo "Run this on a Mac (or figure out how to get equivalent of install_name_tool)"
