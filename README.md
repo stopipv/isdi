@@ -45,7 +45,8 @@ the base directory of this repository)
 ```$ bash run.sh ```
 
 Then navigate to `http://localhost:5000` on the browser of your choice (or `http://localhost:5002` if
-in test mode). You will see ISDi running as a web app. 
+in test mode). You will see ISDi running as a web app. Click on `"Scan instructions"` and follow 
+the instructions to prepare your device for the scan.
 
 It should look something like this:
 
@@ -87,57 +88,16 @@ the device is connected properly.
 
 
 #### iOS tips 
-In the terminal of the computer, run `idevice_id -l` to see if
-the device is connected properly.
+In the terminal of the computer (in the base directory of this repository), 
+run `./static_data/libimobiledevice-darwin/idevice_id -l` to see if
+the device is connected properly (replace `darwin` with `linux` if your system is Linux.)
 
-
-#### Prepare the mobile device for scanning 
-**Android** (also see
-`localhost:5000/instruction` for more details step-by-step.) 1. You will need
-to activate [`developer
-options`](https://developer.android.com/studio/debug/dev-options.html) in the
-phone. Follow the above link to activate the developer option.  **TODO**: how
-to hide it back after the scan.  `$ adb shell pm clear com.android.setting`
-cleans the data for  many (if not most) Android, but not all.  Some might need
-manual cleaning of the settings data by going `Setting -> Apps -> "Settings" ->
-Data -> Clear data`.
-
-2. Connect the phone to the laptop using USB. If `PhoneScanner` is running, try
-refreshing the page, and see if the phone ask for "Do you trust this computer?"
-(or similar) message.  3. Do the scan.  If `PhoneScanner` does not identify the
-device (that is no device enlisted under `Android` group on the left of the
-page), disconnect the USB cable from the phone, reconnect, and refresh the
-page.  4. The scanner will automatically reset the developer option. Restart
-the phone to get to original state.  If you still see the developer options
-(a.k.a, `developer mode`) is on, open `Settings -> Apps`, you will see list of
-apps installed in your device.  Find `Settings` app in the list, tap on it, and
-tap `clear data` (sometimes listed inside `Storage`).
-
-
-**iOS**
-
-There is not much preparation required for iOS. Once the USB cable is
-connected, refresh the page; on the device you have to enter the passcode to
-unlock the device, and then once more to accept the "trust this computer"
-dialog.  Even if you use touchID, passcode is required to enable the USB
-access. If you don't see the device, refresh the page a couple of times, and
-check the phone if it went to "Enter passcode" mode and the "trust this
-computer" dialog.
-
-
-## Cast iOS Screens or Mirror Android Screens 
+#### Cast iOS Screens or Mirror Android Screens 
 It is possible to view your
 device screen(s) in real time on the macOS computer in a new window. This may
 be useful to have while you are running the scan (and especially if you use the
 privacy checkup feature), as it will be easy for you to see the mobile device
 screen(s) in real time on the Mac side-by-side with the scanner.
-
-**"Mirroring" vs "Casting":** 
-Mirroring Android devices allows you to not only
-view the mobile device’s screen, but also maneuver the screen directly with
-your mouse and even use your keyboard to input to the Android device. Casting
-iOS devices only allows you to view the device screen -- the iOS device itself
-must be maneuvered by hand.
 
 **How to do it:** 
 you can mirror Android device screens in a new window using
