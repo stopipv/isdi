@@ -20,15 +20,16 @@ def today():
 def new_client_id():
     last_client_id = query_db(
         'select max(clientid) as cid from scan_res '
-        'where time > datetime("now", "localtime", "-59 minute")',
+        'where time > datetime("now", "localtime", "start of day")',
         one=True
     )['cid']
     d, t = today(), 0
     # FIXME: won't parse if different ClientID.
-    print("new_client_id >>>> {}".format(last_client_id))
     if last_client_id:
         d, t = last_client_id.rsplit('_', 1)
-    return '{}_{:03d}'.format(d, int(t) + 1)
+    cid = '{}_{:03d}'.format(d, int(t) + 1)
+    print("new_client_id >>>> {}".format(cid))
+    return cid
 
 
 def make_dicts(cursor, row):

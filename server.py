@@ -6,7 +6,7 @@ import os
 import json
 import config
 from time import strftime
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from logging.handlers import RotatingFileHandler
 from phone_scanner import AndroidScan, IosScan, TestScan
@@ -246,6 +246,14 @@ def get_device(k):
     }.get(k)
 
 
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    # expires at midnight of new day
+    app.permanent_session_lifetime = \
+            (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0, second=0) - datetime.now()
+    #app.permanent_session_lifetime = timedelta(seconds=1)
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
@@ -259,6 +267,9 @@ def index():
     #if not clientid: # if not coming from notes
 
     newid = request.args.get('newid')
+    # if it's a new day (see app.permenant_session_lifetime), 
+    # or the client devices are all scanned (newid),
+    # ask the DB for a new client ID (additional checks in DB).
     if 'clientid' not in session or (newid is not None):
         session['clientid']=new_client_id()
 
