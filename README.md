@@ -38,10 +38,10 @@ a legitimate request for the blacklist ISDi requires to run.  We will provide
 
 4. **Linux only:** If you are running Linux, install
    [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
-can be done like `apt install patchelf`) and then run
+can be done like `sudo apt install patchelf`) and then run
 `./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
-collaborating and other ISDi users overwrite the iOS binaries with their own
-absolute shared object paths.
+collaborating and other ISDi users overwrite the iOS binaries with their own 
+absolute shared object paths. [More details here (including for macOS users)](notes.md).
 
 ## Running ISDi
 
