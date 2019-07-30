@@ -1,3 +1,9 @@
+## libimobiledevice updates
+If you are updating the [libimobiledevice](https://www.libimobiledevice.org/)
+binaries (in `static_data/libimobiledevice-darwin` and `static_data/libimobiledevice-linux`) 
+with newly compiled ones, run the `./scripts/patch_ios_dylibs.sh` on
+Mac and in Linux in order to keep their dynamic libraries self-contained within ISDi.
+
 ## Android ADB helps
 1. `adb shell settings list [global|system|secure]` Gives a details of system settings.
 2. `pm clear com.android.settings` might remove the developer settings. Need to check.

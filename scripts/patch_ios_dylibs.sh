@@ -37,6 +37,6 @@ if [[ $platform == 'darwin' ]]; then
 elif [[ $platform == 'linux' ]]; then
   for f in "${DIR}"/../static_data/libimobiledevice-linux/*; do
     echo "Patching $f..."
-    patchelf --set-rpath '$ORIGIN':/usr/lib:/lib:/usr/local/lib "$f"
+    patchelf --set-rpath '$ORIGIN':/usr/lib:/lib:/usr/local/lib "$f" > /dev/null 2>&1
   done
 fi
