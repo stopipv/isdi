@@ -35,6 +35,8 @@ if [[ $platform == 'darwin' ]]; then
     done
 
 elif [[ $platform == 'linux' ]]; then
-  echo "Consider patchelf: https://nixos.org/patchelf.html (source at https://github.com/NixOS/patchelf)"
-  echo "Check the dylibs (.so files?) via ldd <file> and add the rules here."
+  for f in "${DIR}"/../static_data/libimobiledevice-linux/*; do
+    echo "Patching $f..."
+    patchelf --set-rpath '$ORIGIN':/usr/lib:/lib:/usr/local/lib "$f"
+  done
 fi

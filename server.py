@@ -203,7 +203,7 @@ class ClientForm(ModelForm):
         ('cloud:passwords synced/password manager','Password syncing (e.g., iCloud Keychain)'),
         ('unknown trusted device','Found an account with an active login from a device not under client\'s control; trusted device'),
         ('ISDi:found dual-use apps/spyware','ISDi found dual-use apps/spyware'),
-        ('ISDi:false positive','ISDi false positive by way of confirming with client'),
+        ('ISDi:false positive','ISDi false positive as confirmed by client'),
         ('browser extension','Browser extension potential spyware'),
         ('desktop potential spyware','Desktop application potential spyware')
         ],

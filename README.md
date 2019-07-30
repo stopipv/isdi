@@ -36,6 +36,13 @@ a legitimate request for the blacklist ISDi requires to run.  We will provide
 `static_data.zip`, which should be unzipped and replacing the public facing
 `static_data` directory in this repository.
 
+4. **Linux only:** If you are running Linux, install
+   [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
+can be done like `apt install patchelf`) and then run
+`./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
+collaborating and other ISDi users overwrite the iOS binaries with their own
+absolute shared object paths.
+
 ## Running ISDi
 
 After ISDi is installed, with an Android or iOS
