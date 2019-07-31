@@ -163,16 +163,41 @@ def get_client_devices_from_db(clientid):
     # first)
     try:
         d = query_db(
-            'select distinct device_model,serial,device_primary_user from scan_res where clientid=?',
+            'select id,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
             args=(clientid,), one=False
         )
     except Exception as e:
         return []
     if d:
-        return 
+        return d
     else:
         return []
 
+def get_scan_res_from_db(scanid):
+    try:
+        d = query_db(
+            'select * from scan_res where id=?',
+            args=(scanid,), one=False
+        )
+    except Exception as e:
+        return []
+    if d:
+        return d
+    else:
+        return []
+
+def get_app_info_from_db(scanid):
+    try:
+        d = query_db(
+            'select * from app_info where scanid=?',
+            args=(scanid,), one=False
+        )
+    except Exception as e:
+        return []
+    if d:
+        return d
+    else:
+        return []
 
 def get_device_from_db(scanid):
     d = query_db(

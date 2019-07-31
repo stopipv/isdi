@@ -82,21 +82,25 @@
         </div>
         <div class="border-warning visible" align="center">
 	    {% if currently_scanned %}
+      <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
+		    {% for scanned in currently_scanned %}
+        {{ scanned.device_model }} ({{ scanned.device_primary_user }})<br>
+		    {% endfor %}
+
+	    {% endif %}
+	    {% if False %}
             <form id="session_scans" method="GET" action="/view_results">
-		<label class="font-weight-bold lead">Devices scanned for this client:
-		    <input style="display:none" name="clientid" id="client-id" type="text" value="{{ clientid }}"/></input>
-                </label>
-	        <input style="display:none" name="last_serial" id="last-serial" type="text" value="{{ serial }}"/></input>
+              <label class="font-weight-bold lead">Devices scanned for this client:<br><br>
                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
 		    {% for scanned in currently_scanned %}
-		    <label class="btn btn-outline-secondary {% if serial == scanned %} active {% endif %}">
-			<input type="radio" name="scan_res" id="scan_res" value="{{ scanned }}"
-			       autocomplete="off" {% if serial == scanned %} checked {% endif %}>
+		    <label class="btn btn-outline-secondary">
+          <input type="radio" name="scan_res" id="{{ scanned.id }}" value="{{ scanned.id }}"
+			       autocomplete="off">
                         {{ scanned.device_model }} ({{ scanned.device_primary_user }})
 		    </label>
 		    {% endfor %}
-		    <button class="btn btn-primary btn-sm">Review Selected Scan Results</button>
 		</div>
+		    <button class="btn btn-group-vertical btn-primary btn-sm">Review Scan Results</button>
 	    </form>
 	    {% endif %}
         </div>
