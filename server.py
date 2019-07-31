@@ -635,6 +635,7 @@ def scan():
         scanid=scanid,
         sysapps=set(),  # sc.get_system_apps(serialno=ser)),
         serial=ser,
+        currently_scanned=currently_scanned,
         # TODO: make this a map of model:link to display scan results for that
         # scan.
         error=config.error()
