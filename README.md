@@ -31,9 +31,9 @@ https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew cask install android-platform-tools`. On Debian-based
 systems, try `sudo apt install adb`.
 
-3. Contact the authors (<havron@cs.cornell.edu> or <rahul@cs.cornell.edu>) with
-a legitimate request for the blacklist ISDi requires to run.  We will provide
-`static_data.zip`, which should be unzipped and replacing the public facing
+3. Fill out https://forms.gle/qzres5fQaRbwsyni7 with
+a legitimate request for the blacklist ISDi requires to run. Please note that at this time, we are only considering requests from those working for victim services organizations. Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox. 
+  We will provide `static_data.zip`, which should be unzipped and replacing the public facing
 `static_data` directory in this repository.
 
 4. **Linux only:** If you are running Linux, install
