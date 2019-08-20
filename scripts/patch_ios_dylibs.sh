@@ -25,6 +25,8 @@ if [[ $platform == 'darwin' ]]; then
       /usr/local/Cellar/libplist/2.0.0_1/lib/libplist.3.dylib 
       /usr/local/opt/libusb/lib/libusb-1.0.0.dylib 
       /usr/local/opt/libzip/lib/libzip.5.dylib 
+      /usr/local/lib/libusbmuxd.4.dylib
+      /usr/local/lib/libplist.3.dylib
     )
 
     for f in "${DIR}"/../static_data/libimobiledevice-darwin/*; do
