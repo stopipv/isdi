@@ -53,11 +53,8 @@ sed -i -e 's/<\/data>/<\/string>/g' $3
 # if fails (so in that case not jailbroken -- or 'not sure' for false negative).
 rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
-ifuse -u "$serial" --root /tmp/phonescanmnt &> $4
-
-#lsof -ti tcp:2222 | xargs kill
-iproxy 2222 22 & "${DIR}/ios_ssh_expect.sh" localhost
-echo $? > $5
+"${libi}/ifuse" --root /tmp/phonescanmnt &> $4
+#"${libi}/ifuse" -u "$serial" --root /tmp/phonescanmnt &> $4
 cd ..
 
 # for consumption by python
