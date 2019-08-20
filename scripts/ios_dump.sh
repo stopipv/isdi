@@ -63,7 +63,8 @@ sed -i -e 's/<\/data>/<\/string>/g' $3
 # if fails (so in that case not jailbroken -- or 'not sure' for false negative).
 rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
-"${libi}/ifuse" -u "$serial" --root /tmp/phonescanmnt &> $4
+"${libi}/ifuse" --root /tmp/phonescanmnt &> $4
+#"${libi}/ifuse" -u "$serial" --root /tmp/phonescanmnt &> $4
 cd ..
 
 # for consumption by python
