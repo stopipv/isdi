@@ -29,6 +29,7 @@ Brew (a software package manager); finally, `brew install python` to get Python
 requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
+
 ### Operating system dependencies
 
 #### Generic
@@ -80,7 +81,6 @@ can be done like `sudo apt install patchelf`) and then run
 `./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
 collaborating and other ISDi users overwrite the iOS binaries with their own 
 absolute shared object paths. [More details here (including for macOS users)](notes.md).
-
 
 ## Running ISDi
 
