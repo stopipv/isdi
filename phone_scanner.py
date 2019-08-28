@@ -556,7 +556,7 @@ class IosScan(AppScan):
 
 
         apps_titles = self.parse_dump.installed_apps_titles()['title'].tolist()
-        for app in ["Cydia", "blackra1n", 
+        for app in ["Cydia", "blackra1n", "Undecimus", 
                 "FakeCarrier", "Icy", "IntelliScreen", 
                 "MxTube", "RockApp", "SBSettings", 
                 "WinterBoard", "3uTools", "Absinthe", 
