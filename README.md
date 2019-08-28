@@ -9,6 +9,8 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
+Also checks for signs of jailbroken iOS devices or rooted Android devices.
+
 ## Installing ISDi :computer:
 
 Right now, ISDi currently only natively supports **macOS and Linux**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
