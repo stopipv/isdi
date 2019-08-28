@@ -526,7 +526,7 @@ class IosScan(AppScan):
             elif 'No such file or directory' in JAILBROKEN_LOG:
                 rooted['False'].append("Unable to check device.")
             else:
-                rooted['True'].append("Filesystem has been rooted. This device is jailbroken.")
+                rooted['True'].append("Filesystem *might* be rooted. Conduct additional checks.")
         except FileNotFoundError as e:
             print("Couldn't find Jailbroken FS check log.")
             # TODO: trigger error message? like 
