@@ -14,7 +14,8 @@ Windows device, it will probably be sufficient to install
 and then follow the remaining instructions as a Linux user would, cloning/running 
 ISDi inside the Linux container of your choice. If it works, let us know!
 
-0. You will need Python 3.6 or higher (check by running `python3` in your
+### Python dependencies
+- You will need Python 3.6 or higher (check by running `python3` in your
 Terminal and see what happens).  On macOS, you can get this by running the
 following commands in your Terminal application: `xcode-select --install`
 (installs developer tools); followed by `/usr/bin/ruby -e "$(curl -fsSL
@@ -22,26 +23,31 @@ https://raw.githubusercontent.com/Homebrew/install/master/install)"` to get
 Brew (a software package manager); finally, `brew install python` to get Python
 3.6+.
 
-1. Run `pip3 install -r
+- Run `pip3 install -r
 requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
-2. Install ADB for your operating system (via
+### Miscellaneous System dependencies
+- Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew cask install android-platform-tools`. On Debian-based
 systems, try `sudo apt install adb`.
 
-3. Fill out https://forms.gle/qzres5fQaRbwsyni7 with
-a legitimate request for the blacklist ISDi requires to run. Please note that at this time, we are only considering requests from those working for victim services organizations. Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox. 
-  We will provide `static_data.zip`, which should be unzipped and replacing the public facing
-`static_data` directory in this repository.
+- Install `expect`. On macOS, run `brew install expect`. On Debian-based
+  systems, run `sudo apt install expect`.
 
-4. **Linux only:** If you are running Linux, install
+- **Linux only:** If you are running Linux, install
    [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
 can be done like `sudo apt install patchelf`) and then run
 `./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
 collaborating and other ISDi users overwrite the iOS binaries with their own 
 absolute shared object paths. [More details here (including for macOS users)](notes.md).
+
+### Blacklist dependencies
+- Fill out https://forms.gle/qzres5fQaRbwsyni7 with
+a legitimate request for the blacklist ISDi requires to run. Please note that at this time, **we are only considering requests from those working for victim services organizations.** Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox. 
+  We will provide `static_data.zip`, which should be unzipped and replacing the public facing
+`static_data` directory in this repository.
 
 ## Running ISDi
 

@@ -51,6 +51,7 @@ def catch_err(p, cmd='', msg='', time=10):
                 print('Need USB for Charging.')
                 return ""
             else:
+                print(s)
                 return s
     except Exception as ex:
         # config.add_to_error(ex)
