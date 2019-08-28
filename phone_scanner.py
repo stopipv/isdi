@@ -50,8 +50,10 @@ class AppScan(object):
         if self.device_type == 'ios':
             devicedumpsdir = os.path.join(config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
-            if fkind == 'Jailbroken':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken',''))
+            if fkind == 'Jailbroken-FS':
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken-FS',''))
+            elif fkind == 'Jailbroken-SSH':
+                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken-SSH',''))
             elif fkind == 'Device_Info':
                 return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Info',''))
             elif fkind == 'Apps':
@@ -479,7 +481,7 @@ class IosScan(AppScan):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
         hmac_serial = config.hmac_serial(serial)
-        cmd = "'{}/ios_dump.sh' {} {Apps} {Info} {Jailbroken}"\
+        cmd = "'{}/ios_dump.sh' {} {Apps} {Info} {Jailbroken-FS} {Jailbroken-SSH}"\
             .format(config.SCRIPT_DIR, hmac_serial, **config.IOS_DUMPFILES)
         print(cmd)
         path = self.dump_path(serial, fkind='Dir')
@@ -489,6 +491,7 @@ class IosScan(AppScan):
 
         dumped = catch_err(run_command(cmd)).strip()
         print('iOS INFO DUMPED.')
+        print(dumped)
         if dumped == serial or True:
             print("Dumped the data into: {}".format(dumpf))
             self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
@@ -512,8 +515,10 @@ class IosScan(AppScan):
         return s != -1
 
     def isrooted(self, serial):
-        with open(self.dump_path(serial, 'Jailbroken'),'r') as fh:
+        with open(self.dump_path(serial, 'Jailbroken-FS'),'r') as fh:
             JAILBROKEN_LOG = fh.readlines()
+        with open(self.dump_path(serial, 'Jailbroken-SSH'),'r') as fh:
+            JAILBROKEN_SSH_LOG = fh.readlines()
 
         # if app["Path"].split("/")[-1] in ["Cydia.app"]
         ''' Summary of jailbroken detection: checks for commonly installed jailbreak apps,
@@ -525,7 +530,15 @@ class IosScan(AppScan):
         # FIXME: load from private data blacklist. More to be added.
         '''
         # FIXME: NEED to apply first to df. self.installed_apps not sufficient. dotapps.append(app["Path"].split("/")[-1])
+
+        
         reasons = []
+
+        if "0\n" in JAILBROKEN_SSH_LOG:
+            reasons.append("SSH is enabled.")
+            print(reasons)
+            return (True, reasons)
+
         for app in ["Cydia.app", "blackra1n.app", 
                 "FakeCarrier.app", "Icy.app", "IntelliScreen.app", 
                 "MxTube.app", "RockApp.app", "SBSettings.app", 

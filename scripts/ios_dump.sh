@@ -65,6 +65,11 @@ rm -rf /tmp/phonescanmnt
 mkdir -p /tmp/phonescanmnt
 "${libi}/ifuse" --root /tmp/phonescanmnt &> $4
 #"${libi}/ifuse" -u "$serial" --root /tmp/phonescanmnt &> $4
+
+#lsof -ti tcp:2222 | xargs kill
+"${libi}/iproxy" 2222 22 & 
+"${DIR}/ios_ssh_expect.sh" localhost
+echo $? > $5
 cd ..
 
 # for consumption by python
