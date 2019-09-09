@@ -12,7 +12,7 @@ Also checks for signs of jailbroken iOS devices or rooted Android devices.
 ## Installing ISDi :computer:
 
 Right now, ISDi currently only supports **macOS and Linux** natively. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
-(WSL2), which can be installed by following ([these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install)). After this,
+(WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
 follow the remaining instructions as a Linux user would, cloning/running 
 ISDi inside the Linux container of your choice.
 
