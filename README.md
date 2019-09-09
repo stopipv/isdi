@@ -11,7 +11,7 @@ Also checks for signs of jailbroken iOS devices or rooted Android devices.
 
 ## Installing ISDi :computer:
 
-Right now, ISDi currently only supports **macOS and Linux** natively. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
+Right now, ISDi currently only natively supports **macOS and Linux**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
 (WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
 follow the remaining instructions as a Linux user would, cloning/running 
 ISDi inside the Linux container of your choice.
@@ -39,7 +39,7 @@ systems, try `sudo apt install adb`.
 - Install `expect`. On macOS, run `brew install expect`. On Debian-based
   systems, run `sudo apt install expect`.
 
-- **Linux only:** If you are running Linux, install
+- **Linux/WSL2 only:** If you are running Linux or WSL2, install
    [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
 can be done like `sudo apt install patchelf`) and then run
 `./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
