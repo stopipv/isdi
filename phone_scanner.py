@@ -358,6 +358,7 @@ class AndroidScan(AppScan):
     def isrooted(self, serial):
         '''
             Doesn't return all reasons by default. First match will return.
+            TODO: make consistent with iOS isrooted, which returns all reasons discovered.
         '''
         cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
@@ -551,11 +552,8 @@ class IosScan(AppScan):
         '''
         # FIXME: NEED to apply first to df. self.installed_apps not sufficient. dotapps.append(app["Path"].split("/")[-1])
 
-        
-
-
-
         apps_titles = self.parse_dump.installed_apps_titles()['title'].tolist()
+        # TODO: convert to set check
         for app in ["Cydia", "blackra1n", "Undecimus", 
                 "FakeCarrier", "Icy", "IntelliScreen", 
                 "MxTube", "RockApp", "SBSettings", 

@@ -11,11 +11,10 @@ Also checks for signs of jailbroken iOS devices or rooted Android devices.
 
 ## Installing ISDi :computer:
 
-Right now, ISDi currently only supports **macOS and Linux**. If you are using a
-Windows device, it will probably be sufficient to install 
-[WSL2](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install)
-and then follow the remaining instructions as a Linux user would, cloning/running 
-ISDi inside the Linux container of your choice. If it works, let us know!
+Right now, ISDi currently only supports **macOS and Linux** natively. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
+(WSL2), which can be installed by following ([these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install)). After this,
+follow the remaining instructions as a Linux user would, cloning/running 
+ISDi inside the Linux container of your choice.
 
 ### Python dependencies
 - You will need Python 3.6 or higher (check by running `python3` in your
@@ -34,7 +33,8 @@ Python modules.
 - Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew cask install android-platform-tools`. On Debian-based
-systems, try `sudo apt install adb`.
+systems, try `sudo apt install adb`. 
+**Windows via WSL2 only:** Installing adb is not so straightforward in WSL2, and it won't work straightaway. You have to ensure having the *same* version of adb *both* in WSL2 and in normal Windows (with `adb version`), then you will need to start the adb process first in Windows, then in WSL2 (with for example `adb devices`).
 
 - Install `expect`. On macOS, run `brew install expect`. On Debian-based
   systems, run `sudo apt install expect`.
