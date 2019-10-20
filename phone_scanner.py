@@ -502,6 +502,7 @@ class IosScan(AppScan):
         self.parse_dump = parse_dump.IosDump(dumpf, finfo=dumpfinfo)
         return self.parse_dump
 
+
     def _dump_phone(self, serial: str) -> bool:
         print('DUMPING iOS INFO...')
         connected, connected_reason = self.setup()
