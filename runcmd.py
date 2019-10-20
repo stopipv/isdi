@@ -38,7 +38,7 @@ def catch_err(p, cmd='', msg='', time=10):
                 print(e)
                 return ""
             # config.add_to_error(m)
-            return ""
+            return m
         else:
             s = p.stdout.read().decode()
             if (len(s) <= 100 and re.search('(?i)(fail|error)', s)) or \

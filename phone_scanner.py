@@ -491,8 +491,9 @@ class IosScan(AppScan):
         dumpf = os.path.join(path, config.IOS_DUMPFILES['Apps'])
         dumpfinfo = os.path.join(path, config.IOS_DUMPFILES['Info'])
 
+        #dumped = catch_err(run_command(cmd)).strip()
         dumped = catch_err(run_command(cmd)).strip()
-        print('iOS INFO DUMPED.')
+        print('iOS DUMP RESULTS for {}:'.format(hmac_serial))
         print(dumped)
         if dumped == serial or True:
             print("Dumped the data into: {}".format(dumpf))
