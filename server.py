@@ -57,7 +57,10 @@ class Client(sa.Model):
     id = sa.Column(sa.Integer, primary_key=True)
     created_at = sa.Column(
         sa.DateTime,
-        default=datetime.now()
+        #default=datetime.now()
+        # TODO: timestamp off by 4 hours? investigate.
+        default=sa.func.current_timestamp(),
+        #server_default=sa.func.current_timestamp() 
         #server_default=str(datetime.now()),
     )
 
