@@ -1,5 +1,6 @@
 from collections import defaultdict
 import pandas as pd
+import config
 import sqlite3
 import json
 import os
@@ -46,6 +47,7 @@ class ISDiSummary():
         return '\n'.join(rep)
 
 if __name__ == '__main__':
+    # TODO: better integrate with tuples used in server? could pull these mappings from config here and in server
     hreadable_vulns = {'none':'None',
                 'shared plan':'Shared plan / abuser pays for plan',
                 'password:observed compromise':'Observed compromise (e.g., client reports abuser shoulder-surfed, or told them password)',
@@ -70,7 +72,8 @@ if __name__ == '__main__':
                 'sms':'SMS texts',
                 'other':'Other chief concern (write in next question)'}
 
-    summ = ISDiSummary('data/fieldstudy.db')
+    DB_PATH = config.SQL_DB_PATH.replace('sqlite:///', '')
+    summ = ISDiSummary(DB_PATH)
     summ.hist_checkbox('vulnerabilities', hreadable_vulns)
     summ.hist_checkbox('chief_concerns', hreadable_concerns)
     print(summ)
