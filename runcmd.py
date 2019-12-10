@@ -33,6 +33,7 @@ def catch_err(p, cmd='', msg='', time=10):
             m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
                 'android', cmd, p.returncode, err_msg, msg
             ))
+            print(cmd, p.returncode, err_msg, msg)
             if 'insufficient permissions for device: user in plugdev group' in err_msg:
                 e = 'Error: Please set "USB For File Transfers" mode on your Android device.'
                 print(e)

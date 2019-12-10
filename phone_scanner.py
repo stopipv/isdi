@@ -360,14 +360,15 @@ class AndroidScan(AppScan):
             Doesn't return all reasons by default. First match will return.
             TODO: make consistent with iOS isrooted, which returns all reasons discovered.
         '''
+        
         cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
-        if s == -1 or 'not found' in s or len(s) == 0:
+        if not s or s == -1 or 'not found' in s or len(s) == 0 or (s == "[android]: Error running ''. Error (1):"):
             print(config.error())
             reason = "couldn't find 'su' tool on the phone."
             return (False, reason)
         else:
-            reason = "found '{}' tool on the phone.".format(s.strip())
+            reason = "found '{}' tool on the phone. Verify whether this is a su binary.".format(s.strip())
             return (True, reason)
         
         installed_apps = self.installed_apps
@@ -532,6 +533,7 @@ class IosScan(AppScan):
         except FileNotFoundError as e:
             print("Couldn't find Jailbroken FS check log.")
             # TODO: trigger error message? like 
+            # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
             #return (True, ['FS check failed, jailbreak not necessarily occurring.'])
 
         try:
@@ -540,6 +542,8 @@ class IosScan(AppScan):
             if "0\n" in JAILBROKEN_SSH_LOG:
                 rooted['True'].append("SSH is enabled.")
         except FileNotFoundError as e:
+            # TODO: trigger error message? like 
+            # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
             print("Couldn't find Jailbroken SSH check log.")
 
         # if app["Path"].split("/")[-1] in ["Cydia.app"]

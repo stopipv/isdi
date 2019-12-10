@@ -11,8 +11,8 @@ class ISDiSummary():
     def __init__(self, db_path):
         assert os.path.isfile(db_path), \
             "ISDi db path {!r} was not found.".format(db_path)
-        app_info_conn = sqlite3.connect(db_path, check_same_thread=False)
-        self.df = pd.read_sql('select * from clients_notes', app_info_conn) #, params=(,))
+        self.app_info_conn = sqlite3.connect(db_path, check_same_thread=False)
+        self.df = pd.read_sql('select * from clients_notes', self.app_info_conn) #, params=(,))
 
     def hist_checkbox(self, cbox_col, hreadable=None):
         hist = defaultdict(int)
@@ -32,6 +32,9 @@ class ISDiSummary():
     def __str__(self):
         rep = ["ISDi data summary"]
         rep.append('-'*80)
+        if self.devices_scanned:
+            rep.append('Number of devices scanned (iOS or Android): {}'\
+                    .format(self.devices_scanned))
         for cbox_col, hist in self.checkbox_hists.items():
             rep.append('')
             c = cbox_col.replace('_',' ')
@@ -45,6 +48,11 @@ class ISDiSummary():
             for k,v in sorted(hist[1].items()):
                 rep.append('Number of clients with '+str(k)+' '+str(c)+': '+str(v))
         return '\n'.join(rep)
+
+    def devices_scanned(self):
+        self.devices_scanned = int(self.app_info_conn.cursor().execute("select count(distinct(serial)) from scan_res;")\
+                .fetchall()[0][0])
+        return self.devices_scanned
 
 if __name__ == '__main__':
     # TODO: better integrate with tuples used in server? could pull these mappings from config here and in server
@@ -76,4 +84,5 @@ if __name__ == '__main__':
     summ = ISDiSummary(DB_PATH)
     summ.hist_checkbox('vulnerabilities', hreadable_vulns)
     summ.hist_checkbox('chief_concerns', hreadable_concerns)
+    summ.devices_scanned()
     print(summ)
