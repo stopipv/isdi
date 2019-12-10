@@ -628,7 +628,7 @@ def scan():
     currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d.update(dict(
         isrooted=(
-            "<strong class='text-danger'>Yes.</strong> Reason(s): {}"
+            "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
             .format(rooted_reason) if rooted
             else "Don't know" if rooted is None 
             else "No"
