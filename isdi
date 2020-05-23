@@ -79,13 +79,6 @@ def app_details(device):
     )
 
 
-@app.route('/instruction', methods=['GET'])
-def instruction():
-    return render_template('main.html', task="instruction",
-                           device_primary_user=config.DEVICE_PRIMARY_USER,
-                           title=config.TITLE)
-
-
 @app.route('/kill', methods=['POST', 'GET'])
 def killme():
     func = request.environ.get('werkzeug.server.shutdown')
