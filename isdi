@@ -10,7 +10,6 @@ from time import strftime
 from datetime import datetime, timedelta
 import logging
 from logging.handlers import RotatingFileHandler
-from phone_scanner import AndroidScan, IosScan, TestScan
 # import traceback
 from privacy_scan_android import do_privacy_check
 from db import (
@@ -21,6 +20,7 @@ from db import (
 )
 
 from web.model import Client
+from web.view import index, get_device
 from web import app, sa
 
 #from flask_wtf import Form
@@ -105,18 +105,6 @@ class ClientForm(ModelForm):
         return (get_field(field_id) for field_id in self.__order)
 
 # app.config['STATIC_FOLDER'] = 'webstatic'
-android = AndroidScan()
-ios = IosScan()
-test = TestScan()
-
-
-def get_device(k):
-    return {
-        'android': android,
-        'ios': ios,
-        'test': test
-    }.get(k)
-
 
 @app.before_request
 def make_session_permanent():
@@ -131,34 +119,6 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-
-@app.route("/", methods=['GET'])
-def index():
-    #clientid = request.form.get('clientid', request.args.get('clientid'))
-    #if not clientid: # if not coming from notes
-
-    newid = request.args.get('newid')
-    # if it's a new day (see app.permenant_session_lifetime), 
-    # or the client devices are all scanned (newid),
-    # ask the DB for a new client ID (additional checks in DB).
-    if 'clientid' not in session or (newid is not None):
-        session['clientid']=new_client_id()
-
-    return render_template(
-        'main.html',
-        title=config.TITLE,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        task='home',
-        devices={
-            'Android': android.devices(),
-            'iOS': ios.devices(),
-            'Test': test.devices()
-        },
-        apps={},
-        clientid=session['clientid'],
-        currently_scanned=get_client_devices_from_db(session['clientid'])
-    )
 
 
 @app.route('/form/', methods=['GET', 'POST'])
