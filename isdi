@@ -19,8 +19,10 @@ from db import (
     get_serial_from_db, get_scan_res_from_db, get_app_info_from_db
 )
 
+# FIXME: this is starting to bloat a little, maybe we can start separating 
+# route resolution into its own module?
 from web.model import Client
-from web.view import index, get_device, client_forms, edit_forms, scan
+from web.view import index, get_device, client_forms, edit_forms, scan, killme
 from web.forms import ClientForm
 from web import app, sa
 
@@ -78,14 +80,6 @@ def app_details(device):
         device=device
     )
 
-
-@app.route('/kill', methods=['POST', 'GET'])
-def killme():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-    return ("The app has been closed!")
 
 
 def is_success(b, msg_succ="", msg_err=""):
