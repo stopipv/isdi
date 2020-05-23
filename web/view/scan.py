@@ -199,4 +199,3 @@ def scan():
     return render_template("main.html", **template_d), 200
  
 
-
