@@ -22,7 +22,7 @@ from db import (
 # route resolution into its own module?
 from web.model import Client
 from web.view import (index, get_device, client_forms, edit_forms, scan,
-        killme, app_details, privacy_scan, privacy)
+        killme, app_details, privacy_scan, privacy, get_nothing)
 from web.forms import ClientForm
 from web import app, sa
 
@@ -177,12 +177,6 @@ def record_scanres(scanid):
         "Success!",
         "Could not save the form. See logs in the terminal.")
 
-
-################# For logging ##############################################
-@app.route("/error")
-def get_nothing():
-    """ Route for intentional error. """
-    return "foobar"  # intentional non-existent variable
 
 
 @app.after_request
