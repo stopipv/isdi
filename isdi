@@ -22,7 +22,8 @@ from db import (
 # FIXME: this is starting to bloat a little, maybe we can start separating 
 # route resolution into its own module?
 from web.model import Client
-from web.view import index, get_device, client_forms, edit_forms, scan, killme
+from web.view import (index, get_device, client_forms, edit_forms, scan,
+        killme, app_details)
 from web.forms import ClientForm
 from web import app, sa
 
@@ -52,33 +53,6 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-
-@app.route('/details/app/<device>', methods=['GET'])
-def app_details(device):
-    sc = get_device(device)
-    appid = request.args.get('appId')
-    ser = request.args.get('serial')
-    d, info = sc.app_details(ser, appid)
-    d = d.fillna('')
-    d = d.to_dict(orient='index').get(0, {})
-    d['appId'] = appid
-
-    # detect apple and put the key into d.permissions
-    # if "Ios" in str(type(sc)):
-    #    print("apple iphone")
-    # else:
-    #    print(type(sc))
-
-    print(d.keys())
-    return render_template(
-        'main.html', task="app",
-        title=config.TITLE,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        app=d,
-        info=info,
-        device=device
-    )
 
 
 
