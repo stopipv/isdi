@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from time import strftime
+import logging
 
 import config
 from flask import Flask, g, session, request
@@ -16,7 +17,11 @@ app.config['SECRET_KEY'] = config.FLASK_SECRET # doesn't seem to be necessary
 app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
 Migrate(app, sa)
-# sa.create_all() # run in init_db()
+
+logger = logging.getLogger(__name__)
+
+import web.view
+
 
 @app.before_request
 def make_session_permanent():
@@ -49,5 +54,3 @@ def after_request(response):
                      request.full_path,
                      response.status)
     return response
-
-
