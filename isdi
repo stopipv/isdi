@@ -1,71 +1,29 @@
 #!/usr/bin/env python3
-from flask import (
-    Flask, render_template, request, redirect, g, jsonify,
-    url_for, session
-)
-import os
-import json
-import config
-from time import strftime
-from datetime import datetime, timedelta
 import logging
-from logging.handlers import RotatingFileHandler
-# import traceback
-from db import (
-    create_scan, save_note, 
-    create_report, new_client_id, init_db, create_mult_appinfo,
-    get_client_devices_from_db, get_device_from_db, update_mul_appinfo,
-    get_serial_from_db
-)
-
-# FIXME: this is starting to bloat a little, maybe we can start separating 
-# route resolution into its own module?
-from web.model import Client
-from web.view import (index, get_device, client_forms, edit_forms, scan,
-        killme, app_details, privacy_scan, privacy, get_nothing, view_results)
-from web.forms import ClientForm
-from web import app, sa
-
-#from flask_wtf import Form
-#from sqlalchemy.orm import validates
-from flask_migrate import Migrate
-from flask_sqlalchemy import Model, SQLAlchemy
-import json
-import config
+import logging.handlers as handlers
+from datetime import datetime, timedelta
 from time import strftime
-from sqlalchemy import *
-from wtforms.validators import Email, InputRequired
 
+from flask import g, session, request
 
-# app.config['STATIC_FOLDER'] = 'webstatic'
+import config
+from db import init_db
+from web import app, sa
 
 @app.before_request
 def make_session_permanent():
     session.permanent = True
     # expires at midnight of new day
     app.permanent_session_lifetime = \
-            (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0, second=0) - datetime.now()
-    #app.permanent_session_lifetime = timedelta(seconds=1)
+            (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0,
+                                                         second=0) - \
+                                                                 datetime.now()
 
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-
-
-   
-##############  RECORD DATA PART  ###############################
-
-
-# @app.route('/save/appnote/<device>', methods=["POST"])
-# def save_app_note(device):
-#     sc = get_device(device)
-#     serial = request.form.get('serial')
-#     appId = request.form.get('appId')
-#     note = request.form.get('note')
-# return is_success(sc.save('appinfo', serial=serial, appId=appId,
-# note=note))
 
 
 @app.after_request
@@ -84,21 +42,6 @@ def after_request(response):
                      response.status)
     return response
 
-# @app.errorhandler(Exception)
-# def exceptions(e):
-#     """ Logging after every Exception. """
-#     ts = strftime('[%Y-%b-%d %H:%M]')
-#     tb = traceback.format_exc()
-#     logger.error('%s %s %s %s %s 5xx INTERNAL SERVER ERROR\n%s',
-#                   ts,
-#                   request.remote_addr,
-#                   request.method,
-#                   request.scheme,
-#                   request.full_path,
-#                   tb)
-#     print(e, file=sys.stderr)
-#     return "Internal server error", 500
-
 
 if __name__ == "__main__":
     import sys
@@ -110,10 +53,10 @@ if __name__ == "__main__":
                       config.SQL_DB_PATH))
     print("TEST={}".format(config.TEST))
     init_db(app, sa, force=config.TEST)
-    handler = RotatingFileHandler('logs/app.log', maxBytes=100000,
-                                  backupCount=30)
+    handler = handlers.RotatingFileHandler('logs/app.log', maxBytes=100000, 
+                                           backupCount=30)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
-    port = 5000 if not config.TEST else 5002
-    app.run(host="0.0.0.0", port=port, debug=config.DEBUG)
+    PORT = 5000 if not config.TEST else 5002
+    app.run(host="0.0.0.0", port=PORT, debug=config.DEBUG)
