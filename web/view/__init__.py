@@ -5,3 +5,4 @@ from .instructions import instruction
 from .control import killme
 from .details import app_details
 from .privacy import privacy, privacy_scan
+from .error import get_nothing
