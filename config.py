@@ -20,8 +20,6 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "1")))
 TEST = bool(int(os.getenv("TEST", "1")))
-DEBUG = False
-TEST = False
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',
@@ -46,7 +44,10 @@ APP_INFO_FILE = 'static_data/app-info.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
     ("~test" if TEST else "")
 
-SQL_DB_PATH = 'sqlite:///data/fieldstudy.db' + ("~test" if TEST else "")
+# we will resolve the database path using an absolute path to __FILE__ because
+# there are a couple of sources of truth that may disagree with their "path
+# relavitity". Needless to say, FIXME
+SQL_DB_PATH = "sqlite:///{}".format(os.path.join(os.path.dirname(__file__), "data/fieldstudy.db"))
 #SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
 
 
