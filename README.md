@@ -58,7 +58,7 @@ After ISDi is installed, with an Android or iOS
 device plugged in and unlocked, run the following command in the terminal (in
 the base directory of this repository)
 
-```$ bash run.sh ```
+```$ ./isdi ```
 
 Then navigate to `http://localhost:5000` in the browser of your choice (or `http://localhost:5002` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
@@ -92,7 +92,7 @@ Some consult form data may not be relevant for use in
 other organizations (e.g., the meeting location being 
 in a borough of New York City). Please consider adapting the form 
 for your needs. One can do this by modifying the `Client` class in 
-`server.py` and use `sa.create_all()` (`sa` is obtained by wrapping SQLAlchemy over 
+`isdi` and use `sa.create_all()` (`sa` is obtained by wrapping SQLAlchemy over 
 the Flask app) to obtain the new
 schema. Then place the new schema in `schema.sql` by updating the `clients_notes` table.
 
@@ -155,7 +155,7 @@ to the application. I don't know how to get install date, resource usage, etc.
  devices. After the initial scan, the server will rely on this parser rather
  than needing an active connection to the device (work in progress). For now,
  please keep your device plugged in when looking at scan results.  
-* `server.py` is the Flask web server.  
+* `isdi` is the Flask web server and the application's main entry point.
 * `templates/` folder contains the html templates rendering in the UI 
 * `webstatic/` folder contains the `.css` and `.js` files
 * `phone_dumps/` folder will contain the data recorded from the phone (as well as in 
