@@ -18,11 +18,7 @@
             </tbody>
         </table>
 	    <div class="text-sm-left">
-		{% if app.title %}
-		<h4> This app uses {{ app.permissions| length }} app permissions:</h4>
-		{% else %}
-		<h4> This app uses {{ app.permissions| length }} app permissions:</h4>
-		{% endif %}
+		<h4> The app used {{ app.permissions| length }} app permissions recently:</h4>
 		<br>
 	    </div>
         <ul class="list-group">
@@ -41,4 +37,14 @@
         <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
         {{ app.descriptionHTML|safe }}
     </div>
+    
+    {% if device=="android" %} 
+    <div class="jumbotron" style="padding: 1em">
+        <h3>Recently used permissions</h3>
+        <p>(Here, <code>mode=allow</code> only means the permission is requested, not necessarily granted.)</p>
+        {{ app.non_hf_permissions_html | safe }}
+    </div>
+    {% endif %}
+
+
 </div>

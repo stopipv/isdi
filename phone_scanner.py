@@ -5,7 +5,7 @@ import hmac
 import hashlib
 import pandas as pd
 import config
-import os
+import os, sys
 import sqlite3
 from datetime import datetime
 from collections import defaultdict
@@ -89,9 +89,9 @@ class AppScan(object):
 
             info = ddump.info(appid)
 
-            print('BEGIN INFO')
+            print('BEGIN APP INFO')
             print("info={}".format(info))
-            print('END INFO')
+            print('END APP INFO')
             # FIXME: sloppy iOS hack but should fix later, just add these to DF
             # directly.
             if self.device_type == 'ios':
@@ -105,7 +105,7 @@ class AppScan(object):
             print("AppInfo: ", info, appid, dfname, ddump)
             return d.fillna(''), info
         except KeyError as ex:
-            print("Exception:::", ex)
+            print(">>> Exception:::", ex, file=sys.stderr)
             return pd.DataFrame([]), dict()
 
     def find_spyapps(self, serialno):
@@ -135,7 +135,6 @@ class AppScan(object):
             td = self.get_app_titles(serialno)
 
         r.set_index('appId', inplace=True)
-        print("td=", td)
         r.loc[td.index, 'title'] = td.get('title','')
         r.reset_index(inplace=True)
 
@@ -167,7 +166,7 @@ class AppScan(object):
             db.commit()
             return True
         except Exception as ex:
-            print("Exception:", ex)
+            print(">> Exception:", ex, file=sys.stderr)
             return False
 
     def device_info(self, serial):
@@ -196,8 +195,8 @@ class AndroidScan(AppScan):
             '{cli} kill-server; {cli} start-server'
         )
         if p != 0:
-            print("Setup failed with returncode={}. ~~ ex={!r}"
-                  .format(p.returncode, p.stderr.read() + p.stdout.read()))
+            print(">> Setup failed with returncode={}. ~~ ex={!r}"
+                  .format(p.returncode, p.stderr.read() + p.stdout.read()), file=sys.stderr)
 
     def _get_apps_(self, serialno, flag):
         cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/^package://g' | sort"
@@ -237,7 +236,7 @@ class AndroidScan(AppScan):
                     if installer not in approved and installer != 'null':
                         # if system is rooted, won't make any difference spoofing wise
                         approved.add(installer)
-        print(approved)
+        print(f"Approved Installers:{approved}")
         for l in self._get_apps_(serialno, '-i -u -3'):
             l = l.split()
             if len(l) == 2:
@@ -246,7 +245,7 @@ class AndroidScan(AppScan):
                 if installer not in approved:
                     offstore.append(apps)
             else:
-                print(">>>>>> ERROR: {}".format(l))
+                print(">>>>>> ERROR: {}".format(l), file=sys.stderr)
         return offstore
 
     def devices(self):
@@ -311,11 +310,16 @@ class AndroidScan(AppScan):
     def app_details(self, serialno, appid):
         d, info = super(AndroidScan, self).app_details(serialno, appid)
         # part that requires android to be connected / store this somehow.
-        hf_recent, not_hf_recent, not_hf, stats = all_permissions(
+        hf_recent, non_hf_recent, non_hf, stats = all_permissions(
             self.dump_path(serialno), appid
         )
+        # print(f"Permissions:\n"\
+        #       f"hf_recent=\n{hf_recent}\n"\
+        #       f"non_hf_recent=\n{non_hf_recent}\n"\
+        #       f"no_hf=\n{non_hf}\n"\
+        #       f"stats=\n{stats}\n")
 
-        # FIXME: some appopps in not_hf_recent are not included in the
+        # FIXME: some appopps in non_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
         info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
         info['Installation Date'] = stats.get('firstInstallTime', '')
@@ -342,15 +346,16 @@ class AndroidScan(AppScan):
                 axis=1
             )
 
+        # print("hf_recent['label']=", hf_recent['label'].tolist())
+        #print(~hf_recent['timestamp'].str.contains('unknown'))
+        d.at[0, 'permissions'] = hf_recent['label'].tolist()
+        non_hf_recent.drop('appId', axis=1, inplace=True)
+        d.at[0, 'non_hf_permissions_html'] = non_hf_recent.to_html()
+
         print("App info dict:", d)
-        print("hf_recent['label']=", hf_recent['label'].tolist())
 
         #hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
         #        (hf_recent['timestamp'].map(str) if isinstance(hf_recent['timestamp'], datetime) else 'nooo') +")"
-
-        #print(~hf_recent['timestamp'].str.contains('unknown'))
-        d.set_value(0, 'permissions', hf_recent['label'].tolist())
-
         #d['recent_permissions'] = hf_recent['timestamp']
         #print(d['recent_permissions'])
         return d, info
