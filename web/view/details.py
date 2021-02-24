@@ -1,6 +1,7 @@
 from flask import request, render_template
 from web import app
 from web.view import get_device
+import config
 
 @app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):

@@ -17,14 +17,22 @@ elif [[ "$unamestr" == 'FreeBSD' ]]; then
    platform='freebsd'
 fi
 
-if [[ $platform == 'darwin' ]]; then
-   adb='static_data/adb-darwin'
-elif [[ $platform == 'linux' ]]; then
-   adb="static_data/adb-linux.$(uname -r)"
-   if [[ ! -e $adb ]]; then
-       adb="static_data/adb-linux"
-   fi
+if command -v adb &>/dev/null;
+then
+    adb=$(command -v adb)
+else
+    echo "Trying static adb. Unlikely to work on newer MAC or Linux. Please install `adb`"
+    if [[ $platform == 'darwin' ]]; then
+        adb='static_data/adb-darwin'
+    elif [[ $platform == 'linux' ]]; then
+        adb="static_data/adb-linux.$(uname -r)"
+        if [[ ! -e $adb ]]; then
+            adb="static_data/adb-linux"
+        fi
+    fi
 fi
+# if adb exists please use that and don't try to override
+
 echo "$platform" "$adb"
 export adb=$adb
 

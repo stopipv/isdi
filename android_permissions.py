@@ -115,16 +115,16 @@ def package_info(dumpf, appid):
         # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the
         # Packages:.  for now, using sed to filter out potential hazards in
         # parsing output.
-        if isinstance(sp, list):
+        if isinstance(sp, list) and len(sp) > 1:
             sp = sp[0]
         _, pkg = sp.popitem()
         if isinstance(pkg, list):
             pkg = pkg[0]
-    except IndexError as e:
+    except (IndexError, AttributeError) as e:
         print(e)
-        print('Didn\'t parse correctly. Not sure why.')
+        print(f"Didn't parse correctly. Not sure why.\nsp={sp}")
         return [], {}
-    print("pkg={}".format(json.dumps(pkg, indent=2)))
+    # print("pkg={}".format(json.dumps(pkg, indent=2)))
     install_perms = [k.split(':')[0] for k, v in
                      pkg.get('install permissions:', {}).items()]
     requested_perms = pkg.get('requested permissions:', [])
@@ -206,6 +206,7 @@ def all_permissions(dumpf, appid):
         non human-friendly permissions, and summary stats.
     '''
     app_perms, pkg_info = package_info(dumpf, appid)
+    # print("--->>> all_permissions\n", app_perms)
     recent_permissions = recent_permissions_used(appid)
 
     permissions = pd.read_csv(config.ANDROID_PERMISSIONS_CSV)
