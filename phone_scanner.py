@@ -138,12 +138,12 @@ class AppScan(object):
         r.loc[td.index, 'title'] = td.get('title','')
         r.reset_index(inplace=True)
 
-        r['class_'] = r.flags.apply(blacklist.assign_class)
-        r['score'] = r.flags.apply(blacklist.score)
+        r['class_'] = r['flags'].apply(blacklist.assign_class)
+        r['score'] = r['flags'].apply(blacklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore')\
           .str.decode('ascii')
         r['title'] = r.title.fillna('')
-        r['html_flags'] = r.flags.apply(blacklist.flag_str)
+        r['html_flags'] = r['flags'].apply(blacklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True],
                       inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
