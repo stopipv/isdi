@@ -31,7 +31,6 @@ Brew (a software package manager); finally, `brew install python` to get Python
 requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
-
 ### Operating system dependencies
 
 #### Generic
