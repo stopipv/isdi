@@ -32,7 +32,7 @@ Python modules.
 ### Miscellaneous System dependencies
 - Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
-macOS, try `brew cask install android-platform-tools`. On Debian-based
+macOS, try `brew install --cask android-platform-tools`. On Debian-based
 systems, try `sudo apt install adb`. 
 **Windows via WSL2 only:** Installing adb is not so straightforward in WSL2, and it won't work straightaway. You have to ensure having the *same* version of adb *both* in WSL2 and in normal Windows (with `adb version`), then you will need to start the adb process first in Windows, then in WSL2 (with for example `adb devices`).
 
