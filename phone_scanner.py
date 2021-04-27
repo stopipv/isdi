@@ -12,14 +12,13 @@ from collections import defaultdict
 from android_permissions import all_permissions
 from runcmd import run_command, catch_err
 import parse_dump
-import blacklist
+import blocklist
 import re
 import shlex
 
 
 class AppScan(object):
     device_type = ''
-    # app_info = pd.read_csv(config.APP_INFO_FILE, index_col='appId')
     # app_info_conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
     app_info_conn = sqlite3.connect(
         config.APP_INFO_SQLITE_FILE.replace('sqlite:///', ''),
@@ -109,7 +108,7 @@ class AppScan(object):
             return pd.DataFrame([]), dict()
 
     def find_spyapps(self, serialno):
-        """Finds the apps in the phone and add flags to them based on @blacklist.py
+        """Finds the apps in the phone and add flags to them based on @blocklist.py
         Return the sorted dataframe
         """
         installed_apps = self.get_apps(serialno)
@@ -119,7 +118,7 @@ class AppScan(object):
                 [],
                 columns=['title', 'flags', 'score', 'class_', 'html_flags']
             )
-        r = blacklist.app_title_and_flag(
+        r = blocklist.app_title_and_flag(
             pd.DataFrame({'appId': installed_apps}),
             offstore_apps=self.get_offstore_apps(serialno),
             system_apps=self.get_system_apps(serialno)
@@ -138,12 +137,12 @@ class AppScan(object):
         r.loc[td.index, 'title'] = td.get('title','')
         r.reset_index(inplace=True)
 
-        r['class_'] = r['flags'].apply(blacklist.assign_class)
-        r['score'] = r['flags'].apply(blacklist.score)
+        r['class_'] = r['flags'].apply(blocklist.assign_class)
+        r['score'] = r['flags'].apply(blocklist.score)
         r['title'] = r.title.str.encode('ascii', errors='ignore')\
           .str.decode('ascii')
         r['title'] = r.title.fillna('')
-        r['html_flags'] = r['flags'].apply(blacklist.flag_str)
+        r['html_flags'] = r['flags'].apply(blocklist.flag_str)
         r.sort_values(by=['score', 'appId'], ascending=[False, True],
                       inplace=True, na_position='last')
         r.set_index('appId', inplace=True)
@@ -152,7 +151,7 @@ class AppScan(object):
 
     def flag_apps(self, serialno):
         installed_apps = self.get_apps(serialno)
-        app_flags = blacklist.flag_apps(installed_apps)
+        app_flags = blocklist.flag_apps(installed_apps)
         return app_flags
 
     def uninstall(self, serial, appid):
@@ -558,7 +557,7 @@ class IosScan(AppScan):
         "waiting for connection" perpertually if not work. says "accepted connection" on next line if it does.
         https://twitter.com/bellis1000/status/807527492810665984?lang=en
         # add to jailbroken log
-        # FIXME: load from private data blacklist. More to be added.
+        # FIXME: load from private data blocklist. More to be added.
         '''
         # FIXME: NEED to apply first to df. self.installed_apps not sufficient. dotapps.append(app["Path"].split("/")[-1])
 

@@ -122,15 +122,16 @@ MobileDevice/
 ## Sensitive folder don't add to Git
 phone_dumps/
 static_data/android_apps_crawl.csv.gz
-static_data/app-flags.csv
-static_data/app-info.db
+# static_data/app-flags.csv
+# static_data/app-info.db
 static_data/com.symantec.mobilesecurity.apk
-static_data/ios_apps_crawl.csv.gz
-static_data/offstore_apks.csv
-static_data/spyware.csv
+# static_data/ios_apps_crawl.csv.gz
+# static_data/offstore_apks.csv
+# static_data/spyware.csv
 backup.tar
 .DS_Store
 error.txt
+static_data.bak/
 
 reports/*.csv
 apps/
