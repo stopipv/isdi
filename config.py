@@ -7,7 +7,7 @@ import hashlib
 import hmac
 
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
-
+THIS_DIR = Path(__file__).absolute().parent
 
 # Used by data_process only.
 source_files = {
@@ -40,14 +40,13 @@ TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_FILE = 'static_data/app-info.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
     ("~test" if TEST else "")
 
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
-SQL_DB_PATH = "sqlite:///{}".format(os.path.join(os.path.dirname(__file__), "data/fieldstudy.db"))
+SQL_DB_PATH = "sqlite:///{}".format(str(THIS_DIR / "data/fieldstudy.db"))
 #SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
 
 
@@ -69,26 +68,23 @@ def set_test_mode(test):
 set_test_mode(TEST)
 
 
-THISDIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DATA = os.path.join(THISDIR, 'static_data')
+STATIC_DATA = THIS_DIR / 'static_data'
+
+# TODO: We should get rid of this, ADB_PATH is very confusing
 ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
 PLATFORM = ('darwin' if platform == 'darwin'
             else 'linux' if platform.startswith('linux')
             else 'win32' if platform == 'win32' else None)
-ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-' + PLATFORM))
+ADB_PATH = shlex.quote(str(ANDROID_HOME / ('adb-' + PLATFORM)))
 #ADB_PATH = 'adb'
 
-LIBIMOBILEDEVICE_PATH = shlex.quote(os.path.join(
-    STATIC_DATA, "libimobiledevice-" + PLATFORM + '/'
-))
+LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(os.path.join(
-    STATIC_DATA, "ios-deploy-" + PLATFORM
-))
+MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
 
-DUMP_DIR = os.path.join(THISDIR, 'phone_dumps')
-SCRIPT_DIR = os.path.join(THISDIR, 'scripts')
+DUMP_DIR = THIS_DIR / 'phone_dumps'
+SCRIPT_DIR = THIS_DIR / 'scripts'
 
 DATE_STR = '%Y-%m-%d %I:%M %p'
 ERROR_LOG = []
@@ -97,26 +93,27 @@ APPROVED_INSTALLERS = {
     'com.android.vending',
     'com.sec.android.preloadinstaller'}
 
-REPORT_PATH = os.path.join(THISDIR, 'reports')
-PII_KEY_PATH = os.path.join(STATIC_DATA, "pii.key")
-try:
-    PII_KEY = open(PII_KEY_PATH, 'rb').read()
-except FileNotFoundError as e:
-    import secrets
-    with open(PII_KEY_PATH, 'wb') as f:
-        f.write(secrets.token_bytes(32))
-    PII_KEY = open(PII_KEY_PATH, 'rb').read()
+REPORT_PATH = THIS_DIR / 'reports'
+PII_KEY_PATH = STATIC_DATA / "pii.key"
+def open_or_create_random_key(fpath, keylen=32):
+    def create():
+        import secrets
+        with fpath.open('wb') as f:
+            f.write(secrets.token_bytes(keylen))
 
-FLASK_SECRET_PATH = os.path.join(STATIC_DATA, "flask.secret")
-try:
-    FLASK_SECRET = open(FLASK_SECRET_PATH, 'rb').read()
-except FileNotFoundError as e:
-    import secrets
-    with open(FLASK_SECRET_PATH, 'wb') as f:
-        f.write(secrets.token_bytes(32))
-    FLASK_SECRET = open(FLASK_SECRET_PATH, 'rb').read()
+    if not fpath.exists():
+        create()
+    k = fpath.open('rb').read(keylen)
+    if len(k) != keylen:
+        creatte()
+    return fpath.open('rb').read()
 
-if not os.path.exists(REPORT_PATH):
+PII_KEY = open_or_create_random_key(PII_KEY_PATH, keylen=32)
+
+FLASK_SECRET_PATH = STATIC_DATA / "flask.secret"
+FLASK_SECRET = open_or_create_random_key(FLASK_SECRET_PATH)
+
+if not REPORT_PATH.exists():
     os.mkdir(REPORT_PATH)
 
 
