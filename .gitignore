@@ -133,6 +133,7 @@ static_data/com.symantec.mobilesecurity.apk
 backup.tar
 .DS_Store
 error.txt
+static_data.bak/
 
 ## To be removed
 toremove/

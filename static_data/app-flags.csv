@@ -1233,6 +1233,7 @@ com.appstar.omatic.callrecorder,playstore,dual-use,Call Recorder - Automatic Cal
 com.argonremote.juliet,playstore,dual-use,Juliet - SMS Control System
 com.maps.mapsplotter,playstore,dual-use,Real Time GPS Tracker -TrackOn
 com.tts.gl.gps,playstore,dual-use,GPS Tracker Free
+com.amdev.recordvoice,playstore,dual-use,call recorder auto
 com.zinn.livelocationtracker,playstore,dual-use,Live Mobile Location Tracker
 com.gpsroutefinder.mobile.location.tracker.gps.maps.locator.route.finder,playstore,dual-use,"GPS , Maps, Navigations & Directions"
 com.blowbought.cell_phone_location,playstore,dual-use,Find My Phone Location
@@ -1437,6 +1438,7 @@ com.srs.callrecorder,playstore,dual-use,Call Recorder
 com.callpaa.enregistrementdappel,playstore,dual-use,Call Record
 com.easyway.apps.smartcallrecorder,playstore,dual-use,Call Recorder Pro
 com.aamrspaceapps.callrecorder,playstore,dual-use,Call Recorder
+com.digitalsolutions.digitalcallrecorder,playstore,dual-use,Digital Call Recorder 3
 com.devicemanagerRB,playstore,dual-use,Family Locator - RedBird
 com.lazydeveloper.autocallrecorder.call_recorder_new_auto_with_best_voice_quality_app.hidden,playstore,dual-use,Call recorder new auto with best voice quality app
 com.tightropeinteractive.supertext,playstore,dual-use,SuperText | SMS Text Messenger
@@ -3426,6 +3428,7 @@ com.goodbarber.matematicalite,playstore,dual-use,Find my Phone Lite
 org.swiftapps.swiftbackup,playstore,dual-use,Swift Backup (Beta)
 com.shravan.map,playstore,dual-use,Friend Finder Lite
 com.familyhawk.FHSenior,appstore,dual-use,Locate365 - Family Locator
+com.locategy.family,appstore,dual-use,Family Locator Locategy
 rars.TrackoApp.ios,appstore,dual-use,TrackoApp GPS Locator - Find Family & Friends
 com.singhsurma.locator,appstore,dual-use,Device Locator: Track and Locate Family Members and Lost or Stolen iPhones
 com.appmosys.phonehome,appstore,dual-use,FoneHome - A Phone Tracker to Find and Locate Your Lost or Stolen Device
@@ -3443,12 +3446,17 @@ com.logsat.familytrackerlite,appstore,dual-use,Family Tracker Lite
 com.logsat.familytracker,appstore,dual-use,Family Tracker
 com.pocket-nanny.pocket-nanny,appstore,dual-use,Little Nanny Family Locator+
 chirp.moonbeamdevelopment.com,appstore,dual-use,Chirp GPS phone tracking
+com.appobit.familyorbit,appstore,dual-use,Family Orbit: Parental Control
 gpstracklite,appstore,dual-use,Gps Vehicle/Child/iPad Location Tracking Lite
 com.coefficientindia.ilocatemobile,appstore,dual-use,Track Any Phone - iLocateMoble
 com.alphasentinel.PyngTechnologies,appstore,dual-use,Pyng GPS & Accident Protection
 com.unwite.onthemap,appstore,dual-use,iMap - Find My Phone & Friends
+es.naxo.Look4Family,appstore,dual-use,Family Location Look4Family
 com.apple.mobileme.fmf1,appstore,dual-use,Find My Friends
+com.TrackView,appstore,dual-use,TrackView - Find My Phone
 com.singhsurma.family,appstore,dual-use,Device Locator 2 with Family Connect: Track Your Family and Locate Your Lost or Stolen iPhone
+com.creativeworkline.OneTouchLocation,appstore,dual-use,One Touch Location
+com.carrotrocket.geozilla,appstore,dual-use,Family GPS Locator GeoZilla
 ru.kidcontrol.kc,appstore,dual-use,Family GPS Tracker Kid Control
 com.semaphore.MyNinoDistribution,appstore,dual-use,MyNiño
 com.pb.letstrak,appstore,dual-use,Letstrack Realtime GPS Tracker
@@ -3465,15 +3473,18 @@ com.followmee.FollowMee,appstore,dual-use,GPS Tracker & Locator Standard
 com.followmee.FollowMeeDeluxe,appstore,dual-use,GPS Tracker & Locator Deluxe
 com.life360.safetymap,appstore,dual-use,"Find My Family, Friends, Phone"
 com.followmee.FollowMeeFree,appstore,dual-use,GPS Tracker by FollowMee
+com.reactapps.followmefree,appstore,dual-use,Family Locator & Phone Tracker
 com.gtx.tracking,appstore,dual-use,Tracking
 com.newapp365.Locator365-Admin,appstore,dual-use,"Locator365 Manager – Remote Mobile Tracking, Routing Record. Prevent Missing Persons"
 com.newapp365.Locator365-Admin-CN,appstore,dual-use,"Locator365 Manager－Remote Mobile Tracking, Routing Record. Prevent Missing Persons"
 com.itrackgps.gotracker,appstore,dual-use,Go Tracker - GPS Tracking App
 com.fammly.ios,appstore,dual-use,Fammly - Family Locator and Parental Controls
+net.prtm.myfamily,appstore,dual-use,Family locator My Family
 com.mediacominteractive.familytracker,appstore,dual-use,Family Tracker by jelocalise
 com.sygic.family,appstore,dual-use,Family Locator and GPS Tracker
 com.christian-poetter.LocationTracker,appstore,dual-use,Family Locator - GPS Phone Tracker for Friends
 com.gps-server.net.gpstracker,appstore,dual-use,GPS Tracker - Mobile Device Tracking
+com.reactapps.followme,appstore,dual-use,Family Locator - Phone Tracker
 clf3soft.pang,appstore,dual-use,"Pang - Friend Locator, Place Finder, and GPS Phone Tracker"
 com.mindspeak.GPSTracker,appstore,dual-use,GPS Phone Tracker for iPhone and iPad
 com.wayogps.iosapp,appstore,dual-use,Phone Locator Wayo GPS Tracker
@@ -3483,10 +3494,12 @@ com.kevinholesh.Moment,appstore,dual-use,Moment – Screen Time Tracker
 PeopleTracker,appstore,dual-use,People Tracker Pro - Cell phone tracker app!
 com.mtechnology.mlocationtracker,appstore,dual-use,Location Tracker (powered by mSpy)
 com.dondeesta.dondeEsta,appstore,dual-use,dondeEsta Family - Locate your Family
+com.kaspersky.safekids,appstore,dual-use,Kaspersky Safe Kids Family GPS
 com.appswage.balefire,appstore,dual-use,Balefire - Anonymous Friends and Family Locator
 com.Realme.FamilyInSafe,appstore,dual-use,"Family In Safe: location tracking, chat and tasks"
 com.tsheets.greatwhite.TSheets,appstore,dual-use,TSheets Time Tracker
 com.forwen.kineye,appstore,dual-use,"KinEye – Find my Family, Friends"
+com.geowaggle.Mamabear,appstore,dual-use,MamaBear Family Safety
 com.troii.timriphone,appstore,dual-use,timr - Time & Mileage Tracker
 ru.kidcontrol.gpsme,appstore,dual-use,GPSme Friends & Family Tracker
 com.loc8erios.parent,appstore,dual-use,Loc8er parent
@@ -3494,6 +3507,7 @@ com.euro.FindMe,appstore,dual-use,GPS Phone Tracker - Family Locator
 com.netsoft.Hubstaff,appstore,dual-use,Hubstaff - GPS Time Tracking
 com.qustodio.mdm.app.family.pro,appstore,dual-use,Qustodio Parental Control
 com.yihubai.findfriend,appstore,dual-use,Find Friends-Yihubai(GPS Tracker)
+io.familytime.dashboard,appstore,dual-use,FamilyTime - Parental Controls
 com.spyphone.PhoneTracker,appstore,dual-use,Spy Phone ® Phone Tracker
 com.syxth.cuspus,appstore,dual-use,Cuspus
 com.ntierinformatics.eMapMe,appstore,dual-use,eMapMe - find friends family locator
@@ -3533,11 +3547,14 @@ PhilG.CUCMEFree,appstore,dual-use,Cucme Free
 com.rockvilletech.zonggpstracker,appstore,dual-use,Zong Kids Tracker Watch
 com.mobisoft.rapidtracker,appstore,dual-use,Rapid Tracker Family manager
 com.gpswox.mobilegpstracker,appstore,dual-use,"Mobile GPS Tracker - GPS Tracking, Phone Tracker"
+com.micriptana.localizame,appstore,dual-use,Find Friends - Localizame
 chopra.dhruv.RaahTracker,appstore,dual-use,Route Tracker Pro - For GPS Location Sharing
 com.openmindnetworks.Periculum,appstore,dual-use,FamFinder Family Locator
 com.trustmobi.MobiShield,appstore,dual-use,MobiShield
 com.phonetracker.phonetracker,appstore,dual-use,Phone Tracker for iPhones
+com.prey,appstore,dual-use,Prey: Find My Phone & Security
 com.kgps.hereo,appstore,dual-use,hereO
+com.reactmobile.lite,appstore,dual-use,React Mobile – Safety App
 com.liveviewgps.mobile,appstore,dual-use,LiveViewGPS Live Trac
 com.sunnyday.wherewuz,appstore,dual-use,WhereWuz
 com.wallfly.io,appstore,dual-use,Wallfly
@@ -3553,6 +3570,7 @@ com.eznovatech.ezClocker,appstore,dual-use,ezClocker Business - Employee Time Tr
 chopra.dhruv.RouteTracker,appstore,dual-use,Route Tracker Lite
 tragging.Wheres-My-Staff-Real-Time,appstore,dual-use,Where's My Staff-Real Time
 com.weblooks.whoscallingme,appstore,dual-use,RingRing - Who's calling me from this number? Reverse Lookup Directories for unknown Caller ID & Phone Numbers (Cell and Landline)
+io.familytime.parentalcontrol,appstore,dual-use,FamilyTime App For Kid's iPhone & iPad
 com.getfindster.findster,appstore,dual-use,Playplace
 com.virtualmaze.gpsconnecttracking,appstore,dual-use,GPS Connect - Tracking Friends
 com.eagerbytes.walkmoar,appstore,dual-use,Walksome walk step tracker
@@ -3563,11 +3581,13 @@ com.felipeloque.Where,appstore,dual-use,Stop Thief!
 com.yourcompany.GPSChaser,appstore,dual-use,GPS Chaser
 coJack,appstore,dual-use,coJack
 com.99check.99check,appstore,dual-use,Find My Family & Friends Phone Locator by 99check
+com.trecone.controlmovil.geoposition,appstore,dual-use,Find my Children
 com.acceleroto.location,appstore,dual-use,GPS Location
 com.vzw.vms,appstore,dual-use,Verizon Support & Protection
 com.mh.friendtracking,appstore,dual-use,"Friend Tracking, find family"
 com.kidslox.osx,appstore,dual-use,Kidslox
 com.timesheet.timesheetmobile,appstore,dual-use,Timesheet Mobile™
+com.justelectus.kidslocation,appstore,dual-use,GPS Phone Locator - KidsLocation
 edsan.guo.PFI01,appstore,dual-use,Private Find Friend
 edsan.guo.PFIL01,appstore,dual-use,Private Find Friend Lite
 com.glympse.iphone.glympse,appstore,dual-use,Glympse -Share your location
@@ -3587,11 +3607,13 @@ ru.patrolife.patrolife,appstore,dual-use,Patrolife Family and Friends Locator (S
 com.microsoft.mobile.polymer,appstore,dual-use,Microsoft Kaizala
 com.bthere.bthere,appstore,dual-use,bthere
 com.pdashes.leash,appstore,dual-use,Leash GPS Tracker
+com.wovenobjects.locatoweb,appstore,dual-use,LocaToWeb - Real time GPS tracking
 it.stefanorussello.followme,appstore,dual-use,FollowMe - Share your GPS tracking in real time
 eu.onlinetracing.OnlineTracing,appstore,dual-use,Online Tracing
 com.track24.T24iPhoneTracker,appstore,dual-use,SMART24 - Keeping you safe
 info.stichling.mytracks4iphoneos,appstore,dual-use,myTracks - The GPS-Logger
 com.wonderabbit.carenow,appstore,dual-use,CoupleKeeper
+com.rubyroidlabs.Navitech,appstore,dual-use,Family GPS Locator by Navitech. Track location of your loved ones.
 com.realstudios.family,appstore,dual-use,Family Screen Time Tracker - Parental Control App
 cz.e-fractal.PhoneCopy,appstore,dual-use,PhoneCopy
 com.zoemob.Family-Safety,appstore,dual-use,ZoeMob Family Assistant
@@ -3628,6 +3650,7 @@ com.wtslocate.trax,appstore,dual-use,Trax - GPS Tracker
 com.teezlelabs.kidsport,appstore,dual-use,MyKidsport
 com.tenthbit.Juliet,appstore,dual-use,Couple - Relationship App for Two
 com.mobicip.cipnet,appstore,dual-use,Mobicip Parental Controls
+com.appsandco.fastwhere,appstore,dual-use,FastWhere - Find GPS location of friends and family in realtime
 com.emberify.instant,appstore,dual-use,Instant - Lifelog | Place & Screen Time Tracker
 com.kidtrol.kidtrol,appstore,dual-use,Kidtrol - Parental Control App Blocker
 com.your-apps.lemontrack,appstore,dual-use,lemontrack - share your location with friends
@@ -3640,6 +3663,7 @@ com.devicetrackerplus.dtpios2,appstore,dual-use,Device Tracker Plus
 com.nvariance.Call-Bliss,appstore,dual-use,Call Bliss - Silence unwanted calls and texts
 com.hdes93404lg.adressQuery,appstore,dual-use,Location Query
 com.where.mobile,appstore,dual-use,"Where The Hell Are You? - Secure, private and secret location sharing via a call to easily find and meet your friends."
+com.getgibi.client,appstore,dual-use,Gibi Pet GPS Tracking Service
 com.launch.Drunk-Mode,appstore,dual-use,Drunk Mode - Call Blocker
 com.mobyiapps.geoalerts,appstore,dual-use,Geo Alerts™
 com.mushapps.LogGPS,appstore,dual-use,LogGPS Vehicle Tracking App
@@ -3789,6 +3813,7 @@ com.prevasystems.ParentApp,appstore,dual-use,GPS Tracking-App for parents
 com.joint.GPSGeneralProject,appstore,dual-use,GPS Tracking General System
 com.amwell.gpstracker,appstore,dual-use,A-Telematic GPS tracker
 com.bustedbooks.spy,appstore,dual-use,Catch Your Cheating Spouse! A Step-by-Step How To Spy and Phone Tracker Guide
+com.vzw.gizmopal,appstore,dual-use,GizmoHub
 com.App.justdriveTeen,appstore,dual-use,JustDriving - Teen
 com.flexilis.security,appstore,dual-use,Lookout: Security and Identity Theft Protection
 com.studiocanvas.dslrbot,appstore,dual-use,DSLR.Bot
@@ -3807,6 +3832,7 @@ com.jimrublee.Go-Walking,appstore,dual-use,Go Walking
 com.redbox2.tcm,appstore,dual-use,Checklist Parent - Mom and Dad Family Calendar Planner and To Do Check Lists
 com.cozi.icozi-free,appstore,dual-use,Cozi - Shared calendar & lists
 com.appologics.airbeam.mac,appstore,dual-use,AirBeam
+com.maptitebalise.MPB,appstore,dual-use,Weenect® - GPS
 com.netstar.captor,appstore,dual-use,CAPTOR GPS TRACKING
 com.409tech.cell1,appstore,dual-use,Cell Phone Tracker - Locate and Track Down
 com.crowdedroad.securitycam,appstore,dual-use,Security Cam with Dropbox & YouTube Sync
@@ -3829,814 +3855,8 @@ com.safesecureservice,offstore,spyware,Secure Service
 com.gpssettings.src.v65,offstore,spyware,Mobile Spy
 com.ispyoo,offstore,spyware,System Service
 sys.framework,offstore,spyware,Update service
+com.spappm_mondow.alarm,offstore,spyware,Backup
 com.android.system.devicelogs,offstore,spyware,com.android.devicelogs
 com.sec.android.internet.service.ik,offstore,spyware,Internet Service
 com.hellospy.system,offstore,spyware,System Services
 com.ws.sc,offstore,spyware,System Update Service
-app.goinhome,playstore,dual-use,GoinHome - Find my Friends & Family on the map
-com.appybuilder.abdulsajid6491.SpoofSMSSenderFake,playstore,dual-use,Spoof SMS Sender fake
-com.jb.receivesms,playstore,dual-use,Receive SMS online
-microfuture.phoneViewer,playstore,dual-use,PhoneViewer ~ Remote Control
-com.timeoutiq,playstore,dual-use,TimeoutIQ®. Smart Education. Screen Time Manager.
-com.att.personalcloud,playstore,dual-use,AT&T Personal Cloud
-com.wultra.app.screenlogger,playstore,dual-use,Screen Logger
-com.BoneCrackerGames.RealisticCarControllerV3,playstore,dual-use,Realistic Car Controller V3
-de.im.RemoDroid,playstore,dual-use,RemoDroid
-com.weixikeji.secretshoot.google,playstore,dual-use,Secret Shoot-background video recorder
-com.phone.clone.easy.data.transfer.smart.share,playstore,dual-use,Phone Clone: Easy Data Transfer  with Smart share
-com.onemanarmy.keylogger,playstore,dual-use,KeyLogger
-com.github.ultron.audiorecorder,playstore,dual-use,Rec Recorder PRO (NO ADS)
-com.trackmyphones.voipcallrecorder,playstore,dual-use,VoIP Call Recorder (compatible with Android 10+)
-me.kacper.barszczewski.pcac,playstore,dual-use,PC-Android Connection
-com.cosmicai.smsgateway,playstore,dual-use,SMS Gateway Local
-com.ivuu,playstore,dual-use,Alfred Home Security Camera: Baby Monitor & Webcam
-com.att.connecttocell,playstore,dual-use,Connect to Cell™
-was.android.transfercompanion,playstore,dual-use,Transfer Companion
-yubi.com,playstore,dual-use,Yubi Parental Control App | Safe Videos for Kids
-mureung.obdproject,playstore,dual-use,Infocar - OBD2 ELM Diagnostic Scanner
-app.zenly.locator,playstore,dual-use,"Zenly - Your map, your people"
-cm.pt.barkparent,playstore,dual-use,Bark - Monitor and Manage Your Kids Online
-com.vts.trackingmantra.vts,playstore,dual-use,Tracking Mantra  GPS Vehicle Tracker
-com.granita.icloudmail,playstore,dual-use,Sync for iCloud Mail
-com.smartfly.phonegpstracker,playstore,dual-use,GPS Tracking
-com.smartgps.pro,playstore,dual-use,Smart GPS Tracker
-com.andrwq.recorder,playstore,dual-use,Smart Recorder – High-quality voice recorder
-com.smsverify.smsforwhatsapp,playstore,dual-use,SMS for WhatsApp
-com.trackingfox.tracker,playstore,dual-use,TrackingFox Car GPS Tracker
-com.vts.cartrack.vts,playstore,dual-use,CAR TRACK
-com.softwareschiek.ultrapass,playstore,dual-use,Password generator for strong and secure passwords
-com.teamviewer.host.market,playstore,dual-use,TeamViewer Host
-com.finder.gpstracking,playstore,dual-use,Finder GPS Tracking Viewer
-com.oneaimdev.skintoolsml,playstore,dual-use,Skin Tools ML
-com.applash.findphone,playstore,dual-use,Find My Phone
-nfo.oneassist,playstore,dual-use,Screen Share - Remote Assistance
-com.locker.kids,playstore,dual-use,Parental Control Screen Time Website Blocker
-com.us.studio.eight.media.cast,playstore,dual-use,Media Cast for Xbox ONE/360
-com.hiddenapps.hiddenscreenrecoder,playstore,dual-use,Hidden Screen Recorder- hide videos & lock app
-com.recovery_messages.converstion_msg,playstore,dual-use,Recover Messages and Conversation Pro
-de.easylogger.easylogger,playstore,dual-use,ELogger
-com.readyapps.contactssync,playstore,dual-use,"Contacts Sync, Transfer and Backup"
-com.wondershare.mobiletrans,playstore,dual-use,MobileTrans-transfer data to new phone
-com.theflashes.pcfinger,playstore,dual-use,PC Finger - Share clipboard with your PC
-com.arolle.kidshome,playstore,dual-use,"Kids Home (Kids Mode,  Launcher, Parental Control)"
-com.teqtiv.findyourfriend,playstore,dual-use,Find Your Friend
-com.MBStudio.clapforfindphone,playstore,dual-use,Clap To Find Phone
-com.granita.caldavsync,playstore,dual-use,Sync for iCloud
-com.gpstracking.common,playstore,dual-use,GPSTracking
-de.tecnetz.forward2me,playstore,dual-use,Forward2Me
-tej.flashkeylogger,playstore,dual-use,Flash Keylogger
-com.mna.couplemonitornew,playstore,dual-use,Couple Tracker
-com.keemut.keemut,playstore,dual-use,Car Tracker Free for all cars and Tesla Stats
-com.lenovo.anyshare.cloneit,playstore,dual-use,CLONEit - Batch Copy All Data
-com.customsolutions.android.phonelink,playstore,dual-use,Phone Link for Alexa
-com.workinfield,playstore,dual-use,Easy Mileage Tracking
-com.hicloud.android.clone,playstore,dual-use,Phone Clone
-net.whatsapptools.watcher.android,playstore,dual-use,WA Watcher - the WA online tracker
-com.busywww.cameraremotebluetooth,playstore,dual-use,Camera Remote Bluetooth
-com.google.android.apps.cloudconsole,playstore,dual-use,Google Cloud Console
-com.ultrasl.videocallrecorder.whatsappcallrecorder,playstore,dual-use,Video Call Recorder for Whatsapp - Video Call
-de.srlabs.snoopsnitch,playstore,dual-use,SnoopSnitch
-com.NSEGPSTracking1,playstore,dual-use,NSE GPS Tracking
-com.as.keylogger,playstore,dual-use,Keylogger
-com.trackom.trackom,playstore,dual-use,TrackOm GPS Tracking App
-com.eastcat.autosync.free,playstore,dual-use,SyncMyDroid Free - Transfer files to PC over WiFi
-in.riants.smsforwarder,playstore,dual-use,Automatic SMS Forwarder
-com.siliconappsandgames.imeinumberfinder.completedeviceinformation,playstore,dual-use,Free IMEI Checker 2021: Find My Device Info
-uit.quocnguyen.automaticcallrecorderpro,playstore,dual-use,Auto Call Recorder PRO
-org.traccar.gateway,playstore,dual-use,Traccar SMS Gateway
-com.ispyfire.iSpyMobile,playstore,dual-use,iSpyMobile
-com.strava,playstore,dual-use,"Strava: Track Running, Cycling & Swimming"
-ar.com.megaingenieria.emobi.locator,playstore,dual-use,Family Locator GPS Tracker Child - Voice Chat
-block.unwanted.call.sms,playstore,dual-use,Block Calls & Block SMS
-com.computec.devil.kidssafety,playstore,dual-use,Kids Safety- track child location at any time
-com.SmartRemote.ir,playstore,dual-use,IR Remote Control for TV & AC
-pulvisapp.tk103_config,playstore,dual-use,GPS Car Tracker Setting SMS free
-com.swd.tracker,playstore,dual-use,iTrack - GPS Tracking System
-com.itrybrand.tracker,playstore,dual-use,Protrack GPS
-com.frkgzn.familysafety,playstore,dual-use,Whats Online Tracker (Last seen) For Family
-ro.urbs.fitbitfindmyphone,playstore,dual-use,Find My Phone with Fitbit
-com.crtfreegpstracker.crtfreemobiletracker,playstore,dual-use,Mobile Tracker
-simplisidy.connecteddevices,playstore,dual-use,Connected Devices
-com.bitdefender.security,playstore,dual-use,Bitdefender Mobile Security & Antivirus
-com.er.mo.apps.mypasswords,playstore,dual-use,My Passwords - Password Manager
-com.google.android.apps.subscriptions.red,playstore,dual-use,Google One
-com.nick.mowen.texpertsync,playstore,dual-use,Texpert SMS Sync
-com.ultrasl.videocallrecorder.whatsappcallrecorder.pro,playstore,dual-use,Video Call Recorder for Whatsapp - Video Call Pro
-me.greenlight,playstore,dual-use,"Greenlight, The Debit Card for Kids and Teens"
-com.techinnate.android.smsforwarder,playstore,dual-use,SMS Forwarder: Messaging and More
-com.spinoco.sms.gateway,playstore,dual-use,Spinoco SMS Gateway
-com.ttxapps.autosync,playstore,dual-use,Autosync - File Sync & Backup
-com.flipdog.cloudsync,playstore,dual-use,Cloud Sync
-com.ebizzapps.texttransferbetweenmobiledesktop,playstore,dual-use,TexFer: Free Text Transfer Between Mobile Desktop
-com.i.video.recorder,playstore,dual-use,iRecorder - Video Recorder
-com.sync.apps.android.sync,playstore,dual-use,Sync
-devesh.ephrine.backup.sms,playstore,dual-use,"SMS Drive | Message Backup, Restore & Sync"
-com.giovesoft.findmy,playstore,dual-use,Find My Apple devices
-com.elteamgroup.callrecorder,playstore,dual-use,Call Recorder
-com.rivetlabs.sms,playstore,dual-use,Telerivet Gateway
-com.justharry.automaticcallrecorderpro,playstore,dual-use,Call Recorder PRO - ACR + Fingerprint Access
-com.anthro.who,playstore,dual-use,WHO growth standards
-com.thetamobile.auto.voice.recorder,playstore,dual-use,"Auto Call, Audio, Sound, Voice Recorder & Editor"
-com.gps.vehicletracker,playstore,dual-use,Vehicle Tracker
-com.teamruscenter.call.dial.recorder.autocallrecorder,playstore,dual-use,ACR Dialer - Auto Call Recorder Pro
-com.application.wgo,playstore,dual-use,Wgo - Family Control
-com.freetracking.app,playstore,dual-use,Mobile Tracker Free
-com.tgelec.kidsitracker,playstore,dual-use,Kids i-Tracker
-com.oneplus.backuprestore,playstore,dual-use,Clone Phone – The official OnePlus Switch app
-com.cloze.app.sync,playstore,dual-use,Cloze Call and Text Sync
-com.spireon.kahu,playstore,dual-use,LoJack Kahu
-com.dfc.location,playstore,dual-use,Free GPS Tracker
-com.iclaude.scheduledrecorder,playstore,spyware,Scheduled Recorder (spy recorder)
-com.as.textrecorder,playstore,dual-use,Text Recorder
-com.dropbox.android,playstore,dual-use,"Dropbox: Cloud Storage & Drive, Doc & Photo Backup"
-com.skateboard.tracker,playstore,dual-use,Skateboard Tracker - GPS tracker for Free
-com.liverecorder.videocall.recorderwa,playstore,dual-use,Video Call Recorder for WhatsApp
-com.kidzoye.parentalcontrol,playstore,dual-use,Kids Mode - Parental Control & Child lock
-com.ourvalues.screentime,playstore,dual-use,ourValues Smarter Screen Time & Parental Control
-com.riteshsahu.SMSBackupRestorePro,playstore,dual-use,SMS Backup & Restore Pro
-netwa.watchdog.watracker,playstore,dual-use,Family Follow : Online Tracker & Last Seen
-com.arbelsolutions.BVRUltimate,playstore,dual-use,Background Video Recorder Ultimate:Motion detect
-com.appstock.vehicletracking,playstore,dual-use,Online GPS Vehicle or Truck Tracker
-pl.kipertech.smsgateway,playstore,dual-use,SMS MMS Gateway
-com.tmobile.syncuptag,playstore,dual-use,SyncUP TRACKER
-com.pamsys.WebCam,playstore,dual-use,"Security camera for smartphones, Lexis Cam"
-com.greenchills.calllogmonitor,playstore,dual-use,"Call Log Monitor, Call History- Free PDF Export"
-cz.scamera.securitycamera,playstore,dual-use,Security Camera CZ
-com.tracker.enduro,playstore,dual-use,Enduro Tracker - real-time GPS tracker
-com.mda.recover.deleted.messages,playstore,dual-use,EZ SMS Backup and Restore: Recover Deleted Message
-com.infinityidea.thirdeye,playstore,dual-use,Third Eye - Smart Video Recorder
-com.facebook.talk,playstore,dual-use,Messenger Kids – The Messaging App for Kids
-com.callrecorder.androidapp,playstore,dual-use,Pro Automatic Call Recorder 2020
-ms.navisoft.winrani_v2,playstore,dual-use,MY FRIENDS LOCATION
-com.dimusoft.tcr,playstore,dual-use,Total Call Recorder
-web.siwmansala.reccall,playstore,dual-use,Automatic Call Recorder Pro (Reccall)
-ru.locmanmobile.paranoiaaccess,playstore,dual-use,"Paranoia Access: anti-spyware, microphone, camera"
-com.dimonvideo.smstoweb,playstore,dual-use,Auto-forward SMS to Email or Cloud
-com.recordingwhatsapp.videocallrecorder,playstore,dual-use,"Video Call, Screen Recorder for WhatsApp FB"
-com.arshad.azmi.androidmanager,playstore,dual-use,Manager fo Android - Control Lost Your Devices ?
-com.trackermurah.gps,playstore,dual-use,IDTRACK - Server GPS
-attendtrack.attendancetracker.free,playstore,dual-use,Employee Attendance & Location Tracker App
-at.janossarkezi.android.smsforwarder,playstore,dual-use,SMS Forwarder
-com.puttikaa.wfamilytracker,playstore,dual-use,W-Family-Tracker
-com.callrecpro,playstore,dual-use,Automatic Call Recorder-RecPro
-com.sand.airmirror,playstore,dual-use,AirMirror: Remote support & Remote control devices
-com.rizvi.callrecorderpro,playstore,dual-use,Call Recorder Pro
-com.mi.mobiletracker,playstore,dual-use,Mobile Tracker Free
-com.aorbegozo005.livetracking,playstore,dual-use,Live Tracking
-com.sparklingapps.callrecorder.telegram,playstore,dual-use,Speech Recorder - Record any Telegram calls
-com.diceappstudio.voicerecorder.callrecorder.free,playstore,dual-use,Call Recorder Free - Voice Recording App
-app.kids360.parent,playstore,dual-use,Kids 360 – parental control & screen time limiter
-com.sparklingapps.callrecorder.messenger,playstore,dual-use,Record Messenger calls
-com.sand.airdroid,playstore,dual-use,AirDroid: Remote access & File
-com.smsrobot.call.blocker.caller.id.callmaster,playstore,dual-use,Call Blocker & Call Recorder - CallMaster
-com.kidslauncher,playstore,dual-use,Kids Launcher - Parental Control and Kids Mode
-com.autocall.record,playstore,dual-use,Auto Call Recording
-com.sparklingapps.callrecorder.full,playstore,dual-use,Universal Call Recorder
-com.rwdindustries.beacon,playstore,dual-use,"Beacon: Family Locator, GPS Tracker & Alert System"
-net.cupla.tracklocation,playstore,dual-use,Track Location
-com.wondershare.famisafe,playstore,dual-use,Parental Control App & Location Tracker - FamiSafe
-com.sparklingapps.callrecorder.oppo,playstore,dual-use,Oppo Call Recorder
-com.sparklingapps.callrecorder.redmi,playstore,dual-use,Redmi Call Recorder
-com.videocall.autorecorder,playstore,dual-use,Auto Video Call Recorder
-find.my.device,playstore,dual-use,Find my Device
-com.kunalapps.callcube,playstore,dual-use,Call Cube : a automatic Call Recorder
-com.akashgarg.callrecorder,playstore,dual-use,Automatic Call Recorder - ACR
-com.dev.callrecordingapp,playstore,dual-use,Call Recorder
-com.yousman.autocallrecorder,playstore,dual-use,Automatic Call Recoder - Free Record Call ACR
-net.mrpear.apps.desktopsmslite,playstore,dual-use,DesktopSMS Lite - Send SMS from PC computer
-com.automaticcallrecorder.recorderadfree,playstore,dual-use,Call Recorder (Ads Free)
-io.faceter.faceter,playstore,dual-use,Faceter – Free DIY Cloud Video Surveillance
-com.github.cpu.controller,playstore,dual-use,Parental Control Child Protection - Mobile Tracker
-com.trackonline.wonline,playstore,dual-use,"WOnline - Whatsapp Online Tracking, Last Seen"
-com.universus.wtracker,playstore,dual-use,W-Track : Last Seen
-com.recordvideocall.recordcall,playstore,dual-use,Video Call Recorder
-com.paktech.TheftTracker,playstore,dual-use,Theft Tracker: Find Lost Phone By Unlock Detector
-com.recq.recoder,playstore,dual-use,Call Recorder Pro Free
-com.mibtech.callrecorderpaid,playstore,dual-use,Call Recorder Pro
-com.onbtech.whatstracker,playstore,dual-use,WhatsTracker : Last Seen and Online Tracker
-com.sparklingapps.callrecorder,playstore,dual-use,App Call Recorder
-com.vinsofts.claptofind,playstore,dual-use,Clap to Find - Find my phone With CLAP
-com.jiobit.app,playstore,dual-use,Jiobit - More than a GPS Tracker for Kids and Pets
-eu.basicairdata.graziano.gpslogger,playstore,dual-use,GPS Logger
-com.digitalwoodpiker.whatstrackerandgirlnumber,playstore,dual-use,Whats Tracker - Last Seen Tracker : Status Saver
-com.becloser,playstore,dual-use,Be Closer - Share your location
-com.q4u.autocallrecorder,playstore,dual-use,Automatic Call Recorder Latest (ACR)
-com.kit.acremotecontrol,playstore,dual-use,AC Remote Control (IR) - All AC Remote
-com.travis.callrecorder.oneplus,playstore,dual-use,OnePlus Call Recorder
-in.synchronise.findfriends,playstore,dual-use,Find My Friends
-com.remoteaire.acaire.control,playstore,dual-use,AC Remote Control Universal
-com.loopvector.allinonebackup.smsbackup,playstore,dual-use,SMS Backup and Restore
-com.tirichlabs.audiorecorder,playstore,dual-use,True Voice Recorder - No Ads - Gain Control
-desai.pratik.callrecorded,playstore,dual-use,Call Recorder ( PRO )
-com.gokoo.callrecorder,playstore,dual-use,Automatic Call Recorder 2020
-com.dragonsque.recoder,playstore,dual-use,Automatic Call Record Pro
-com.vzw.smartlocatorhub,playstore,dual-use,Smart Locator
-com.procall.recoder,playstore,dual-use,Auto call  recorder Tez call recorder
-videocallrecorder.forwhatsapp.statussaver.cleaner.directchat,playstore,dual-use,Video call recorder for whatsapp - Status saver
-com.fawa,playstore,dual-use,Fawa - Last Seen Tracker
-com.rubserv_fbird.recoder,playstore,dual-use,Autocall Recoder pro
-ag.inc.callrecord,playstore,dual-use,Free Call Recorder 2020
-find.my.cellphone,playstore,dual-use,Find my Phone
-com.solutionrecorder.videocall,playstore,dual-use,Video Call Recorder
-com.solutionrecorder.easyvideocall,playstore,dual-use,Auto Video Call Recorder For All
-com.autocallrecorder.callrecorderpro2021,playstore,dual-use,Call recorder pro - Automatic call recorder
-com.freephonetracker.app,playstore,dual-use,Free Phone Tracker
-com.dln.callrecord,playstore,dual-use,Automatic Call Recorder - With Secure Encryption
-com.devparadigam.searchforsure,playstore,dual-use,Search4Sure - find your lost phone
-ru.callina.app,playstore,dual-use,Callina – automatic call recorder
-com.miyapp.bulksms,playstore,dual-use,Miyapp SMS Gateway
-com.kami.autorecoder,playstore,dual-use,Auto Call Recorder 2021 Voice Recorder
-com.nine_to_five_pp.takecontrol_appusage_analysis_control,playstore,dual-use,TakeControl- App Usage Tracker & Addiction Control
-com.whistleclap.phonefinder,playstore,dual-use,Whistle Clap Phone Finder
-com.findphonebycalp.claptofindmylostphone,playstore,dual-use,Clap to Find my Lost Phone - Ring Phone by Clap
-com.vdg.callrecorder,playstore,dual-use,HD Auto Call Recorder 2020
-com.app.realtimetracker,playstore,dual-use,Real Time GPS Tracker
-com.dailgon.recorder,playstore,dual-use,AutoRecord : Smart Auto Call Recorder
-com.phonetrackerfree.findmyfamily.gpstracker,playstore,dual-use,GPS Location With Mobile Phone Number Tracker
-com.systemapps.callrecorder,playstore,dual-use,Mini Call Record - Automatic Call Recorder
-com.picsartphotostudio.clap.find.my.mobile.alarm.sound.claptofind.mydevice.phone.finder,playstore,dual-use,Clap to Find Phone
-com.phonenumbertracker.location.mobile.call.locator.callerid,playstore,dual-use,Phone Number Tracker - Mobile Number Locator Free
-com.saharaappworld.truecallerid.callername.locationtracker.numbertracker.mobilenumbertracker,playstore,dual-use,Mobile Number Tracker : Number Location & Address
-com.awesun.control,playstore,dual-use,AweSun Remote Desktop
-com.tabnova.aidashboard,playstore,dual-use,Kids Dashboard (Parental Control Kids Mode App)
-com.miraps.recordcall,playstore,dual-use,Smart Call Recorder - SCR
-com.trackmyphones.livefamilytracker,playstore,dual-use,Live Family Tracker
-com.pixarix.callrecorder,playstore,dual-use,call recorder pro free : no root
-com.reboot.callrepro,playstore,dual-use,Call Recorder Pro
-pdhpan.automatic.call.recorder,playstore,dual-use,Automatic Call Recorder 2020
-com.swae.porpl.cdrue.imei,playstore,dual-use,Find My Device (IMEI Tracker)
-com.swae.porpl.paid.imei,playstore,dual-use,Find My Device(Imei Tracker)
-com.maykim.wafamilyonline,playstore,dual-use,WA Family Online
-com.olmapps.offthephone,playstore,dual-use,Off The Phone - lock phone remotely
-starbox.callrecorder,playstore,dual-use,All Call Recorder Automatic
-com.remotecontrolfor.samsungdvdremote,playstore,dual-use,Samsung DVD Remote
-com.smithandsons.claptofindphone,playstore,dual-use,Clap To Find My Phone
-org.skvalex.cr,playstore,dual-use,Call Recorder - SKVALEX (Trial)
-com.mapdirection.tracking.route.gpsfinder.drivingplanner,playstore,dual-use,GPS Tracking Route Planner & Maps Locator
-ocean.daikin.remote.ac,playstore,dual-use,Daikin Air Conditioner Remote Control For All AC
-com.blackshark.callrecordergold,playstore,dual-use,Call Recorder GOLD - ACR + Voicememo + Fingerprint
-com.voltasac.voltasremote,playstore,dual-use,Remote Control For voltas Air Conditioner
-ocean.Lloyd.Acremote,playstore,dual-use,LLyod Air Conditioner Remote Control For All Ac
-com.analyze.wpanalyze,playstore,dual-use,"WpAnalyze - Online Tracker, Last Seen for Whatsapp"
-com.autocallrecorder2020.callrecorder,playstore,dual-use,Call Recorder Free - auto call recorder free
-com.shdevelo.ClapWhistleToFindPhone,playstore,dual-use,Find Phone By Clap Or Whistle - Gadget Finder Tool
-map.ly.mobile.number.caller.id.blocker,playstore,dual-use,Mobile Number Locator - Live Phone Number Location
-com.panaromicapps.calleridtracker,playstore,dual-use,Mobile Number Tracker: Find My Phone
-com.parentportal.logviewer,playstore,dual-use,Parent Portal - Parental Control & Monitoring App
-com.indappdev.acr,playstore,dual-use,ACR - Call Recorder - Automatic Call Recording
-com.pctattletale.androidviewer,playstore,dual-use,👀 pcTattletale Phone Tracker
-com.orbit.parenting.lookoutmykid,playstore,dual-use,Find My Kids: Lookout my child and Mobile Tracker
-com.misk.callrecoder,playstore,dual-use,Auto Call Recorder Pro – All Call Recorder
-call.recording.app,playstore,dual-use,Call Recorder Automatic
-com.anka.familylastseen,playstore,dual-use,WA Family Last Seen
-com.appnextg.acr,playstore,dual-use,Call Recorder - Auto Call Recording - ACR
-com.illusions.samsunguniversalremotecontrol,playstore,dual-use,Universal Remote For Samsung
-net.justping.family,playstore,dual-use,"JustPing Family Locator, GPS Tracker, Child Safety"
-com.nobrainer.localization,playstore,dual-use,Parental GPS Phone Tracker
-global.claptofind,playstore,dual-use,Clap To Find Phone : Clap phone finder
-com.callrecorder.automaticpronew,playstore,dual-use,Call Recorder Automatic Pro
-com.donttouchmyphone.unlock.photo,playstore,dual-use,Who Touched My Phone
-com.hammersecurity,playstore,dual-use,Track it EVEN if it is off | Antitheft SOS Family
-com.gps_vehicle_tracker.tracker_tool,playstore,dual-use,GPS Vehicle Tracker
-com.secureapps.clap.findphone,playstore,dual-use,Clap to find my lost / misplaced phone
-com.xtry.recorfimo,playstore,dual-use,"Video call Recorder imo, autorecord hd"
-com.autotool.callrecorder,playstore,dual-use,Call Recorder Pro
-com.bothsides.callrecorder,playstore,dual-use,Both Sides Call Recorder Automatic - Clear voice
-com.piandro.backupsms,playstore,dual-use,Backup SMS
-com.superrecorder.callrec,playstore,dual-use,Call Recorder & Hide App Pro Full voice clarity
-com.oussama.auto.phone.call.recorder,playstore,dual-use,ACR
-com.c.a.inspectware,playstore,dual-use,Inspectware - (Keylogger)
-com.samslab.recoder,playstore,dual-use,Call Recorder Pro
-apstan.flashlightonclap.smart_flashlight.flashblinkg,playstore,dual-use,Find MY Phone : Clap to Find Lost Device📲
-com.whistlephonefinder.findphonebywhistle.clapfinder,playstore,dual-use,Find My Phone - Whistle & Clap
-com.fmee.fmeeservf,playstore,dual-use,FollowMee GPS Tracker: Locate & Track Your Device
-magicalappzone.voicetofindmyphone.findphone,playstore,dual-use,Voice to Find My Phone - Clap to Find Phone
-vector.media.claptofindphone.app,playstore,dual-use,Clap To Find My Phone
-com.universal.ac.remote.control.air.conditioner,playstore,dual-use,air conditioner Universal remote - remote ac
-at.bikersos,playstore,dual-use,BikerSOS - Motorcycle Ride GPS Tracker & SOS
-com.parentalcontrol.smartdaddy,playstore,dual-use,SmartDaddy: Parental Control Child Protection
-enstone.smsfw.app,playstore,dual-use,Sms forwarder : Auto forward SMS to PC or Phone
-com.shouttofindmyphone.claptofindephone,playstore,dual-use,Shout To Find My Phone
-com.jbmsoftlab.emocallrecorder,playstore,dual-use,Video call recorder for imo
-com.ip_camera_monitor,playstore,dual-use,IP Camera Monitor – Video Surveillance Monitoring
-com.heavenecom.smartscheduler,playstore,dual-use,Auto Message - auto reply text call sms sender app
-com.kp.wonlinewatcher,playstore,dual-use,Family track - Online & Last Seen Watcher
-com.moez.QKSMS.websmith.smsforwarder,playstore,dual-use,SMS Forwarder SMS Forwarding App & Auto SMS Tool
-com.auto_call_recorder_acr,playstore,dual-use,Auto Call Recorder (ACR) - Smart Call Recording
-com.find.my.mobile.sound.alarm.clap,playstore,dual-use,Mobile tracker:Phone tracker & Phone finder
-com.technolts.auto.phone.callrecorder.free,playstore,dual-use,Auto Call Recorder
-com.teamruscenter.allcallrecorder,playstore,dual-use,Supper Call Recorder Pro: Record Messenger Calls
-com.pangkang.recoder,playstore,dual-use,Call Recorder Pro  Latest Version Free
-com.gawk.smsforwarder,playstore,dual-use,Automatically forward SMS to your PC/phone
-com.pangkang.claptofindephone,playstore,dual-use,Find My Phone Whistle Clap
-us.AutomaticCallRecorder.autorecordphonecalls.phonerecording.callrecordingapp,playstore,dual-use,call recorder auto call record 2021
-com.kl.whistleapp.findphone,playstore,dual-use,Find my Phone by Whistle
-com.gfds.clap.your.hands.find.my.phone,playstore,dual-use,Clap Your Hands to Find My Phone – Phone Finder
-co.familykeeper.kids,playstore,dual-use,FamilyKeeper Child
-telegram.family.tracker.app,playstore,dual-use,LastSeen - Teleqram Tracking
-barsa.auto.call.recorder.free,playstore,dual-use,Auto Call Recorder Free 2020
-com.arappsltd.autocallrecoder,playstore,dual-use,Auto Call Recorder 2021
-com.exeedlk.onecallrecorder,playstore,dual-use,Call Recorder : ONE ACR Free
-com.imeicommunity.android,playstore,dual-use,IMEI Community: Find My Phone & Mobile Security
-com.appflix.findapp,playstore,dual-use,Find Friends Location
-clap.to.find.phone.rk,playstore,dual-use,Clap To Find My Phone
-com.kiddoware.kidsafebrowser,playstore,dual-use,Safe Browser Parental Control - Blocks Adult Sites
-com.mobile.location.lost.phone.tracker,playstore,dual-use,Mobile Location Tracker
-com.google.android.apps.kids.familylinkhelper,playstore,dual-use,Google Family Link for children & teens
-com.HRK.FreeAutoCallRecorder,playstore,dual-use,Call Recorder Pro
-worldsoft71.ami.com.videoCallRecorder,playstore,dual-use,Video Call  Recorder 2021 : Automatic and Free
-com.parental.control.kids.control,playstore,dual-use,"Parental Control App - Screen Time, Kids Mode"
-com.projectone.callrecorderpro2020,playstore,dual-use,Call Recorder Pro (Automatic)
-com.saychiz.remotecamera,playstore,dual-use,SayCheese - Remote Camera
-clap.to.find.my.lost.phone.flashlight.with.sound,playstore,dual-use,Clap to Find my Lost Phone - Flashlight & Sound
-com.liid.react.android,playstore,dual-use,Salestrail - Call Monitoring & Call Recorder App
-com.callrecorder.tapeacall,playstore,dual-use,"Tapeacall - Free Automatic Call Recorder, ACR"
-com.johnapps.freecallrecorder,playstore,dual-use,Call Recorder 2020-HD&Free Automatic Call Recorder
-com.og.virtual.families.simulator.games,playstore,dual-use,Happy Virtual Family: Prank Hero Family Games 3D
-com.shabaglobal.ipfind,playstore,dual-use,FindApp-Phone Location Tracking for Friends Family
-eu.parent.android.app,playstore,dual-use,Parent: Child Care App
-truecaller.showcaller.callerid.callrecorder.blocker.dialer.phone,playstore,dual-use,Call Recorder for Phone Call
-com.shaikhutech.whatscallvideorecorder,playstore,dual-use,Whats Call Recorder app
-com.securellc.phone.tracker.caller,playstore,dual-use,Phone Tracker Free GPS
-com.bitguardian.parentalcontrol,playstore,dual-use,Parental Control : Screen Time & Location Tracker
-com.turtlesbd.videocallrecorder,playstore,dual-use,Video call recorder - record video call with audio
-com.softlab.videoscreen.recorder.videocall,playstore,dual-use,Video call recorder for whatsapp
-com.phonefinder.findmyphone.whistlephonefinder,playstore,dual-use,Find My Phone by Whistle - Where is my phone?
-com.mobiletracker.mobileapp,playstore,dual-use,Mobile Tracker
-com.anti.theft.alarm.alarm.app.for.dont.touch.mobile,playstore,dual-use,Anti Theft Alarm App for Don't Touch Phone
-com.beingocderz.auto_recoder,playstore,dual-use,Automatic Call Recorder PRO
-com.exeedlk.autocallrecorder,playstore,dual-use,Call Recorder - Automatic Call Recorder - ACR
-com.playstudio.videocall.emorecorder,playstore,dual-use,video call recorder for imo
-com.whatstracker.onlinetrackerwatracker,playstore,dual-use,WeFamily Online Tracker for Family Free App
-com.segmentationfault.sensemobils.management.cams.trial,playstore,dual-use,CAMS 🆓👫📷: Remote cameras as one|Bluetooth CCTV
-com.smsrobot.call.recorder.callsbox,playstore,dual-use,Call Recorder - CallsBox
-com.goldenprograms.callrecorderpro,playstore,dual-use,Call Recorder
-com.antonio.family.locator.phone.tracker,playstore,dual-use,Phone Tracker Free - Phone Locator by Number
-bhanupro.callrecorderpro,playstore,dual-use,Call Recorder Pro
-com.techproof.acr,playstore,dual-use,Call Recorder - ACR - Automatic Call Recording
-com.maploapp.familylocator,playstore,dual-use,Maplo - Family Locator
-phonefinderbyvoice.claptofindphone.findphonebywhistle,playstore,dual-use,Clap To Find My Phone: Whistle Phone Finder Tool
-com.aimadLaghrib.autoCallRecorder2019,playstore,dual-use,Auto Call Recorder 2019
-com.universalremotecontrol.acremote.allacremote.wifiac.smartac.ac.remote.control,playstore,dual-use,Universal AC Remote Controller
-com.callrecorder.automaticrecorder365,playstore,dual-use,Call Recorder - Free Automatic Call Recorder ACR
-com.wisetechapps.whistle.find.phone,playstore,dual-use,Find My Phone by Whistle
-com.wparents,playstore,dual-use,"W-Parents - Online Tracker, Last Seen for Whatsapp"
-com.tapeacall.com,playstore,dual-use,TapeACall: Phone Call Recorder
-com.videocallrecorder.screenvideorecorderwithaudioa,playstore,dual-use,Automatic Video Call Recorder - Call Recorder Free
-powersofttech.smart.automatic.callrecorder.pro,playstore,dual-use,Smart Automatic Call Recorder Pro
-com.sufiantech.findphonebywhistleclapper,playstore,dual-use,Find my Phone Whistle : Find my Phone Clap
-com.videocalls.recorder,playstore,dual-use,WhatsRec Free Video Call Recorder ACR
-com.lma.callrecorder,playstore,dual-use,Call Recorder
-com.alltracker_family.new,playstore,dual-use,AllTracker Family – Parental control
-com.medox.medoxapp,playstore,dual-use,Video call recorder for imo - Auto call recorder
-com.appslate.findapp,playstore,dual-use,Location Tracker - Maps GPS Track & Location Trace
-com.family.safe.kids.tracker.gps.phone.locator.android.parent,playstore,dual-use,Safe Kids: My kid's location
-com.blackjack.clap.findphone,playstore,dual-use,Clap To Find My Phone 2020 - Find Lost Phone
-com.jivubaa.videorecorderforwhatscall,playstore,dual-use,Video Recorder for Whatsapp Call
-com.ft.clap.whistle.phonefinder.findphonebywhistle,playstore,dual-use,Whistle Phone Finder : Find My Phone by Whistle
-hubpro.hd.callrecorder,playstore,dual-use,HD Call Recorder App |Automatic Call Recorder Free
-find.my.phone.by.clapping,playstore,dual-use,Find my phone clap - mobile gadget finder tool
-com.talker.acr,playstore,dual-use,Call Recorder - Talker ACR
-com.lostphone.tracker,playstore,dual-use,Lost Phone Tracker
-com.wondershare.famisafe.kids,playstore,dual-use,App for kids' devices - FamiSafe Jr
-ua.com.tim_berners.parental_control,playstore,dual-use,Parental Control Kroha - screen time & kids mode
-yobi.koe.rokuon.callrecorder,playstore,dual-use,Automatic Call Recorder With Voice Cutter
-clap.to.find.phone.lost.phone.finder,playstore,dual-use,Clap To Find My Phone
-com.nswebworld.recorder,playstore,dual-use,Call Recorder Automatic - ACR Lite
-com.greenchills.superbackup,playstore,dual-use,"SMS, Call - XML, PDF, CSV(Super Backup & Restore)"
-com.bcdstudio.autocallrecorder,playstore,dual-use,ACR - Automatic Call Recorder 2021
-com.rajviraj.wscallrecoding,playstore,dual-use,Video Call Recorder For Whatsapp
-com.screentime.rc,playstore,dual-use,Parental Control - Screen Time & Location Tracker
-com.androdev.loc.tracker.lostphonetracker,playstore,dual-use,Lost Phone and Location Tracker
-com.app.callrecorderpro,playstore,dual-use,Call Recorder Pro
-com.saharaprod.autocallrecorder,playstore,dual-use,Automatic Call Recorder 2020 - Free Call Recording
-app.cybrook.trackview,playstore,dual-use,TrackView
-com.lazycat.findphoneclap,playstore,dual-use,Find my phone clap PRO - clap to find your Phone
-com.seipl.acr.auto.call.recorder.automatic.callrecorderpro,playstore,dual-use,Auto Call Recorder Pro
-com.syn.findmy.phone.clap.whistle,playstore,dual-use,Find my Phone- Find  Lost Phone by Clap or Whistle
-silentnoice.bvb.universalacremote,playstore,dual-use,Universal AC Remote - All AC Remote
-com.videocallrecorderforwhatsapp.automaticvideocallrecorder,playstore,dual-use,Video Call Recorder for WhatsApp
-com.caller.recorderhd,playstore,dual-use,Call Recorder HD Automatic Free
-com.m24apps.acr,playstore,dual-use,Call Recorder - Auto Call Recording - Caller ID
-com.ucall,playstore,dual-use,Call Recorder - Automatic Call Recorder - Ucall
-com.hidden.recoder,playstore,dual-use,Auto Call Recorder
-com.phonefinder.findphonebywhistle.whistlephonefinder,playstore,dual-use,Find My Phone Whistle – Phone Tracker Free
-locator24.com.main,playstore,dual-use,Family locator / GPS location - Locator 24
-com.universal.acremote.allacremotes,playstore,dual-use,AC Remote Control - All AC Remote
-com.keepers,playstore,dual-use,Keepers - Parental Control & Location Tracker App
-com.solab.newdonttouch.myphonefree,playstore,dual-use,Don't Touch My Mobile
-com.lazycat.findphone,playstore,dual-use,Find my phone by whistle PRO
-com.unglobal.antitheftalarm.donttouchmyphone.phonesecurity,playstore,dual-use,Anti Theft Alarm - Do Not Touch My Phone App 2021
-om.roitman.autowhatsapptriggers,playstore,dual-use,Find Person Location By Phone Number - Waloc
-com.ManoappsStudio.CallandVoiceRec,playstore,dual-use,Call Record - Auto Call Recorder & Voice Recorder
-com.testlab.family360,playstore,dual-use,"Family360 - Family Locator, GPS Tracker"
-app.childsafetytracker,playstore,dual-use,Child Safety & Tracker App
-com.qustodio.family.parental.control.app.screentime,playstore,dual-use,Qustodio Parental Control & Screen Time App
-com.wecr.callrecorder,playstore,dual-use,Call Recorder - IntCall ACR
-com.kingsoftgame.newlocationtracking,playstore,dual-use,Family Locator
-com.accurasoftech.automaticcallrecorder,playstore,dual-use,Automatic Call Recoreder -ACR
-com.krishinfotup.Mobile_Missing,playstore,dual-use,Mobile Missing ( TAMRRA )
-com.kolaku.callrecoder,playstore,dual-use,"Automatic call recorder, best phone call recorder"
-app.lifecircle,playstore,dual-use,Secure Messenger and Family Locator - LifeCircle
-com.appstock.familytracker,playstore,dual-use,Family Location  Tracker or Locator
-com.famikit.android,playstore,dual-use,FamiKit - Parental Control & Track Location
-com.parentalvalues.parentalvaluesparent,playstore,dual-use,Free Parental Control App by Parental Values
-kn.cforcat.myfamilylocatorphonegpsfamilytracker,playstore,dual-use,My Family Locator - Phone GPS Family Tracker
-com.primetechnosys.autocallrecorder,playstore,dual-use,Auto Call Recorder 2021
-com.brykings_inc.recorder,playstore,dual-use,Automatic Call Recorder 2021
-com.chnjekbh.findmyphonealarm,playstore,dual-use,Find My Phone with Clap/Whistle - Anti Theft Alarm
-com.diamond.studio.apps.live.mobile.location.tracker,playstore,dual-use,Live Mobile Location Tracker- Phone Number Locator
-com.tekxperiastudios.pdfexporter,playstore,dual-use,"E2PDF - Backup Restore SMS,Call,Contact,TrueCaller"
-com.whats.callrecorder,playstore,dual-use,Whats Call Recorder New
-com.findphone.bywhistle.findmyphone.app,playstore,dual-use,Find Phone by Whistle: Find my Phone App
-com.mm.find.phone.clap.whistle,playstore,dual-use,"Find my Phone, Device Finder - Whistle & Clap"
-com.family_tracker.app,playstore,dual-use,Family Tracker
-co.familykeeper.parents,playstore,dual-use,Parental Control & Screen Time App - FamilyKeeper
-com.fox.voicerecorder.audiorecorder,playstore,dual-use,2 Ways Automatic Call Recorder for phone calls
-com.qs.clapphonefinder.antitheftalarm,playstore,dual-use,Clap To Find Phone Alarm
-cell.phone.ip.location,playstore,dual-use,Cell Phone Tracker
-com.goryf.android,playstore,dual-use,"Find My Friends, Find My Family, Kids Safely - RYF"
-com.apperspace.mobile.tracker,playstore,dual-use,Mobile Tracker by Number - mTracker
-com.remote.universalacremote.accontroller,playstore,dual-use,AC Remote Control For All AC (IR)
-app.parentalcontrol.kid,playstore,dual-use,Parental Control Kids App
-com.panthertech.autocallrecoder,playstore,dual-use,Auto Call Recorder 2021
-com.wokkalokka.wokkalokkanew,playstore,dual-use,"Find my Family: Сhildren GPS Tracker, Kids Locator"
-com.appcorner.videocallrecorder,playstore,dual-use,Video Call Recorder for WhatsApp 2020
-call.recorder.callerrecorder.automaticcallerrecorder,playstore,dual-use,Call Recorder - Automatic Call Recorder
-com.topsoft.callrecorderpro,playstore,dual-use,Call Recorder PRO - Whit Show contact name
-com.nglinx.famlinx,playstore,dual-use,Famlinx - Family Location Tracker for Safety
-us.cell.tracker.kids.locator,playstore,dual-use,Cell Tracker Kids
-com.loc.tracker,playstore,dual-use,Phone Tracker By Number
-com.wola.fami,playstore,dual-use,Fami - Family tracking app
-com.tickapps.whistlephonefinder,playstore,dual-use,Whistle Phone Finder : Whistle To Find My Phone
-com.worldsoft.callrecorder,playstore,dual-use,Automatic Call Recorder 2020 - Free Call Recording
-com.appscorner.callrecorde,playstore,dual-use,call recorder 2021
-com.att.securefamilycompanion,playstore,dual-use,AT&T Secure Family Companion™
-family.tracker.my,playstore,dual-use,My Family - Family Locator
-phone.automatic.call.recorder.arc,playstore,dual-use,Recorder Phone Call
-ai.myfamily.android,playstore,dual-use,FamilyGo: GPS locator
-com.claptofind.myphone.app,playstore,dual-use,Clap to Find My Phone: Find Phone by Clapping
-com.whistlephonefinder.findphonebywhistle.find.phone.by.clap,playstore,dual-use,Find Phone by Whistle - Whistle To Find My Phone
-com.acrmtapp.acremotecontrol,playstore,dual-use,Universal AC Remote Control For All
-com.bytebox.find.track.gps.maps.lost.phone,playstore,dual-use,Find My Lost Phone : cell phone finder
-com.full.callrecorder,playstore,dual-use,Full call recorder Automatic - Both Side recording
-com.parental.control.app.free.movi,playstore,dual-use,Parental Control App with Monitoring -  MoVi. Free
-net.kayisoft.familytracker,playstore,dual-use,Connected - Family Locator - GPS Tracker
-com.oldmansitting.familylocator,playstore,dual-use,Family locator-find my friends-share my location
-com.callrecorder.callrecorderfree,playstore,dual-use,Call Recorder Free - Call Recorder for Android™
-com.lokaytr.app,playstore,dual-use,"Lokaytr - Family Locator & Finder, GPS Tracker App"
-com.siriosoftech.truelocation.callerid,playstore,dual-use,"True Call Location - Caller ID, Family Tracker"
-imorecorder.videocall.recorder,playstore,dual-use,Video call recorder for imo - Auto call recorder
-kz.sirius.kidssecurity,playstore,dual-use,"Kid security - GPS phone tracker, family search"
-genuineapp.findlostdevice.trackyourphone,playstore,dual-use,Lost Phone Finder
-com.smartapp.donottouch,playstore,dual-use,Don't touch my phone™ - Who touched my phone?
-imagicalapp.call.recorder,playstore,dual-use,Auto Call Recorder : Free Call Recorder 2021
-com.autocallrecorder.solutions,playstore,dual-use,Auto Call Recorder
-com.softexpoitmaps.mapping.aysar,playstore,dual-use,"MyMap-Find My Phone,Live Tracking of Another Phone"
-com.lsa.findfamily,playstore,dual-use,Find Family - Family GPS Location Tracker
-com.integratedapps.familylink,playstore,dual-use,Family Link: Find My Phone: GPS Tracker & Locator
-lk.codescale.myfam360,playstore,dual-use,"MyFam360 - Family Locator, Location Tracker"
-com.trackerappsforlife.monitoring.findmyphone,playstore,dual-use,Find My Phone - Track My Lost Phone ( offline )
-com.call.callsrecordercaller,playstore,dual-use,Automatic Call Recorder & Voice Recorder
-com.track.locator,playstore,dual-use,TrackMobi - Family's GPS Phone Tracker
-com.callrecorder.hafido,playstore,dual-use,Auto Call Recorder
-app.parentalcontrol.parent,playstore,dual-use,Parental Control App
-aitech.whistlephonefinder.findphonebywhistle,playstore,dual-use,Whistle Phone Finder
-com.callrecord.callrecorder.callrecording,playstore,dual-use,call recorder for android phones
-com.skyline.familytracker,playstore,dual-use,Family Tracker - Family Locator & GPS Tracker
-com.raafiya.universalacremotecontrol,playstore,dual-use,Remote AC Universal
-com.whistlephonefinder.findphonebywhistle,playstore,dual-use,Phone Finder By Whistle - Find My Phone by Whistle
-com.devprofessional.recordercall,playstore,dual-use,Call Recorder Pro - Automatically record
-com.briive2,playstore,dual-use,Briive: Family Locator. GPS Tracker.
-com.gokul.friendsfamilytracker,playstore,dual-use,Friends & Family Tracker
-whistlephonefinder.findphonebywhistle,playstore,dual-use,Find My Phone Whistle - Whistle To Find My Phone
-com.callrecorderautomatic.callrecorder,playstore,dual-use,Automatic Call Recorder ACR
-com.allcallrecorder.callrecoder,playstore,dual-use,call recorder automatic-call recorder acr
-com.mkdev.callrecorder,playstore,dual-use,Auto Call Recorder
-family.tracker.free.locator,playstore,dual-use,Family Tracker Free
-app.gpsme,playstore,dual-use,Family GPS tracker KidsControl
-com.panther.familyloco,playstore,dual-use,Free Family Locator
-com.msngames.autocallrec,playstore,dual-use,Auto Call Recorder
-com.nmstudios_call.recorder,playstore,dual-use,Auto Call Recorder Pro - Record Phone Calls
-com.bismillahtechnolohy.donttouchmyphone,playstore,dual-use,Anti-Theft : GPS Lost Phone Tracker
-com.phone.number.tracker.family.findlocation,playstore,dual-use,Find Location-Phone Number Tracker
-com.fameelee.app,playstore,dual-use,Family Locator by Fameelee
-com.pros.recoder,playstore,dual-use,Call Recorder Pro - Made In India
-com.kestrels.spointApp,playstore,dual-use,Spoint - Family App For Safety (Location Tracker)
-caller.phone.dialer.smart,playstore,dual-use,Call Recorder ACR
-com.splunk.lostphonetracker,playstore,dual-use,Lost Phone Tracker
-com.callrecorder.autorecoderprofree,playstore,dual-use,Record Phone Calls From Both Sides Free
-com.geozilla.family,playstore,dual-use,GeoZilla - Find My Family
-com.sam.software.familygpstracker,playstore,dual-use,Family GPS Tracker FREE
-com.call.recording.callrecord,playstore,dual-use,All Call Recorder 2021 – Auto Call Recording
-com.all.callrecorder.noor,playstore,dual-use,All Call Recorder Automatic Record
-com.allcallerrecorder.callerecorder2021,playstore,dual-use,"automatic call recorder, call recorder acr"
-phone.tracker.location.app,playstore,dual-use,"Find My Phone, Family, Kids - GPS Location Tracker"
-com.tokyo.autocallrecorder,playstore,dual-use,Call Recorder Auto - Call Recorder Pro
-com.lewisapps.RecordAnyCall,playstore,dual-use,Record Any Call
-com.mta.anti.theft.alarm.whistle.phone.finder,playstore,dual-use,Anti Theft Whistle to Find My Phone
-com.hr.callrecoder,playstore,dual-use,Automatic Call Recorder Free - All Call Recording
-com.automatic.callrecorder.forandroid,playstore,dual-use,Call Recorder - Automatic Call Recorder Free (ACR)
-com.group.organizer,playstore,dual-use,Family Locator - GPS Tracker & Find My Family
-com.hm.callrecoder,playstore,dual-use,Call Recorder New 2021 - Automatic Call Recording
-com.call.recorder.automatic.recordapp,playstore,dual-use,Automatic Call Recorder – Record Call Free ACR
-com.mmdevs.callrecorder,playstore,dual-use,Automatic call recorder 2021
-com.mbd.freecallrecorder,playstore,dual-use,Automatic Call Recorder 2021-Voice Recorder Pro
-acremotecontroller.airconditionerremote.allacremote,playstore,dual-use,AC Remote Control For All AC
-com.ct.acremotecontrol,playstore,dual-use,AC Remote Control All - Universal AC Remote
-com.parental.control.kidgy,playstore,dual-use,Kidgy: Find my Family GPS Location
-com.find.my.phone.by.clapping.clap.find.my.mobile.alarm.sound,playstore,dual-use,Find My Phone Clap-Clap to Find my Device
-com.antitheft.protection.findstolen.lostphone,playstore,dual-use,Find lost phone: Anti theft protection with Alarm
-app.geoloc,playstore,dual-use,GeoLocator — Family Tracker + Baby Monitor Online
-family.locator.find.my.friends,playstore,dual-use,Phone Tracker - Family Locator
-com.find.mymobile.phone.clap.whistle.detectnow,playstore,dual-use,Find My Lost Cell-Phone:Clap to Find lost Device
-com.lion2030.findmyphone,playstore,dual-use,Find my phone offline
-com.islam.freecallrecorder,playstore,dual-use,Call Recorder 2021 - Automatic Call Recording Free
-com.lost.phone.master.track.lost.device.app,playstore,dual-use,Lost Phone Master-Track Lost Device
-com.recorder_callrecordering.enregistrement,playstore,dual-use,All Call Recorder Automatic 2021
-family.locator.mobile.phone.tracker,playstore,dual-use,Location phone tracker of my family and friends
-com.bkapps.callrecord,playstore,dual-use,Automatic Call Recorder 2021 - All Calls Recording
-iplay.mobiletracker.location.livemap,playstore,dual-use,Family Locator on Map - GPS Phone Tracker
-com.wonderapps.org.findphone,playstore,dual-use,Find My Phone: GPS Phone Tracker
-com.phonefinder.antitheftalarm,playstore,dual-use,Find My Phone Whistle and Clap - Anti Theft Alarm
-com.family.locator.familylocator.app.new.navigacijos.mb,playstore,dual-use,Family Locator - GPS Tracker
-com.findmyphone.findmydevice,playstore,dual-use,Find My Lost Phone
-com.emobi.convoy,playstore,dual-use,Craton - GPS Tracker. Locator. Flights. Hotels
-com.asjlnwawal.callrecorder,playstore,dual-use,Auto Call Recorder
-com.auto.call.recoder.autocallrecorder,playstore,dual-use,Auto Call Recording
-com.callrecording.voicecallrecorder.automaticcallrecord,playstore,dual-use,"Automatic Call Recorder Free, 2 Ways Call Recorder"
-com.bwf.automatic.call.recorder.auto.recording.app,playstore,dual-use,Automatic Call Recorder - Free Call Recording App
-finder.lost.my.phone.online,playstore,dual-use,Lost phone – Find My Lost Device
-com.ilocatemobile.navigation,playstore,dual-use,Track a phone - Family Locator & GPS Tracker
-com.hitten.callrecorder,playstore,dual-use,Automatic Call Recorder - Free Call Recording App
-com.lost.phone.tracker.app_2020,playstore,dual-use,Lost Phone Tracker- Find Lost phone
-com.family.locator.find.my.kids,playstore,dual-use,Family Locator - GPS Location Tracker Find Family
-finder.lost.phone.rapid.online,playstore,dual-use,Find Lost Phone – Where is my phone
-com.mm.family.tracker,playstore,dual-use,Family Tracker for USA: Cell Phone GPS Locator
-com.tracklostcellphone.findphone,playstore,dual-use,Track Lost Cell Phone - Find Phone Location
-com.family.life24h,playstore,dual-use,Life24h - Family Locator Free
-com.oussx.xgpstracker,playstore,dual-use,Location tracker - family locator - GPS Tracker
-com.hailingfogg.app.autocallrecorder,playstore,dual-use,Call Recorder Auto Call Record: Call Recorder free
-lost.phone.my.phone.finder.device.tracker,playstore,dual-use,Lost Phone Tracker – Find My Lost Device
-com.familylocator.gpstracker,playstore,dual-use,"Family Locator, GPS Tracker - LocLite"
-com.hak.familylocater,playstore,dual-use,Family Locator - Family GPS Tracker
-io.singulart.safe,playstore,dual-use,"Find my Family - Kids, Phone Locator & GPS Tracker"
-com.familylocator.familytracker.gps.locationtracker.forandroid,playstore,dual-use,Family Locator - GPS Tracker For Find My Friends
-com.touchbyte.PhotoSync,appstore,dual-use,PhotoSync – transfer photos
-com.sharpcast.sugarsync,appstore,dual-use,SugarSync
-JMLMD.BabyDo,appstore,dual-use,BabyDo - Track Your Child's Milestones
-com.geoape.Tracker,appstore,dual-use,GeoApe Tracker
-com.jordan.spouse,appstore,dual-use,How To Catch a Cheating Spouse: Spy Tool Kit 2017
-com.Trakengg.Fluidsecure,appstore,dual-use,FluidSecure
-com.connectIN.Xupo1,appstore,dual-use,Xupo
-com.martinman.bestbabymonitor,appstore,dual-use,Cloud Baby Monitor
-com.kinggamesstudio.carpark,appstore,dual-use,GPS Car Tracker - Track My Car
-at.murbit.moGPXTracker-Free,appstore,dual-use,GPX Trail Tracker
-com.optimus,appstore,dual-use,Optimus Tracking
-call.recorder.tape,appstore,dual-use,Phone Call Recorder
-com.mobi-tracking.TrackApp,appstore,dual-use,Mobicom GPS Tracking
-com.theappmedia.wifi.ip.camera,appstore,dual-use,IP Webcam Home Security Camera
-com.iluvwireless.secure-tracker,appstore,dual-use,SECURE TRACKER
-com.manything.manything,appstore,dual-use,Manything
-com.leftshoe.droppop,appstore,dual-use,DropPop!
-Com.letzwApp.ID,appstore,dual-use,LetzwApp - Phone Number Update
-com.safepass.staff,appstore,dual-use,SafePass Manager
-com.dhrik.ios,appstore,dual-use,Dhrik
-com.emby.mobile,appstore,dual-use,Emby
-au.com.itfirstaid.ios.leelou,appstore,dual-use,Leelou Personal Safety
-com.metricell.tracesaveriOS3,appstore,dual-use,Tracesaver (iOS 3.x)
-com.parentskit,appstore,dual-use,ParentsKit - Parental Control
-com.mapmytracks.outfrontfree,appstore,dual-use,Map My Tracks: ride run walk
-com.intelligentsystems.PhoneTrack,appstore,dual-use,PhoneTrack
-com.mindset.fami,appstore,dual-use,Find my family locator tracker
-org.monicotechnologieslimited.finderios,appstore,dual-use,Finder GPS Tracking Viewer
-com.symantec.mobilesecurity,appstore,dual-use,Norton 360: Mobile Security
-com.uitraspeed.callrecord,appstore,dual-use,Call Recorder for iPhone •
-com.apps.busdemo,appstore,dual-use,EyeLoop
-io.callrecorder4.me,appstore,dual-use,Call Recorder App - onRec
-com.safetripapp.safetripapp,appstore,dual-use,SafeTrip
-com.bluazu.Scout2016,appstore,dual-use,Find My Scout
-com.evadofilip.EvadoFilip,appstore,dual-use,FiLIP™
-family.tracker.app,appstore,dual-use,Famio: Find My Family
-com.brickhousesecurity.brickhousePhoneTracker,appstore,dual-use,Brickhouse Phone Tracker
-com.simplifieditproducts.pkc,appstore,dual-use,Picture Keeper Connect
-com.appsverse.callrecorder,appstore,dual-use,Recording App - Re:Call
-com.track.child,appstore,dual-use,Track Your Child N
-com.efe.callrecorder.Call-Recorder,appstore,dual-use,My Call Recorder -Record Calls
-com.callrecordapp.es,appstore,dual-use,Phone Call Recorder App - ACR
-com.waytronic.callRecorder,appstore,dual-use,Waytronic Call Recorder
-com.toyopagroup.picaboo,appstore,dual-use,Snapchat
-com.vzw.gizmopal,appstore,dual-use,GizmoHub
-org.merlos.OpenGpxTracker,appstore,dual-use,Open GPX Tracker
-com.esr.mobile,appstore,dual-use,EatSleepRIDE Motorcycle GPS
-com.security.securityapp,appstore,dual-use,Phone Security
-com.truesoftware.Guardians,appstore,dual-use,Guardians from Truecaller
-jp.shingo.Lost-Child-and-Pet-Alarm,appstore,dual-use,Lost Child and Pet Alarm
-com.thinkbitz.geotag,appstore,dual-use,PixTrack Tracklogger
-com.wheresfamily.ios,appstore,dual-use,Wheresfamily
-com.workmate.app,appstore,dual-use,Workmate Network
-Anon.Mobile.Tracker,appstore,dual-use,Anon Mobile Tracker
-com.mmguardian.parentapp.ios,appstore,dual-use,MMGuardian Parent App
-com.tracker.ch,appstore,dual-use,tracker.ch - GPS Tracker
-com.PlayaApps.ContactsSyncForGoogleGmailLite,appstore,dual-use,Contacts Sync Pro
-com.newtechnologies.CarLocationFindermopsd,appstore,dual-use,Car Location Finder: Parking
-com.oldmansitting.familytracker,appstore,dual-use,Locate Any Device by Number.s
-com.find.phone.location.tracker.gps.locator.ios,appstore,dual-use,"MyLocator: Find Friends,Phone"
-cn.fitnessforever.family,appstore,dual-use,Find my Friends、Family、Phone
-app.joyne.joyne,appstore,dual-use,JoyneApp
-app.spottifamily,appstore,dual-use,Spotti Family Mapper
-com.vincentdylan.findbee,appstore,dual-use,FindBee - GPS Location Tracker
-com.itbus.tracker,appstore,dual-use,"Friends Finder, track location"
-de.onieper.GPSTracker,appstore,dual-use,My GPS Tracks
-com.wondershare.parentalcontrol,appstore,dual-use,FamiSafe-Parental Control App
-com.vzw.familybase,appstore,dual-use,Verizon Smart Family™
-com.besta.ancall,appstore,dual-use,Ancall
-com.mosyle.ios.screenguide,appstore,dual-use,ScreenGuide Parental Control
-com.jo.spectrum-tracker,appstore,dual-use,Spectrum Tracking
-com.vzw.sfc,appstore,dual-use,Smart Family Companion
-com.wya.wya-now,appstore,dual-use,WYA-NOW
-com.RaceRenderLLC.TrackAddictFree,appstore,dual-use,TrackAddict
-com.buusoft.MyLocation,appstore,dual-use,Phone Tracker - GPS Location
-com.meetcircle.circle,appstore,dual-use,Circle Parental Controls
-com.canopy.canopy-parent,appstore,dual-use,Canopy - Parental Control App
-com.kappa.icare,appstore,dual-use,iCare - Find Location
-com.funberry.findfriends,appstore,dual-use,FlashPoint - Find my Friends
-com.locate.find.friends,appstore,dual-use,Locate Friends and Find Family
-com.apple.findmy,appstore,dual-use,Find My
-us.bark.Bark-iOS-Child2,appstore,dual-use,Bark Kids
-com.pinkventures.goyamove,appstore,dual-use,Genius - Screen Lock For Kids
-app.mobile.phone.number.call.location.tracker,appstore,dual-use,Mobile Number Location Finder
-com.pinwheel.caregiver,appstore,dual-use,Pinwheel Caregiver
-com.arrivesafe,appstore,dual-use,ArriveSafe – Location Sharing
-com.mobilekidunia.mylocation,appstore,dual-use,My Location - Mobilekidunia
-mobi.geocircle.GeoCircle,appstore,dual-use,GeoCircle Track Family Friends
-com.mysticmobileapps.gps.coordinates.lite,appstore,dual-use,My GPS Coordinates Lite
-au.com.koben.ios.ThumbsUp,appstore,dual-use,Thumsters
-com.knyghtops.childjournal,appstore,dual-use,Child Journal
-com.appdifferent.lastalert,appstore,dual-use,Last Alert Lite - Find My Lost Phone
-com.lihstudio.stag,appstore,dual-use,Track phone by number pro
-com.whoanalytics.location-finder,appstore,dual-use,Find My Friends: Phone Tracker
-com.nobrainer.localization,appstore,dual-use,Parental GPS Phone Tracker
-com.gps.tracking,appstore,dual-use,Gps_Tracking
-Suntechltd.Phuongnga.Bluetooth,appstore,dual-use,BT Notifier - Find My Tracker
-com.jksol.PhoneNumberTracker,appstore,dual-use,Phone Number Tracker
-uk.co.cyferltd.familymonitor,appstore,dual-use,FamilyMonitor
-com.teslinekidl01.KidLogger,appstore,dual-use,KidLogger
-eu.lokato.kids,appstore,dual-use,Pingonaut Kids
-com.flipcode.hidden,appstore,dual-use,"HiddenApp, Find My Device App"
-com.bandb.autoconnect,appstore,dual-use,AutoConnect GPS
-uk.co.cyferltd.FamilyMonitorLite,appstore,dual-use,Family Monitor Lite
-com.joinhomebase.mobile,appstore,dual-use,Homebase Employee Scheduling
-com.apps.iamnotified,appstore,dual-use,iAmNotified - Anti Spy System
-com.xatash.linquet,appstore,dual-use,Linquet AntiLoss: Phone & Keys
-kz.sirius.siriuskids,appstore,dual-use,Kid security: GPS tracker
-family.locator.com,appstore,dual-use,Family Locator: Find My Friend
-com.find.gps,appstore,dual-use,Find My Friend: Phone Locator
-com.iOS.NavBus,appstore,dual-use,NAVBUS
-mobilenumberlocator.numberlocation.phone.caller.location,appstore,dual-use,Find Mobile Number Location
-com.hf.Find-Lost-Device,appstore,dual-use,Wunderfind: Find Lost Device
-com.spyphone.pro,appstore,dual-use,Spy Phone ®  Pro
-lapastudio.lapaapp,appstore,dual-use,Lapa - Bluetooth Tracker
-com.microsoft.familysafetymobile,appstore,dual-use,Microsoft Family Safety
-com.beaconmobile.PingMe,appstore,dual-use,PingMe! - Location Sharing With Friends
-org.softwarecraftsman.WhereIveBeen-Lite,appstore,dual-use,Where Did I Go - Lite Edition
-com.jiobit.JioApp.ios,appstore,dual-use,Jiobit for Families
-com.infoweise.secureteen.childapp,appstore,dual-use,SecureTeen Child App
-com.parentapp.safetrax,appstore,dual-use,Safetrax Parent
-kinkin.free,appstore,dual-use,KinKin - Family Locator
-inc.speramus.ios.crew,appstore,dual-use,Crew Messaging and Scheduling
-com.kaspersky.safekids,appstore,dual-use,Kaspersky Safe Kids with GPS
-findfriendsapp1,appstore,dual-use,Find My Family Friends & Phone
-com.recreavision.kidcrono,appstore,dual-use,Screen Time Limit KidCrono
-com.metricell.tracesaver.01,appstore,dual-use,TraceSaver
-com.hqe.insight,appstore,dual-use,iGPS App
-com.openrunner.app,appstore,dual-use,Openrunner
-com.milewiz.ios,appstore,dual-use,MileWiz 2021 - Car Mileage Log
-com.astralertechnology.kidsafe,appstore,dual-use,Parental Control App & Blocker
-com.safe.minor,appstore,dual-use,SafeMinor
-com.grangerfx.YouNeedAMap,appstore,dual-use,You Need A Map
-com.scentropic.ow,appstore,dual-use,deviceOwl
-com.MySafetyNet,appstore,dual-use,MySafetyNet app: Safe Internet
-com.app.TeenOrbit,appstore,dual-use,TeenOrbit Parent Control Panel
-com.asmi.CallerLocation,appstore,dual-use,Track Caller Location
-com.omrup.cell.tracker,appstore,dual-use,Family Locator - Child Tracker
-com.falcon.track,appstore,dual-use,Falcons™ GPS Tracking
-com.rubyroidlabs.Navitech,appstore,dual-use,Family GPS Locator by Navitech. Track location of your loved ones.
-com.sonargroup.bloo,appstore,dual-use,Bloo Safety App
-com.delorme.earthmate,appstore,dual-use,Earthmate
-com.creative.shareLocation,appstore,dual-use,People Location Tracker Pro
-com.videoapp9.radar,appstore,dual-use,Find My Device & Track Friends
-com.esri.app.Tracker,appstore,dual-use,ArcGIS Tracker
-com.driversnote.driversnote,appstore,dual-use,Mileage Tracker by Driversnote
-me.dingtone.im,appstore,dual-use,Dingtone: Phone Calls + Texts
-com.fp.findnow.tracker,appstore,dual-use,FP FindNow - GPS Location Link
-com.google.FamilyLink,appstore,dual-use,Google Family Link for parents
-com.suntech.fsafe,appstore,dual-use,Family Location - Find Friends
-fr.pixelium.Triber,appstore,dual-use,Triber Realtime GPS compass
-net.gotracker.pushntrack,appstore,dual-use,PUSHnTRACK
-com.bizlogapp.iTripLog,appstore,dual-use,TripLog: Mileage Tracker & Log
-com.oos.autoreplypal,appstore,dual-use,AutoReply Pal
-com.wondershare.parentalcontrolkid,appstore,dual-use,FamiSafe Jr - Blocksite
-bp.ft,appstore,dual-use,"FindMe: Find My Friends, Phone"
-org.venture361.findly,appstore,dual-use,Findly - Location Tracker
-Friends.finder.com,appstore,dual-use,Find My Friends and Famili
-com.trecone.controlmovil.geoposition,appstore,dual-use,Find my Children
-find.my.friends.app,appstore,dual-use,Find My Friends Share Location
-com.overinet.locator,appstore,dual-use,Family GPS locator!
-com.jasonchiu.GPS-Hiker,appstore,dual-use,GPS Hiker
-me.talktone.im,appstore,dual-use,TalkU: Unlimited Calls + Texts
-com.ivmob.find,appstore,dual-use,F&F - find family & friends
-io.familytime.parentalcontrol,appstore,dual-use,FamilyTime Jr.
-com.vijay.group.location.tracker,appstore,dual-use,Tracker 8 : Track a cell phone
-com.ilmasoft.SBASParentApp,appstore,dual-use,SBAS Parent Application
-parlandLocaloc,appstore,dual-use,Get Location - Share and Find
-com.efe.Find-Loca,appstore,dual-use,Find Loca - Find Location
-com.familylocator.app,appstore,dual-use,Family Locator: Find My Phone
-com.mgmwireless.allmytribe3,appstore,dual-use,Spacetalk
-com.mcafee.security.safefamily,appstore,dual-use,Safe Family: Screen Time App
-com.prey,appstore,dual-use,Prey Find my Phone Tracker GPS
-com.ask.WokkaLokka,appstore,dual-use,Find my family: Phone Tracker
-com.Free-Imei-Check,appstore,dual-use,SIM Card Status Checker
-ParthPandya.DeviceTracker-Offline,appstore,dual-use,Device Tracker - Mobile Finder
-com.facemetrics.LocationTracker,appstore,dual-use,I`M OK: Family Locator
-com.dev.track,appstore,dual-use,RealLoc: Find Friends & Family
-com.phone.locator,appstore,dual-use,Friend Location Tracker: GPS
-com.location.outsea,appstore,dual-use,VV Location
-com.99mobileapp.detectit,appstore,dual-use,Bluetooth BLE Device Finder
-by.uniq.find-my-friends,appstore,dual-use,Family Link for Parents
-com.escudoweb.blabloo,appstore,dual-use,Blabloo Parents
-com.datersafehouseff.geosafe,appstore,dual-use,LocateUs: GPS Location Tracker
-com.escudoweb.genio,appstore,dual-use,Geniora Parent
-com.gamenexa.truelocation360,appstore,dual-use,True Location360 – Find Family
-com.PhoneNumberTracker.Transit,appstore,dual-use,Phone Number Tracker & Transit
-com.phtracker.gpslogger,appstore,dual-use,Locate & Track Phone by Number
-com.phonetracker.findus,appstore,dual-use,Cell Phone Tracker + by number
-com.yooconn,appstore,dual-use,Yooconn
-com.lezhi.locateservice,appstore,dual-use,QFinder -location tracker
-net.kayisoft.connected,appstore,dual-use,Connected: Family Locator
-com.zzlibsafecentercc.fam360,appstore,dual-use,Fam 360: GPS Location Tracker
-com.sur.tracker,appstore,dual-use,Location Tracker - find GPS
-by.tracktech.familyios,appstore,dual-use,My Family: Find Friends Phone
-ai.familygo.ios.app,appstore,dual-use,FamilyGo: Track and Control
-com.nano.ltd.app,appstore,dual-use,Nano GPS: Find Family &Friends
-com.alphaproject.family360,appstore,dual-use,Family 360: GPS Phone Tracker
-com.xarisa.familytracker,appstore,dual-use,iTracker: Find Family & Friend
-com.family.friends.finder.app,appstore,dual-use,Locator. My Friends Finder
-com.newapp365.GPSTracker-CN,appstore,dual-use,"GPS Tracker－Mobile Tracking, Routing Record"
-gpsTacker.happiness.com,appstore,dual-use,GPS Tracker Pro for iPhone
-com.arnold.findfriendsapp,appstore,dual-use,Find My Friends・Phone Locator
-com.tractive.ios.gps,appstore,dual-use,Tractive GPS for Dogs and Cats
-com.mh.myfamily,appstore,dual-use,Find My Friends + Family App
-com.geowaggle.Mamabear,appstore,dual-use,MamaBear Family Safety
-com.hafaso.family,appstore,dual-use,Find My Friends Family247
-app.Find24.com,appstore,dual-use,Find24 - Find Location
-com.wru.location.global,appstore,dual-use,W.R.U-Find Friends & Family
-com.ensourcedigital.childtrack,appstore,dual-use,ChildTrack App
-com.wondershare.geonection,appstore,dual-use,Geonection - Location Tracker
-com.dichef.loctrapp,appstore,dual-use,Loctra - Find Location
-com.jksol.MobileNumberLocationTracker,appstore,dual-use,Phone Number Search & Location
-com.efe.findapp.FindApp2,appstore,dual-use,FindApp - Location Finder
-com.contentwatch.ghoti.cp2.parent,appstore,dual-use,Net Nanny Parental Control App
-com.racersoft.CellTracker,appstore,dual-use,FollowMe - GPS Mobile Location Tracker
-GD.Loco,appstore,dual-use,Seeking My Family Friends Live
-theappie.online.day,appstore,dual-use,Day24: Find Family & Friend‪s‬
-com.spoten,appstore,dual-use,Spoten Phone Location Tracker
-com.changegps.locationapp,appstore,dual-use,GPS App!
-com.mkucyjhb.app.cp.address,appstore,dual-use,Find Geo-Find Friends & Family
-caller-location-tracker.realmobilecallerlocation,appstore,dual-use,True Location - Find Number
-com.euro.gpspro,appstore,dual-use,GPS Phone Tracker Family Locator Pro
-com.littlesamsoft.IM-Map-Navigator,appstore,dual-use,Phone Tracker:IM Map Navigator
-io.singulart.safecontrol,appstore,dual-use,Find My Family & Phone Locator
-com.ahount.oneminlate,appstore,dual-use,On My Way Realtime GPS
-universoft.placeter.com,appstore,dual-use,Placeter
-com.spirit.safemily,appstore,dual-use,Safemily - Family GPS Locator
-com.att.familyprotectchild,appstore,dual-use,AT&T Secure Family Companion™
-com.app.Locatoria,appstore,dual-use,Locatoria - Find Location
-app.kc.circles,appstore,dual-use,KidsControl. Find my Phone
-lap.services.app,appstore,dual-use,Lap - Find Family & Friends
-com.familylocator.family360,appstore,dual-use,Family360 - Family Locator
-com.leadthefleettracker.ios,appstore,dual-use,Lead The Fleet Phone Tracker
-intouch24.app,appstore,dual-use,Briive - Family Tracking App
-com.lt.location.tracker.app,appstore,dual-use,Find Friends & Family Location
-com.meshukraina.parentalcontrol,appstore,dual-use,Parental control Kroha
-com.TrackView,appstore,dual-use,TrackView - Find My Phone
-es.naxo.Look4Family,appstore,dual-use,Family Location Look4Family
-com.mindpeace,appstore,dual-use,Find My Family & Friends GPS
-com.carrotrocket.geozilla,appstore,dual-use,GeoZilla Find My Phone Tracker
-com.IztokTrost.Watch4myPhone,appstore,dual-use,Watch 4 my Phone - Lost Alert
-com.gto-software.LocationNote,appstore,dual-use,LocationNote
-com.appobit.familyorbit,appstore,dual-use,Family Orbit: Parental Control
-com.alpify.Alpify,appstore,dual-use,Durcal - GPS App Tracker
-com.park.gpstracker,appstore,dual-use,Family Locator - Phone Tracker
-com.thiensly.MyLocationLink,appstore,dual-use,"Find Family, Friends, Phone"
-com.mono.carpin,appstore,dual-use,Carpin - Find Family & Friends
-com.nationaledtech.boomerang,appstore,dual-use,Boomerang Parental Control
-Mg.FamilyLocator.PhoneTracker2,appstore,dual-use,Phone Tracker By Number
-com.saferway.io,appstore,dual-use,Family Locator - Saferway
-com.location.family,appstore,dual-use,Phone · Location Tracker
-com.ndili.iphone.apps.tracking4iphone,appstore,dual-use,Tracking for iPhone
-com.jksol.ShareLocation,appstore,dual-use,FindNow : Share Location
-com.mr.digital.familyLocator,appstore,dual-use,Family Locator & GPS Tracker
-ifind.maps.gps.find.friends.family,appstore,dual-use,"Find My Phone, Friends&Family"
-com.phonelocator.numbertracker,appstore,dual-use,Phone Locator & Number Tracker
-com.appie.familylocator,appstore,dual-use,Find Family & Friends Locator
