@@ -1,5 +1,5 @@
 import re
-from blacklist import _regex_blacklist, app_title_and_flag
+from blocklist import _regex_blocklist, app_title_and_flag
 import pandas as pd
 import sys
 
@@ -25,9 +25,9 @@ def test_regex():
         assert (re.search(regex_pos, a) and not re.search(regex_neg, a)) == m
 
 
-def test_blacklist():
+def test_blocklist():
     for a, m in test_list:
-        assert _regex_blacklist(a) == m
+        assert _regex_blocklist(a) == m
 
 
 def test_app_title_and_flags():
