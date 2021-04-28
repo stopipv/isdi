@@ -46,11 +46,11 @@ can be done like `sudo apt install patchelf`) and then run
 collaborating and other ISDi users overwrite the iOS binaries with their own 
 absolute shared object paths. [More details here (including for macOS users)](notes.md).
 
-### Blacklist dependencies
-- Fill out https://forms.gle/qzres5fQaRbwsyni7 with
-a legitimate request for the blacklist ISDi requires to run. Please note that at this time, **we are only considering requests from those working for victim services organizations.** Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox. 
-  We will provide `static_data.zip`, which should be unzipped and replacing the public facing
-`static_data` directory in this repository.
+<!-- ### Blacklist dependencies -->
+<!-- - Fill out https://forms.gle/qzres5fQaRbwsyni7 with -->
+<!-- a legitimate request for the blacklist ISDi requires to run. Please note that at this time, **we are only considering requests from those working for victim services organizations.** Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox.  -->
+<!--   We will provide `static_data.zip`, which should be unzipped and replacing the public facing -->
+<!-- `static_data` directory in this repository. -->
 
 ## Running ISDi
 
