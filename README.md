@@ -39,6 +39,19 @@ systems, try `sudo apt install adb`.
 - Install `expect`. On macOS, run `brew install expect`. On Debian-based
   systems, run `sudo apt install expect`.
 
+- Install `libimobiledevice`. On macOS, run `brew install libimobiledevice`.
+
+- Install `ideviceinstaller`. On macOS, run `brew install ideviceinstaller`.
+
+- Install `ifuse` (via https://github.com/libimobiledevice/ifuse). On macOS, run:
+`brew install autoconf`
+`brew install automake`
+`brew install libtool`
+`cd ifuse`
+`./autogen.sh`
+`make`
+`sudo make install`
+
 - **Linux/WSL2 only:** If you are running Linux or WSL2, install
    [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
 can be done like `sudo apt install patchelf`) and then run
