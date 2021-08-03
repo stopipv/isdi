@@ -78,7 +78,8 @@ PLATFORM = ('darwin' if platform == 'darwin'
 ADB_PATH = shlex.quote(str(ANDROID_HOME / ('adb-' + PLATFORM)))
 #ADB_PATH = 'adb'
 
-LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
+#LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
+LIBIMOBILEDEVICE_PATH = ''
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
 MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
