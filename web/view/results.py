@@ -1,5 +1,5 @@
 from web import app
-from flask import request, render_template, redirect
+from flask import request, render_template, redirect, url_for
 from db import get_scan_res_from_db, get_app_info_from_db
 
 @app.route("/view_results", methods=['POST', 'GET'])
