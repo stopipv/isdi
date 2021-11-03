@@ -14,7 +14,7 @@ Also checks for signs of jailbroken iOS devices or rooted Android devices.
 Right now, ISDi currently only natively supports **macOS and Linux**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
 (WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
 follow the remaining instructions as a Linux user would, cloning/running 
-ISDi inside the Linux container of your choice.
+ISDi inside the Linux container of your choice. 
 
 ### Python dependencies
 - You will need Python 3.6 or higher (check by running `python3` in your
@@ -34,7 +34,11 @@ Python modules.
 https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew install --cask android-platform-tools`. On Debian-based
 systems, try `sudo apt install adb`. 
-**Windows via WSL2 only:** Installing adb is not so straightforward in WSL2, and it won't work straightaway. You have to ensure having the *same* version of adb *both* in WSL2 and in normal Windows (with `adb version`), then you will need to start the adb process first in Windows, then in WSL2 (with for example `adb devices`).
+**Windows via WSL2 only:** Installing adb is not so straightforward in WSL2, and
+it won't work straightaway. You have to ensure having the *same* version of adb
+*both* in WSL2 and in normal Windows (with `adb version`), then you will need to
+start the adb process first in Windows, then in WSL2 (with for example `adb
+devices`).
 
 - Install `expect`. On macOS, run `brew install expect`. On Debian-based
   systems, run `sudo apt install expect`.
@@ -59,11 +63,6 @@ can be done like `sudo apt install patchelf`) and then run
 collaborating and other ISDi users overwrite the iOS binaries with their own 
 absolute shared object paths. [More details here (including for macOS users)](notes.md).
 
-<!-- ### Blacklist dependencies -->
-<!-- - Fill out https://forms.gle/qzres5fQaRbwsyni7 with -->
-<!-- a legitimate request for the blacklist ISDi requires to run. Please note that at this time, **we are only considering requests from those working for victim services organizations.** Approved requests will receive a follow-up email to the address entered on the form, so be sure to check your inbox.  -->
-<!--   We will provide `static_data.zip`, which should be unzipped and replacing the public facing -->
-<!-- `static_data` directory in this repository. -->
 
 ## Running ISDi
 
@@ -72,6 +71,12 @@ device plugged in and unlocked, run the following command in the terminal (in
 the base directory of this repository)
 
 ```$ ./isdi ```
+
+By default right now ISDi runs in test mode, which requires setting up test
+copies of the app blocklist and the SQLite database. You can run in regular mode
+via: 
+
+```$ TEST=0 ./isdi```
 
 Then navigate to `http://localhost:5000` in the browser of your choice (or `http://localhost:5002` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
@@ -95,7 +100,7 @@ UI")
 
 ## Consultation form data 
 ISDi is intended to be used by advocates for victims of intimate partner violence in 
-a [clinical setting](https://havron.dev/pubs/clinicalsec.pdf); 
+a [clinical setting](http://www.nixdell.com/papers/2019-usenix_clinical_security_FULL.pdf); 
 you can add detailed notes about a victim's tech abuse situation 
 by clicking `"Start Consult Form"` on ISDi's homepage. The results
 will be saved in `data/fieldstudy.db` and can be viewed/edited
@@ -110,9 +115,8 @@ the Flask app) to obtain the new
 schema. Then place the new schema in `schema.sql` by updating the `clients_notes` table.
 
 ## Debugging tips 
-If you encounter errors, please file a [GitHub issue](../../issues/) with the server error output 
-(or send it as an email to <havron@cs.cornell.edu>). Pull requests are welcome.
-Inspect apps on the device manually if you cannot resolve a failure.
+If you encounter errors, please file a [GitHub issue](../../issues/) with the server error output. 
+Pull requests are welcome. 
 
 #### Android tips 
 In the terminal of the computer, run `adb devices` to see if
