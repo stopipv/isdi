@@ -30,10 +30,11 @@ try:
 except FileNotFoundError as e:
     print(f"I can't find the blocklist file: {config.APP_FLAGS_FILE!r}.")
     exit(0)
-#{APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({'dual-use', 'high co-occurrence odds', 'spyware'})]
+
 APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({
     'dual-use', 'spyware', 'co-occurrence'
 })].replace('<Unknown>', '')
+
 SPY_REGEX = {
     "pos": re.compile(r'(?i)(spy|track|keylog|cheating)'),
     "neg": re.compile(r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'),
@@ -42,7 +43,7 @@ SPY_REGEX = {
 
 def dedup_app_flags(df):
     return df.fillna('').groupby('appId').agg({
-        'title': lambda x: ' '.join(set(x)),
+        'title': lambda x: ' -+- '.join(set(x)),
         'flag': list,
     }).reset_index()
 
