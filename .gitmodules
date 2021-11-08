@@ -1,6 +1,0 @@
-[submodule "MobileDevice"]
-	path = MobileDevice
-	url = https://github.com/rchatterjee/MobileDevice.git
-[submodule "ios-deploy"]
-	path = ios-deploy
-	url = https://github.com/rchatterjee/ios-deploy.git
