@@ -32,7 +32,15 @@ def _parse_time(time_str):
     return datetime.timedelta(**time_params)
 
 
-s = 'VIBRATE: allow; time=+29d3h41m32s800ms ago; duration=+1s13ms\nCAMERA: allow; time=+38d23h30m11s6ms ago; duration=+420ms\nRECORD_AUDIO: allow; time=+38d23h19m35s283ms ago; duration=+10s237ms\nWAKE_LOCK: allow; time=+16m12s788ms ago; duration=+10s67ms\nTOAST_WINDOW: allow; time=+38d23h22m57s645ms ago; duration=+4s2ms\nREAD_EXTERNAL_STORAGE: allow; time=+2h7m13s715ms ago\nWRITE_EXTERNAL_STORAGE: allow; time=+2h7m13s715ms ago\nRUN_IN_BACKGROUND: allow; time=+15m2s867ms ago'
+s = \
+"""VIBRATE: allow; time=+29d3h41m32s800ms ago; duration=+1s13ms
+CAMERA: allow; time=+38d23h30m11s6ms ago; duration=+420ms
+RECORD_AUDIO: allow; time=+38d23h19m35s283ms ago; duration=+10s237ms
+WAKE_LOCK: allow; time=+16m12s788ms ago; duration=+10s67ms
+TOAST_WINDOW: allow; time=+38d23h22m57s645ms ago; duration=+4s2ms
+READ_EXTERNAL_STORAGE: allow; time=+2h7m13s715ms ago
+WRITE_EXTERNAL_STORAGE: allow; time=+2h7m13s715ms ago
+RUN_IN_BACKGROUND: allow; time=+15m2s867ms ago"""
 
 
 def recent_permissions_used(appid):
@@ -109,7 +117,6 @@ def package_info(dumpf, appid):
     except AttributeError as e:
         print(package_dump)
         return []
-
     try:
         # FIXME: TypeError: list indices must be integers or slices, not str
         # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the
@@ -160,7 +167,8 @@ def gather_permissions_labels():
     perms = catch_err(
         run_command(
             cmd,
-            outf='static_data/android_permissions.txt'))
+            outf='static_data/android_permissions.txt')
+    )
 
 
 def permissions_map():

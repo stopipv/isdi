@@ -24,7 +24,6 @@ function hashing_exe {
 }
 echo $(hashing_exe)
 
-mkdir -p pkgs/
 ${adb_cmd} shell "mkdir -p /sdcard/apps/"
 # pkg_version com.amazon.mShop.android.shopping
 # exit 0;
