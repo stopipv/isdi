@@ -19,7 +19,7 @@ try:
     APP_FLAGS = pd.read_csv(
         config.APP_FLAGS_FILE,
         index_col='appId', encoding='latin1',
-        error_bad_lines=False).fillna({
+        on_bad_lines="skip").fillna({
             'title': '',
             'store': '',
             'flag': '',

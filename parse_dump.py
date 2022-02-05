@@ -263,7 +263,7 @@ class AndroidDump(PhoneDump):
         # parser error (tested on SM-G965U,Samsung,8.0.0)
         net_stats = pd.read_csv(io.StringIO(
             '\n'.join(d['net_stats'].keys())
-        ), error_bad_lines=False)
+        ), on_bad_lines="skip")
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
             ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']].astype(int)
 
