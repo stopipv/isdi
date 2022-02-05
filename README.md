@@ -50,16 +50,6 @@ brew install --cask android-platform-tools
 ```
 brew install expect libimobiledevice ideviceinstaller
 ```
-```
-brew install autoconf
-brew install automake
-brew install libtool
-brew install --cask macfuse
-cd ifuse
-./autogen.sh
-make
-sudo make install
-```
 
 #### Debian family
 
@@ -76,13 +66,6 @@ it won't work straightaway. You have to ensure having the *same* version of adb
 *both* in WSL2 and in normal Windows (with `adb version`), then you will need to
 start the adb process first in Windows, then in WSL2 (with for example `adb
 devices`).
-
-You also need to install [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
-can be done like `sudo apt install patchelf`) and then run
-`./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
-collaborating and other ISDi users overwrite the iOS binaries with their own 
-absolute shared object paths. [More details here (including for macOS users)](notes.md).
-
 
 ## Running ISDi
 
