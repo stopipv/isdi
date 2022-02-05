@@ -51,6 +51,7 @@ devices`).
 `brew install autoconf`
 `brew install automake`
 `brew install libtool`
+`brew install macfuse`
 `cd ifuse`
 `./autogen.sh`
 `make`
