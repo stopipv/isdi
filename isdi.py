@@ -9,12 +9,12 @@ from web import app, sa
 
 if __name__ == "__main__":
     import sys
-    if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
-        print("Running in test mode.")
-        config.set_test_mode(True)
-        print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
-              .format(config.TEST, config.APP_FLAGS_FILE,
-                      config.SQL_DB_PATH))
+    # if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
+    #     print("Running in test mode.")
+    #     config.set_test_mode(True)
+    #     print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
+    #           .format(config.TEST, config.APP_FLAGS_FILE,
+    #                   config.SQL_DB_PATH))
     print("TEST={}".format(config.TEST))
     init_db(app, sa, force=config.TEST)
     handler = handlers.RotatingFileHandler('logs/app.log', maxBytes=100000, 
