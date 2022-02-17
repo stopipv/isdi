@@ -2,6 +2,8 @@ import json
 import re
 import sys
 import os
+from plistlib import load
+
 import pandas as pd
 import io
 import config
@@ -384,9 +386,10 @@ class IosDump(PhoneDump):
         return len(self.df)
 
     def load_deviceinfo(self):
-        from plistlib import readPlist
         try:
-            return readPlist(self.finfo)
+            # return readPlist(self.finfo)
+            return load(self.finfo)
+
         except Exception as ex:
             print("Load_deviceinfo in parse_dump failed with exception {!r}".format(ex))
             return {
@@ -401,9 +404,9 @@ class IosDump(PhoneDump):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
         try:
             # FIXME: somehow, get the ios_apps.plist into a dataframe.
-            from plistlib import readPlist
             print("fname is: {}".format(self.fname))
-            apps_plist = readPlist(self.fname)
+            # apps_plist = readPlist(self.fname)
+            apps_plist = load(self.fname)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
             return d
