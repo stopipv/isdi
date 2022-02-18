@@ -440,8 +440,9 @@ class IosDump(PhoneDump):
 
     def load_deviceinfo(self):
         try:
-            # return readPlist(self.finfo)
-            return load(self.finfo)
+            with open(self.finfo, 'rb') as data:
+                device_info = load(data)
+            return device_info
 
         except Exception as ex:
             print("Load_deviceinfo in parse_dump failed with exception {!r}".format(ex))
@@ -458,8 +459,8 @@ class IosDump(PhoneDump):
         try:
             # FIXME: somehow, get the ios_apps.plist into a dataframe.
             print("fname is: {}".format(self.fname))
-            # apps_plist = readPlist(self.fname)
-            apps_plist = load(self.fname)
+            with open(self.fname, 'rb') as app_data:
+                apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
             d.set_index('appId', inplace=True)
