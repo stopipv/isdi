@@ -364,7 +364,7 @@ class IosDump(PhoneDump):
         self.fname = fplist
         if finfo:
             self.finfo = finfo
-            self.deviceinfo = self.load_deviceinfo()
+            self.deviceinfo = self.load_device_info()
             self.device_class = self.deviceinfo.get('DeviceClass', "")
         else:
             self.device_class = 'iPhone/iPad'
@@ -385,7 +385,7 @@ class IosDump(PhoneDump):
     def __len__(self):
         return len(self.df)
 
-    def load_deviceinfo(self):
+    def load_device_info(self):
         try:
             with open(self.finfo, 'rb') as data:
                 device_info = load(data)
