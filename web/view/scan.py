@@ -12,6 +12,8 @@ def scan():
     """
     Needs three attribute for a device
     :param device: "android" or "ios" or test
+    :param devid: id of the android device
+    :param cientid: id of the cient
     :return: a flask view template
     """
     #clientid = request.form.get('clientid', request.args.get('clientid'))
@@ -22,6 +24,7 @@ def scan():
         'device_primary_user',
         request.args.get('device_primary_user'))
     device = request.form.get('device', request.args.get('device'))
+    devid =  request.form.get('devid', request.args.get('devid'))
     action = request.form.get('action', request.args.get('action'))
     device_owner = request.form.get(
         'device_owner', request.args.get('device_owner'))

@@ -163,7 +163,7 @@ def get_client_devices_from_db(clientid):
     # first)
     try:
         d = query_db(
-            'select id,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
+            'select id,device,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
             args=(clientid,), one=False
         )
     except Exception as e:

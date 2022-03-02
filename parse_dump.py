@@ -97,6 +97,18 @@ def _extract_one(d, lkeys):
 def split_equalto_delim(k):
     return k.split('=', 1)
 
+def prune_empty_keys(d):
+    """d is an multi-layer dictionary. The function 
+    converts a sequence of keys into
+    array if all have empty values"""
+    if not isinstance(d, dict):
+        return d
+    if not any(d.values()):
+        return list(d.keys())
+    for k,v in d.items():
+        d[k] = prune_empty_keys(v)
+    return d
+
 
 def retrieve(dict_, nest):
     '''
@@ -153,7 +165,7 @@ class AndroidDump(PhoneDump):
             return lines
 
     @staticmethod
-    def new_parse_dump_file(fname):
+    def new_parse_dump_file(self, fname):
         """Not used working using simple parse to parse the files. """
         if not Path(fname).exists():
             print("File: {!r} does not exists".format(fname))
@@ -186,46 +198,84 @@ class AndroidDump(PhoneDump):
             d[service] = _parse(join_lines)
         return d
 
-    @staticmethod
-    def parse_dump_file(fname):
+    def _extract_info_lines(self, fp) -> list:
+        lastpos = fp.tell()
+        content = []
+        a = True
+        while a:
+            l = fp.readline()
+            if not l:
+                a = False
+                break
+            if l.startswith('DUMP OF'):
+                fp.seek(lastpos)
+                return content
+            lastpos = fp.tell()
+            content.append(l.rstrip())
+        return content
+
+    def _parse_dump_service_info_lines(self, lines) -> dict:
+        res = {}
+        curr_spcnt = [0]
+        curr_lvl = 0
+        lvls = ['' for _ in range(20)]  # Max 20 levels allowed
+        i = 0
+        while i < len(lines):
+            l = lines[i]; i += 1
+            if not l.strip():  # subsection ends
+                continue
+            l = l.replace('\t', ' '*5)
+            t_spcnt = count_lspaces(l)
+            # print(t_spcnt, curr_spcnt, curr_lvl)
+            # if t_spcnt == 1:
+            #     print(repr(l))
+            if t_spcnt >= 0 and t_spcnt >= curr_spcnt[-1] + 2:
+                curr_lvl += 1
+                curr_spcnt.append(t_spcnt)
+            while curr_spcnt and curr_spcnt[-1] > 0 and t_spcnt <= curr_spcnt[-1] - 2:
+                curr_lvl -= 1
+                curr_spcnt.pop()
+            if curr_spcnt[-1]>0:
+                curr_spcnt[-1] = t_spcnt
+            # assert (t_spcnt != 0) or (curr_lvl == 0), \
+            #         "t_spc: {} <--> curr_lvl: {}\n{}".format(t_spcnt, curr_lvl, l)
+            # print(lvls[:curr_lvl], curr_lvl, curr_spcnt)
+            curr = get_d_at_level(res, lvls[:curr_lvl])
+            k = l.strip().rstrip(':')
+            lvls[curr_lvl] = k   # '{} --> {}'.format(curr_lvl, k)
+            curr[lvls[curr_lvl]] = {}
+        return prune_empty_keys(res)
+
+    # @staticmethod
+    def parse_dump_file(self, fname) -> dict:
         if not Path(fname).exists():
             print("File: {!r} does not exists".format(fname))
-        data = open(fname)
+        fp = open(fname)
         d = {}
         service = ''
-        lvls = ['' for _ in range(20)]  # Max 100 levels allowed
         curr_spcnt, curr_lvl = 0, 0
-        for i, l in enumerate(data):
+        while True:
+            l = fp.readline().rstrip()
             if l.startswith('----'):
                 continue
-            if l.startswith('DUMP OF SERVICE'):
+
+            if l.startswith('DUMP OF SERVICE'): # Service
                 service = l.strip().rsplit(' ', 1)[1]
-                d[service] = res = {}
-                curr_spcnt = [0]
-                curr_lvl = 0
+                content = self._extract_info_lines(fp)
+                print(f"Content: {service!r}", content[:10])
+                d[service] = self._parse_dump_service_info_lines(content)
+
+            elif l.startswith('DUMP OF SETTINGS'): # Setting
+                setting = 'settings_' + l.strip().rsplit(' ', 1)[1]
+                content = self._extract_info_lines(fp)
+                settings_d = dict(
+                    [l.split('=', 1) for l in content]
+                )
+                d[setting] = settings_d
             else:
-                if not l.strip():  # subsection ends
-                    continue
-                l = l.replace('\t', ' '*5)
-                t_spcnt = count_lspaces(l)
-                # print(t_spcnt, curr_spcnt, curr_lvl)
-                # if t_spcnt == 1:
-                #     print(repr(l))
-                if t_spcnt > 0 and t_spcnt >= curr_spcnt[-1]*2:
-                    curr_lvl += 1
-                    curr_spcnt.append(t_spcnt)
-                while curr_spcnt and curr_spcnt[-1] > 0 and t_spcnt <= curr_spcnt[-1]/2:
-                    curr_lvl -= 1
-                    curr_spcnt.pop()
-                if curr_spcnt[-1]>0:
-                    curr_spcnt[-1] = t_spcnt
-                assert (t_spcnt != 0) or (curr_lvl == 0), \
-                        "t_spc: {} <--> curr_lvl: {}\n{}".format(t_spcnt, curr_lvl, l)
-                # print(lvls[:curr_lvl], curr_lvl, curr_spcnt)
-                curr = get_d_at_level(res, lvls[:curr_lvl])
-                k = l.strip().rstrip(':')
-                lvls[curr_lvl] = k   # '{} --> {}'.format(curr_lvl, k)
-                curr[lvls[curr_lvl]] = {}
+                if not l:
+                    break
+                print(f"Something wrong! --> {l!r}")
         return d
 
     def load_file(self, failed_before=False):
@@ -237,7 +287,7 @@ class AndroidDump(PhoneDump):
                 try:
                     d = json.load(f)
                 except Exception as ex:
-                    print(ex)
+                    print(f">> AndroidDump.load_file(): {ex}", file=sys.stderr)
                     if not failed_before:
                         os.unlink(json_fname)
                         return self.load_file(failed_before=True)
