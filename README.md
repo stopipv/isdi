@@ -30,6 +30,8 @@ requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
 ### Miscellaneous System dependencies
+On macOS you can quickly install project dependencies with Homebrew by running `brew bundle`.
+
 - Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew install --cask android-platform-tools`. On Debian-based
