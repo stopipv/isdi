@@ -1,7 +1,7 @@
 import pandas as pd
 
-#df = pd.read_csv('../static_data/app-flags.csv', index_col='appId', encoding='latin1', error_bad_lines=False)
-df = pd.read_csv('../static_data/app-flags.csv', encoding='latin1', error_bad_lines=False)
+#df = pd.read_csv('../static_data/app-flags.csv', index_col='appId', encoding='latin1', on_bad_lines="skip")
+df = pd.read_csv('../static_data/app-flags.csv', encoding='latin1', on_bad_lines="skip")
 df2 = df.groupby(df['appId']).agg({'flag':' AND '.join})
 
 def flags_filter(d):
