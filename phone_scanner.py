@@ -210,6 +210,7 @@ class AndroidScan(AppScan):
 
     def get_apps(self, serialno):
         installed_apps = self._get_apps_(serialno, '-u')
+        ##  Read from the database if we can d['package']['Packages'].keys() provides the list of packages.
         hmac_serial = config.hmac_serial(serialno)
         if installed_apps:
             q = run_command(
