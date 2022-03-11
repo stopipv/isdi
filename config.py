@@ -70,10 +70,10 @@ set_test_mode(TEST)
 STATIC_DATA = THIS_DIR / 'static_data'
 
 # TODO: We should get rid of this, ADB_PATH is very confusing
-ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
+ANDROID_HOME = Path(os.getenv('ANDROID_HOME', STATIC_DATA))
 PLATFORM = ('darwin' if platform == 'darwin'
             else 'linux' if platform.startswith('linux')
-            else 'win32' if platform == 'win32' else None)
+            else 'win32' if platform == 'win32' else 'unknown')
 ADB_PATH = shlex.quote(str(ANDROID_HOME / ('adb-' + PLATFORM)))
 #ADB_PATH = 'adb'
 

@@ -182,7 +182,7 @@ def get_device_info(ser: str) -> dict:
         return {}
     
     
-def get_client_devices_from_db(clientid: str) -> dict:
+def get_client_devices_from_db(clientid: str) -> list:
     # TODO: change 'select serial ...' to 'select device_model ...' (setup
     # first)
     d = query_db(

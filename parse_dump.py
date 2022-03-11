@@ -11,6 +11,7 @@ from pathlib import Path
 from rsonlite import simpleparse
 import itertools
 from collections import OrderedDict
+from typing import Dict, List, Tuple
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -200,7 +201,7 @@ class AndroidDump(PhoneDump):
 
     def _extract_info_lines(self, fp) -> list:
         lastpos = fp.tell()
-        content = []
+        content: List[str] = []
         a = True
         while a:
             l = fp.readline()
@@ -215,7 +216,7 @@ class AndroidDump(PhoneDump):
         return content
 
     def _parse_dump_service_info_lines(self, lines) -> dict:
-        res = {}
+        res: Dict[str, dict] = {}
         curr_spcnt = [0]
         curr_lvl = 0
         lvls = ['' for _ in range(20)]  # Max 20 levels allowed
@@ -458,6 +459,7 @@ class IosDump(PhoneDump):
             apps_plist = readPlist(self.fname)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
+            d.set_index('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -567,26 +569,23 @@ class IosDump(PhoneDump):
         #return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
         return self.df.query('ApplicationType=="System"')['CFBundleIdentifier']
 
-    def installed_apps_titles(self):
+    def installed_apps_titles(self) -> pd.DataFrame:
         if self:
-            t = self.df.set_index('appId')
-            t.rename(index=str, columns={'CFBundleExecutable': 'title'},
-                        inplace=True)
-            return t
+            return self.df.rename(index=str,
+                                  columns={'CFBundleExecutable': 'title'})
 
     def installed_apps(self):
         #return self.df.index
         if self.df is None:
             return []
-        print("parse_dump (installed_apps): >>", self.df)
-        if self.df is not None:
-            print(self.df.columns)
-        return self.df['appId']
+        print("parse_dump (installed_apps): >>", self.df.columns, len(self.df))
+        return self.df['appId'].to_list()
 
 
 if __name__ == "__main__":
     fname = sys.argv[1]
     # data = [l.strip() for l in open(fname)]
+    ddump: PhoneDump
     if sys.argv[2] == 'android':
         ddump = AndroidDump(fname)
         json.dump(ddump.parse_dump_file(fname), open(fname.rsplit('.', 1)[0] + '.json', 'w'), indent=2)

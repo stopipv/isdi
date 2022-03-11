@@ -33,11 +33,11 @@
 	 </form> -->
 </div>
 <div class="row  h-100">
-    <div class="col-md-3 border py-2" style="height:80vh;">
+    <div class="col-md-3 border py-2" style="height:90vh;">
         <div align="center">
             <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
-                for scanning mobile devices (e.g., Android and iOS devices) for apps that
-                can be used to spy on, track, or otherwise monitor a person.
+                for scanning Android and iOS devices to find apps that
+                can be used to spy, track, or otherwise monitor a person.
             </p>
             <hr/>
             <label class="font-weight-bold lead">What type of device is this?</label>
@@ -118,9 +118,9 @@
             </form>
         </div>-->
     </div>
-    <div class="col-md-9 border py-2" style="height: 80vh">
+    <div class="col-md-9 border py-2" style="height: 87vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
-        <div class="w-100" style="height: 70vh; overflow: auto;">
+        <div class="w-100" style="height: 80vh; overflow: auto;">
             {% if device_name %}
             <label>Scanned: <b>{{ device_name }}</b></label>
 	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
