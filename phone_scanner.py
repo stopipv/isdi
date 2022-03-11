@@ -49,7 +49,7 @@ class AppScan(object):
         hmac_serial = config.hmac_serial(serial)
         if self.device_type == 'ios':
             devicedumpsdir = os.path.join(config.DUMP_DIR, \
-                        '{}_{}'.format(serial, 'ios'))
+                        '{}_{}'.format(hmac_serial, 'ios'))
             if fkind == 'Jailbroken-FS':
                 return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken-FS',''))
             elif fkind == 'Jailbroken-SSH':
