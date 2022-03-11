@@ -519,7 +519,6 @@ class IosScan(AppScan):
             print(">> The iOS dumping failed for some reason. Check above for more information")
             return False
 
-
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         #cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
