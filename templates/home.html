@@ -84,7 +84,7 @@
 	    {% if currently_scanned %}
       <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
 		    {% for scanned in currently_scanned %}
-      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}">
+      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
           {{ scanned.device_model }} ({{ scanned.device_primary_user }})
       </a><br>
 		    {% endfor %}

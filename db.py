@@ -158,43 +158,65 @@ def create_mult_appinfo(args):
         args)
 
 
-def get_client_devices_from_db(clientid):
+def get_is_rooted(serial):
+    try:
+        d = query_db(
+            'select id, is_rooted, rooted_reasons from scan_res where serial=?',
+            args=(serial), one=False
+        )
+        if d:
+            d = d[0]
+        return d['is_rooted'], d['rooted_reasons']
+    except Exception as e:
+        return "<ROOTED_ERR>", "<ROOTED_ERR>"
+    
+    
+def get_device_info(ser: str) -> dict:
+    d = query_db(
+        'select id,device,device_model,serial,device_primary_user from scan_res where serial=?',
+        args=(ser,), one=True
+    )
+    if d:
+        return d
+    else:
+        return {}
+    
+    
+def get_client_devices_from_db(clientid: str) -> dict:
     # TODO: change 'select serial ...' to 'select device_model ...' (setup
     # first)
-    try:
-        d = query_db(
-            'select id,device,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
-            args=(clientid,), one=False
-        )
-    except Exception as e:
-        return []
+    d = query_db(
+        'select id,device,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
+        args=(clientid,), one=False
+    )
     if d:
         return d
     else:
-        return []
+        return [{}]
+
+def get_most_recent_scan_id(ser: str) -> int:
+    d = query_db(
+        "select max(id) as scanid from scan_res where serial=?",
+        args=(ser,), one=True
+    )
+    print(f"Get_most_recent_scanid: {d}")
+    return d['scanid']
+
+
 
 def get_scan_res_from_db(scanid):
-    try:
-        d = query_db(
-            'select * from scan_res where id=?',
-            args=(scanid,), one=False
-        )
-    except Exception as e:
-        return []
-    if d:
-        return d
-    else:
-        return []
+    d = query_db(
+        'select * from scan_res where id=?',
+        args=(scanid,), one=True
+    )
+    return d
 
 def get_app_info_from_db(scanid):
-    try:
-        d = query_db(
-            'select * from app_info where scanid=?',
-            args=(scanid,), one=False
-        )
-    except Exception as e:
-        return []
-    if d:
+    d = query_db(
+        'select * from app_info where scanid=?',
+        args=(scanid,), one=False
+    )
+    if d: 
         return d
     else:
         return []
@@ -202,10 +224,7 @@ def get_app_info_from_db(scanid):
 def get_device_from_db(scanid):
     d = query_db(
         'select device from scan_res where id=?',
-        args=(
-            scanid,
-        ),
-        one=True)
+        args=(scanid,), one=True)
     if d:
         return d['device']
     else:
@@ -224,6 +243,10 @@ def get_serial_from_db(scanid):
     else:
         return ''
 
+
+def first_element_or_none(l):
+    if l and len(l) > 0:
+        return l[0]
 
 def create_report(clientid):
     """

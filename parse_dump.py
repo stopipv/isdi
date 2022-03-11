@@ -143,21 +143,21 @@ class AndroidDump(PhoneDump):
         super(AndroidDump, self).__init__('android', fname)
         self.df = self.load_file()
 
-    def _extract_lines(self, service):
-        """Extract lines for te DUMP OF SERVICE <service> """
-        cmd = "sed -n -e '/DUMP OF SERVICE {}/,/DUMP OF SERVICE/p' '{fname}' "\
-              "| head -n -1"
-        s = "DUMP OF SERVICE {}".format(service)
-        started = False
-        with open(self.dumpf) as f:
-            for l in f:
-                if started:
-                    if "DUMP OF SERVICE" in l:
-                        break
-                    else:
-                        yield l
-                elif s in l:
-                    started = True
+    # def _extract_lines(self, service):
+    #     """Extract lines for te DUMP OF SERVICE <service> """
+    #     cmd = "sed -n -e '/DUMP OF SERVICE {}/,/DUMP OF SERVICE/p' '{fname}' "\
+    #           "| head -n -1"
+    #     s = "DUMP OF SERVICE {}".format(service)
+    #     started = False
+    #     with open(self.dumpf) as f:
+    #         for l in f:
+    #             if started:
+    #                 if "DUMP OF SERVICE" in l:
+    #                     break
+    #                 else:
+    #                     yield l
+    #             elif s in l:
+    #                 started = True
 
     @staticmethod
     def custom_parse(service, lines):
@@ -269,7 +269,7 @@ class AndroidDump(PhoneDump):
                 setting = 'settings_' + l.strip().rsplit(' ', 1)[1]
                 content = self._extract_info_lines(fp)
                 settings_d = dict(
-                    [l.split('=', 1) for l in content]
+                    l.split('=', 1) for l in content if '=' in l
                 )
                 d[setting] = settings_d
             else:
@@ -299,7 +299,8 @@ class AndroidDump(PhoneDump):
                 except Exception as ex:
                     print("File ({!r}) could not be opened or parsed.".format(fname))
                     print("Exception: {}".format(ex))
-                    return pd.DataFrame([])
+                    raise(ex)
+                    return {}
         return d
 
     @staticmethod
@@ -311,9 +312,10 @@ class AndroidDump(PhoneDump):
             }
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
         # parser error (tested on SM-G965U,Samsung,8.0.0)
+        
         net_stats = pd.read_csv(io.StringIO(
-            '\n'.join(d['net_stats'].keys())
-        ), on_bad_lines="skip")
+            '\n'.join(d['net_stats'])
+        ), error_bad_lines=False)
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
             ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']].astype(int)
 
