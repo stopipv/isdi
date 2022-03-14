@@ -29,7 +29,9 @@ Brew (a software package manager); finally, `brew install python` to get Python
 requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
-### Miscellaneous System dependencies
+### Operating system dependencies
+On macOS you can quickly install project dependencies with Homebrew by running `brew bundle`.
+
 - Install ADB for your operating system (via
 https://developer.android.com/studio/releases/platform-tools.html). On
 macOS, try `brew install --cask android-platform-tools`. On Debian-based
@@ -51,6 +53,7 @@ devices`).
 `brew install autoconf`
 `brew install automake`
 `brew install libtool`
+`brew install --cask macfuse`
 `cd ifuse`
 `./autogen.sh`
 `make`
