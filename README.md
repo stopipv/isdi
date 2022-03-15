@@ -6,8 +6,8 @@ in ["Clinical Computer Security for Victims of Intimate Partner Violence"
 (USENIX 2019)](https://www.usenix.org/conference/usenixsecurity19/presentation/havron). The blacklist is based
 on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 2018)](https://www.computer.org/csdl/pds/api/csdl/proceedings/download-article/12OmNxWuiny/pdf).
 
-
-Also checks for signs of jailbroken iOS devices or rooted Android devices.
+## Contribution Guidelines
+For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
 ## Installing ISDi :computer:
 
