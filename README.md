@@ -138,7 +138,7 @@ privacy checkup feature), as it will be easy for you to see the mobile device
 screen(s) in real time on the Mac side-by-side with the scanner.
 
 **How to do it:** 
-you can mirror Android device screens in a new window using
+You can mirror Android device screens in a new window using
 [scrcpy](https://github.com/Genymobile/scrcpy), and cast iOS device screens on
 macOS with QuickTime 10 (launch it and click File --> New Movie Recording -->
 (on dropdown by red button) the iPhone/iPad name).
