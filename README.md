@@ -75,14 +75,7 @@ the base directory of this repository)
 
 ```$ ./isdi ```
 
-By default right now ISDi runs in test mode, which requires setting up test
-copies of the app blocklist and the SQLite database. You can run in regular mode
-via: 
-
-```$ TEST=0 ./isdi```
-
-Then navigate to `http://localhost:5000` in the browser of your choice (or `http://localhost:5002` if
-in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
+Then navigate to `http://localhost:5000` in the browser of your choice. You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
 the instructions to prepare your device for the scan.
 
 It should look something like this:

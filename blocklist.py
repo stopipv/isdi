@@ -18,7 +18,7 @@ import pandas as pd
 try:
     APP_FLAGS = pd.read_csv(
         config.APP_FLAGS_FILE,
-        index_col='appId', encoding='latin1',
+        index_col='appId', encoding='latin1', 
         on_bad_lines="skip").fillna({
             'title': '',
             'store': '',

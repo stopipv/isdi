@@ -19,7 +19,6 @@ spyware_list_file = 'static_data/spyware.csv'   # hand picked
 
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "1")))
-TEST = bool(int(os.getenv("TEST", "1")))
 
 DEVICE_PRIMARY_USER = {
     'me': 'Me',
@@ -37,35 +36,15 @@ IOS_DUMPFILES = {'Jailbroken-FS': 'ios_jailbroken.log',
 TEST_APP_LIST = 'static_data/android.test.apps_list'
 #TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 
-TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
+TITLE = {'title': "IPV Spyware Discovery (ISDi)"}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
-    ("~test" if TEST else "")
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
 
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
 SQL_DB_PATH = "sqlite:///{}".format(str(THIS_DIR / "data/fieldstudy.db"))
-#SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
-
-
-def set_test_mode(test):
-    global TEST, APP_FLAGS_FILE, SQL_DB_PATH
-    TEST = test
-    if TEST:
-        if not APP_FLAGS_FILE.endswith('~test'):
-            APP_FLAGS_FILE = APP_FLAGS_FILE + "~test"
-        if not SQL_DB_PATH.endswith('~test'):
-            SQL_DB_PATH = SQL_DB_PATH + "~test"
-    else:
-        if APP_FLAGS_FILE.endswith('~test'):
-            APP_FLAGS_FILE = APP_FLAGS_FILE.replace("~test", '')
-        if SQL_DB_PATH.endswith('~test'):
-            SQL_DB_PATH = SQL_DB_PATH.replace("~test", '')
-
-
-set_test_mode(TEST)
 
 
 STATIC_DATA = THIS_DIR / 'static_data'
