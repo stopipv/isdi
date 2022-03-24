@@ -384,6 +384,8 @@ class AndroidScan(AppScan):
             Doesn't return all reasons by default. First match will return.
             TODO: make consistent with iOS isrooted, which returns all reasons discovered.
         '''
+        # TODO This should be removed once the check is fixed
+        return (False, "Jailbreak and root checks are currently disabled")
         
         cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
@@ -532,6 +534,10 @@ class IosScan(AppScan):
     def isrooted(self, serial):
         # dict with 'True' and 'False' mapping to a list of reasons for root/no root
         rooted = defaultdict(list)
+        # TODO This should be removed once the check is fixed
+        rooted['False'].append("Jailbreak and root checks are currently "
+                               "disabled")
+        return (False, rooted['False'])
         try:
             with open(self.dump_path(serial, 'Jailbroken-FS'),'r') as fh:
                 JAILBROKEN_LOG = fh.readlines()
