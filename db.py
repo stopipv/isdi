@@ -186,9 +186,11 @@ def get_client_devices_from_db(clientid: str) -> list:
     # TODO: change 'select serial ...' to 'select device_model ...' (setup
     # first)
     d = query_db(
-        'select id,device,device_model,serial,device_primary_user from scan_res where clientid=? group by serial',
-        args=(clientid,), one=False
+        'select id,device,device_model,serial,device_primary_user from scan_res where serial like "HSN_%" group by serial',
+        # args=(clientid,),
+        one=False
     )
+    print("<>get_client_devices_from_db<>", d)
     if d:
         return d
     else:
