@@ -52,11 +52,11 @@ However, for now, it is acceptable to check the PR against your own device and m
 
 ### Maintainers:  
 The following individuals <@github> are maintainers of the code base and have permission to merge pull requests: 
-Rahul Chatterjee <@rchatterjee>, Pixel 4  
-Tom Ristenpart  <@tomrist>
-Nolan Earl  <@>
-Martijn Grooten<@>  
-Stef Hart
-Grant V <@grant v9>, iPhone 8
-Lana R <@lanamorgan>, iPhone8
+* Rahul Chatterjee <`@rchatterjee`>, Pixel 4  
+* Tom Ristenpart  <`@tomrist`>
+* Nolan Earl  <@>
+* Martijn Grooten<@>  
+* Stef Hart
+* Grant V <`@grantv9`>, iPhone 8
+* Lana R <`@lanamorgan`>, iPhone 8
 	
