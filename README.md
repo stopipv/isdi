@@ -45,9 +45,11 @@ devices`).
 - Install `expect`. On macOS, run `brew install expect`. On Debian-based
   systems, run `sudo apt install expect`.
 
-- Install `libimobiledevice`. On macOS, run `brew install libimobiledevice`.
+- Install `libimobiledevice`. On macOS, run `brew install libimobiledevice`. On Debian-based
+  systems, run `sudo apt install libimobiledevice-utils`.
 
-- Install `ideviceinstaller`. On macOS, run `brew install ideviceinstaller`.
+- Install `ideviceinstaller`. On macOS, run `brew install ideviceinstaller`.On Debian-based
+  systems, run `sudo apt install ideviceinstaller`.
 
 - Install `ifuse` (via https://github.com/libimobiledevice/ifuse). On macOS, run:
 `brew install autoconf`
@@ -58,6 +60,8 @@ devices`).
 `./autogen.sh`
 `make`
 `sudo make install`
+On Debian-based systems, run `sudo apt install ifuse`.
+
 
 - **Linux/WSL2 only:** If you are running Linux or WSL2, install
    [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
@@ -81,7 +85,7 @@ via:
 
 ```$ TEST=0 ./isdi```
 
-Then navigate to `http://localhost:5000` in the browser of your choice (or `http://localhost:5002` if
+Then navigate to `http://localhost:6200` in the browser of your choice (or `http://localhost:6202` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
 the instructions to prepare your device for the scan.
 
