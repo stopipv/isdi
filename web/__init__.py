@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from time import strftime
 import logging
-
 import config
 from flask import Flask, g, session, request
 from flask_sqlalchemy import Model, SQLAlchemy
