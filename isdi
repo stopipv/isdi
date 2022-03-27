@@ -9,8 +9,6 @@ from db import init_db
 from web import app, sa
 
 def open_browser():
-    if config.DEBUG:
-        return
     webbrowser.open('http://127.0.0.1:' + str(PORT), new=0, autoraise=True)
 
 if __name__ == "__main__":
@@ -29,6 +27,5 @@ if __name__ == "__main__":
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
     PORT = 6200 if not config.TEST else 6202
-    Timer(1.25, open_browser).start()
-    app.run(host="0.0.0.0", port=PORT, debug=config.DEBUG)
-    
+    Timer(1, open_browser).start()
+    app.run(host="0.0.0.0", port=PORT, debug=config.DEBUG, use_reloader= False)
