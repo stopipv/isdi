@@ -13,12 +13,20 @@
     <p><!-- {{ title.title }} is  -->An <a href="https://github.com/stopipv/isdi" target="_blank" rel="noopener">open-source</a> app
         for scanning mobile devices (e.g., Android and iOS devices) for apps that
         can be used to spy on, track, or <br>otherwise monitor a person.<br/>
-    </p>
-    <div class="row container">
+    </p -->
+    <!-- div class="row container">
             <a class="btn btn-info" href="/form" target="_blank" rel="noopener">Start Consult Form</a>
-    </div>
-    <br>
+    </div>    <br -->
+
     <div class="row container">
+
+    </div>
+    <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
+	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
+	 </form> -->
+</div>
+<div class="row">
+    <div class="col-md-3 border py-2" style="height:90vh;">
         <form onsubmit="return false" name="form-newclient" id="form-newclient">
             <div class="pull-left">
 	        <label for="clientid"><i>Session ID:</i>
@@ -32,13 +40,6 @@
             </div>
         </form>
 
-    </div>
-    <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
-	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
-	 </form> -->
-</div>
-<div class="row  h-100">
-    <div class="col-md-3 border py-2" style="height:80vh;">
         <div align="center">
             <label class="font-weight-bold lead">What type of device is this?</label>
             <form id="scan_select" method="GET" action="/scan">
@@ -116,9 +117,9 @@
             </form>
         </div>-->
     </div>
-    <div class="col-md-9 border py-2" style="height: 80vh">
+    <div class="col-md-9 border py-2" style="height: 90vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
-        <div class="w-100" style="height: 70vh; overflow: auto;">
+        <div class="w-100" style="height: 80vh; overflow: auto;">
             {% if device_name %}
             <label>Scanned: <b>{{ device_name }}</b></label>
 	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
