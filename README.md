@@ -79,11 +79,10 @@ the base directory of this repository)
 
 ```$ ./isdi ```
 
-By default right now ISDi runs in test mode, which requires setting up test
-copies of the app blocklist and the SQLite database. You can run in regular mode
-via: 
+ISDi defaults to normal (non-debug) mode. To run ISDi in `test` mode, set the `TEST` flag to 1: 
 
-```$ TEST=0 ./isdi```
+```$ TEST=1 ./isdi```
+
 
 Then navigate to `http://localhost:6200` in the browser of your choice (or `http://localhost:6202` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
