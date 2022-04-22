@@ -1,10 +1,10 @@
 import json
-import config
 import os
-from web import app
-from web.view.index import get_device
 from flask import render_template, request, session, redirect, url_for
-from db import (get_client_devices_from_db, new_client_id, create_scan, 
+import isdi.config
+from isdi.web import app
+from isdi.web.view.index import get_device
+from isdi.db import (get_client_devices_from_db, new_client_id, create_scan,
     create_mult_appinfo)
 
 @app.route("/scan", methods=['POST', 'GET'])
@@ -29,9 +29,9 @@ def scan():
     currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d = dict(
         task="home",
-        title=config.TITLE,
+        title=isdi.config.TITLE,
         device=device,
-        device_primary_user=config.DEVICE_PRIMARY_USER,   # TODO: Why is this sent
+        device_primary_user=isdi.config.DEVICE_PRIMARY_USER,   # TODO: Why is this sent
         device_primary_user_sel=device_primary_user,
         apps={},
         currently_scanned=currently_scanned,
@@ -108,7 +108,7 @@ def scan():
 
     scan_d = {
         'clientid': session['clientid'],
-        'serial': config.hmac_serial(ser),
+        'serial': isdi.config.hmac_serial(ser),
         'device': device,
         'device_model': device_name_map.get('model', '<Unknown>').strip(),
         'device_version': device_name_map.get('version', '<Unknown>').strip(),
@@ -147,7 +147,7 @@ def scan():
         isrooted=(
             "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
             .format(rooted_reason) if rooted
-            else "Don't know" if rooted is None 
+            else "Don't know" if rooted is None
             else "No"
         ),
         device_name=device_name_print,
@@ -158,10 +158,10 @@ def scan():
         currently_scanned=currently_scanned,
         # TODO: make this a map of model:link to display scan results for that
         # scan.
-        error=config.error()
+        error=isdi.config.error()
     ))
     return render_template("main.html", **template_d), 200
- 
+
 
 def first_element_or_none(l):
     if l and len(l) > 0:

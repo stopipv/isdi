@@ -1,7 +1,7 @@
 from flask import request, render_template
-from web import app
-from web.view import get_device
-import config
+from isdi.web import app
+from isdi.web.view import get_device
+import isdi.config
 
 @app.route('/details/app/<device>', methods=['GET'])
 def app_details(device):

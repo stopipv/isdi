@@ -1,25 +1,25 @@
 from datetime import datetime, timedelta
 from time import strftime
 import logging
-import config
+import isdi.config
 from flask import Flask, g, session, request
 from flask_sqlalchemy import Model, SQLAlchemy
 from flask_migrate import Migrate
 
 app = Flask(__name__, static_folder='../webstatic',
         template_folder='../templates/')
-app.config['SQLALCHEMY_DATABASE_URI'] = config.SQL_DB_PATH
+app.config['SQLALCHEMY_DATABASE_URI'] = isdi.config.SQL_DB_PATH
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = config.FLASK_SECRET # doesn't seem to be necessary
-app.config['SECRET_KEY'] = config.FLASK_SECRET # doesn't seem to be necessary
+app.secret_key = isdi.config.FLASK_SECRET # doesn't seem to be necessary
+app.config['SECRET_KEY'] = isdi.config.FLASK_SECRET # doesn't seem to be necessary
 app.config['SESSION_TYPE'] = 'filesystem'
 sa=SQLAlchemy(app)
 Migrate(app, sa)
 
 logger = logging.getLogger(__name__)
 
-import web.view
+import isdi.web.view
 
 
 @app.before_request

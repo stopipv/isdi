@@ -1,13 +1,12 @@
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
-import config
 from flask import g
 from datetime import datetime as dt
-import config
+import isdi.config
 import os
 import pandas as pd
 
-DATABASE = config.SQL_DB_PATH.replace('sqlite:///', '').strip()
+DATABASE = isdi.config.SQL_DB_PATH.replace('sqlite:///', '').strip()
 #CONSULTS_DATABASE = config.SQL_DB_CONSULT_PATH.replace('sqlite:///', '')
 
 def today():
@@ -229,7 +228,7 @@ def create_report(clientid):
     """
     Creates a report for a clientid
     """
-    reportf = os.path.join(config.REPORT_PATH, clientid + '.csv')
+    reportf = os.path.join(isdi.config.REPORT_PATH, clientid + '.csv')
     d = pd.DataFrame(
         query_db(
             "select * from scan_res inner join app_info on "

@@ -1,5 +1,5 @@
-from web import app
-from db import update_appinfo, update_mul_appinfo, create_report
+from isdi.web import app
+from isdi.db import update_appinfo, update_mul_appinfo, create_report
 
 
 @app.route('/saveapps/<scanid>', methods=["POST"])

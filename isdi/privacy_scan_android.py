@@ -3,7 +3,7 @@ Author: Rahul Chatterjee
 Date: 2018-06-11
 Doc: https://docs.google.com/document/d/1HAzmB1IiViMrY7eyEt2K7-IwqFOKcczsgtRRaySCInA/edit
 
-Privacy configuration for Android. An attempt to automate most of this. 
+Privacy configuration for Android. An attempt to automate most of this.
 
 
 Automatic settings check
@@ -12,7 +12,7 @@ To find what activity is running on the current window (*Super useful command*)
 
     adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
 
-Finally screen capture. 
+Finally screen capture.
 
     adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > screen.png
 
@@ -34,7 +34,7 @@ import re
 import time
 from flask import url_for
 import random
-import config
+from isdi import config
 adb=config.ADB_PATH
 
 
@@ -84,7 +84,7 @@ def tap(ser, xpercent, ypercent):
     w, h = get_screen_res(ser)
     x = int(xpercent * w / 100)
     y = int(ypercent * h / 100)
-    cmd = "{cli} shell input tap {x} {y}" 
+    cmd = "{cli} shell input tap {x} {y}"
     out, err = run_command(cmd, cli=thiscli(ser), x=x, y=y)
     if err:
         print("ERROR (tap): {!r}".format(err))
@@ -125,7 +125,7 @@ def take_screenshot(ser, fname=None):
     # cmd = "{cli} shell screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g' > '{fname}'"
     cmd = "{cli} shell screencap -p > '{fname}'"
     run_command(cmd, cli=thiscli(ser), fname=fname)
-    
+
 
 def wait(t):
     time.sleep(t)
@@ -135,7 +135,7 @@ def do_privacy_check(ser, command):
         rand = random.randint(0, 10000)
         return "<img height='400px' src='" + \
             url_for('static', filename='images/' + img) + "?{}'/>".format(rand if nocache else '')
-    
+
     command = command.lower()
     if command == "account": # 1. Account ownership  & 3. Sync (if present)
         open_activity(ser, "com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsLink")

@@ -30,7 +30,7 @@ DEVICE_PRIMARY_USER = {
 }
 
 ANDROID_PERMISSIONS_CSV = 'static_data/android_permissions.csv'
-IOS_DUMPFILES = {'Jailbroken-FS': 'ios_jailbroken.log', 
+IOS_DUMPFILES = {'Jailbroken-FS': 'ios_jailbroken.log',
                  'Jailbroken-SSH': 'ios_jailbreak_ssh.retcode',
                  'Apps': 'ios_apps.plist', 'Info': 'ios_info.xml'}
 
@@ -39,8 +39,8 @@ TEST_APP_LIST = 'static_data/android.test.apps_list'
 
 TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
 
-APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
+APP_FLAGS_FILE = 'isdi/static_data/app-flags.csv'
+APP_INFO_SQLITE_FILE = 'sqlite:///isdi/static_data/app-info.db' + \
     ("~test" if TEST else "")
 
 # we will resolve the database path using an absolute path to __FILE__ because

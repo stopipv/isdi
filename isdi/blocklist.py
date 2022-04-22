@@ -12,12 +12,12 @@ Flags added to them are from the following four classes
 5. "odds-ratio": Spyware based on high co-occurrence with other offstore-spyware
 """
 import re
-import config
+import isdi.config
 import pandas as pd
 
 try:
     APP_FLAGS = pd.read_csv(
-        config.APP_FLAGS_FILE,
+        isdi.config.APP_FLAGS_FILE,
         index_col='appId', encoding='latin1',
         on_bad_lines="skip").fillna({
             'title': '',
@@ -28,7 +28,7 @@ try:
             'source': ''
         })
 except FileNotFoundError as e:
-    print(f"I can't find the blocklist file: {config.APP_FLAGS_FILE!r}.")
+    print(f"I can't find the blocklist file: {isdi.config.APP_FLAGS_FILE!r}.")
     exit(0)
 
 APP_FLAGS = APP_FLAGS[APP_FLAGS.flag.isin({

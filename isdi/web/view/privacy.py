@@ -1,8 +1,8 @@
 from flask import request, render_template
-from web import app
-from web.view import get_device
-from privacy_scan_android import do_privacy_check
-import config
+from isdi.web import app
+from isdi.web.view import get_device
+from isdi.privacy_scan_android import do_privacy_check
+import isdi.config
 
 @app.route("/privacy", methods=['GET'])
 def privacy():
@@ -12,8 +12,8 @@ def privacy():
     """
     return render_template(
         'main.html', task="privacy",
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        title=config.TITLE
+        device_primary_user=isdi.config.DEVICE_PRIMARY_USER,
+        title=isdi.config.TITLE
     )
 
 

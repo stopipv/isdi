@@ -4,9 +4,9 @@ flask
 dataset
 rsonlite==0.1.0
 Flask-WTF==0.14.2
-Flask-SQLAlchemy==2.4.0
+Flask-SQLAlchemy==2.5.1
 WTForms==2.2.1
-WTForms-Alchemy==0.16.9
+WTForms-Alchemy==0.18
 WTForms-Components==0.10.4
 Flask-Migrate==2.5.2
 python-dotenv==0.10.3

@@ -1,11 +1,11 @@
-# If changes are made to this model, please run 
-# `flask db migrate` and then delete the drops to other tables from the upgrade() method in 
+# If changes are made to this model, please run
+# `flask db migrate` and then delete the drops to other tables from the upgrade() method in
 # migrations/versions/<version>.py
 # before running `flask db upgrade` and re-launching the server.
 # if the migrations folder isn't present, run `flask db init` first.
 # _order in ClientForm should be modified .
 
-from web import sa
+from isdi.web import sa
 from wtforms.validators import Email, InputRequired
 
 class Client(sa.Model):
@@ -19,7 +19,7 @@ class Client(sa.Model):
         #default=datetime.now()
         # TODO: timestamp off by 4 hours? investigate.
         default=sa.func.current_timestamp(),
-        #server_default=sa.func.current_timestamp() 
+        #server_default=sa.func.current_timestamp()
         #server_default=str(datetime.now()),
     )
 
@@ -63,25 +63,25 @@ class Client(sa.Model):
     chief_concerns_other = sa.Column(sa.Text, nullable=False,
             info=_lr('Chief concerns if not listed above (Optional)', ''), **_d)
 
-    android_phones = sa.Column(sa.Integer, nullable=False, 
+    android_phones = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of Android phones brought in','r'), **_d0)
 
-    android_tablets = sa.Column(sa.Integer, nullable=False, 
+    android_tablets = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of Android tablets brought in','r'), **_d0)
 
-    iphone_devices = sa.Column(sa.Integer, nullable=False, 
+    iphone_devices = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of iPhones brought in','r'), **_d0)
 
-    ipad_devices = sa.Column(sa.Integer, nullable=False, 
+    ipad_devices = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of iPads brought in','r'), **_d0)
 
-    macbook_devices = sa.Column(sa.Integer, nullable=False, 
+    macbook_devices = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of MacBooks brought in','r'), **_d0)
 
-    windows_devices = sa.Column(sa.Integer, nullable=False, 
+    windows_devices = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of Windows laptops brought in','r'), **_d0)
 
-    echo_devices = sa.Column(sa.Integer, nullable=False, 
+    echo_devices = sa.Column(sa.Integer, nullable=False,
             info=_lr('# of Amazon Echoes brought in','r'), **_d0)
 
     other_devices = sa.Column(sa.String(400), nullable=True,

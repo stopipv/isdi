@@ -6,7 +6,7 @@ from plistlib import load
 
 import pandas as pd
 import io
-import config
+import isdi.config
 from functools import reduce
 import operator
 from pathlib import Path
@@ -374,9 +374,9 @@ class IosDump(PhoneDump):
         # load permissions mappings and apps plist
         self.permissions_map = {}
         self.model_make_map = {}
-        with open(os.path.join(config.STATIC_DATA, 'ios_permissions.json'), 'r') as fh:
+        with open(os.path.join(isdi.config.STATIC_DATA, 'ios_permissions.json'), 'r') as fh:
             self.permissions_map = json.load(fh)
-        with open(os.path.join(config.STATIC_DATA, 'ios_device_identifiers.json'), 'r') as fh:
+        with open(os.path.join(isdi.config.STATIC_DATA, 'ios_device_identifiers.json'), 'r') as fh:
             self.model_make_map = json.load(fh)
 
     def __nonzero__(self):
@@ -421,7 +421,7 @@ class IosDump(PhoneDump):
             if permission not in self.permissions_map:
                 print('Have not seen '+str(permission)+' before. Making note of this...')
                 permission_human_readable = permission.replace('kTCCService','')
-                with open(os.path.join(config.THISDIR,'ios_permissions.json'), 'w') as fh:
+                with open(os.path.join(isdi.config.THISDIR,'ios_permissions.json'), 'w') as fh:
                     self.permissions_map[permission] = permission_human_readable
                     fh.write(json.dumps(self.permissions_map))
                 print('Noted.')
@@ -483,7 +483,7 @@ class IosDump(PhoneDump):
         if party in ['system', 'user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
                     .format(party))
-            # permissions are an array that returns the permission id and an explanation. 
+            # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res['permissions'] = [(p.capitalize(), r) for p, r in permissions]
         res['title'] = app['CFBundleExecutable']
@@ -501,7 +501,7 @@ class IosDump(PhoneDump):
 
         return res
 
-    # TODO: The following function is incorrect or incomplete. Commenting out for now. 
+    # TODO: The following function is incorrect or incomplete. Commenting out for now.
     # def all(self):
     #     for appidx in range(self.df.shape[0]):
     #         app = self.df.iloc[appidx,:].dropna()

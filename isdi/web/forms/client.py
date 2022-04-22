@@ -1,5 +1,5 @@
 from wtforms_alchemy import ModelForm
-from web.model import Client
+from isdi.web.model import Client
 from wtforms.fields import SelectMultipleField
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms import TextAreaField

@@ -4,15 +4,15 @@
 import hmac
 import hashlib
 import pandas as pd
-import config
+import isdi.config
 import os, sys
 import sqlite3
 from datetime import datetime
 from collections import defaultdict
-from android_permissions import all_permissions
+from isdi.android_permissions import all_permissions
 from runcmd import run_command, catch_err
-import parse_dump
-import blocklist
+from isdi import parse_dump
+from isdi import blocklist
 import re
 import shlex
 
@@ -21,14 +21,14 @@ class AppScan(object):
     device_type = ''
     # app_info_conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
     app_info_conn = sqlite3.connect(
-        config.APP_INFO_SQLITE_FILE.replace('sqlite:///', ''),
+        isdi.config.APP_INFO_SQLITE_FILE.replace('sqlite:///', ''),
         check_same_thread=False
     )
 
     def __init__(self, dev_type, cli):
-        assert dev_type in config.DEV_SUPPRTED, \
+        assert dev_type in isdi.config.DEV_SUPPRTED, \
             "dev={!r} is not supported yet. Allowed={}"\
-                .format(dev_type, config.DEV_SUPPRTED)
+                .format(dev_type, isdi.config.DEV_SUPPRTED)
         self.device_type = dev_type
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
 
@@ -46,25 +46,25 @@ class AppScan(object):
         return []
 
     def dump_path(self, serial, fkind='json'):
-        serial = config.hmac_serial(serial)
+        serial = isdi.config.hmac_serial(serial)
         if self.device_type == 'ios':
-            devicedumpsdir = os.path.join(config.DUMP_DIR, \
+            devicedumpsdir = os.path.join(isdi.config.DUMP_DIR, \
                         '{}_{}'.format(serial, 'ios'))
             if fkind == 'Jailbroken-FS':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken-FS',''))
+                return os.path.join(devicedumpsdir, isdi.config.IOS_DUMPFILES.get('Jailbroken-FS',''))
             elif fkind == 'Jailbroken-SSH':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Jailbroken-SSH',''))
+                return os.path.join(devicedumpsdir, isdi.config.IOS_DUMPFILES.get('Jailbroken-SSH',''))
             elif fkind == 'Device_Info':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Info',''))
+                return os.path.join(devicedumpsdir, isdi.config.IOS_DUMPFILES.get('Info',''))
             elif fkind == 'Apps':
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Apps',''))
+                return os.path.join(devicedumpsdir, isdi.config.IOS_DUMPFILES.get('Apps',''))
             elif fkind == 'Dir':
                 return devicedumpsdir
             else:
                 # returns apps dumpfile if fkind isn't explicitly specified.
-                return os.path.join(devicedumpsdir, config.IOS_DUMPFILES.get('Apps',''))
+                return os.path.join(devicedumpsdir, isdi.config.IOS_DUMPFILES.get('Apps',''))
 
-        return os.path.join(config.DUMP_DIR, '{}_{}.{}'.format(
+        return os.path.join(isdi.config.DUMP_DIR, '{}_{}.{}'.format(
             serial, self.device_type, fkind))
 
     def app_details(self, serialno, appid):
@@ -184,7 +184,7 @@ class AndroidScan(AppScan):
     """
 
     def __init__(self):
-        super(AndroidScan, self).__init__('android', config.ADB_PATH)
+        super(AndroidScan, self).__init__('android', isdi.config.ADB_PATH)
         self.serialno = None
         self.installed_apps = None
         # self.setup()
@@ -210,7 +210,7 @@ class AndroidScan(AppScan):
 
     def get_apps(self, serialno):
         installed_apps = self._get_apps_(serialno, '-u')
-        hmac_serial = config.hmac_serial(serialno)
+        hmac_serial = isdi.config.hmac_serial(serialno)
         if installed_apps:
             q = run_command(
                 'bash scripts/android_scan.sh scan {ser} {hmac_serial}',
@@ -225,7 +225,7 @@ class AndroidScan(AppScan):
     def get_offstore_apps(self, serialno):
         offstore = []
         rooted, reason = self.isrooted(serialno)
-        approved = config.APPROVED_INSTALLERS
+        approved = isdi.config.APPROVED_INSTALLERS
         if not rooted:
             for l in self._get_apps_(serialno, '-i -u -s'):
                 l = l.split()
@@ -320,7 +320,7 @@ class AndroidScan(AppScan):
 
         # FIXME: some appopps in non_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
-        info['Date of Scan'] = datetime.now().strftime(config.DATE_STR)
+        info['Date of Scan'] = datetime.now().strftime(isdi.config.DATE_STR)
         info['Installation Date'] = stats.get('firstInstallTime', '')
         info['Last Updated'] = stats.get('lastUpdateTime', '')
         # info['Last Used'] = stats['used']
@@ -366,21 +366,21 @@ class AndroidScan(AppScan):
         '''
         # TODO This should be removed once the check is fixed
         return (False, "Jailbreak and root checks are currently disabled")
-        
+
         cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
         if not s or s == -1 or 'not found' in s or len(s) == 0 or (s == "[android]: Error running ''. Error (1):"):
-            print(config.error())
+            print(isdi.config.error())
             reason = "couldn't find 'su' tool on the phone."
             return (False, reason)
         else:
             reason = "found '{}' tool on the phone. Verify whether this is a su binary.".format(s.strip())
             return (True, reason)
-        
+
         installed_apps = self.installed_apps
         if not installed_apps:
             installed_apps = self.get_apps(serial)
-        
+
         # FIXME: load these from a private database instead.  from OWASP,
         # https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
         root_pkgs = ['com.noshufou.android.su','com.thirdparty.superuser',\
@@ -391,27 +391,27 @@ class AndroidScan(AppScan):
             reason = "found the following app(s) on the phone: '{}'."\
                     .format(str(root_pkgs_check))
             return (True, reason)
-    
+
 
 class IosScan(AppScan):
     """
     Run `bash scripts/setup.sh to get libimobiledevice dependencies`
     """
     def __init__(self):
-        super(IosScan, self).__init__('ios', cli=config.LIBIMOBILEDEVICE_PATH)
+        super(IosScan, self).__init__('ios', cli=isdi.config.LIBIMOBILEDEVICE_PATH)
         self.installed_apps = None
         self.serialno = None
         self.parse_dump = None
 
     def setup(self, attempt_remount=False):
         ''' FIXME: iOS setup. '''
-        if config.PLATFORM == 'linux' and attempt_remount:
+        if isdi.config.PLATFORM == 'linux' and attempt_remount:
             # should show GUI prompt for password. sudo apt install policykit-1 if not there.
-            cmd = "pkexec '"+config.SCRIPT_DIR + "/ios_mount_linux.sh' mount"
+            cmd = "pkexec '"+ isdi.config.SCRIPT_DIR + "/ios_mount_linux.sh' mount"
             #mountmsg = run_command(cmd).stderr.read().decode('utf-8')
             if catch_err(run_command(cmd)) == -1:
                 return (False, "Couldn't detect device. See {}/ios_mount_linux.sh."\
-                        .format(config.SCRIPT_DIR))
+                        .format(isdi.config.SCRIPT_DIR))
         cmd = '{}idevicepair pair'.format(self.cli)
         pairmsg = run_command(cmd).stdout.read().decode('utf-8')
         if "No device found, is it plugged in?" in pairmsg:
@@ -489,14 +489,14 @@ class IosScan(AppScan):
     def _dump_phone(self, serial):
         print('DUMPING iOS INFO...')
         # FIXME: pathlib migration at some point
-        hmac_serial = config.hmac_serial(serial)
+        hmac_serial = isdi.config.hmac_serial(serial)
         cmd = "'{}/ios_dump.sh' {} {Apps} {Info} {Jailbroken-FS} {Jailbroken-SSH}"\
-            .format(config.SCRIPT_DIR, hmac_serial, **config.IOS_DUMPFILES)
+            .format(isdi.config.SCRIPT_DIR, hmac_serial, **isdi.config.IOS_DUMPFILES)
         print(cmd)
         path = self.dump_path(serial, fkind='Dir')
         # dumped = catch_err(run_command(cmd)).strip()
-        dumpf = os.path.join(path, config.IOS_DUMPFILES['Apps'])
-        dumpfinfo = os.path.join(path, config.IOS_DUMPFILES['Info'])
+        dumpf = os.path.join(path, isdi.config.IOS_DUMPFILES['Apps'])
+        dumpfinfo = os.path.join(path, isdi.config.IOS_DUMPFILES['Info'])
 
         #dumped = catch_err(run_command(cmd)).strip()
         dumped = catch_err(run_command(cmd)).strip()
@@ -542,7 +542,7 @@ class IosScan(AppScan):
                 rooted['True'].append("Filesystem *might* be rooted. Conduct additional checks.")
         except FileNotFoundError as e:
             print("Couldn't find Jailbroken FS check log.")
-            # TODO: trigger error message? like 
+            # TODO: trigger error message? like
             # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
             #return (True, ['FS check failed, jailbreak not necessarily occurring.'])
 
@@ -552,7 +552,7 @@ class IosScan(AppScan):
             if "0\n" in JAILBROKEN_SSH_LOG:
                 rooted['True'].append("SSH is enabled.")
         except FileNotFoundError as e:
-            # TODO: trigger error message? like 
+            # TODO: trigger error message? like
             # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
             print("Couldn't find Jailbroken SSH check log.")
 
@@ -569,18 +569,18 @@ class IosScan(AppScan):
 
         apps_titles = self.parse_dump.installed_apps_titles()['title'].tolist()
         # TODO: convert to set check
-        for app in ["Cydia", "blackra1n", "Undecimus", 
-                "FakeCarrier", "Icy", "IntelliScreen", 
-                "MxTube", "RockApp", "SBSettings", 
-                "WinterBoard", "3uTools", "Absinthe", 
-                "backr00m", "blackra1n", "Corona", 
-                "doubleH3lix", "Electra", "EtasonJB", 
-                "evasi0n", "evasi0n7", "G0blin", "Geeksn0w", 
-                "greenpois0n", "h3lix", "Home Depot", "ipwndfu", 
-                "JailbreakMe", "LiberiOS", "LiberTV", "limera1n", 
-                "Meridian", "p0sixspwn", "Pangu", "Pangu8", "Pangu9", 
-                "Phœnix", "PPJailbreak", "purplera1n", "PwnageTool", 
-                "redsn0w", "RockyRacoon","Rocky Racoon", "Saïgon", "Seas0nPass", 
+        for app in ["Cydia", "blackra1n", "Undecimus",
+                "FakeCarrier", "Icy", "IntelliScreen",
+                "MxTube", "RockApp", "SBSettings",
+                "WinterBoard", "3uTools", "Absinthe",
+                "backr00m", "blackra1n", "Corona",
+                "doubleH3lix", "Electra", "EtasonJB",
+                "evasi0n", "evasi0n7", "G0blin", "Geeksn0w",
+                "greenpois0n", "h3lix", "Home Depot", "ipwndfu",
+                "JailbreakMe", "LiberiOS", "LiberTV", "limera1n",
+                "Meridian", "p0sixspwn", "Pangu", "Pangu8", "Pangu9",
+                "Phœnix", "PPJailbreak", "purplera1n", "PwnageTool",
+                "redsn0w", "RockyRacoon","Rocky Racoon", "Saïgon", "Seas0nPass",
                 "sn0wbreeze", "Spirit", "TaiG", "unthredera1n", "yalu"]:
             if app in apps_titles:
                 rooted['True'].append("{} was found on the device.".format(app))
@@ -588,7 +588,7 @@ class IosScan(AppScan):
         # if apps check passes
         if not rooted:
             rooted['False'].append("Did not find popular jailbreak apps installed.")
-            ''' check for jailbroken status after attempts logged by ios_dump.sh ''' 
+            ''' check for jailbroken status after attempts logged by ios_dump.sh '''
         if 'True' in rooted:
             return (True, rooted['True'])
         else:
@@ -601,7 +601,7 @@ class TestScan(AppScan):
 
     def get_apps(self, serialno):
         # assert serialno == 'testdevice1'
-        installed_apps = open(config.TEST_APP_LIST, 'r').read().splitlines()
+        installed_apps = open(isdi.config.TEST_APP_LIST, 'r').read().splitlines()
         return installed_apps
 
     def devices(self):

@@ -6,7 +6,7 @@ from rsonlite import simpleparse
 from runcmd import run_command, catch_err
 import pandas as pd
 import datetime
-import config
+import isdi.config
 import re
 import json
 

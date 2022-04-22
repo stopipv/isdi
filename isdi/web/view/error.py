@@ -1,4 +1,4 @@
-from web import app
+from isdi.web import app
 
 @app.route("/error")
 def get_nothing():

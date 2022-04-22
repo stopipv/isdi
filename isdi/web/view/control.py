@@ -1,4 +1,4 @@
-from web import app
+from isdi.web import app
 from flask import request
 
 @app.route('/kill', methods=['POST', 'GET'])

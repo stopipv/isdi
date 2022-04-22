@@ -1,8 +1,8 @@
-import config
-from web import app
+import isdi.config
+from isdi.web import app
 from flask import render_template, request, session
-from phone_scanner import AndroidScan, IosScan, TestScan
-from db import get_client_devices_from_db, new_client_id
+from isdi.phone_scanner import AndroidScan, IosScan, TestScan
+from isdi.db import get_client_devices_from_db, new_client_id
 
 # FIXME: why are we scanning devices before people clicked on scan now?
 android = AndroidScan()
@@ -25,7 +25,7 @@ def index():
     #if not clientid: # if not coming from notes
 
     newid = request.args.get('newid')
-    # if it's a new day (see app.permenant_session_lifetime), 
+    # if it's a new day (see app.permenant_session_lifetime),
     # or the client devices are all scanned (newid),
     # ask the DB for a new client ID (additional checks in DB).
     if 'clientid' not in session or (newid is not None):
@@ -33,8 +33,8 @@ def index():
 
     return render_template(
         'main.html',
-        title=config.TITLE,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
+        title=isdi.config.TITLE,
+        device_primary_user=isdi.config.DEVICE_PRIMARY_USER,
         task='home',
         devices={
             'Android': android.devices(),
