@@ -1,5 +1,6 @@
 logs/app.log.1
 notes/
+isdi/phone_dumps/
 static_data/pii.key
 static_data/flask.secret
 static_data/*.old
