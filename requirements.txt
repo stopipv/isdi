@@ -30,6 +30,7 @@ SQLAlchemy-Utils==0.38.3
 tomli==2.0.1
 validators==0.20.0
 Werkzeug==2.2.2
+Flask-SQLAlchemy==2.5.1
 WTForms==2.2.1
 WTForms-Alchemy==0.16.9
 WTForms-Components==0.10.4
