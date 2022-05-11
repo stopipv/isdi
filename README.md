@@ -30,41 +30,52 @@ requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
 ### Operating system dependencies
+
+#### Generic
+* [adb](https://developer.android.com/studio/releases/platform-tools.html)
+* expect
+* libimobiledevice
+* ideviceinstaller
+* ifuse
+
+#### macOS
 On macOS you can quickly install project dependencies with Homebrew by running `brew bundle`.
 
-- Install ADB for your operating system (via
-https://developer.android.com/studio/releases/platform-tools.html). On
-macOS, try `brew install --cask android-platform-tools`. On Debian-based
-systems, try `sudo apt install adb`. 
-**Windows via WSL2 only:** Installing adb is not so straightforward in WSL2, and
+You can also fulfill the requirements by doing:
+```
+brew install --cask android-platform-tools
+```
+```
+brew install expect libimobiledevice ideviceinstaller
+```
+```
+brew install autoconf
+brew install automake
+brew install libtool
+brew install --cask macfuse
+cd ifuse
+./autogen.sh
+make
+sudo make install
+```
+
+#### Debian family
+
+```
+sudo apt install adb expect libimobiledevice-utils ideviceinstaller ifuse
+```
+
+#### Windows Subsystem Linux (v2)
+
+For Debian or Debian-derivatives, please follow first the [steps for debian](#debian-family)
+
+Installing **adb** is not so straightforward in WSL2, and
 it won't work straightaway. You have to ensure having the *same* version of adb
 *both* in WSL2 and in normal Windows (with `adb version`), then you will need to
 start the adb process first in Windows, then in WSL2 (with for example `adb
 devices`).
 
-- Install `expect`. On macOS, run `brew install expect`. On Debian-based
-  systems, run `sudo apt install expect`.
-
-- Install `libimobiledevice`. On macOS, run `brew install libimobiledevice`. On Debian-based
-  systems, run `sudo apt install libimobiledevice-utils`.
-
-- Install `ideviceinstaller`. On macOS, run `brew install ideviceinstaller`.On Debian-based
-  systems, run `sudo apt install ideviceinstaller`.
-
-- Install `ifuse` (via https://github.com/libimobiledevice/ifuse). On macOS, run:
-`brew install autoconf`
-`brew install automake`
-`brew install libtool`
-`brew install --cask macfuse`
-`cd ifuse`
-`./autogen.sh`
-`make`
-`sudo make install`
-On Debian-based systems, run `sudo apt install ifuse`.
-
-
-- **Linux/WSL2 only:** If you are running Linux or WSL2, install
-   [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
+You also need to install [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
 can be done like `sudo apt install patchelf`) and then run
 `./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
 collaborating and other ISDi users overwrite the iOS binaries with their own 
