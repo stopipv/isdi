@@ -30,5 +30,3 @@ jobs:
     - name: Update
       run: |
         python scripts/get-stalkerware-indicators.py
-
-    branches: [ "main" ]
