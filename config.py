@@ -43,6 +43,11 @@ APP_FLAGS_FILE = 'static_data/app-flags.csv'
 APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
     ("~test" if TEST else "")
 
+# IOC stalkware indicators
+IOC_PATH = "data/stalkerware-indicators/"
+IOC_FILE = IOC_PATH + "ioc.yaml"
+
+
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
