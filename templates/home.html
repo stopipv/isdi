@@ -6,6 +6,7 @@
                       device for a scan."><u>Scan Instructions</u></a>
             <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
+            <a class='btn btn-normal' href="/evidence" target="_blank" rel="noopener" data-toggle="tooltip" title="Collect evidence here."><u>Evidence</u></a>
             <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
         </span> 
     </h4>
@@ -118,7 +119,7 @@
         </div>-->
     </div>
     <div class="col-md-9 border py-2" style="height: 90vh">
-        <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
+        <div id="msg" class="alert alert-primary">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 80vh; overflow: auto;">
             {% if device_name %}
             <label>Scanned: <b>{{ device_name }}</b></label>

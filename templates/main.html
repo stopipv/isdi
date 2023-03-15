@@ -59,6 +59,7 @@
              if (confirm("Did you finish scanning ALL devices of the current client? Do you want to scan devices for a new client?")) {
                  window.location.href = "/?newid=y";
              }
+        }
 
          function consult_form(form) {
              if (confirm("Did you finish the form? If you leave, your changes may not be saved.")) {
@@ -96,6 +97,9 @@
         {% endif %}
         {% if task == 'privacy' %}
           {% include "privacy.html" %}
+        {% endif %}
+        {% if task == 'evidence' %}
+          {% include "evidence.html" %}
         {% endif %}
         {% if task == 'app' %}
           {% include "app.html" %}

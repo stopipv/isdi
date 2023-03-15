@@ -1,0 +1,29 @@
+<script>
+    function get(url){
+        $('#loadingDiv').show();
+        $('#msg').html("")
+        $.get(url, function(data) {
+            $('#msg').html(data);
+            $('#loadingDiv').hide();
+        }).done(function(data) {
+        }).fail(function(data) {
+            alert("Failed:" + JSON.serialize(data));
+        })
+    }
+   
+    var loading = $('#loadingDiv').hide();
+    $(document).ready(function() {
+        $('#loadingDiv').hide();
+    });
+    
+</script>
+
+<div class="container">
+    <div>
+        <h4 class="display-4"> Evidence Collection</h4>
+        <div class="jumbotron" id="msg">
+            Hello?
+        </div>
+    </div>
+</div>
+
