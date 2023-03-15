@@ -31,7 +31,7 @@
                 What type of device is this? 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     {% for a in ["Android", "iOS"] %}
-                            <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
+                            <label class="btn btn-outline-secondary">
                                 <input type="radio" name="device" id="{{ a | lower }}"
                            value="{{ a| lower }}" autocomplete="off"
                            {% if device==a.lower() %} checked {% endif %}
@@ -72,18 +72,21 @@
         </div>
         <br/><br/>
         {% endif %}
+        
+        <form method="POST", action="/evidence/summary">
+        <input type="hidden" name="dual_use" value={{dual_use_str}} />
+        <input type="hidden" name="spyware" value={{spyware}} />
 
-        {% if dual_use %}
-        <h2>Dual-Use Apps</h2>
-        {% for app in dual_use %}
+        {% if spyware %}
+        <h2>Spyware Apps</h2>
+        {% for app in spyware %}
         <div class="jumbotron">
             <h3>{{app["title"]}}</h3>
-            <form>
                 Did you know this app was installed on your device? 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
-                                <input type="radio" name="device" id="{{ a | lower }}"
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
                            value="{{ a| lower }}" autocomplete="off"> 
                             {{ a }}
                             </label>
@@ -93,20 +96,58 @@
                 Did you install this app?
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
-                                <input type="radio" name="device" id="{{ a | lower }}"
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
                            value="{{ a| lower }}" autocomplete="off"> 
                             {{ a }}
                             </label>
                     {% endfor %}
                 </div>
                 <br/><br/>
-                If you did not install this app, do you know who did? <textarea name="installer"></textarea>
+                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
                 <br/>
-            </form>
         </div>
+        <hr/>
         {% endfor %}
         {% endif %}
+
+
+        {% if dual_use %}
+        <h2>Dual-Use Apps</h2>
+        {% for app in dual_use %}
+        <div class="jumbotron">
+            <h3>{{app["title"]}}</h3>
+                Did you know this app was installed on your device? 
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                Did you install this app?
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
+                <br/>
+        </div>
+        {% endfor %}
+
+        <button type="submit">Submit</button>
+        </form>
+        {% endif %}
+
 
 	<br><br>
     </div>

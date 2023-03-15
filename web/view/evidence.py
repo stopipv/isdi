@@ -57,18 +57,28 @@ def evidence():
 
     return render_template('main.html', **context)
 
-    
+@app.route("/evidence/summary", methods=['POST'])
+def evidence_summary():
 
-@app.route("/evidence/apps", methods=['GET', 'POST'])
-def evidence_apps():
-    """
-    TODO: Get list of apps which ISDi flags as dual-use or spyware
-    """
-    
-    # TODO get input from the user
-    device = 'ios'
-    device_owner = 'test'
+    snapchat = dict(
+        recognize = request.form["recognizesnapchat"],
+        installed = request.form["installedsnapchat"],
+        installer = request.form["installersnapchat"],
+    )
 
-    app_list = get_suspicious_apps(device, device_owner)
+    app_summaries = [snapchat]
 
-    return "Hi"
+    context = dict(
+        task="evidencesummary",
+        device_primary_user=config.DEVICE_PRIMARY_USER,
+        title=config.TITLE,
+        name="Sophie",
+        dual_use=request.form["dual_use"],
+        spyware=request.form["spyware"],
+        app_summaries = app_summaries
+    )
+
+    pprint(context["dual_use"])
+
+
+    return render_template('main.html', **context)
