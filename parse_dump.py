@@ -1,18 +1,20 @@
+import io
+import itertools
 import json
+import operator
+import os
 import re
 import sys
-import os
+from collections import OrderedDict
+from functools import reduce
+from pathlib import Path
 from plistlib import load
 
 import pandas as pd
-import io
-import config
-from functools import reduce
-import operator
-from pathlib import Path
 from rsonlite import simpleparse
-import itertools
-from collections import OrderedDict
+
+import config
+
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -421,7 +423,7 @@ class IosDump(PhoneDump):
             if permission not in self.permissions_map:
                 print('Have not seen '+str(permission)+' before. Making note of this...')
                 permission_human_readable = permission.replace('kTCCService','')
-                with open(os.path.join(config.THISDIR,'ios_permissions.json'), 'w') as fh:
+                with open(os.path.join(config.THIS_DIR,'ios_permissions.json'), 'w') as fh:
                     self.permissions_map[permission] = permission_human_readable
                     fh.write(json.dumps(self.permissions_map))
                 print('Noted.')

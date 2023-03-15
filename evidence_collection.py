@@ -16,16 +16,29 @@ from pprint import pprint
 from flask import redirect, render_template, request, session, url_for
 
 import config
-from db import (
-    create_mult_appinfo,
-    create_scan,
-    get_client_devices_from_db,
-    new_client_id,
-)
+from db import create_mult_appinfo, create_scan
 from web import app
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
+
+def get_multiple_app_details(device, ser, apps):
+    filled_in_apps = []
+    for app in apps:
+        d = get_app_details(device, ser, app["id"])
+        d["flags"] = app["flags"]
+        filled_in_apps.append(d)
+    return filled_in_apps
+
+
+def get_app_details(device, ser, appid):
+    sc = get_device(device)
+    d, info = sc.app_details(ser, appid)
+    d = d.fillna('')
+    d = d.to_dict(orient='index').get(0, {})
+    d['appId'] = appid
+
+    return d
 
 def get_suspicious_apps(device, device_owner):
 
@@ -160,15 +173,7 @@ def get_suspicious_apps(device, device_owner):
         if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
             app["id"] = k
             suspicious_apps.append(app)
+
+    detailed_apps = get_multiple_app_details(device, ser, suspicious_apps)
         
-    return suspicious_apps
-
-def app_list_to_str(app_list):
-
-    app_details = ""
-    for app in app_list:
-        for k, v in app.items():
-            app_details += k + ": " + str(v) + "\t"
-        app_details += "<br></br>"
-
-    return app_details
+    return detailed_apps
