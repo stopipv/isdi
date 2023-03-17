@@ -47,7 +47,6 @@ APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
 IOC_PATH = "data/stalkerware-indicators/"
 IOC_FILE = IOC_PATH + "ioc.yaml"
 
-
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
@@ -80,6 +79,7 @@ ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
 PLATFORM = ('darwin' if platform == 'darwin'
             else 'linux' if platform.startswith('linux')
             else 'win32' if platform == 'win32' else None)
+
 ADB_PATH = os.path.join(ANDROID_HOME, 'adb-', PLATFORM)
 
 #LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
