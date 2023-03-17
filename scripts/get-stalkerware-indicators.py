@@ -11,13 +11,22 @@ sys.path.append(os.getcwd())
 
 import config
 
-# check if submodule is initialized
-if not os.path.exists(config.IOC_PATH):
-    print("Submodule not initialized. Initializing now...")
-    os.system("git submodule update --init --recursive")
+def requirements():
+    # check if submodule is initialized
+    if not os.path.exists(config.IOC_PATH) and not os.path.exists(config.IOC_FILE):
+        print("Submodule not initialized properly")
+        return False
 
-# update submodule
-os.system("git submodule update --recursive --remote")
+    # check config.APP_FLAGS_FILE exists
+    if not os.path.exists(config.APP_FLAGS_FILE):
+        print("app-flags.csv not found")
+        return False
+    return True
+
+# check requirements
+if not requirements():
+    print("Requirements not met. Exiting...")
+    exit()
 
 # parse ioc.yaml
 ioc = {}
@@ -25,12 +34,7 @@ with open(config.IOC_FILE, "r") as f:
     ioc = yaml.load(f, Loader=yaml.FullLoader)
 
 # get packages from every element of ioc dict
-apps = []
-for element in ioc:
-    # add ioc[element]['packages'] to apps
-    if 'packages' in element:
-        apps.extend(element['packages'])
-
+apps = [element['packages'] for element in ioc if 'packages' in element]
 
 # print all indicators
 print("Found " + str(len(apps)) + " apps from the IOC stalkware indicators repostiory!")
