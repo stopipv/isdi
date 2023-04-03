@@ -13,13 +13,144 @@ import json
 import os
 from pprint import pprint
 
-from flask import redirect, render_template, request, session, url_for
+from flask import render_template, session
+from flask_wtf import FlaskForm
+from wtforms import (
+    FieldList,
+    FormField,
+    HiddenField,
+    MultipleFileField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+)
+from wtforms.validators import InputRequired
 
 import config
 from db import create_mult_appinfo, create_scan
-from web import app
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
+
+yes_no_choices = [('y', 'Yes'), ('n', 'No'), ('u', 'Unsure')]
+device_type_choices=[('android', 'Android'), ('ios', 'iOS')]
+accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber"]
+two_factor_options = ["Phone", "Email", "App"]
+
+## HELPER FORMS FOR EVERY PAGE
+class NotesForm(FlaskForm):
+    client_notes = TextAreaField("Client notes")
+    consultant_notes = TextAreaField("Consultant notes")
+
+## HELPER FORMS FOR APPS
+class PermissionForm(FlaskForm):
+    permission_name = HiddenField("Permission")
+    access = SelectField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()])
+    describe = TextAreaField("Please describe how you know this.")
+    screenshot = MultipleFileField('Add screenshot(s)')
+
+class InstallForm(FlaskForm):
+    knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()])
+    installed = SelectField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()])
+    coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()])
+
+class SpywareAppForm(FlaskForm):
+    app_name = HiddenField("App Name")
+    install_form = FormField(InstallForm)
+    notes = FormField(NotesForm)
+    screenshot = MultipleFileField('Add screenshot(s)')
+
+class DualUseAppForm(FlaskForm):
+    app_name = HiddenField("App Name")
+    install_form = FormField(InstallForm)
+    permissions = FieldList(FormField(PermissionForm), min_entries = 1)
+    notes = FormField(NotesForm)
+    screenshot = MultipleFileField('Add screenshot(s)')
+
+
+## HELPER FORMS FOR ACCOUNTS
+class SuspiciousLoginsForm(FlaskForm):
+    recognize = SelectField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()])
+    describe = TextAreaField("Which devices do you not recognize?")
+    activity_log = SelectField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()])
+    screenshot = MultipleFileField('Add screenshot(s)')
+
+class PasswordForm(FlaskForm):
+    know = SelectField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()])
+    guess = SelectField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()])
+
+class RecoveryForm(FlaskForm):
+    phone = TextAreaField("What is the recovery phone number?")
+    phone_owned = SelectField("Is this your phone number?", choices=yes_no_choices, validators=[InputRequired()])
+    email = TextAreaField("What is the recovery email?")
+    email_owned = SelectField("Is this your email address?", choices=yes_no_choices, validators=[InputRequired()])
+    screenshot = MultipleFileField('Add screenshot(s)')
+
+class TwoFactorForm(FlaskForm):
+    enabled = SelectField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()])
+    enabled = SelectField("What type of two-factor authentication is it?", choices=[(x.lower(), x) for x in two_factor_options], validators=[InputRequired()])
+    email = TextAreaField("What is the second factor?")
+    email_owned = SelectField("Do you control the second factor?", choices=yes_no_choices, validators=[InputRequired()])
+
+class SecurityQForm(FlaskForm):
+    enabled = SelectField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()])
+    email = TextAreaField("Which questions are set?")
+    enabled = SelectField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()])
+
+class AccountInfoForm(FlaskForm):
+    account_name = HiddenField("Account Name")
+    suspicious_logins = FormField(SuspiciousLoginsForm)
+    password_check = FormField(PasswordForm)
+    recovery_settings = FormField(RecoveryForm)
+    two_factor_settings = FormField(TwoFactorForm)
+    security_questions = FormField(SecurityQForm)
+    notes = FormField(NotesForm)
+
+## INDIVIDUAL PAGES
+class StartForm(FlaskForm):
+    title = "Welcome to <Name of tool>"
+    name = StringField('Name', validators=[InputRequired()])
+    device_type = SelectField('Device type:', choices=device_type_choices, validators=[InputRequired()])
+    submit = SubmitField("Continue")
+
+class SpywareForm(FlaskForm):
+    title = "Spyware Check"
+    spyware_apps = FieldList(FormField(SpywareAppForm))
+    submit = SubmitField("Continue")
+
+class DualUseForm(FlaskForm):
+    title = "Dual Use App Check"
+    dual_use_apps = FieldList(FormField(DualUseAppForm))
+    submit = SubmitField("Continue")
+
+class AccountsUsedForm(FlaskForm):
+    accounts_used = SelectMultipleField(choices=[(x.lower(), x) for x in accounts])
+    submit = SubmitField("Continue")
+
+class AccountCompromiseForm(FlaskForm):
+    title = "Account Compromise Check"
+    accounts = FieldList(FormField(AccountInfoForm), min_entries=2)
+    submit = SubmitField("Continue")
+
+def remove_unwanted_data(data):
+    unwanted_keys = ["csrf_token"]
+
+    if type(data) == list:
+        return [remove_unwanted_data(d) for d in data]
+        
+    elif type(data) == dict:
+        new_data = {}
+        for k in data.keys():
+            if k not in unwanted_keys:
+                new_v = remove_unwanted_data(data[k])
+                new_data[k] = new_v
+
+        return new_data
+    
+    else:
+        return data
+                
 
 
 def get_multiple_app_details(device, ser, apps):

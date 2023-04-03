@@ -1,50 +1,68 @@
-import json
-import os
+
+from collections import namedtuple
 from pprint import pprint
 
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import redirect, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, SubmitField, TextAreaField
-from wtforms.validators import InputRequired
 
 import config
+from evidence_collection import (
+    AccountCompromiseForm,
+    AccountsUsedForm,
+    DualUseForm,
+    SpywareForm,
+    StartForm,
+    remove_unwanted_data,
+)
 from web import app
 
 bootstrap = Bootstrap(app)
-
-yes_no_choices = [('y', 'Yes'), ('n', 'No'), ('u', 'Unsure')]
-device_type_choices=[('android', 'Android'), ('ios', 'iOS')]
-
-class StartForm(FlaskForm):
-    title = "Welcome to <Name of tool>"
-    name = StringField('Name', validators=[InputRequired()])
-    device_type = SelectField('Device type:', choices=device_type_choices, validators=[InputRequired()])
-    submit = SubmitField("Continue")
-
-class SpywareForm(FlaskForm):
-    title = "Spyware Check"
-    knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()])
-    installed = SelectField('Did install this app?', choices=yes_no_choices, validators=[InputRequired()])
-    coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()])
-    submit = SubmitField("Continue")
 
 @app.route("/evidence/<int:step>", methods=['GET', 'POST'])
 def evidence(step):
     """
     TODO: Evidence stuff!
-    """
+    """ 
+    spyware = []
+    dualuse = []
+    if 'apps' in session.keys():
+        spyware = session['apps']['spyware']
+        dualuse = session['apps']['dualuse']
+
+    accounts=[]
+    if 'step4' in session.keys():
+        accounts=[{"account_name": x} for x in session['step4']['accounts_used']]
 
     forms = {
         1: StartForm(),
-        2: SpywareForm(),
+        2: SpywareForm(spyware_apps=spyware),
+        3: DualUseForm(dual_use_apps=dualuse),
+        4: AccountsUsedForm(),
+        5: AccountCompromiseForm(accounts=accounts),
     }
 
     form = forms.get(step, 1)
 
     if request.method == 'POST':
         if form.is_submitted() and form.validate():
-            session['step{}'.format(step)] = form.data
+            clean_data = remove_unwanted_data(form.data)
+            session['step{}'.format(step)] = clean_data
+
+            # collect apps if we need to
+            if step == 1:
+                session['apps'] = {
+                    "spyware": [{"app_name": "MSpy"}],
+                    "dualuse": [{"app_name": "Snapchat", 
+                                "permissions": [
+                                    {"permission_name": "Location"},
+                                    {"permission_name": "Camera"},
+                                ]}, 
+                                {"app_name": "FindMy", 
+                                "permissions": [
+                                    {"permission_name": "Location"},
+                                ]}]
+                }
+
             if step < len(forms):
                 # Redirect to next step
                 return redirect(url_for('evidence', step=step+1))
