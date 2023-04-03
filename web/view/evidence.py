@@ -12,6 +12,7 @@ from evidence_collection import (
     DualUseForm,
     SpywareForm,
     StartForm,
+    get_suspicious_apps,
     remove_unwanted_data,
 )
 from web import app
@@ -23,6 +24,8 @@ def evidence(step):
     """
     TODO: Evidence stuff!
     """ 
+    print("STEP =", step)
+
     spyware = []
     dualuse = []
     if 'apps' in session.keys():
@@ -44,13 +47,34 @@ def evidence(step):
     form = forms.get(step, 1)
 
     if request.method == 'POST':
+        print("IT's A POST")
+        print(form.is_submitted())
+        print(form.validate())
+        
         if form.is_submitted() and form.validate():
+            print("SUBMITTED")
             clean_data = remove_unwanted_data(form.data)
             session['step{}'.format(step)] = clean_data
+            pprint(session)
 
             # collect apps if we need to
             if step == 1:
-                session['apps'] = {
+                try:
+                    verbose_apps = get_suspicious_apps(clean_data['device_type'], clean_data['name'])
+                    
+                    session['apps'] = {"spyware": [], "dualuse": []}
+                    for verbose_app in verbose_apps:
+                        minimal_app = dict()
+                        minimal_app['permissions'] = [{"permission_name": x[0]} for x in verbose_app['permissions']]
+                        minimal_app['app_name'] = verbose_app['title']
+                        if "dual-use" in verbose_app["flags"]:
+                            session['apps']['dualuse'].append(minimal_app)
+                        if "spyware" in verbose_app["flags"]:
+                            session['apps']['spyware'].append(minimal_app)
+
+                except Exception as e:
+                    # for now, just do this
+                    session['apps'] = {
                     "spyware": [{"app_name": "MSpy"}],
                     "dualuse": [{"app_name": "Snapchat", 
                                 "permissions": [
@@ -61,7 +85,9 @@ def evidence(step):
                                 "permissions": [
                                     {"permission_name": "Location"},
                                 ]}]
-                }
+                    }
+                    #print("ERROR: Please try again")
+                    #return redirect(url_for('evidence', step=step))
 
             if step < len(forms):
                 # Redirect to next step
@@ -85,6 +111,10 @@ def evidence(step):
         device = "",
         scanned=False
     )
+
+    if "step1" in session.keys():
+        context["device_owner"] = session["step1"]["name"]
+        context["device"] = session["step1"]["device_type"]
     
     return render_template('main.html', **context)
 

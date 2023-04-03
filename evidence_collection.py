@@ -54,6 +54,7 @@ class InstallForm(FlaskForm):
     knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()])
     installed = SelectField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()])
     coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()])
+    screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
     app_name = HiddenField("App Name")
@@ -64,7 +65,7 @@ class SpywareAppForm(FlaskForm):
 class DualUseAppForm(FlaskForm):
     app_name = HiddenField("App Name")
     install_form = FormField(InstallForm)
-    permissions = FieldList(FormField(PermissionForm), min_entries = 1)
+    permissions = FieldList(FormField(PermissionForm))
     notes = FormField(NotesForm)
     screenshot = MultipleFileField('Add screenshot(s)')
 
@@ -130,7 +131,7 @@ class AccountsUsedForm(FlaskForm):
 
 class AccountCompromiseForm(FlaskForm):
     title = "Account Compromise Check"
-    accounts = FieldList(FormField(AccountInfoForm), min_entries=2)
+    accounts = FieldList(FormField(AccountInfoForm))
     submit = SubmitField("Continue")
 
 def remove_unwanted_data(data):
@@ -149,8 +150,7 @@ def remove_unwanted_data(data):
         return new_data
     
     else:
-        return data
-                
+        return data  
 
 
 def get_multiple_app_details(device, ser, apps):

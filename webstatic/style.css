@@ -34,3 +34,36 @@ a.appid {
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
+
+details {
+    user-select: none;
+  }
+  
+  details>summary span.icon {
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s;
+    margin-left: auto;
+    float: right;
+  }
+  
+  details[open] {
+    background-color: gray;
+  }
+
+  details[open] summary span.icon {
+    transform: rotate(180deg);
+  }
+  
+  summary {
+    display: flex;
+    cursor: pointer;
+    background-color: purple;
+    color: white;
+    padding: 10px;
+    border-radius: 20px;
+  }
+  
+  summary::-webkit-details-marker {
+    display: none;
+  }
