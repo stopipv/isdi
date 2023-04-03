@@ -1,35 +1,22 @@
-<script>
-    function get(url){
-        $('#loadingDiv').show();
-        $('#msg').html("")
-        $.get(url, function(data) {
-            $('#msg').html(data);
-            $('#loadingDiv').hide();
-        }).done(function(data) {
-        }).fail(function(data) {
-            alert("Failed:" + JSON.serialize(data));
-        })
-    }
-   
-    var loading = $('#loadingDiv').hide();
-    $(document).ready(function() {
-        $('#loadingDiv').hide();
-    });
-    
-</script>
+{% extends 'bootstrap/base.html' %}
 
+{% block content %}
 <div class="container">
-    <div>
-        <h4 class="display-4">Evidence Summary</h4>
-        <hr/>
-        <h2>Dual-Use apps</h2>
-        <div>
-            <i>Snapchat (hardcoded)</i>
-            {% for app in app_summaries %}
-                <div>Recognized: {{app["recognized"]}}</div>
-                <div>Installed: {{app["installed"]}}</div>
-                <div>Who installed: {{app["installer"]}}</div>
-            {% endfor %}
-        </div>
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h1>Summary</h1>
+      <p>Thank you for your submission!</p>
+      <table class="table">
+        {% for key, value in data.items() %}
+          {% if key not in ['csrf_token', 'submit', 'previous']%}
+            <tr>
+              <th>{{ key }}</th>
+              <td>{{ value }}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </table>
     </div>
+  </div>
 </div>
+{% endblock %}
