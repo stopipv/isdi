@@ -33,10 +33,47 @@ from db import create_mult_appinfo, create_scan
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
-yes_no_choices = [('y', 'Yes'), ('n', 'No'), ('u', 'Unsure')]
-device_type_choices=[('android', 'Android'), ('ios', 'iOS')]
+ios_instructions = """
+		        <img src="/webstatic/images/apple.resized.png"> There is not much preparation required for iOS. Just connect the USB cable, then on
+                the device, you should see a prompt asking if you trust this device. Please select "Trust",
+                and enter your passcode to unlock the device. Leave the device unlocked during the scan.
+                <b>Troubleshooting:</b> Sometimes the system might fail to recognize the
+                iOS device. Try opening iTunes on macOS, and see if the device is
+                listed. Disconnect the device from the USB cable, reconnect, and try scanning again."""
+
+android_instructions = """
+	                    <img src="/webstatic/images/android.resiz.png">
+                    For an Android device, the <code>developer options</code> on the device need to be
+		            activated. Developer options provide functionality for this system to communicate with 
+		            your device. The exact steps might vary from device manufacturer and version of
+                    Android, but roughly the following steps will help you activate developer
+                    options and USB debugging. 
+                     <ol>
+                    <li>Go to Settings. Either find the Settings app in the device drawer, or
+                        pull down from the top notification bar, on the top right you will see a gear
+                        type icon (<b>&#9881;</b>) for settings.</li>
+                    <li>Scroll down to find About Phone, search for <code>Build number</code>,
+                        tap on the build number 6-8 times to activate the developer mode. For some
+                        devices, Build number might be hidden under Software info. (<b>Warning:</b> For
+                        most device we can turn it off (see step 4), but there are some devices this
+                        cannot be undone. This will not interfere with any of the device’s common
+                        functionality, but does not leave the device at the state as it was before the
+                        scanning.)</li>
+                    <li>Turn on <code>USB debugging</code>. Go to
+                        <code>Settings</code>&rarr;<code>Developer options</code>&rarr;<code>USB debugging</code>.
+                        Tap on the toggle switch to turn it on.
+                    </ol>
+                        """
+
+empty_choice = ("", "---")
+second_factors = ["Phone", "Email", "App"]
 accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber"]
-two_factor_options = ["Phone", "Email", "App"]
+
+yes_no_choices = [empty_choice,( 'y', 'Yes'), ('n', 'No'), ('u', 'Unsure')]
+device_type_choices = [empty_choice, ('android', 'Android'), ('ios', 'iOS')]
+#two_factor_choices = [empty_choice] + [(x.lower(), x) for x in second_factors]
+two_factor_choices = [(x.lower(), x) for x in second_factors] + [empty_choice]
+account_choices = [(x, x) for x in accounts]
 
 ## HELPER FORMS FOR EVERY PAGE
 class NotesForm(FlaskForm):
@@ -46,58 +83,57 @@ class NotesForm(FlaskForm):
 ## HELPER FORMS FOR APPS
 class PermissionForm(FlaskForm):
     permission_name = HiddenField("Permission")
-    access = SelectField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()])
-    describe = TextAreaField("Please describe how you know this.")
+    access = SelectField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()], default="")
+    describe = TextAreaField("Please describe how you know this.", validators=[InputRequired()])
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class InstallForm(FlaskForm):
-    knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()])
-    installed = SelectField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()])
-    coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()])
+    knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()], default="")
+    installed = SelectField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()], default="")
+    coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()], default="")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
     app_name = HiddenField("App Name")
     install_form = FormField(InstallForm)
     notes = FormField(NotesForm)
-    screenshot = MultipleFileField('Add screenshot(s)')
 
 class DualUseAppForm(FlaskForm):
     app_name = HiddenField("App Name")
     install_form = FormField(InstallForm)
     permissions = FieldList(FormField(PermissionForm))
     notes = FormField(NotesForm)
-    screenshot = MultipleFileField('Add screenshot(s)')
-
 
 ## HELPER FORMS FOR ACCOUNTS
 class SuspiciousLoginsForm(FlaskForm):
-    recognize = SelectField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()])
-    describe = TextAreaField("Which devices do you not recognize?")
-    activity_log = SelectField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()])
+    recognize = SelectField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    describe = TextAreaField("Which devices do you not recognize?", validators=[InputRequired()])
+    activity_log = SelectField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()], default="")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class PasswordForm(FlaskForm):
-    know = SelectField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()])
-    guess = SelectField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()])
+    know = SelectField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    guess = SelectField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()], default="")
 
 class RecoveryForm(FlaskForm):
-    phone = TextAreaField("What is the recovery phone number?")
-    phone_owned = SelectField("Is this your phone number?", choices=yes_no_choices, validators=[InputRequired()])
-    email = TextAreaField("What is the recovery email?")
-    email_owned = SelectField("Is this your email address?", choices=yes_no_choices, validators=[InputRequired()])
+    phone = TextAreaField("What is the recovery phone number?", validators=[InputRequired()])
+    phone_owned = SelectField("Is this your phone number?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    email = TextAreaField("What is the recovery email?", validators=[InputRequired()])
+    email_owned = SelectField("Is this your email address?", choices=yes_no_choices, validators=[InputRequired()], default="")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class TwoFactorForm(FlaskForm):
-    enabled = SelectField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()])
-    enabled = SelectField("What type of two-factor authentication is it?", choices=[(x.lower(), x) for x in two_factor_options], validators=[InputRequired()])
-    email = TextAreaField("What is the second factor?")
-    email_owned = SelectField("Do you control the second factor?", choices=yes_no_choices, validators=[InputRequired()])
+    enabled = SelectField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    type = SelectField("What type of two-factor authentication is it?", choices=two_factor_choices, validators=[InputRequired()], default="")
+    second_factor = TextAreaField("What is the second factor?", validators=[InputRequired()])
+    second_factor_owned = SelectField("Do you control the second factor?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    screenshot = MultipleFileField('Add screenshot(s)')
 
 class SecurityQForm(FlaskForm):
-    enabled = SelectField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()])
-    email = TextAreaField("Which questions are set?")
-    enabled = SelectField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()])
+    present = SelectField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    questions = TextAreaField("Which questions are set?", validators=[InputRequired()])
+    know = SelectField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()], default="")
+    screenshot = MultipleFileField('Add screenshot(s)')
 
 class AccountInfoForm(FlaskForm):
     account_name = HiddenField("Account Name")
@@ -112,7 +148,7 @@ class AccountInfoForm(FlaskForm):
 class StartForm(FlaskForm):
     title = "Welcome to <Name of tool>"
     name = StringField('Name', validators=[InputRequired()])
-    device_type = SelectField('Device type:', choices=device_type_choices, validators=[InputRequired()])
+    device_type = SelectField('Device type', choices=device_type_choices, validators=[InputRequired()], default="")
     submit = SubmitField("Continue")
 
 class SpywareForm(FlaskForm):
@@ -126,7 +162,7 @@ class DualUseForm(FlaskForm):
     submit = SubmitField("Continue")
 
 class AccountsUsedForm(FlaskForm):
-    accounts_used = SelectMultipleField(choices=[(x.lower(), x) for x in accounts])
+    accounts_used = SelectMultipleField(choices=account_choices)
     submit = SubmitField("Continue")
 
 class AccountCompromiseForm(FlaskForm):

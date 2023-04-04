@@ -5,9 +5,6 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <div class="progress mb-4">
-                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ form.title }}: {{ progress }}%</div>
-            </div>
             <br>
             {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -20,59 +17,176 @@
             {% endwith %}
             <br>
 
-            {% if step == 1 %}
-            <h3>{{ form.title }}</h3>
+            <h2>{{ form.title }}</h2>
             <hr>
-            {{ wtf.quick_form(form, form_type="horizontal") }}
-            <br>
-            {% endif %}
-
-            {% if step != 1 and step != 3 %}
-            <details>
-            <summary>
-            <h3>{{ form.title }}</h3>
-            <span class="icon">👇</span>
-            </summary>
-            {{ wtf.quick_form(form, form_type="horizontal") }}
-            <br>
-            </details>
-            {% endif %}
-
-            {% if step == 3 %}
-            <h3>{{ form.title }}</h3>
             <form action method="post" class="form" role="form">
                 {{ form.hidden_tag() }}
                 {{ wtf.form_errors(form) }}
-                <br/>
-                {% for nested in form.dual_use_apps %}
+
+                {% if step == 1 %}
+                <table id="scan-form">
+                    <tbody>
+                        <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
+                        <tr><th><label>{{ form.device_type.label }}</label></th><td> {{ form.device_type }}</td></tr>
+                    </tbody>
+                </table>
+                <br>
+                <p>Add instructions here</p>
+                <br>
+                {% endif %}
+
+                {% if step == 2 %}
+                {% if form.spyware_apps|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware_apps|length }}</b> potential spyware apps found
+                </div>
+                {% elif form.spyware_apps|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware_apps|length }}</b> potential spyware app found
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No spyware apps found!
+                </div>
+                {% endif %}
+                <br>
+                {% for nested in form.spyware_apps %}
                 <details>
                     <summary>
-                    <b>{{ nested.app_name.label }}</b>
                     <span class="icon">▼</span>
+                    <b>{{ spyware[loop.index0].app_name }}</b>
                     </summary>
-
                     {{ nested.hidden_tag() }}
-                    <h4>{{nested.install_form.label}}</h4>
-                    {{ nested.install_form }}
-                    {% for perm in nested.permissions %}
-                        <h4>{{ perm.permission_name.label }}</h4>
-                        {{ perm.hidden_tag() }}
-                        {{ perm.label }}{{ perm }}
-                    {% endfor %}
-                    {{nested.notes.label}}{{ nested.notes }}
+                    <div class="content">
+                        <h4>{{nested.install_form.label}}</h4>
+                        <div class="subform">{{ nested.install_form }}</div>
+                        <h4>{{nested.notes.label}}</h4>
+                        <div class="subform">{{ nested.notes }}</div>
+                    </div>
                 </details>
                 <br>
                 {% endfor %}
-                {{form.submit}}
-            </form>
-            {% endif %}
+                {% endif %}
 
-            {% if step == 1 %}
-            <p>Additional instructions here</p>
-            {% endif %}
+                {% if step == 3 %}
+                {% if form.dual_use_apps|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dual_use_apps|length }}</b> potential dual use apps found
+                </div>
+                {% elif form.dual_use_apps|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dual_use_apps|length }}</b> potential dual use app found
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <br>
+                    <img src="/webstatic/images/no-concerns.png">
+                    No dual use apps found!
+                </div>
+                {% endif %}
+
+                <br>
+                {% for nested in form.dual_use_apps %}
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ dualuse[loop.index0].app_name }}</b>
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <h4>{{nested.install_form.label}}</h4>
+                        <div class="subform">{{ nested.install_form }}</div>
+
+                        {% for perm in nested.permissions %}
+                        <h4>{{ perm.permission_name.label }}</h4>
+                        {{ perm.hidden_tag() }}
+                        <div class="subform">{{ perm }}</div>
+                        {% endfor %}
+
+                        <h4>{{nested.notes.label}}</h4>
+                        <div class="subform">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+                {% endif %}
+
+                {% if step == 4 %}
+                <hr>
+                <h4>{{ form.accounts_used.label }}</h4>
+                {{ form.accounts_used }}
+                <br>
+                {% endif %}
+
+                {% if step == 5 %}
+                {% if form.accounts|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.accounts|length }}</b> accounts to check
+                </div>
+                {% elif form.accounts|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.accounts|length }}</b> account to check
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No accounts to check!
+                </div>
+                {% endif %}
+
+                {% for nested in form.accounts %}
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ accounts[loop.index0].account_name }}</b>
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <h4>{{ nested.suspicious_logins.label }}</h4>
+                        <div class="subform">{{ nested.suspicious_logins }}</div>
+                        <h4>{{ nested.password_check.label }}</h4>
+                        <div class="subform">{{ nested.password_check }}</div>
+                        <h4>{{ nested.recovery_settings.label }}</h4>
+                        <div class="subform">{{ nested.recovery_settings }}</div>
+                        <h4>{{ nested.two_factor_settings.label }}</h4>
+                        <div class="subform">{{ nested.two_factor_settings }}</div>
+                        <h4>{{ nested.security_questions.label }}</h4>
+                        <div class="subform">{{ nested.security_questions }}</div>
+                        <h4>{{nested.notes.label}}</h4>
+                        <div class="subform">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+                {% endif %}
+
+                <br>
+                <span class="primarybutton">{{form.submit}}</span>
+            </form>
             {% if step > 1 %}
             <a href="{{ url_for('evidence', step=step-1) }}" class="btn btn-default">Previous</a>
             {% endif %}
+            <br>
+            <br>
+            <br>
+            <div class="progress mb-4">
+                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
+            </div>
         </div>
     </div>
 </div>

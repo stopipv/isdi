@@ -43,27 +43,111 @@ details {
     width: 24px;
     height: 24px;
     transition: all 0.3s;
-    margin-left: auto;
-    float: right;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 2px;
+    float: left;
   }
   
   details[open] {
-    background-color: gray;
+    background-color: rgb(208, 206, 206);
+    border-radius: 20px;
   }
 
   details[open] summary span.icon {
-    transform: rotate(180deg);
+    transform: rotate(180deg) translate(7px, 0px);
+  }
+
+  details[open] div.content {
+    color: black;
+    padding: 10px 30px;
+  }
+
+  details[open] div.subform {
+    margin-left: 20px;
+    margin-bottom: 5px;
   }
   
   summary {
     display: flex;
     cursor: pointer;
-    background-color: purple;
-    color: white;
+    background-color: rgb(180, 142, 207);
+    color: black;
     padding: 10px;
     border-radius: 20px;
+    font-size: 14pt;
   }
   
   summary::-webkit-details-marker {
     display: none;
   }
+
+  .primarybutton {
+    float: right;
+  }
+
+  .primarybutton>input {
+    background-color: rgb(66, 15, 103);
+    border: rgb(66, 15, 103);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  
+  .secondarybutton {
+    float: left;
+  }
+
+  select {
+    border-radius: 10px;
+    padding: 2.5px;
+    margin: 8px;
+    margin-bottom: 8px;
+  }
+
+  details[open]>select {
+    border: 0px;
+    margin-bottom: 8px;
+  }
+
+  th>label {
+    padding-right: 10px;
+    font-style: normal;
+    font-weight: normal;
+  }
+
+  input {
+    margin: 5px;
+  }
+
+  .header {
+    padding: 5px 15px;
+    text-align: left;
+    background: rgb(66, 15, 103);
+    color: white;
+    font-size: 10px;
+  }
+
+div.progress-bar {
+    fill: green;
+    background-color: green;
+}
+
+textarea {
+    width: 100%;
+    margin: 5px;
+}
+
+div.result-overview {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 14pt;
+    padding: 10px;
+}
+
+div.result-overview>img {
+    width: 100px;
+    margin: 10px;
+}

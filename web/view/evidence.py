@@ -12,12 +12,19 @@ from evidence_collection import (
     DualUseForm,
     SpywareForm,
     StartForm,
+    android_instructions,
     get_suspicious_apps,
+    ios_instructions,
     remove_unwanted_data,
 )
 from web import app
 
 bootstrap = Bootstrap(app)
+
+@app.route("/evidence/", methods={'GET'})
+def evidence_default():
+    return redirect(url_for('evidence', step=1))
+
 
 @app.route("/evidence/<int:step>", methods=['GET', 'POST'])
 def evidence(step):
@@ -109,7 +116,10 @@ def evidence(step):
         title=config.TITLE,
         device_owner = "",
         device = "",
-        scanned=False
+        scanned=False,
+        spyware=spyware,
+        dualuse=dualuse,
+        accounts=accounts
     )
 
     if "step1" in session.keys():
