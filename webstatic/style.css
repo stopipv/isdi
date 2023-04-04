@@ -1,3 +1,4 @@
+
 input[type=radio] {
     margin: 2px;
 }
@@ -5,6 +6,7 @@ input[type=radio] {
 #applist tr td a {
     /* color: unset;*/
 }
+
 a.appid {
     color: unset;
 }
@@ -150,4 +152,65 @@ div.result-overview {
 div.result-overview>img {
     width: 100px;
     margin: 10px;
+}
+
+#ck-button {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+    padding: 15px;
+    width: 45%;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#ck-button label {
+    float:left;
+    width:4.0em;
+    margin: 5px;
+    font-weight: 300;
+}
+
+#ck-button label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+}
+
+#ck-button>input {
+    visibility: visible;
+    float: right;
+    width: 25px;
+    margin: 10px;
+    align-self: center;
+}
+
+#ck-button input[type='checkbox']:checked + span>label {
+    font-weight: bolder;
+}
+
+div.account-buttons {
+    margin: 20px;
+    width: 100%;
+    display:block;
+    overflow: auto;
+}
+
+#ck-button img {
+    width: 20px;
+    margin: 5px;
+    float: left;
+}
+
+input[type='checkbox'] {
+    accent-color: green;
+    transform: scale(2);
+    margin: 20px;
+}
+
+.checked {
+    background-color: red;
 }

@@ -16,6 +16,7 @@ from pprint import pprint
 from flask import render_template, session
 from flask_wtf import FlaskForm
 from wtforms import (
+    BooleanField,
     FieldList,
     FormField,
     HiddenField,
@@ -162,7 +163,13 @@ class DualUseForm(FlaskForm):
     submit = SubmitField("Continue")
 
 class AccountsUsedForm(FlaskForm):
-    accounts_used = SelectMultipleField(choices=account_choices)
+    title = "Accounts Used"
+    Google = BooleanField("Google")
+    iCloud = BooleanField("iCloud")
+    Microsoft = BooleanField("Microsoft")
+    Lyft = BooleanField("Lyft")
+    Uber = BooleanField("Uber")
+    Other = BooleanField("Other")
     submit = SubmitField("Continue")
 
 class AccountCompromiseForm(FlaskForm):

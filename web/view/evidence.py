@@ -31,7 +31,6 @@ def evidence(step):
     """
     TODO: Evidence stuff!
     """ 
-    print("STEP =", step)
 
     spyware = []
     dualuse = []
@@ -54,13 +53,24 @@ def evidence(step):
     form = forms.get(step, 1)
 
     if request.method == 'POST':
-        print("IT's A POST")
-        print(form.is_submitted())
-        print(form.validate())
-        
         if form.is_submitted() and form.validate():
-            print("SUBMITTED")
             clean_data = remove_unwanted_data(form.data)
+
+            if step == 4:
+                # have to reformat our data due to limitations with wtforms
+                accounts_used = []
+                accounts_unused = []
+                for k, v in clean_data.items():
+                    if k != "submit" and v == True:
+                        accounts_used.append(k)
+                    elif k != "submit" :
+                        accounts_unused.append(k)
+
+                for k in accounts_unused:
+                    clean_data.pop(k)
+
+                clean_data['accounts_used'] = accounts_used
+            
             session['step{}'.format(step)] = clean_data
             pprint(session)
 
