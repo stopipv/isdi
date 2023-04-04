@@ -1,12 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-<script>
-    $(":checkbox").on("change", function() {
-        $(this).parent().toggleClass("checked", this.checked);
-    });​
-</script>
-
 {% block content %}
 <div class="container">
     <div class="row">
@@ -63,10 +57,15 @@
                 {% endif %}
                 <br>
                 {% for nested in form.spyware_apps %}
+                {% if loop.index0 == 0 %}
+                <details open>
+                {% else %}
                 <details>
+                {% endif %}
                     <summary>
                     <span class="icon">▼</span>
                     <b>{{ spyware[loop.index0].app_name }}</b>
+                    <img src="/webstatic/images/complete.png">
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">
@@ -103,10 +102,15 @@
 
                 <br>
                 {% for nested in form.dual_use_apps %}
+                {% if loop.index0 == 0 %}
+                <details open>
+                {% else %}
                 <details>
+                {% endif %}
                     <summary>
                     <span class="icon">▼</span>
                     <b>{{ dualuse[loop.index0].app_name }}</b>
+                    <img src="/webstatic/images/inprogress.png">
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">
@@ -160,10 +164,15 @@
                 {% endif %}
 
                 {% for nested in form.accounts %}
+                {% if loop.index0 == 0 %}
+                <details open>
+                {% else %}
                 <details>
+                {% endif %}
                     <summary>
                     <span class="icon">▼</span>
                     <b>{{ accounts[loop.index0].account_name }}</b>
+                    <img src="/webstatic/images/notstarted.png">
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">

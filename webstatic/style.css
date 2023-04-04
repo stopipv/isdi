@@ -50,6 +50,13 @@ details {
     margin-top: 2px;
     float: left;
   }
+
+  details>summary img {
+    float: right;
+    align-self: center;
+    width: 24px;
+    margin: 2px 10px;
+  }
   
   details[open] {
     background-color: rgb(208, 206, 206);
