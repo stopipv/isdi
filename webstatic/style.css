@@ -221,3 +221,9 @@ input[type='checkbox'] {
 .checked {
     background-color: red;
 }
+
+
+img.small {
+    width: 30px;
+    margin-left: 10px;
+}

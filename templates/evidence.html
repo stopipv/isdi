@@ -31,11 +31,51 @@
                     </tbody>
                 </table>
                 <br>
-                <p>Add instructions here</p>
-                <br>
                 {% endif %}
 
                 {% if step == 2 %}
+                    {% if 'ios' == device %}
+                    <h3>For iPhones<img class="small" src="/webstatic/images/apple.resized.png"> </h3>
+                    <p>There is not much preparation required for iOS. 
+                        <ol>
+                            <li>Connect the USB cable</li>
+                            <li>On the device, you should see a prompt asking if you trust this device. Please select "Trust",
+                                and enter your passcode to unlock the device.</li>
+                            <li>Leave the device unlocked and press Scan.</li>
+                        </ol> 
+                        <br>
+                        <b>Troubleshooting:</b> Sometimes the system might fail to recognize the
+                        iOS device. Try opening iTunes on macOS, and see if the device is
+                        listed. Disconnect the device from the USB cable, reconnect, and try scanning again.</p>
+                    {% else %}
+                    <h3>For Android phones<img class="small"src="/webstatic/images/android.resiz.png"> </h3>
+                    <p>  
+                        For an Android device, the <code>developer options</code> on the device need to be
+                        activated. Developer options provide functionality for this system to communicate with 
+                        your device. The exact steps might vary from device manufacturer and version of
+                        Android, but roughly the following steps will help you activate developer
+                        options and USB debugging. 
+                        <ol>
+                        <li>Go to Settings. Either find the Settings app in the device drawer, or
+                            pull down from the top notification bar, on the top right you will see a gear
+                            type icon (<b>&#9881;</b>) for settings.</li>
+                        <li>Scroll down to find About Phone, search for <code>Build number</code>,
+                            tap on the build number 6-8 times to activate the developer mode. For some
+                            devices, Build number might be hidden under Software info. (<b>Warning:</b> For
+                            most device we can turn it off (see step 4), but there are some devices this
+                            cannot be undone. This will not interfere with any of the device’s common
+                            functionality, but does not leave the device at the state as it was before the
+                            scanning.)</li>
+                        <li>Turn on <code>USB debugging</code>. Go to
+                            <code>Settings</code>&rarr;<code>Developer options</code>&rarr;<code>USB debugging</code>.
+                            Tap on the toggle switch to turn it on.</li>
+                        <li>Hit Scan to start the scan.</li>
+                        </ol></p>
+                    {% endif %}
+                <br>
+                {% endif %}
+
+                {% if step == 3 %}
                 {% if form.spyware_apps|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -79,7 +119,7 @@
                 {% endfor %}
                 {% endif %}
 
-                {% if step == 3 %}
+                {% if step == 4 %}
                 {% if form.dual_use_apps|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -131,7 +171,7 @@
                 {% endfor %}
                 {% endif %}
 
-                {% if step == 4 %}
+                {% if step == 5 %}
                 <div class="account-buttons">
                     <div id="ck-button">{{form.Google}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Google.label }}</span></div>
                     <div id="ck-button">{{form.iCloud}}<span><img src="/webstatic/images/no-concerns.png">{{ form.iCloud.label }}</span></div>
@@ -142,7 +182,7 @@
                 </div>
                 {% endif %}
 
-                {% if step == 5 %}
+                {% if step == 6 %}
                 {% if form.accounts|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">

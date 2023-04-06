@@ -10,6 +10,7 @@ from evidence_collection import (
     AccountCompromiseForm,
     AccountsUsedForm,
     DualUseForm,
+    ScanForm,
     SpywareForm,
     StartForm,
     android_instructions,
@@ -44,10 +45,11 @@ def evidence(step):
 
     forms = {
         1: StartForm(),
-        2: SpywareForm(spyware_apps=spyware),
-        3: DualUseForm(dual_use_apps=dualuse),
-        4: AccountsUsedForm(),
-        5: AccountCompromiseForm(accounts=accounts),
+        2: ScanForm(),
+        3: SpywareForm(spyware_apps=spyware),
+        4: DualUseForm(dual_use_apps=dualuse),
+        5: AccountsUsedForm(),
+        6: AccountCompromiseForm(accounts=accounts),
     }
 
     form = forms.get(step, 1)
@@ -75,7 +77,7 @@ def evidence(step):
             pprint(session)
 
             # collect apps if we need to
-            if step == 1:
+            if step == 2:
                 try:
                     verbose_apps = get_suspicious_apps(clean_data['device_type'], clean_data['name'])
                     pprint(verbose_apps)

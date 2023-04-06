@@ -152,6 +152,10 @@ class StartForm(FlaskForm):
     device_type = SelectField('Device type', choices=device_type_choices, validators=[InputRequired()], default="")
     submit = SubmitField("Continue")
 
+class ScanForm(FlaskForm):
+    title = "Scan Instructions"
+    submit = SubmitField("Scan")
+
 class SpywareForm(FlaskForm):
     title = "Spyware Check"
     spyware_apps = FieldList(FormField(SpywareAppForm))
