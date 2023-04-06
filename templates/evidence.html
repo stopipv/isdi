@@ -99,17 +99,17 @@
                     No dual use apps found!
                 </div>
                 {% endif %}
-
                 <br>
                 {% for nested in form.dual_use_apps %}
-                {% if loop.index0 == 0 %}
+                {% set outer_loop = loop %}
+                {% if outer_loop.index0 == 0 %}
                 <details open>
                 {% else %}
                 <details>
                 {% endif %}
                     <summary>
                     <span class="icon">▼</span>
-                    <b>{{ dualuse[loop.index0].app_name }}</b>
+                    <b>{{ dualuse[outer_loop.index0].app_name }}</b>
                     <img src="/webstatic/images/inprogress.png">
                     </summary>
                     {{ nested.hidden_tag() }}
@@ -118,7 +118,7 @@
                         <div class="subform">{{ nested.install_form }}</div>
 
                         {% for perm in nested.permissions %}
-                        <h4>{{ perm.permission_name.label }}</h4>
+                        <h4>{{ dualuse[outer_loop.index0].permissions[loop.index0].permission_name}}</h4>
                         {{ perm.hidden_tag() }}
                         <div class="subform">{{ perm }}</div>
                         {% endfor %}

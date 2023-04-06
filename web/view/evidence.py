@@ -78,11 +78,15 @@ def evidence(step):
             if step == 1:
                 try:
                     verbose_apps = get_suspicious_apps(clean_data['device_type'], clean_data['name'])
+                    pprint(verbose_apps)
                     
                     session['apps'] = {"spyware": [], "dualuse": []}
                     for verbose_app in verbose_apps:
                         minimal_app = dict()
-                        minimal_app['permissions'] = [{"permission_name": x[0]} for x in verbose_app['permissions']]
+
+                        # the way ISDi does permissions is messed up rn, have to fix on the backend
+                        minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
+
                         minimal_app['app_name'] = verbose_app['title']
                         if "dual-use" in verbose_app["flags"]:
                             session['apps']['dualuse'].append(minimal_app)
