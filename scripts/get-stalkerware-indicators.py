@@ -14,7 +14,7 @@ import config
 def requirements():
     # check if submodule is initialized
     if not os.path.exists(config.IOC_PATH) and not os.path.exists(config.IOC_FILE):
-        print("Submodule not initialized properly")
+        print("IOC repo not initialized properly")
         return False
 
     # check config.APP_FLAGS_FILE exists
@@ -30,35 +30,67 @@ if not requirements():
 
 # parse ioc.yaml
 ioc = {}
-with open(config.IOC_FILE, "r") as f:
-    ioc = yaml.load(f, Loader=yaml.FullLoader)
+try:
+    with open(config.IOC_FILE, "r") as f:
+        ioc = yaml.load(f, Loader=yaml.FullLoader)
+        # print all indicators
+        # print("Found " + str(len(apps)) + "  apps from the IOC stalkware indicators repostiory!")
+
+except yaml.YAMLError as e:
+    print("Error parsing YAML IOC file: {}".format(e))
+    sys.exit(1)
+except Exception as e:
+    print("Other error reading IOC file: {}".format(e))
+    sys.exit(1)
 
 # get packages from every element of ioc dict
 apps = [element['packages'] for element in ioc if 'packages' in element]
 
-# print all indicators
-print("Found " + str(len(apps)) + " apps from the IOC stalkware indicators repostiory!")
-
 # read app-flags.csv csv file
 old_apps = []
-with open(config.APP_FLAGS_FILE, "r") as f:
-    reader = csv.reader(f)
-    for row in reader:
-        old_apps.append(row[0])
+try:
+    with open(config.APP_FLAGS_FILE, "r") as f:
+        reader = csv.reader(f)
+        old_apps = [row[0] for row in csv.reader(f)]
+except csv.Error as e:
+    print("Error parsing CSV app flags file: {}".format(e))
+    sys.exit(1)
+except Exception as e:
+    print("Other error reading app flags file: {}".format(e))
 
 new_app_count = 0
-
-# append new apps to app-flags.csv for all ioc apps
-with open(config.APP_FLAGS_FILE, "a") as f:
-    writer = csv.writer(f)
-    for element in ioc:
-        if 'packages' not in element:
-            continue
-        for app in element['packages']:
-            # if app is not in the csv file, add it
-            if app not in old_apps:
-                new_app_count += 1
-                writer.writerow([app, "", "", element['name']])
+try:
+    # append new apps to app-flags.csv for all ioc apps
+    with open(config.APP_FLAGS_FILE, "a") as f:
+        writer = csv.writer(f)
+        for element in ioc:
+            if 'packages' not in element:
+                continue
+            for app in element['packages']:
+                # if app is not in the csv file, add it
+                if app not in old_apps:
+                    new_app_count += 1
+                    writer.writerow([app, "", "", element['name']])
+except csv.Error as e:
+    print("Error parsing CSV app flags file: {}".format(e))
+    sys.exit(1)
+except Exception as e:
+    print("Other error reading app flags file: {}".format(e))
+    sys.exit(1)
 
 print("\nFound and added " + str(new_app_count) + " new apps!")
 
+# verify that app-flags.csv is a valid csv file
+# try:
+#     with open(config.APP_FLAGS_FILE, "r") as f:
+#         reader = csv.reader(f)
+#         for row in reader:
+#             if len(row) != 4:
+#                 print("Error: app-flags.csv is not a valid csv file!")
+#                 sys.exit(1)
+# except csv.Error as e:
+#     print("Error parsing CSV app flags file: {}".format(e))
+#     sys.exit(1)
+# except Exception as e:
+#     print("Other error reading app flags file: {}".format(e))
+#     sys.exit(1)
