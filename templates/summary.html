@@ -23,7 +23,7 @@
                     {% else %}
                     {{device_owner}} originally installed this app willingly. <i>(This does not imply that the app is not being misused.)</i>
                     {%endif%} 
-                        {% if app.install_form.screenshot|length > 0 %}
+                        {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
                         <b>Screenshots</b>
                         {% for filename in app.install_form.screenshot %}
                             <img class="screenshot" src={{filename}}>
@@ -58,7 +58,7 @@
                     {% else %}
                     {{device_owner}} originally installed this app willingly. <i>(This does not imply that the app is not being misused.)</i>
                     {%endif%} 
-                        {% if app.install_form.screenshot|length > 0 %}
+                        {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
                         <b>Screenshots</b>
                         {% for filename in app.install_form.screenshot %}
                             <img class="screenshot" src={{filename}}>
@@ -74,7 +74,7 @@
                         {% if perm.describe %}
                         Additional details: {{perm.describe}}. 
                         {% endif %}
-                        {% if perm.screenshot|length > 0 %}
+                        {% if perm.screenshot|length > 0 and perm.screenshot[0] %}
                             <b>Screenshots</b>
                             {% for filename in perm.screenshot %}
                                 <img class="screenshot" src={{filename}}>
@@ -109,7 +109,7 @@
                     {% if account.suspicious_logins.describe_logins %}
                     Additional details: {{account.suspicious_logins.describe_logins}}.
                     {% endif %}
-                    {% if account.suspicious_logins.login_screenshot|length > 0 %}
+                    {% if account.suspicious_logins.login_screenshot|length > 0 and account.suspicious_logins.login_screenshot[0]%}
                         <b>Screenshots</b>
                         {% for filename in account.suspicious_logins.login_screenshot %}
                             <img class="screenshot" src={{filename}}>
@@ -125,7 +125,7 @@
                     {% if account.suspicious_logins.describe_activity %}
                     Additional details: {{account.suspicious_logins.describe_activity}}.
                     {% endif %}
-                    {% if account.suspicious_logins.activity_screenshot|length > 0 %}
+                    {% if account.suspicious_logins.activity_screenshot|length > 0 and account.suspicious_logins.activity_screenshot[0]%}
                         <b>Screenshots</b>
                         {% for filename in account.suspicious_logins.activity_screenshot %}
                             <img class="screenshot" src={{filename}}>
@@ -167,7 +167,7 @@
                     {% if account.recovery_settings.email_access == 'y' %}has
                     {% else %}might have{% endif %}
                      access to the recovery email address. With this access, they can access the account without a password and/or reset the password.
-                     {% if account.recovery_settings.email_screenshot|length > 0 %}
+                     {% if account.recovery_settings.email_screenshot|length > 0 and account.recovery_settings.email_screenshot[0] %}
                          <b>Screenshots</b>
                          {% for filename in account.recovery_settings.email_screenshot %}
                              <img class="screenshot" src={{filename}}>
@@ -181,7 +181,7 @@
                     {% if account.two_factor_settings.second_factor_access == 'y' %}has
                     {% else %}might have{% endif %}
                      access to the authentication second factor. This means that if they have the account password, they can get in without {{device_owner}} receiving a notification.
-                     {% if account.two_factor_settings.screenshot|length > 0 %}
+                     {% if account.two_factor_settings.screenshot|length > 0 and account.two_factor_settings.screenshot[0]%}
                          <b>Screenshots</b>
                          {% for filename in account.two_factor_settings.screenshot %}
                              <img class="screenshot" src={{filename}}>
@@ -196,7 +196,7 @@
                     {% else %}might know{% endif %}
                      the answers to the account security questions. With these answers, they may be able to access the account without the password and/or reset the password.
                 
-                     {% if account.security_questions.screenshot|length > 0 %}
+                     {% if account.security_questions.screenshot|length > 0 and account.security_questions.screenshot[0]%}
                          <b>Screenshots</b>
                          {% for filename in account.security_questions.screenshot %}
                              <img class="screenshot" src={{filename}}>

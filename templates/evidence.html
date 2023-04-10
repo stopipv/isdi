@@ -109,9 +109,33 @@
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">
-                        <h4>{{nested.install_form.label}}</h4>
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th>App name</th><td>
+                                {% if spyware[loop.index0].url %}
+                                    <a href={{spyware[loop.index0].url}}>{{spyware[loop.index0].app_name}}</a> 
+                                    {% else %}
+                                    {{spyware[loop.index0].app_name}}
+                                {% endif %} 
+                                </td></tr>
+                                {% if spyware[loop.index0].application_icon %}
+                                <tr><th>Icon</th><td><img src={{spyware[loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if spyware[loop.index0].description %}
+                                <tr><th>Description</th><td>{{spyware[loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th>Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
+                                {% if spyware[loop.index0].permissions|length > 0 %}
+                                <tr><th>Permissions used</th><td>{{spyware[loop.index0].permissions}}</td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
                         <div class="subform">{{ nested.install_form }}</div>
-                        <h4>{{nested.notes.label}}</h4>
+                        <h5>{{nested.notes.label}}</h5>
                         <div class="subform">{{ nested.notes }}</div>
                     </div>
                 </details>
@@ -154,16 +178,44 @@
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">
-                        <h4>{{nested.install_form.label}}</h4>
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th>App name</th><td>
+                                {% if dualuse[outer_loop.index0].url %}
+                                    <a href={{dualuse[outer_loop.index0].url}}>{{dualuse[outer_loop.index0].app_name}}</a> 
+                                    {% else %}
+                                    {{dualuse[outer_loop.index0].app_name}}
+                                {% endif %} 
+                                </td></tr>
+                                {% if dualuse[outer_loop.index0].application_icon %}
+                                <tr><th>Icon</th><td><img src={{dualuse[outer_loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if dualuse[outer_loop.index0].description %}
+                                <tr><th>Description</th><td>{{dualuse[outer_loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th>Install time</th><td>January 1, 1970 00:00:00</td></tr>
+                                {% if dualuse[outer_loop.index0].permissions|length > 0 %}
+                                <tr><th>Permissions used</th><td>
+                                    {% for perm in dualuse[outer_loop.index0].permissions %}
+                                    {{perm.permission_name}}{% if loop.index < dualuse[outer_loop.index0].permissions|length %}, {% endif %}
+                                    {% endfor %}
+                                </td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
                         <div class="subform">{{ nested.install_form }}</div>
 
                         {% for perm in nested.permissions %}
-                        <h4>{{ dualuse[outer_loop.index0].permissions[loop.index0].permission_name}}</h4>
+                        <h5>Permission check: {{dualuse[outer_loop.index0].permissions[loop.index0].permission_name}}</h5>
                         {{ perm.hidden_tag() }}
                         <div class="subform">{{ perm }}</div>
                         {% endfor %}
 
-                        <h4>{{nested.notes.label}}</h4>
+                        <h5>{{nested.notes.label}}</h5>
                         <div class="subform">{{ nested.notes }}</div>
                     </div>
                 </details>
@@ -216,17 +268,17 @@
                     </summary>
                     {{ nested.hidden_tag() }}
                     <div class="content">
-                        <h4>{{ nested.suspicious_logins.label }}</h4>
+                        <h5>{{ nested.suspicious_logins.label }}</h5>
                         <div class="subform">{{ nested.suspicious_logins }}</div>
-                        <h4>{{ nested.password_check.label }}</h4>
+                        <h5>{{ nested.password_check.label }}</h5>
                         <div class="subform">{{ nested.password_check }}</div>
-                        <h4>{{ nested.recovery_settings.label }}</h4>
+                        <h5>{{ nested.recovery_settings.label }}</h5>
                         <div class="subform">{{ nested.recovery_settings }}</div>
-                        <h4>{{ nested.two_factor_settings.label }}</h4>
+                        <h5>{{ nested.two_factor_settings.label }}</h5>
                         <div class="subform">{{ nested.two_factor_settings }}</div>
-                        <h4>{{ nested.security_questions.label }}</h4>
+                        <h5>{{ nested.security_questions.label }}</h5>
                         <div class="subform">{{ nested.security_questions }}</div>
-                        <h4>{{nested.notes.label}}</h4>
+                        <h5>{{nested.notes.label}}</h5>
                         <div class="subform">{{ nested.notes }}</div>
                     </div>
                 </details>

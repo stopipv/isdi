@@ -31,10 +31,12 @@ from wtforms.validators import InputRequired
 
 import config
 from db import create_mult_appinfo, create_scan
+from privacy_scan_android import take_screenshot
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
 DEFAULT = "y"
+SCREENSHOT_FOLDER = os.path.join("tmp", "isdi-screenshots/")
 
 empty_choice = ("", "---")
 second_factors = ["Phone", "Email", "App"]
@@ -104,7 +106,7 @@ class TwoFactorForm(FlaskForm):
 
 class SecurityQForm(FlaskForm):
     present = SelectField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    questions = TextAreaField("Which questions are set?", validators=[InputRequired()])
+    questions = TextAreaField("Which questions are set?")
     know = SelectField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
@@ -153,6 +155,21 @@ class AccountCompromiseForm(FlaskForm):
     accounts = FieldList(FormField(AccountInfoForm))
     submit = SubmitField("Continue")
 
+def screenshot(device, fname):
+    fname = os.path.join(SCREENSHOT_FOLDER, fname)
+
+    sc = get_device(device)
+    ser = sc.devices()
+
+    if device.lower() == "android":
+        take_screenshot(ser, fname=fname)
+
+    else:
+        # don't know how to do this yet
+        return None
+    
+    return fname
+
 def remove_unwanted_data(data):
     unwanted_keys = ["csrf_token"]
 
@@ -170,6 +187,34 @@ def remove_unwanted_data(data):
     
     else:
         return data  
+    
+def reformat_verbose_apps(verbose_apps):
+    pprint(verbose_apps)
+    spyware = []
+    dualuse = []
+    
+    for verbose_app in verbose_apps:
+        minimal_app = dict()
+
+        minimal_app['description'] = verbose_app['descriptionHTML']
+        minimal_app['appId'] = verbose_app['appId']
+        minimal_app['icon'] = verbose_app['application-icon']
+        minimal_app['url'] = verbose_app['developerwebsite']
+        minimal_app['genres'] = []
+        if verbose_app['genres'] != "":
+            minimal_app['genres'] = ", ".split(verbose_app['genres'])
+
+        # the way ISDi does permissions is messed up rn, have to fix on the backend
+        minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
+
+        # add app to correct list
+        minimal_app['app_name'] = verbose_app['title']
+        if "spyware" in verbose_app["flags"]:
+            spyware.append(minimal_app)
+        if "dual-use" in verbose_app["flags"]:
+            dualuse.append(minimal_app)
+
+    return spyware, dualuse
     
 def account_is_concerning(account):
     login_concern = account['suspicous_logins']['recognize'] != 'y' or account['suspicous_logins']['activity_log'] != 'n'

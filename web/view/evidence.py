@@ -14,6 +14,7 @@ from evidence_collection import (
     SpywareForm,
     StartForm,
     get_suspicious_apps,
+    reformat_verbose_apps,
     remove_unwanted_data,
 )
 from web import app
@@ -79,23 +80,12 @@ def evidence(step):
             # collect apps if we need to
             if step == 2:
                 try:
-                    verbose_apps = get_suspicious_apps(clean_data['device_type'], clean_data['name'])
-                    pprint(verbose_apps)
-                    
-                    session['apps'] = {"spyware": [], "dualuse": []}
-                    for verbose_app in verbose_apps:
-                        minimal_app = dict()
-
-                        # the way ISDi does permissions is messed up rn, have to fix on the backend
-                        minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
-
-                        minimal_app['app_name'] = verbose_app['title']
-                        if "dual-use" in verbose_app["flags"]:
-                            session['apps']['dualuse'].append(minimal_app)
-                        if "spyware" in verbose_app["flags"]:
-                            session['apps']['spyware'].append(minimal_app)
+                    verbose_apps = get_suspicious_apps(session['step1']['device_type'], session['step1']['name'])
+                    spyware, dualuse = reformat_verbose_apps(verbose_apps)
+                    session['apps'] = {"spyware": spyware, "dualuse": dualuse}
 
                 except Exception as e:
+                    print(e)
                     # for now, just do this
                     session['apps'] = {
                     "spyware": [{"app_name": "MSpy"}],

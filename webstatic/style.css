@@ -14,6 +14,7 @@ a.appid {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
+  font-size: 25pt;
   src: url(http://localhost:6200/webstatic/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
 }
 
@@ -222,4 +223,10 @@ input[type='checkbox'] {
 img.small {
     width: 30px;
     margin-left: 10px;
+}
+
+div.app-info th {
+    font-style: italic;
+    font-weight: normal;
+    padding-right: 10px;
 }
