@@ -3,10 +3,6 @@ input[type=radio] {
     margin: 2px;
 }
 
-#applist tr td a {
-    /* color: unset;*/
-}
-
 a.appid {
     color: unset;
 }

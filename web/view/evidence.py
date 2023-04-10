@@ -13,9 +13,7 @@ from evidence_collection import (
     ScanForm,
     SpywareForm,
     StartForm,
-    android_instructions,
     get_suspicious_apps,
-    ios_instructions,
     remove_unwanted_data,
 )
 from web import app
@@ -24,6 +22,7 @@ bootstrap = Bootstrap(app)
 
 @app.route("/evidence/", methods={'GET'})
 def evidence_default():
+    session.clear()
     return redirect(url_for('evidence', step=1))
 
 
@@ -40,8 +39,9 @@ def evidence(step):
         dualuse = session['apps']['dualuse']
 
     accounts=[]
-    if 'step4' in session.keys():
-        accounts=[{"account_name": x} for x in session['step4']['accounts_used']]
+    # have to do this step numbering better...
+    if 'step5' in session.keys():
+        accounts=[{"account_name": x} for x in session['step5']['accounts_used']]
 
     forms = {
         1: StartForm(),
@@ -58,8 +58,8 @@ def evidence(step):
         if form.is_submitted() and form.validate():
             clean_data = remove_unwanted_data(form.data)
 
-            if step == 4:
-                # have to reformat our data due to limitations with wtforms
+            # for accounts used, have to reformat our data due to limitations with wtforms
+            if step == 5:
                 accounts_used = []
                 accounts_unused = []
                 for k, v in clean_data.items():
@@ -154,13 +154,23 @@ def evidence_summary():
         device_owner = "",
         device = "",
         scanned=False,
-        data = {},
+        spyware = [],
+        dualuse = [],
+        accounts = [],
     )
 
-    for key in session.keys():
-        if key.startswith('step'):
-            context['data'].update(session[key])
-    session.clear()
+    if "step1" in session.keys():
+        context['device_owner'] = session['step1']['name']
+        context['device'] = session['step1']['device_type']
+
+    if "step3" in session.keys():
+        context['spyware'] = session['step3']['spyware_apps']
+
+    if "step4" in session.keys():
+        context['dualuse'] = session['step4']['dual_use_apps']
+
+    if "step6" in session.keys():
+        context['accounts'] = session['step6']['accounts']
 
     return render_template('main.html', **context)
 
