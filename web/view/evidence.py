@@ -56,6 +56,7 @@ def evidence(step):
     form = forms.get(step, 1)
 
     if request.method == 'POST':
+        pprint(form.data)
         if form.is_submitted() and form.validate():
             clean_data = remove_unwanted_data(form.data)
 

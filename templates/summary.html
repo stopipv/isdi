@@ -67,9 +67,9 @@
                 </li>
 
                 {% for perm in app.permissions %}
-                {% if perm.access != 'n' %}
+                {% if perm.access != 'no' %}
                     <li>The [ex-]partner can
-                        {% if perm.access == 'u' %}potentially{% endif %}
+                        {% if perm.access == 'unsure' %}potentially{% endif %}
                         use this app to access {{device_owner}}'s {{perm.permission_name}}. 
                         {% if perm.describe %}
                         Additional details: {{perm.describe}}. 
@@ -104,7 +104,7 @@
             <ul>
                 {% if account.suspicious_logins.recognize != "y" %}
                 <li>There are 
-                    {% if account.suspicious_logins.recognize == 'u' %}potentially {% endif %}
+                    {% if account.suspicious_logins.recognize == 'unsure' %}potentially {% endif %}
                     some suspicious devices logged into this account. This could indicate that the [ex-]partner has accessed this account before. 
                     {% if account.suspicious_logins.describe_logins %}
                     Additional details: {{account.suspicious_logins.describe_logins}}.
@@ -120,7 +120,7 @@
 
                 {% if account.suspicious_logins.activity_log != "y" %}
                 <li>There are 
-                    {% if account.suspicious_logins.activity_log == 'u' %}potentially {% endif %}
+                    {% if account.suspicious_logins.activity_log == 'unsure' %}potentially {% endif %}
                     some suspicious logins in the activity log. This could indicate that the [ex-]partner has accessed this account before. 
                     {% if account.suspicious_logins.describe_activity %}
                     Additional details: {{account.suspicious_logins.describe_activity}}.
@@ -134,24 +134,24 @@
                 </li>
                 {% endif %}
             
-                {% if account.password_check.know != 'n' or account.password_check.guess != 'n' %}
+                {% if account.password_check.know != 'no' or account.password_check.guess != 'no' %}
                 <li>The [ex-]partner 
-                    {% if account.password_check.know == 'y' %}knows
-                    {% elif account.password_check.know == 'u'%}might know
+                    {% if account.password_check.know == 'yes' %}knows
+                    {% elif account.password_check.know == 'unsure'%}might know
                     {% else %}does not know{% endif %}
                      the password to this account.
-                    {% if account.password_check.know != 'y' %}
+                    {% if account.password_check.know != 'yes' %}
                         They 
-                        {% if account.password_check.know == 'u' %}may be able to
+                        {% if account.password_check.know == 'unsure' %}may be able to
                         {% else %}can likely{% endif %}
                          guess the password.
                     {% endif %}
                 </li>
                 {% endif %}
 
-                {% if account.recovery_settings.phone_access != 'n' %}
+                {% if account.recovery_settings.phone_access != 'no' %}
                 <li>The [ex-]partner 
-                    {% if account.recovery_settings.phone_access == 'y' %}has
+                    {% if account.recovery_settings.phone_access == 'yes' %}has
                     {% else %}might have{% endif %}
                      access to the recovery phone number. With this access, they can access the account without a password and reset the password.
                      {% if account.recovery_settings.phone_screenshot|length > 0 %}
@@ -162,9 +162,9 @@
                      {% endif %}
                 </li>
                 {% endif %}
-                {% if account.recovery_settings.email_access != 'n' %}
+                {% if account.recovery_settings.email_access != 'no' %}
                 <li>The [ex-]partner 
-                    {% if account.recovery_settings.email_access == 'y' %}has
+                    {% if account.recovery_settings.email_access == 'yes' %}has
                     {% else %}might have{% endif %}
                      access to the recovery email address. With this access, they can access the account without a password and/or reset the password.
                      {% if account.recovery_settings.email_screenshot|length > 0 and account.recovery_settings.email_screenshot[0] %}
@@ -176,9 +176,9 @@
                 </li>
                 {% endif %}
 
-                {% if account.two_factor_settings.second_factor_access != 'n' %}
+                {% if account.two_factor_settings.second_factor_access != 'no' %}
                 <li>The [ex-]partner 
-                    {% if account.two_factor_settings.second_factor_access == 'y' %}has
+                    {% if account.two_factor_settings.second_factor_access == 'yes' %}has
                     {% else %}might have{% endif %}
                      access to the authentication second factor. This means that if they have the account password, they can get in without {{device_owner}} receiving a notification.
                      {% if account.two_factor_settings.screenshot|length > 0 and account.two_factor_settings.screenshot[0]%}
@@ -190,9 +190,9 @@
                 </li>
                 {% endif %}
 
-                {% if account.security_questions.know != 'n' %}
+                {% if account.security_questions.know != 'no' %}
                 <li>The [ex-]partner
-                    {% if account.security_questions.know == 'y' %}knows
+                    {% if account.security_questions.know == 'yes' %}knows
                     {% else %}might know{% endif %}
                      the answers to the account security questions. With these answers, they may be able to access the account without the password and/or reset the password.
                 

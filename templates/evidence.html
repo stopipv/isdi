@@ -27,7 +27,17 @@
                 <table id="scan-form">
                     <tbody>
                         <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
-                        <tr><th><label>{{ form.device_type.label }}</label></th><td> {{ form.device_type }}</td></tr>
+                        <tr><th><label>{{form.device_type.label}}</label></th><td>
+                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}> 
+                            {% for option in form.device_type %}
+                            <label class="btn btn-secondary" for="{{option.id}}">
+                                {{option.label.text}}
+                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                <span class="glyphicon glyphicon-ok"></span>
+                            </label>
+                            {% endfor %}
+                            </div>
+                        </td></tr>
                     </tbody>
                 </table>
                 <br>
@@ -134,7 +144,25 @@
                         <hr>
                         <h4>Questionnaires</h4>
                         <h5>{{nested.install_form.label}}</h5>
-                        <div class="subform">{{ nested.install_form }}</div>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform">{{ nested.notes }}</div>
                     </div>
@@ -207,12 +235,47 @@
                         <hr>
                         <h4>Questionnaires</h4>
                         <h5>{{nested.install_form.label}}</h5>
-                        <div class="subform">{{ nested.install_form }}</div>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 
                         {% for perm in nested.permissions %}
                         <h5>Permission check: {{dualuse[outer_loop.index0].permissions[loop.index0].permission_name}}</h5>
-                        {{ perm.hidden_tag() }}
-                        <div class="subform">{{ perm }}</div>
+                        <div class="subform">
+                            {{ perm.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{perm.access.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}> 
+                                        {% for option in perm.access %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
+                                    <tr><th>{{perm.screenshot.label}}</th><td>{{perm.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         {% endfor %}
 
                         <h5>{{nested.notes.label}}</h5>
@@ -269,15 +332,143 @@
                     {{ nested.hidden_tag() }}
                     <div class="content">
                         <h5>{{ nested.suspicious_logins.label }}</h5>
-                        <div class="subform">{{ nested.suspicious_logins }}</div>
+                        <div class="subform">
+                            {{nested.suspicious_logins.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{nested.suspicious_logins.recognize.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.recognize.id}}> 
+                                        {% for option in nested.suspicious_logins.recognize %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.suspicious_logins.describe_logins.label}}</th><td>{{nested.suspicious_logins.describe_logins}}</td></tr>
+                                    <tr><th>{{nested.suspicious_logins.login_screenshot.label}}</th><td>{{nested.suspicious_logins.login_screenshot}}</td></tr>
+
+                                    <tr><th>{{nested.suspicious_logins.activity_log.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}> 
+                                        {% for option in nested.suspicious_logins.activity_log %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.suspicious_logins.describe_activity.label}}</th><td>{{nested.suspicious_logins.describe_activity}}</td></tr>
+                                    <tr><th>{{nested.suspicious_logins.activity_screenshot.label}}</th><td>{{nested.suspicious_logins.activity_screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{ nested.password_check.label }}</h5>
-                        <div class="subform">{{ nested.password_check }}</div>
+                        <div class="subform">
+                            {{ nested.password_check.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.password_check.know, nested.password_check.guess] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{ nested.recovery_settings.label }}</h5>
-                        <div class="subform">{{ nested.recovery_settings }}</div>
+                        <div class="subform">
+                            {{ nested.recovery_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.recovery_settings.phone_present, nested.recovery_settings.phone_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.phone_screenshot.label}}</th><td>{{nested.recovery_settings.phone_screenshot}}</td></tr>
+                                    {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.email_screenshot.label}}</th><td>{{nested.recovery_settings.email_screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{ nested.two_factor_settings.label }}</h5>
-                        <div class="subform">{{ nested.two_factor_settings }}</div>
+                        <div class="subform">
+                            {{ nested.two_factor_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.two_factor_settings.enabled, nested.two_factor_settings.second_factor_type, nested.two_factor_settings.second_factor_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.two_factor_settings.screenshot.label}}</th><td>{{nested.two_factor_settings.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{ nested.security_questions.label }}</h5>
-                        <div class="subform">{{ nested.security_questions }}</div>
+                        <div class="subform">
+                            {{ nested.security_questions.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{nested.security_questions.present.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.present.id}}> 
+                                        {% for option in nested.security_questions.present %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.security_questions.questions.label}}</th><td>{{nested.security_questions.questions}}</td></tr>
+                                    <tr><th>{{nested.security_questions.know.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.know.id}}> 
+                                        {% for option in nested.security_questions.know %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.security_questions.screenshot.label}}</th><td>{{nested.security_questions.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform">{{ nested.notes }}</div>
                     </div>

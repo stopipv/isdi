@@ -230,3 +230,25 @@ div.app-info th {
     font-weight: normal;
     padding-right: 10px;
 }
+
+
+.btn span.glyphicon {    			
+	opacity: 0;				
+}
+
+.btn.active span.glyphicon {				
+	opacity: 1;				
+}
+
+.btn-group>label.btn {
+    border-color: rgb(208, 206, 206);
+    margin: 5px 0px;
+}
+
+input[type="file"] {
+    margin: 5px 0px;
+}
+
+textarea {
+    margin: 5px 0px;
+}

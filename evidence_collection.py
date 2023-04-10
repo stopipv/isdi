@@ -21,6 +21,7 @@ from wtforms import (
     FormField,
     HiddenField,
     MultipleFileField,
+    RadioField,
     SelectField,
     SelectMultipleField,
     StringField,
@@ -38,14 +39,13 @@ from web.view.scan import first_element_or_none
 DEFAULT = "y"
 SCREENSHOT_FOLDER = os.path.join("tmp", "isdi-screenshots/")
 
-empty_choice = ("", "---")
 second_factors = ["Phone", "Email", "App"]
 accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber"]
 
-yes_no_choices = [empty_choice,( 'y', 'Yes'), ('n', 'No'), ('u', 'Unsure')]
-device_type_choices = [empty_choice, ('android', 'Android'), ('ios', 'iOS')]
+yes_no_choices = [( 'yes', 'Yes'), ('no', 'No'), ('unsure', 'Unsure')]
+device_type_choices = [('android', 'Android'), ('ios', 'iOS')]
 #two_factor_choices = [empty_choice] + [(x.lower(), x) for x in second_factors]
-two_factor_choices = [(x.lower(), x) for x in second_factors] + [empty_choice]
+two_factor_choices = [(x.lower(), x) for x in second_factors]
 account_choices = [(x, x) for x in accounts]
 
 ## HELPER FORMS FOR EVERY PAGE
@@ -56,14 +56,14 @@ class NotesForm(FlaskForm):
 ## HELPER FORMS FOR APPS
 class PermissionForm(FlaskForm):
     permission_name = HiddenField("Permission")
-    access = SelectField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    access = RadioField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     describe = TextAreaField("Please describe how you know this.")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class InstallForm(FlaskForm):
-    knew_installed = SelectField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    installed = SelectField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    coerced = SelectField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    knew_installed = RadioField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    installed = RadioField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    coerced = RadioField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
@@ -79,35 +79,35 @@ class DualUseAppForm(FlaskForm):
 
 ## HELPER FORMS FOR ACCOUNTS
 class SuspiciousLoginsForm(FlaskForm):
-    recognize = SelectField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    recognize = RadioField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     describe_logins = TextAreaField("Which devices do you not recognize?")
     login_screenshot = MultipleFileField('Add screenshot(s)')
-    activity_log = SelectField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    activity_log = RadioField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     describe_activity = TextAreaField("Which logins are suspicious, and why?")
     activity_screenshot = MultipleFileField('Add screenshot(s)')
 
 class PasswordForm(FlaskForm):
-    know = SelectField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    guess = SelectField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    guess = RadioField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
 
 class RecoveryForm(FlaskForm):
-    phone_present = SelectField("Is there a recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    phone_access = SelectField("Could your partner have access to the recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    phone_present = RadioField("Is there a recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    phone_access = RadioField("Could your partner have access to the recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     phone_screenshot = MultipleFileField('Add screenshot(s)')
-    email_present = SelectField("Is there a recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    email_access = SelectField("Could your partner have access to the recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    email_present = RadioField("Is there a recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    email_access = RadioField("Could your partner have access to the recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     email_screenshot = MultipleFileField('Add screenshot(s)')
 
 class TwoFactorForm(FlaskForm):
-    enabled = SelectField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    type = SelectField("What type of two-factor authentication is it?", choices=two_factor_choices, validators=[InputRequired()], default=DEFAULT)
-    second_factor_access = SelectField("Could your partner have access to the second factor?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    enabled = RadioField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    second_factor_type = RadioField("What type of two-factor authentication is it?", choices=two_factor_choices, validators=[InputRequired()], default=DEFAULT)
+    second_factor_access = RadioField("Could your partner have access to the second factor?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SecurityQForm(FlaskForm):
-    present = SelectField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    present = RadioField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     questions = TextAreaField("Which questions are set?")
-    know = SelectField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class AccountInfoForm(FlaskForm):
@@ -123,7 +123,7 @@ class AccountInfoForm(FlaskForm):
 class StartForm(FlaskForm):
     title = "Welcome to <Name of tool>"
     name = StringField('Name', validators=[InputRequired()])
-    device_type = SelectField('Device type', choices=device_type_choices, validators=[InputRequired()], default=DEFAULT)
+    device_type = RadioField('Device type', choices=device_type_choices, validators=[InputRequired()], default=DEFAULT)
     submit = SubmitField("Continue")
 
 class ScanForm(FlaskForm):
