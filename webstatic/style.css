@@ -169,6 +169,8 @@ div.result-overview>img {
     width: 45%;
     font-size: 16px;
     cursor: pointer;
+    align-content: center;
+    align-items: center;
 }
 
 #ck-button label {
@@ -204,7 +206,7 @@ div.account-buttons {
 }
 
 #ck-button img {
-    width: 20px;
+    height: 25px;
     margin: 5px;
     float: left;
 }

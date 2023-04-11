@@ -9,7 +9,6 @@ Collect evidence of IPS. Basic version collects this data from the phone:
 2. Permission usage in the last 7 days (or 28 days, if we can)
 
 """
-import datetime
 import json
 import os
 from collections import defaultdict
@@ -17,7 +16,7 @@ from pprint import pprint
 
 import jinja2
 import pdfkit
-from flask import render_template, session
+from flask import session
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
@@ -26,8 +25,6 @@ from wtforms import (
     HiddenField,
     MultipleFileField,
     RadioField,
-    SelectField,
-    SelectMultipleField,
     StringField,
     SubmitField,
     TextAreaField,
@@ -37,7 +34,6 @@ from wtforms.validators import InputRequired
 import config
 from db import create_mult_appinfo, create_scan
 from privacy_scan_android import take_screenshot
-from web import app
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
@@ -45,7 +41,7 @@ DEFAULT = "y"
 SCREENSHOT_FOLDER = os.path.join("tmp", "isdi-screenshots/")
 
 second_factors = ["Phone", "Email", "App"]
-accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber"]
+accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber", "Doordash", "Grubhub", "Facebook", "Twitter", "Snapchat", "Instagram"]
 
 yes_no_choices = [( 'yes', 'Yes'), ('no', 'No'), ('unsure', 'Unsure')]
 device_type_choices = [('android', 'Android'), ('ios', 'iOS')]
@@ -152,7 +148,12 @@ class AccountsUsedForm(FlaskForm):
     Microsoft = BooleanField("Microsoft")
     Lyft = BooleanField("Lyft")
     Uber = BooleanField("Uber")
-    Other = BooleanField("Other")
+    Doordash = BooleanField("Doordash")
+    Grubhub = BooleanField("Grubhub")
+    Facebook = BooleanField("Facebook")
+    Twitter = BooleanField("Twitter")
+    Snapchat = BooleanField("Snapchat")
+    Instagram = BooleanField("Instagram")
     submit = SubmitField("Continue")
 
 class AccountCompromiseForm(FlaskForm):
@@ -161,6 +162,7 @@ class AccountCompromiseForm(FlaskForm):
     submit = SubmitField("Continue")
 
 def unpack_evidence_context(session, task="evidence"):
+    """Takes session data and turns it into less confusing context to feed to template"""
 
     context = dict(
         task = task,
@@ -218,6 +220,7 @@ def create_printout(context):
     return filename
 
 def screenshot(device, fname):
+    """Take a screenshot and return the file where the screenshot is"""
     fname = os.path.join(SCREENSHOT_FOLDER, fname)
 
     sc = get_device(device)
@@ -233,6 +236,7 @@ def screenshot(device, fname):
     return fname
 
 def remove_unwanted_data(data):
+    """Clean data from forms (e.g., remove CSRF tokens so they don't live in the session)"""
     unwanted_keys = ["csrf_token"]
 
     if type(data) == list:
@@ -251,6 +255,7 @@ def remove_unwanted_data(data):
         return data  
     
 def reformat_verbose_apps(verbose_apps):
+    """Minimize data we're storing in the session about these apps"""
     pprint(verbose_apps)
     spyware = []
     dualuse = []

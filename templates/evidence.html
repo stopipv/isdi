@@ -285,12 +285,15 @@
 
                 {% if step == 5 %}
                 <div class="account-buttons">
-                    <div id="ck-button">{{form.Google}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Google.label }}</span></div>
-                    <div id="ck-button">{{form.iCloud}}<span><img src="/webstatic/images/no-concerns.png">{{ form.iCloud.label }}</span></div>
-                    <div id="ck-button">{{form.Microsoft}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Microsoft.label }}</span></div>
-                    <div id="ck-button">{{form.Lyft}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Lyft.label }}</span></div>
-                    <div id="ck-button">{{form.Uber}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Uber.label }}</span></div>
-                    <div id="ck-button">{{form.Other}}<span><img src="/webstatic/images/no-concerns.png">{{ form.Other.label }}</span></div>
+                    {% for field in form %}
+                        {% if field.type == "BooleanField" %}
+                            <div id="ck-button">{{field}}
+                                <span>
+                                    <img src="/webstatic/images/accounts/{{field.label.text.lower()}}.png">{{ field.label }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
                 {% endif %}
 
