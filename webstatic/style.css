@@ -258,3 +258,13 @@ textarea {
 div.notes textarea {
     width: 250%;
 }
+
+#printout-header {
+    position: relative;
+}
+
+#printout-header img {
+    position: absolute;
+    top: -50px;
+    right: -100px;
+}

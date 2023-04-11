@@ -24,6 +24,7 @@
                 <table id="scan-form">
                     <tbody>
                         <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
+                        <tr><th><label>{{ form.consultant_name.label }}</label></th><td> {{ form.consultant_name }}</td> </tr>
                         <tr><th><label>{{form.device_type.label}}</label></th><td>
                             <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}> 
                             {% for option in form.device_type %}

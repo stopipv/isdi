@@ -124,6 +124,7 @@ class AccountInfoForm(FlaskForm):
 class StartForm(FlaskForm):
     title = "Welcome to <Name of tool>"
     name = StringField('Name', validators=[InputRequired()])
+    consultant_name = StringField('Consultant name', validators=[InputRequired()])
     device_type = RadioField('Device type', choices=device_type_choices, validators=[InputRequired()], default=DEFAULT)
     submit = SubmitField("Continue")
 
@@ -170,6 +171,7 @@ def unpack_evidence_context(session, task="evidence"):
         title=config.TITLE,
         device_owner = "",
         device = "",
+        consultant = "",
         spyware = [],
         dualuse = [],
         accounts = [],
@@ -177,6 +179,7 @@ def unpack_evidence_context(session, task="evidence"):
     
     if "step1" in session.keys():
         context['device_owner'] = session['step1']['name']
+        context['consultant'] = session['step1']['consultant_name']
         context['device'] = session['step1']['device_type']
 
     if "step3" in session.keys():

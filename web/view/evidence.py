@@ -1,7 +1,6 @@
 
 import os
-import traceback
-from collections import defaultdict, namedtuple
+from datetime import datetime
 from pprint import pprint
 
 from flask import (
@@ -158,6 +157,12 @@ def evidence_summary():
 @app.route("/evidence/printout", methods=["GET"])
 def evidence_printout():
     context = unpack_evidence_context(session)
+
+    # add datetime
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    context["current_time"] = dt_string
+
     filename = create_printout(context)
     workingdir = os.path.abspath(os.getcwd())
     return send_from_directory(workingdir, filename)
