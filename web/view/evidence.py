@@ -1,8 +1,9 @@
 
-from collections import namedtuple
+import traceback
+from collections import defaultdict, namedtuple
 from pprint import pprint
 
-from flask import redirect, render_template, request, session, url_for
+from flask import flash, redirect, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
 
 import config
@@ -44,6 +45,9 @@ def evidence(step):
     if 'step5' in session.keys():
         accounts=[{"account_name": x} for x in session['step5']['accounts_used']]
 
+    
+    pprint(session)
+
     forms = {
         1: StartForm(),
         2: ScanForm(),
@@ -76,7 +80,6 @@ def evidence(step):
                 clean_data['accounts_used'] = accounts_used
             
             session['step{}'.format(step)] = clean_data
-            pprint(session)
 
             # collect apps if we need to
             if step == 2:
@@ -86,10 +89,14 @@ def evidence(step):
                     session['apps'] = {"spyware": spyware, "dualuse": dualuse}
 
                 except Exception as e:
-                    print(e)
+                    print(traceback.format_exc())
+                    flash(str(e), "error")
+                    return redirect(url_for('evidence', step=step))
                     # for now, just do this
                     session['apps'] = {
-                    "spyware": [{"app_name": "MSpy"}],
+                    "spyware": [{"app_name": "MSpy", 
+                                 "description": "mSpy is a computer security for parental control. Helps parents to give attention to their children online activities. It checks WhatsApp, Facebook, massage and snapchat messages. mSpy is a computer security for parental control.",
+                                 }],
                     "dualuse": [{"app_name": "Snapchat", 
                                 "permissions": [
                                     {"permission_name": "Location"},
@@ -100,8 +107,6 @@ def evidence(step):
                                     {"permission_name": "Location"},
                                 ]}]
                     }
-                    #print("ERROR: Please try again")
-                    #return redirect(url_for('evidence', step=step))
 
             if step < len(forms):
                 # Redirect to next step
@@ -144,7 +149,6 @@ def evidence_summary():
         title=config.TITLE,
         device_owner = "",
         device = "",
-        scanned=False,
         spyware = [],
         dualuse = [],
         accounts = [],
@@ -162,6 +166,19 @@ def evidence_summary():
 
     if "step6" in session.keys():
         context['accounts'] = session['step6']['accounts']
+
+    if "apps" in session.keys():
+        spyware = defaultdict(dict)
+        for item in session['step3']['spyware_apps'] + session['apps']['spyware']:
+            spyware[item['app_name']].update(item)
+        dualuse = defaultdict(dict)
+        for item in session['step4']['dual_use_apps'] + session['apps']['dualuse']:
+            dualuse[item['app_name']].update(item)
+
+    context['dualuse'] = dualuse.values()
+    context['spyware'] = spyware.values()
+
+    pprint(context)
 
     return render_template('main.html', **context)
 

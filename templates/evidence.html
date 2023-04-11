@@ -6,15 +6,12 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <br>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <ul class=flashes>
-              {% for message in messages %}
-              <li>{{ message }}</li>
-              {% endfor %}
-            </ul>
-            {% endif %}
-            {% endwith %}
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
             <br>
 
             <h2>{{ form.title }}</h2>
@@ -122,7 +119,7 @@
                         <div class="app-info">
                             <h4>App information</h4>
                             <table>
-                                <tr><th>App name</th><td>
+                                <tr><th valign="top">App name</th><td>
                                 {% if spyware[loop.index0].url %}
                                     <a href={{spyware[loop.index0].url}}>{{spyware[loop.index0].app_name}}</a> 
                                     {% else %}
@@ -130,14 +127,14 @@
                                 {% endif %} 
                                 </td></tr>
                                 {% if spyware[loop.index0].application_icon %}
-                                <tr><th>Icon</th><td><img src={{spyware[loop.index0].application_icon}}></td></tr>
+                                <tr><th valign="top">Icon</th><td><img src={{spyware[loop.index0].application_icon}}></td></tr>
                                 {% endif %}
                                 {% if spyware[loop.index0].description %}
-                                <tr><th>Description</th><td>{{spyware[loop.index0].description}}</td></tr>
+                                <tr><th valign="top">Description</th><td>{{spyware[loop.index0].description}}</td></tr>
                                 {% endif %}
-                                <tr><th>Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
+                                <tr><th valign="top">Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
                                 {% if spyware[loop.index0].permissions|length > 0 %}
-                                <tr><th>Permissions used</th><td>{{spyware[loop.index0].permissions}}</td></tr>
+                                <tr><th valign="top">Permissions used</th><td>{{spyware[loop.index0].permissions}}</td></tr>
                                 {% endif %}
                             </table>
                         </div>
@@ -164,7 +161,7 @@
                             </table>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
-                        <div class="subform">{{ nested.notes }}</div>
+                        <div class="subform notes">{{ nested.notes }}</div>
                     </div>
                 </details>
                 <br>
@@ -209,7 +206,7 @@
                         <div class="app-info">
                             <h4>App information</h4>
                             <table>
-                                <tr><th>App name</th><td>
+                                <tr><th valign="top">App name</th><td>
                                 {% if dualuse[outer_loop.index0].url %}
                                     <a href={{dualuse[outer_loop.index0].url}}>{{dualuse[outer_loop.index0].app_name}}</a> 
                                     {% else %}
@@ -217,14 +214,14 @@
                                 {% endif %} 
                                 </td></tr>
                                 {% if dualuse[outer_loop.index0].application_icon %}
-                                <tr><th>Icon</th><td><img src={{dualuse[outer_loop.index0].application_icon}}></td></tr>
+                                <tr><th valign="top">Icon</th><td><img src={{dualuse[outer_loop.index0].application_icon}}></td></tr>
                                 {% endif %}
                                 {% if dualuse[outer_loop.index0].description %}
-                                <tr><th>Description</th><td>{{dualuse[outer_loop.index0].description}}</td></tr>
+                                <tr><th valign="top">Description</th><td>{{dualuse[outer_loop.index0].description}}</td></tr>
                                 {% endif %}
-                                <tr><th>Install time</th><td>January 1, 1970 00:00:00</td></tr>
+                                <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
                                 {% if dualuse[outer_loop.index0].permissions|length > 0 %}
-                                <tr><th>Permissions used</th><td>
+                                <tr><th valign="top">Permissions used</th><td>
                                     {% for perm in dualuse[outer_loop.index0].permissions %}
                                     {{perm.permission_name}}{% if loop.index < dualuse[outer_loop.index0].permissions|length %}, {% endif %}
                                     {% endfor %}
@@ -279,7 +276,7 @@
                         {% endfor %}
 
                         <h5>{{nested.notes.label}}</h5>
-                        <div class="subform">{{ nested.notes }}</div>
+                        <div class="subform notes">{{ nested.notes }}</div>
                     </div>
                 </details>
                 <br>
@@ -470,7 +467,7 @@
                             </table>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
-                        <div class="subform">{{ nested.notes }}</div>
+                        <div class="subform notes">{{ nested.notes }}</div>
                     </div>
                 </details>
                 <br>

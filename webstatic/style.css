@@ -252,3 +252,7 @@ input[type="file"] {
 textarea {
     margin: 5px 0px;
 }
+
+div.notes textarea {
+    width: 250%;
+}

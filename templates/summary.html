@@ -13,6 +13,8 @@
             <h3>{{app.app_name}}</h3> 
 
             <ul>
+                {% if app.description %}<li>App description: {{app.description}}</li>{% endif %}
+                {% if app.url %}<li>Link: {{app.url}}</li>{% endif %}
                 <li>
                     {% if app.install_form.knew_installed == "n" %}
                     Someone else installed this app on {{device_owner}}'s phone without their knowledge or permission.
@@ -21,7 +23,7 @@
                     {% elif app.install_form.coerced == "y" %}
                     {{device_owner}} was coerced into installing this app.</li>
                     {% else %}
-                    {{device_owner}} originally installed this app willingly. <i>(This does not imply that the app is not being misused.)</i>
+                    {{device_owner}} originally installed this app willingly. (However, the app could still be a concern.)
                     {%endif%} 
                         {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
                         <b>Screenshots</b>
@@ -48,6 +50,8 @@
             <h3>{{app.app_name}}</h3> 
 
             <ul>
+                {% if app.description %}<li>App description: {{app.description}}</li>{% endif %}
+                {% if app.url %}<li>Link: {{app.url}}</li>{% endif %}
                 <li>
                     {% if app.install_form.knew_installed == "n" %}
                     Someone else installed this app on {{device_owner}}'s phone without their knowledge or permission.
@@ -56,7 +60,7 @@
                     {% elif app.install_form.coerced == "y" %}
                     {{device_owner}} was coerced into installing this app.</li>
                     {% else %}
-                    {{device_owner}} originally installed this app willingly. <i>(This does not imply that the app is not being misused.)</i>
+                    {{device_owner}} originally installed this app willingly. (However, the app could still be a concern.)
                     {%endif%} 
                         {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
                         <b>Screenshots</b>

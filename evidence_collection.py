@@ -196,13 +196,10 @@ def reformat_verbose_apps(verbose_apps):
     for verbose_app in verbose_apps:
         minimal_app = dict()
 
-        minimal_app['description'] = verbose_app['descriptionHTML']
+        minimal_app['description'] = verbose_app['description']
         minimal_app['appId'] = verbose_app['appId']
-        minimal_app['icon'] = verbose_app['application-icon']
+        minimal_app['icon'] = verbose_app['application_icon']
         minimal_app['url'] = verbose_app['developerwebsite']
-        minimal_app['genres'] = []
-        if verbose_app['genres'] != "":
-            minimal_app['genres'] = ", ".split(verbose_app['genres'])
 
         # the way ISDi does permissions is messed up rn, have to fix on the backend
         minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
@@ -258,12 +255,9 @@ def get_suspicious_apps(device, device_owner):
 
     sc = get_device(device)
     if not sc:
-        template_d["error"] = "Please choose one device to scan."
-        return render_template("main.html", **template_d), 201
+        raise Exception("Please choose one device to scan.")
     if not device_owner:
-        template_d["error"] = "Please give the device a nickname."
-        return render_template("main.html", **template_d), 201
-
+        raise Exception("Please give the device a nickname.")
     ser = sc.devices()
 
     print("Devices: {}".format(ser))
@@ -274,7 +268,7 @@ def get_suspicious_apps(device, device_owner):
             "<a href='/instruction' target='_blank' rel='noopener'>"\
             "setup instructions here.</a></b>"
         template_d["error"] = error
-        return render_template("main.html", **template_d), 201
+        raise Exception(error)
 
     ser = first_element_or_none(ser)
     print(">>>scanning_device", device, ser, "<<<<<")
@@ -294,7 +288,7 @@ def get_suspicious_apps(device, device_owner):
         isconnected, reason = sc.setup()
         template_d["error"] = error.format(reason)
         if not isconnected:
-            return render_template("main.html", **template_d), 201
+            raise Exception(error)
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
@@ -311,10 +305,14 @@ def get_suspicious_apps(device, device_owner):
             "phone_scanner/</code> directory. Checn the phone manually. Sorry for"\
             " the inconvenience."
         template_d["error"] = error
-        return render_template("main.html", **template_d), 201
+        raise Exception(error)
+
+    clientid = "1"
+    if session['clientid']:
+        clientid = session['clientid']
 
     scan_d = {
-        'clientid': session['clientid'],
+        'clientid': clientid,
         'serial': config.hmac_serial(ser),
         'device': device,
         'device_model': device_name_map.get('model', '<Unknown>').strip(),

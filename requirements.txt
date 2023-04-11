@@ -3,7 +3,7 @@ pandas
 flask
 dataset
 rsonlite==0.1.0
-Flask-WTF==0.14.2
+Flask-WTF==1.1.1
 Flask-SQLAlchemy==2.5.1
 WTForms==2.2.1
 WTForms-Alchemy==0.16.9
