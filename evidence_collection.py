@@ -9,10 +9,14 @@ Collect evidence of IPS. Basic version collects this data from the phone:
 2. Permission usage in the last 7 days (or 28 days, if we can)
 
 """
+import datetime
 import json
 import os
+from collections import defaultdict
 from pprint import pprint
 
+import jinja2
+import pdfkit
 from flask import render_template, session
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -33,6 +37,7 @@ from wtforms.validators import InputRequired
 import config
 from db import create_mult_appinfo, create_scan
 from privacy_scan_android import take_screenshot
+from web import app
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
@@ -154,6 +159,63 @@ class AccountCompromiseForm(FlaskForm):
     title = "Step 3b: Account Compromise Check"
     accounts = FieldList(FormField(AccountInfoForm))
     submit = SubmitField("Continue")
+
+def unpack_evidence_context(session, task="evidence"):
+
+    context = dict(
+        task = task,
+        device_primary_user=config.DEVICE_PRIMARY_USER,
+        title=config.TITLE,
+        device_owner = "",
+        device = "",
+        spyware = [],
+        dualuse = [],
+        accounts = [],
+    )
+    
+    if "step1" in session.keys():
+        context['device_owner'] = session['step1']['name']
+        context['device'] = session['step1']['device_type']
+
+    if "step3" in session.keys():
+        context['spyware'] = session['step3']['spyware_apps']
+
+    if "step4" in session.keys():
+        context['dualuse'] = session['step4']['dual_use_apps']
+
+    if "step6" in session.keys():
+        context['accounts'] = session['step6']['accounts']
+
+    if "apps" in session.keys():
+        spyware = defaultdict(dict)
+        for item in session['step3']['spyware_apps'] + session['apps']['spyware']:
+            spyware[item['app_name']].update(item)
+        dualuse = defaultdict(dict)
+        for item in session['step4']['dual_use_apps'] + session['apps']['dualuse']:
+            dualuse[item['app_name']].update(item)
+
+        context['dualuse'] = dualuse.values()
+        context['spyware'] = spyware.values()
+
+    return context
+
+def create_printout(context):
+    
+    filename = os.path.join('reports', 'test_report.pdf')
+    template = os.path.join('templates', 'printout.html')
+    css_path = os.path.join('webstatic', 'style.css')
+    
+    template_loader = jinja2.FileSystemLoader("./")
+    template_env = jinja2.Environment(loader=template_loader)
+    template = template_env.get_template(template)
+    output_text = template.render(context)
+
+    config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+    pdfkit.from_string(output_text, filename, configuration=config, css=css_path)
+
+    print("Printout created. Filename is", filename)
+
+    return filename
 
 def screenshot(device, fname):
     fname = os.path.join(SCREENSHOT_FOLDER, fname)

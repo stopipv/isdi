@@ -1,9 +1,18 @@
 
+import os
 import traceback
 from collections import defaultdict, namedtuple
 from pprint import pprint
 
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import (
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+)
 from flask_bootstrap import Bootstrap
 
 import config
@@ -14,9 +23,11 @@ from evidence_collection import (
     ScanForm,
     SpywareForm,
     StartForm,
+    create_printout,
     get_suspicious_apps,
     reformat_verbose_apps,
     remove_unwanted_data,
+    unpack_evidence_context,
 )
 from web import app
 
@@ -26,7 +37,6 @@ bootstrap = Bootstrap(app)
 def evidence_default():
     session.clear()
     return redirect(url_for('evidence', step=1))
-
 
 @app.route("/evidence/<int:step>", methods=['GET', 'POST'])
 def evidence(step):
@@ -89,9 +99,9 @@ def evidence(step):
                     session['apps'] = {"spyware": spyware, "dualuse": dualuse}
 
                 except Exception as e:
-                    print(traceback.format_exc())
-                    flash(str(e), "error")
-                    return redirect(url_for('evidence', step=step))
+                    #print(traceback.format_exc())
+                    #flash(str(e), "error")
+                    #return redirect(url_for('evidence', step=step))
                     # for now, just do this
                     session['apps'] = {
                     "spyware": [{"app_name": "MSpy", 
@@ -140,45 +150,14 @@ def evidence(step):
     
     return render_template('main.html', **context)
 
-@app.route("/evidence/summary", methods=['GET'])
+@app.route('/evidence/summary', methods=['GET'])
 def evidence_summary():
-
-    context = dict(
-        task = "evidencesummary",
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        title=config.TITLE,
-        device_owner = "",
-        device = "",
-        spyware = [],
-        dualuse = [],
-        accounts = [],
-    )
-
-    if "step1" in session.keys():
-        context['device_owner'] = session['step1']['name']
-        context['device'] = session['step1']['device_type']
-
-    if "step3" in session.keys():
-        context['spyware'] = session['step3']['spyware_apps']
-
-    if "step4" in session.keys():
-        context['dualuse'] = session['step4']['dual_use_apps']
-
-    if "step6" in session.keys():
-        context['accounts'] = session['step6']['accounts']
-
-    if "apps" in session.keys():
-        spyware = defaultdict(dict)
-        for item in session['step3']['spyware_apps'] + session['apps']['spyware']:
-            spyware[item['app_name']].update(item)
-        dualuse = defaultdict(dict)
-        for item in session['step4']['dual_use_apps'] + session['apps']['dualuse']:
-            dualuse[item['app_name']].update(item)
-
-    context['dualuse'] = dualuse.values()
-    context['spyware'] = spyware.values()
-
-    pprint(context)
-
+    context = unpack_evidence_context(session, task="evidencesummary")
     return render_template('main.html', **context)
 
+@app.route("/evidence/printout", methods=["GET"])
+def evidence_printout():
+    context = unpack_evidence_context(session)
+    filename = create_printout(context)
+    workingdir = os.path.abspath(os.getcwd())
+    return send_from_directory(workingdir, filename)

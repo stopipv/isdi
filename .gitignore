@@ -137,7 +137,7 @@ error.txt
 ## To be removed
 toremove/
 
-reports/*.csv
+reports/*
 apps/
 data/
 static_data/app-info.db.gz
