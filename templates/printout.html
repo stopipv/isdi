@@ -1,5 +1,5 @@
 <div id="printout-header">
-    <img src="https://brand.wisc.edu/content/uploads/2016/11/uw-crest-color-300x180.png">
+    <img src="https://brand.wisc.edu/content/uploads/2016/11/uw-crest-color-300x180.png" />
     <h1>&lt; Name of Tool &gt; - Investigation Report</h1>
 </div>
 <p><em>Current time:&nbsp;</em>{{current_time}}</p>
@@ -12,106 +12,131 @@
 <hr />
 <h2>Detailed findings</h2>
 <h3>Spyware apps</h3>
-<table border="0">
+{% if spyware|length > 0 %}
+<table border="0" class="printout_columns">
     <tbody>
+        {% for app in spyware %}
         <tr>
             <td>
-                <p><strong>1. MSpy</strong></p>
+                <p><strong>{{loop.index}}. {{app.app_name}}</strong></p>
                 <p><em>App information</em></p>
                 <ul>
-                    <li>App description: asl;kdfja;slkdjfas;ld</li>
-                    <li>Install time: apsodfkjasd;lkfjas;d</li>
-                    <li>Permissions requested: as;dlkfjas;ldkjfa;sd</li>
-                    <li>Recent permissions used: asdlkfja;sldkfja;sdk</li>
+                    <li>App description: {{app.description}}</li>
+                    <li>Install time: {{app.install_time}}</li>
+                    <li>Permissions requested: {{app.permissions}}</li>
+                    <li>Recent permissions used: {{app.recent_permissions}}</li>
                 </ul>
                 <p><em>Investigation results</em></p>
+                {% with form = app.install_form %}
                 <ul>
-                    <li>Did the client know this app was installed?&nbsp;<strong>No</strong></li>
-                    <li>Did the client install this app?&nbsp;<strong>No</strong></li>
-                    <li>Was the client coerced into installing this app?&nbsp;<strong>No</strong></li>
+                    <li>
+                        Did the client know this app was installed?&nbsp;<strong>{{form.knew_installed |
+                            capitalize}}</strong>
+                    </li>
+                    <li>
+                        Did the client install this app?&nbsp;<strong>{{form.installed | capitalize}}</strong>
+                    </li>
+                    <li>
+                        Was the client coerced into installing this app?&nbsp;<strong>{{form.coerced |
+                            capitalize}}</strong>
+                    </li>
                 </ul>
-                <p><em>Automated explanation</em></p>
+                {% endwith %}
+                <p><em>Explanation (automated)</em></p>
                 <p>...</p>
                 <p><em>Client comments</em></p>
                 <blockquote>
-                    <p>My husband has been talking about this app for a long time. I didn't think he would use it on me.
+                    <p>
+                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
+                        else %}None. {% endif %}
                     </p>
                 </blockquote>
                 <p><em>Consultant comments</em></p>
-                <p>None.</p>
+                <blockquote>
+                    <p>
+                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
+                        else %}None. {% endif %}
+                    </p>
+                </blockquote>
             </td>
-            <td valign="top">Screenshot goes here</td>
+            <td valign="top" class="screenshot">Screenshot goes here</td>
         </tr>
+        {% endfor %}
     </tbody>
 </table>
+{% else %}
+<p>No spyware apps were detected on the device.</p>
+{% endif %}
+
 <h3>Dual use apps</h3>
-<table border="0">
+{% if dualuse|length > 0 %}
+<table border="0" class="printout_columns">
     <tbody>
+        {% for app in dualuse %}
         <tr>
             <td>
-                <p><strong>1. MSpy</strong></p>
+                <p><strong>{{loop.index}}. {{app.app_name}}</strong></p>
                 <p><em>App information</em></p>
                 <ul>
-                    <li>App description: asl;kdfja;slkdjfas;ld</li>
-                    <li>Install time: apsodfkjasd;lkfjas;d</li>
-                    <li>Permissions requested: as;dlkfjas;ldkjfa;sd</li>
-                    <li>Recent permissions used: asdlkfja;sldkfja;sdk</li>
+                    <li>App description: {{app.description}}</li>
+                    <li>Install time: {{app.install_time}}</li>
+                    <li>Permissions requested: {{app.permissions}}</li>
+                    <li>Recent permissions used: {{app.recent_permissions}}</li>
                 </ul>
                 <p><em>Investigation results</em></p>
                 <ul>
-                    <li>Did the client know this app was installed?&nbsp;<strong>No</strong></li>
-                    <li>Did the client install this app?&nbsp;<strong>No</strong></li>
-                    <li>Was the client coerced into installing this app?&nbsp;<strong>No</strong></li>
+                    {% with form = app.install_form %}
+                    <li>
+                        Did the client know this app was installed?&nbsp;<strong>{{form.knew_installed |
+                            capitalize}}</strong>
+                    </li>
+                    <li>
+                        Did the client install this app?&nbsp;<strong>{{form.installed | capitalize}}</strong>
+                    </li>
+                    <li>
+                        Was the client coerced into installing this app?&nbsp;<strong>{{form.coerced |
+                            capitalize}}</strong>
+                    </li>
+                    {% endwith %}
+                    {% for permission in app.permissions %}
+                    <li>
+                        Can the [ex-]partner access the client's {{permission.permission_name.lower()}} using this
+                        app?&nbsp;<strong>{{permission.access | capitalize}}</strong>
+                        {% if permission.access == 'yes' %}
+                        <br />Description of the capability:
+                        <blockquote>
+                            <p>{% if permission.describe %}{{permission.describe}}{% else %}None.{% endif %}</p>
+                        </blockquote>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
                 </ul>
-                <p><em>Automated explanation</em></p>
+                <p><em>Explanation (automated)</em></p>
                 <p>...</p>
                 <p><em>Client comments</em></p>
                 <blockquote>
-                    <p>My husband has been talking about this app for a long time. I didn't think he would use it on me.
+                    <p>
+                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
+                        else %}None. {% endif %}
                     </p>
                 </blockquote>
                 <p><em>Consultant comments</em></p>
-                <p>None.</p>
-            </td>
-            <td valign="top">Screenshot goes here</td>
-        </tr>
-        <tr>
-            <td>
-                <p><strong>1. FindMy</strong></p>
-                <p><em>App information</em></p>
-                <ul>
-                    <li>App description: asl;kdfja;slkdjfas;ld</li>
-                    <li>Install time: apsodfkjasd;lkfjas;d</li>
-                    <li>Permissions requested: as;dlkfjas;ldkjfa;sd</li>
-                    <li>Recent permissions used: asdlkfja;sldkfja;sdk</li>
-                </ul>
-                <p><em>Investigation results</em></p>
-                <ul>
-                    <li>Did the client know this app was installed?&nbsp;<strong>No</strong></li>
-                    <li>Did the client install this app?&nbsp;<strong>No</strong></li>
-                    <li>Was the client coerced into installing this app?&nbsp;<strong>No</strong></li>
-                    <li>Can the [ex-]partner see the client's location?&nbsp;<strong>Yes</strong></li>
-                </ul>
                 <blockquote>
-                    <p><em>Explanation from client:</em> a;sldkjfasl;dkjfaskldjf</p>
-                </blockquote>
-                <ul>
-                    <li>Can the [ex-]partner see the client's camera roll?&nbsp;<strong>No</strong></li>
-                </ul>
-                <p><em>Automated explanation</em></p>
-                <p>...</p>
-                <p><em>Client comments</em></p>
-                <blockquote>
-                    <p>My husband has been talking about this app for a long time. I didn't think he would use it on me.
+                    <p>
+                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
+                        else %}None. {% endif %}
                     </p>
                 </blockquote>
-                <p><em>Consultant comments</em></p>
-                <p>None.</p>
             </td>
-            <td valign="top">Screenshots go here</td>
+            <td valign="top" class="screenshot">Screenshot goes here</td>
         </tr>
+        {% endfor %}
     </tbody>
 </table>
+{% else %}
+<p>No dual use apps were detected on the device.</p>
+{% endif %}
+
 <h3>Account check</h3>
 <table border="0">
     <tbody>
@@ -126,7 +151,9 @@
                 <p>...</p>
                 <p><em>Client comments</em></p>
                 <blockquote>
-                    <p>My husband has been talking about this app for a long time. I didn't think he would use it on me.
+                    <p>
+                        My husband has been talking about this app for a long time. I didn't
+                        think he would use it on me.
                     </p>
                 </blockquote>
                 <p><em>Consultant comments</em></p>
@@ -137,5 +164,7 @@
     </tbody>
 </table>
 <hr />
-<p><em>&lt;Name of tool&gt; Investigation Report. &amp;copy; Madison Tech Clinic, University of Wisconsin Madison.</em>
+<p>
+    <em>&lt;Name of tool&gt; Investigation Report. &amp;copy; Madison Tech Clinic,
+        University of Wisconsin Madison.</em>
 </p>

@@ -268,3 +268,7 @@ div.notes textarea {
     top: -50px;
     right: -100px;
 }
+
+table.printout_columns td.screenshot {
+    width: 30%;
+}
