@@ -261,6 +261,7 @@ div.notes textarea {
 
 #printout-header {
     position: relative;
+    margin-bottom: 50px;
 }
 
 #printout-header img {
@@ -284,4 +285,9 @@ div.printout-summary {
 
 table.printout_columns {
     page-break-after: always;
+}
+
+#printout-header th {
+    font-style: italic;
+    font-weight: normal;
 }
