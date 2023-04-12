@@ -192,15 +192,27 @@ def unpack_evidence_context(session, task="evidence"):
         context['accounts'] = session['step6']['accounts']
 
     if "apps" in session.keys():
+
+        # remove permissions from the orig list because it merges weird
+        permissionless_apps = []
+        for item in context['dualuse']:
+            try:
+                newitem = item
+                newitem.pop("permissions")
+                permissionless_apps.append(item)
+            except:
+                print("Permissions already popped")
+            
+        # combine the information in both dicts
         spyware = defaultdict(dict)
-        for item in session['step3']['spyware_apps'] + session['apps']['spyware']:
+        for item in session['step3']['spyware_apps'] + context['spyware']:
             spyware[item['app_name']].update(item)
         dualuse = defaultdict(dict)
-        for item in session['step4']['dual_use_apps'] + session['apps']['dualuse']:
+        for item in session['step4']['dual_use_apps'] + permissionless_apps:
             dualuse[item['app_name']].update(item)
 
-        context['dualuse'] = dualuse.values()
-        context['spyware'] = spyware.values()
+        context['dualuse'] = list(dualuse.values())
+        context['spyware'] = list(spyware.values())
 
     return context
 
@@ -216,7 +228,8 @@ def create_printout(context):
     output_text = template.render(context)
 
     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
-    pdfkit.from_string(output_text, filename, configuration=config, css=css_path)
+    options = {'enable-local-file-access': None}
+    pdfkit.from_string(output_text, filename, configuration=config, css=css_path, options=options)
 
     print("Printout created. Filename is", filename)
 

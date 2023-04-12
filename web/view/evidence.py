@@ -163,6 +163,10 @@ def evidence_printout():
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     context["current_time"] = dt_string
 
+    context["screenshot_dir"] = config.SCREENSHOT_LOCATION
+
+    pprint(context)
+
     filename = create_printout(context)
     workingdir = os.path.abspath(os.getcwd())
     return send_from_directory(workingdir, filename)

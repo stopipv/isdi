@@ -138,6 +138,7 @@ error.txt
 toremove/
 
 reports/*
+screenshots/*
 apps/
 data/
 static_data/app-info.db.gz

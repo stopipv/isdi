@@ -272,3 +272,16 @@ div.notes textarea {
 table.printout_columns td.screenshot {
     width: 30%;
 }
+
+td.screenshot img {
+    margin-left: 15px;
+    width: 250px;
+}
+
+div.printout-summary {
+    page-break-after: always;
+}
+
+table.printout_columns {
+    page-break-after: always;
+}
