@@ -280,7 +280,60 @@ def create_app_summary(app, spyware):
     return " ".join(sentences)
 
 def create_account_summary(account):
-    return "Summary for {}".format(account['account_name'])
+    
+    # generally, more high level because there is a lot going on.
+
+    sentences = []
+
+    # Suspicious logins
+    form = account["suspicious_logins"]
+    if form['recognize'] != "yes":
+        sentences.append("There is evidence that someone other than the client is currently logged into this account.")
+        if form['describe_logins'] != "":
+            sentences.append("The suspicious devices include {}.".format(form['describe_logins']))
+    elif form['activity_log'] != "yes":
+        sentences.append("There is evidence that someone other than the client has recently logged into this account.")
+    else:
+        sentences.append("There is no evidence that someone other than the client has logged into this account recently.")
+
+    # Passwords
+    pwd = False
+    form = account["password_check"]
+    if form['know'] != 'no' or form['guess'] != 'no':
+        pwd = True
+
+    # Recovery details 
+    recovery = False
+    form = account["recovery_settings"]
+    if (form['email_present'] == 'yes' and form['email_access'] != 'no') or (form['phone_present'] == 'yes' and form['phone_access'] != 'no'):
+        recovery = True
+
+    # Two-factor
+    twofactor = False
+    form = account["two_factor_settings"]
+    if form['enabled'] == 'yes' and form['second_factor_access'] != 'no':
+        twofactor = True
+
+    # Security questions
+    questions = False
+    form = account["security_questions"]
+    if form['present'] and form['know'] != 'no':
+        questions= True
+
+    
+    if not (pwd or recovery or twofactor or questions):
+        sentences.append("There is no evidence that anyone else has access to this account.")
+    else:
+        methods = []
+        if pwd: methods.append("the password")
+        if recovery: methods.append("the recovery contact information")
+        if questions: methods.append("the security questions")
+        sentences.append("There is evidence that another person could access this account via these methods: {}.".format(", ".join(methods)))
+
+        if twofactor: 
+            sentences.append("The [ex-]partner has access to the second authentication factor; if they know the password, they could access this account without alerting the client.")
+
+    return " ".join(sentences)
 
 def screenshot(device, fname):
     """Take a screenshot and return the file where the screenshot is"""

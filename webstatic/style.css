@@ -287,6 +287,16 @@ table.printout_columns {
     page-break-after: always;
 }
 
+table.printout_columns th {
+    text-align: left;
+    font-style: italic;
+    font-weight: normal;
+    
+}
+table.printout_columns + table {
+    border: 1px;
+}
+
 #printout-header th {
     font-style: italic;
     font-weight: normal;
