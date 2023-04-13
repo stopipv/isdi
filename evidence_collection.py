@@ -65,6 +65,7 @@ class InstallForm(FlaskForm):
     knew_installed = RadioField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     installed = RadioField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
     coerced = RadioField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    who = TextAreaField("If you were coerced, who coerced you?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
@@ -195,13 +196,12 @@ def unpack_evidence_context(session, task="evidence"):
 
         # remove permissions from the orig list because it merges weird
         permissionless_apps = []
-        for item in context['dualuse']:
-            try:
-                newitem = item
-                newitem.pop("permissions")
-                permissionless_apps.append(item)
-            except:
-                print("Permissions already popped")
+        for app in context['dualuse']:
+            newapp = dict()
+            for k, v in app.items():
+                if k != "permissions":
+                    newapp[k] = v
+            permissionless_apps.append(newapp)
             
         # combine the information in both dicts
         spyware = defaultdict(dict)
@@ -234,6 +234,53 @@ def create_printout(context):
     print("Printout created. Filename is", filename)
 
     return filename
+
+def create_printout_summary(context):
+    return "SUMMARY!"
+
+def create_app_summary(app, spyware):
+
+    sentences = []
+
+    # for all apps, look at install information
+    form = app['install_form']
+    if form['knew_installed'] != 'yes':
+        sentences.append("The client did not know that this app was installed on the phone.")
+    elif form['installed'] != 'yes':
+        # 
+        # TODO: check if it is a system app
+        #
+        system_app = True
+        if system_app:
+            sentences.append("The client did not install this app. However, this is a system app which was likely installed on the phone when it was purchased.")
+        else:
+            if form['installed'] == 'no':
+                sentences.append("The client knew this app was installed on the phone, but they did not install it.")
+            if form['installed'] == 'unsure':
+                sentences.append("The client knew this app was installed on the phone, but they are unsure whether they installed it.")
+            sentences.append("This indicates that another person installed this app, which would require physical access to the phone.")
+        
+
+    elif form['coerced'] != 'no':
+        sentences.append("The client was coerced into installing this app by \"{},\" indicating that person is using the app to surveil the client.".format(form['who']))
+    else: 
+        sentences.append("The client installed this app voluntarily.")
+
+    # for spyware apps, look at permission stuff
+    if not spyware:
+        any_issues = False
+        for perm in app['permissions']:
+            if perm['access'] != 'no':
+                any_issues = True
+                sentences.append("The [ex-]partner can use this app to access the phone's {}.".format(perm['permission_name'].lower()))
+
+        if not any_issues:
+            sentences.append("There is no evidence that this app is being used maliciously against the client.")
+
+    return " ".join(sentences)
+
+def create_account_summary(account):
+    return "Summary for {}".format(account['account_name'])
 
 def screenshot(device, fname):
     """Take a screenshot and return the file where the screenshot is"""

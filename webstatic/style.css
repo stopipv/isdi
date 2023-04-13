@@ -291,3 +291,12 @@ table.printout_columns {
     font-style: italic;
     font-weight: normal;
 }
+
+.appsummary {
+    border: 1px solid black;
+    border-left: 5px solid black; 
+    background-color: rgb(208, 206, 206);
+    padding: 5px 10px;
+    margin-right: 10px;
+    box-shadow: 4px 4px 4px #ccc;
+}

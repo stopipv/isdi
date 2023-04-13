@@ -22,7 +22,10 @@ from evidence_collection import (
     ScanForm,
     SpywareForm,
     StartForm,
+    create_account_summary,
+    create_app_summary,
     create_printout,
+    create_printout_summary,
     get_suspicious_apps,
     reformat_verbose_apps,
     remove_unwanted_data,
@@ -163,8 +166,24 @@ def evidence_printout():
     dt_string = now.strftime("%Y/%m/%d %H:%M:%S")
     context["current_time"] = dt_string
 
+    # add screenshot directory
     context["screenshot_dir"] = config.SCREENSHOT_LOCATION
 
+    # Analyze investigation results and write up:
+    #   (1) Automated explanations for each app, account
+    #   (2) A summary that combines those explanations and surfaces the concerns
+    
+    for app in context["spyware"]:
+        app['summary'] = create_app_summary(app, spyware=True)
+
+    for app in context["dualuse"]:
+        app['summary'] = create_app_summary(app, spyware=False)
+
+    for account in context["accounts"]:
+        account["summary"] = create_account_summary(account)
+
+    context["summary"] = create_printout_summary(context)
+    
     pprint(context)
 
     filename = create_printout(context)
