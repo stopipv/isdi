@@ -155,3 +155,5 @@ __MACOSX
 *~test
 *.apk
 dumps/android_scan.logs
+
+*.pkl

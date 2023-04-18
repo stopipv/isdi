@@ -1,5 +1,7 @@
 
 import os
+import pickle
+import traceback
 from datetime import datetime
 from pprint import pprint
 
@@ -16,16 +18,19 @@ from flask_bootstrap import Bootstrap
 
 import config
 from evidence_collection import (
+    CONTEXT_PKL_FNAME,
+    FAKE_APP_DATA,
     AccountCompromiseForm,
     AccountsUsedForm,
     DualUseForm,
+    Pages,
     ScanForm,
     SpywareForm,
     StartForm,
     create_account_summary,
     create_app_summary,
+    create_overall_summary,
     create_printout,
-    create_printout_summary,
     get_suspicious_apps,
     reformat_verbose_apps,
     remove_unwanted_data,
@@ -34,6 +39,8 @@ from evidence_collection import (
 from web import app
 
 bootstrap = Bootstrap(app)
+
+USE_PICKLE = True
 
 @app.route("/evidence/", methods={'GET'})
 def evidence_default():
@@ -54,19 +61,18 @@ def evidence(step):
 
     accounts=[]
     # have to do this step numbering better...
-    if 'step5' in session.keys():
-        accounts=[{"account_name": x} for x in session['step5']['accounts_used']]
+    if 'step{}'.format(Pages.ACCOUNTS_USED.value) in session.keys():
+        accounts=[{"account_name": x} for x in session['step{}'.format(Pages.ACCOUNTS_USED.value)]['accounts_used']]
 
-    
     pprint(session)
 
     forms = {
-        1: StartForm(),
-        2: ScanForm(),
-        3: SpywareForm(spyware_apps=spyware),
-        4: DualUseForm(dual_use_apps=dualuse),
-        5: AccountsUsedForm(),
-        6: AccountCompromiseForm(accounts=accounts),
+        Pages.START.value: StartForm(),
+        Pages.SCAN.value: ScanForm(),
+        Pages.SPYWARE.value: SpywareForm(spyware_apps=spyware),
+        Pages.DUALUSE.value: DualUseForm(dual_use_apps=dualuse),
+        Pages.ACCOUNTS_USED.value: AccountsUsedForm(),
+        Pages.ACCOUNT_COMP.value: AccountCompromiseForm(accounts=accounts),
     }
 
     form = forms.get(step, 1)
@@ -77,7 +83,7 @@ def evidence(step):
             clean_data = remove_unwanted_data(form.data)
 
             # for accounts used, have to reformat our data due to limitations with wtforms
-            if step == 5:
+            if step == Pages.ACCOUNTS_USED.value:
                 accounts_used = []
                 accounts_unused = []
                 for k, v in clean_data.items():
@@ -94,9 +100,10 @@ def evidence(step):
             session['step{}'.format(step)] = clean_data
 
             # collect apps if we need to
-            if step == 2:
+            if step == Pages.SCAN.value:
                 try:
-                    verbose_apps = get_suspicious_apps(session['step1']['device_type'], session['step1']['name'])
+                    verbose_apps = get_suspicious_apps(session['step{}'.format(Pages.START.value)]['device_type'], 
+                                                       session['step{}'.format(Pages.START.value)]['name'])
                     spyware, dualuse = reformat_verbose_apps(verbose_apps)
                     session['apps'] = {"spyware": spyware, "dualuse": dualuse}
 
@@ -104,21 +111,9 @@ def evidence(step):
                     #print(traceback.format_exc())
                     #flash(str(e), "error")
                     #return redirect(url_for('evidence', step=step))
-                    # for now, just do this
-                    session['apps'] = {
-                    "spyware": [{"app_name": "MSpy", 
-                                 "description": "mSpy is a computer security for parental control. Helps parents to give attention to their children online activities. It checks WhatsApp, Facebook, massage and snapchat messages. mSpy is a computer security for parental control.",
-                                 }],
-                    "dualuse": [{"app_name": "Snapchat", 
-                                "permissions": [
-                                    {"permission_name": "Location"},
-                                    {"permission_name": "Camera"},
-                                ]}, 
-                                {"app_name": "FindMy", 
-                                "permissions": [
-                                    {"permission_name": "Location"},
-                                ]}]
-                    }
+                   
+                    # use fake data
+                    session['apps'] = FAKE_APP_DATA
 
             if step < len(forms):
                 # Redirect to next step
@@ -146,20 +141,32 @@ def evidence(step):
         accounts=accounts
     )
 
-    if "step1" in session.keys():
-        context["device_owner"] = session["step1"]["name"]
-        context["device"] = session["step1"]["device_type"]
+    if 'step{}'.format(Pages.START.value) in session.keys():
+        context["device_owner"] = session['step{}'.format(Pages.START.value)]["name"]
+        context["device"] = session['step{}'.format(Pages.START.value)]["device_type"]
     
     return render_template('main.html', **context)
 
 @app.route('/evidence/summary', methods=['GET'])
 def evidence_summary():
-    context = unpack_evidence_context(session, task="evidencesummary")
+    # to speed up dev...
+    if USE_PICKLE and os.path.isfile(CONTEXT_PKL_FNAME):
+        context = pickle.load(open(CONTEXT_PKL_FNAME, 'rb'))
+    else:
+        context = unpack_evidence_context(session, task="evidencesummary")
+        pickle.dump(context, open(CONTEXT_PKL_FNAME, 'wb'))
+
+    context["concerns"] = create_overall_summary(context, second_person=True)
+
     return render_template('main.html', **context)
 
 @app.route("/evidence/printout", methods=["GET"])
 def evidence_printout():
-    context = unpack_evidence_context(session)
+    if USE_PICKLE and os.path.isfile(CONTEXT_PKL_FNAME):
+        context = pickle.load(open(CONTEXT_PKL_FNAME, 'rb'))
+    else:
+        context = unpack_evidence_context(session, task="evidencesummary")
+        pickle.dump(context, open(CONTEXT_PKL_FNAME, 'wb'))
 
     # add datetime
     now = datetime.now()
@@ -168,21 +175,24 @@ def evidence_printout():
 
     # add screenshot directory
     context["screenshot_dir"] = config.SCREENSHOT_LOCATION
-
-    # Analyze investigation results and write up:
-    #   (1) Automated explanations for each app, account
-    #   (2) A summary that combines those explanations and surfaces the concerns
     
     for app in context["spyware"]:
-        app['summary'] = create_app_summary(app, spyware=True)
+         summary, concerning = create_app_summary(app, spyware=True)
+         app['summary'] = summary
+         app['concerning'] = concerning
 
     for app in context["dualuse"]:
-        app['summary'] = create_app_summary(app, spyware=False)
+         summary, concerning = create_app_summary(app, spyware=False)
+         app['summary'] = summary
+         app['concerning'] = concerning
 
     for account in context["accounts"]:
-        account["summary"] = create_account_summary(account)
+        access, ability, access_concern, ability_concern = create_account_summary(account)
+        account["access_summary"] = access
+        account["ability_summary"] = ability
+        account["concerning"] = access_concern or ability_concern
 
-    context["summary"] = create_printout_summary(context)
+    context["concerns"] = create_overall_summary(context)
     
     pprint(context)
 

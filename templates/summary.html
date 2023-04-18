@@ -8,221 +8,51 @@
         <p>Results for {{device_owner}}'s {{device}} phone</p>
         <hr>
         
-        {% for app in spyware %}
-        <div class="app-or-account">
-            <h3>{{app.app_name}}</h3> 
-
-            <ul>
-                {% if app.description %}<li>App description: {{app.description}}</li>{% endif %}
-                {% if app.url %}<li>Link: {{app.url}}</li>{% endif %}
-                <li>
-                    {% if app.install_form.knew_installed == "n" %}
-                    Someone else installed this app on {{device_owner}}'s phone without their knowledge or permission.
-                    {% elif app.install_form.installed == "n" %}
-                    {{device_owner}} knew this app was installed, but did not install it themselves. Someone else installed this app on {{device_owner}}'s phone.
-                    {% elif app.install_form.coerced == "y" %}
-                    {{device_owner}} was coerced into installing this app.</li>
-                    {% else %}
-                    {{device_owner}} originally installed this app willingly. (However, the app could still be a concern.)
-                    {%endif%} 
-                        {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
-                        <b>Screenshots</b>
-                        {% for filename in app.install_form.screenshot %}
-                            <img class="screenshot" src={{filename}}>
-                        {% endfor %}
-                    {% endif %}
-                </li>
-
-                {% if app.notes.client_notes %}
-                <li>Notes from client: {{app.notes.client_notes}}</li>
-                {% endif %}
-
-                {% if app.notes.consultant_notes %}
-                <li>Notes from consultant: {{app.notes.consultant_notes}}</li>
-                {% endif %}
-            </ul>
-
+        <div class="summarybubble">
+            <table>
+                <tbody>
+                    <tr>
+                        {% with num_apps = concerns.spyware|length + concerns.dualuse|length %}
+                        <th>
+                            <div class="number">{{num_apps}}</div>
+                            <div>concerning app{% if num_apps != 1 %}s{%endif%}</div>
+                        </th>
+                        {% endwith %}
+                        <td>
+                            <ol>
+                                {% for concern in concerns.spyware + concerns.dualuse %}
+                                <li><b>{{concern.name}}</b>: {{concern.summary}}</li>
+                                {% endfor %}
+                            </ol>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        {% endfor %}
-
-        {% for app in dualuse %}
-        <div class="app-or-account">
-            <h3>{{app.app_name}}</h3> 
-
-            <ul>
-                {% if app.description %}<li>App description: {{app.description}}</li>{% endif %}
-                {% if app.url %}<li>Link: {{app.url}}</li>{% endif %}
-                <li>
-                    {% if app.install_form.knew_installed == "n" %}
-                    Someone else installed this app on {{device_owner}}'s phone without their knowledge or permission.
-                    {% elif app.install_form.installed == "n" %}
-                    {{device_owner}} knew this app was installed, but did not install it themselves. Someone else installed this app on {{device_owner}}'s phone.
-                    {% elif app.install_form.coerced == "y" %}
-                    {{device_owner}} was coerced into installing this app.</li>
-                    {% else %}
-                    {{device_owner}} originally installed this app willingly. (However, the app could still be a concern.)
-                    {%endif%} 
-                        {% if app.install_form.screenshot|length > 0 and app.install_form.screenshot[0] %}
-                        <b>Screenshots</b>
-                        {% for filename in app.install_form.screenshot %}
-                            <img class="screenshot" src={{filename}}>
-                        {% endfor %}
-                    {% endif %}
-                </li>
-
-                {% for perm in app.permissions %}
-                {% if perm.access != 'no' %}
-                    <li>The [ex-]partner can
-                        {% if perm.access == 'unsure' %}potentially{% endif %}
-                        use this app to access {{device_owner}}'s {{perm.permission_name}}. 
-                        {% if perm.describe %}
-                        Additional details: {{perm.describe}}. 
-                        {% endif %}
-                        {% if perm.screenshot|length > 0 and perm.screenshot[0] %}
-                            <b>Screenshots</b>
-                            {% for filename in perm.screenshot %}
-                                <img class="screenshot" src={{filename}}>
-                            {% endfor %}
-                        {% endif %}
-                    </li>   
-                {% endif %}
-                {% endfor %}
-
-                {% if app.notes.client_notes %}
-                <li>Notes from client: {{app.notes.client_notes}}</li>
-                {% endif %}
-
-                {% if app.notes.consultant_notes %}
-                <li>Notes from consultant: {{app.notes.consultant_notes}}</li>
-                {% endif %}
-            </ul>
-
+        
+        <div class="summarybubble">
+            <table>
+                <tbody>
+                    <tr>
+                        <th>
+                            <div class="number">{{concerns.accounts|length}}</div>
+                            <div>potentially compromised account{% if concerns.accounts|length != 1 %}s{%endif%}</div>
+                        </th>
+                        <td>
+                            <ol>
+                                {% for concern in concerns.accounts %}
+                                <li><b>{{concern.name}} account</b>: {{concern.summary}}</li>
+                                {% endfor %}
+                            </ol>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        {% endfor %}
 
+        <a class="btn btn-default btn-lg">See advice</a>
 
-        {% for account in accounts %}
-        <div class="app-or-account">
-            <h3>{{account.account_name}}</h3>    
-
-            <ul>
-                {% if account.suspicious_logins.recognize != "y" %}
-                <li>There are 
-                    {% if account.suspicious_logins.recognize == 'unsure' %}potentially {% endif %}
-                    some suspicious devices logged into this account. This could indicate that the [ex-]partner has accessed this account before. 
-                    {% if account.suspicious_logins.describe_logins %}
-                    Additional details: {{account.suspicious_logins.describe_logins}}.
-                    {% endif %}
-                    {% if account.suspicious_logins.login_screenshot|length > 0 and account.suspicious_logins.login_screenshot[0]%}
-                        <b>Screenshots</b>
-                        {% for filename in account.suspicious_logins.login_screenshot %}
-                            <img class="screenshot" src={{filename}}>
-                        {% endfor %}
-                    {% endif %}
-                </li>
-                {% endif %}
-
-                {% if account.suspicious_logins.activity_log != "y" %}
-                <li>There are 
-                    {% if account.suspicious_logins.activity_log == 'unsure' %}potentially {% endif %}
-                    some suspicious logins in the activity log. This could indicate that the [ex-]partner has accessed this account before. 
-                    {% if account.suspicious_logins.describe_activity %}
-                    Additional details: {{account.suspicious_logins.describe_activity}}.
-                    {% endif %}
-                    {% if account.suspicious_logins.activity_screenshot|length > 0 and account.suspicious_logins.activity_screenshot[0]%}
-                        <b>Screenshots</b>
-                        {% for filename in account.suspicious_logins.activity_screenshot %}
-                            <img class="screenshot" src={{filename}}>
-                        {% endfor %}
-                    {% endif %}
-                </li>
-                {% endif %}
-            
-                {% if account.password_check.know != 'no' or account.password_check.guess != 'no' %}
-                <li>The [ex-]partner 
-                    {% if account.password_check.know == 'yes' %}knows
-                    {% elif account.password_check.know == 'unsure'%}might know
-                    {% else %}does not know{% endif %}
-                     the password to this account.
-                    {% if account.password_check.know != 'yes' %}
-                        They 
-                        {% if account.password_check.know == 'unsure' %}may be able to
-                        {% else %}can likely{% endif %}
-                         guess the password.
-                    {% endif %}
-                </li>
-                {% endif %}
-
-                {% if account.recovery_settings.phone_access != 'no' %}
-                <li>The [ex-]partner 
-                    {% if account.recovery_settings.phone_access == 'yes' %}has
-                    {% else %}might have{% endif %}
-                     access to the recovery phone number. With this access, they can access the account without a password and reset the password.
-                     {% if account.recovery_settings.phone_screenshot|length > 0 %}
-                         <b>Screenshots</b>
-                         {% for filename in account.recovery_settings.phone_screenshot %}
-                             <img class="screenshot" src={{filename}}>
-                         {% endfor %}
-                     {% endif %}
-                </li>
-                {% endif %}
-                {% if account.recovery_settings.email_access != 'no' %}
-                <li>The [ex-]partner 
-                    {% if account.recovery_settings.email_access == 'yes' %}has
-                    {% else %}might have{% endif %}
-                     access to the recovery email address. With this access, they can access the account without a password and/or reset the password.
-                     {% if account.recovery_settings.email_screenshot|length > 0 and account.recovery_settings.email_screenshot[0] %}
-                         <b>Screenshots</b>
-                         {% for filename in account.recovery_settings.email_screenshot %}
-                             <img class="screenshot" src={{filename}}>
-                         {% endfor %}
-                     {% endif %}
-                </li>
-                {% endif %}
-
-                {% if account.two_factor_settings.second_factor_access != 'no' %}
-                <li>The [ex-]partner 
-                    {% if account.two_factor_settings.second_factor_access == 'yes' %}has
-                    {% else %}might have{% endif %}
-                     access to the authentication second factor. This means that if they have the account password, they can get in without {{device_owner}} receiving a notification.
-                     {% if account.two_factor_settings.screenshot|length > 0 and account.two_factor_settings.screenshot[0]%}
-                         <b>Screenshots</b>
-                         {% for filename in account.two_factor_settings.screenshot %}
-                             <img class="screenshot" src={{filename}}>
-                         {% endfor %}
-                     {% endif %}
-                </li>
-                {% endif %}
-
-                {% if account.security_questions.know != 'no' %}
-                <li>The [ex-]partner
-                    {% if account.security_questions.know == 'yes' %}knows
-                    {% else %}might know{% endif %}
-                     the answers to the account security questions. With these answers, they may be able to access the account without the password and/or reset the password.
-                
-                     {% if account.security_questions.screenshot|length > 0 and account.security_questions.screenshot[0]%}
-                         <b>Screenshots</b>
-                         {% for filename in account.security_questions.screenshot %}
-                             <img class="screenshot" src={{filename}}>
-                         {% endfor %}
-                     {% endif %}
-                </li>
-                {% endif %}
-
-                
-                {% if account.notes.client_notes %}
-                <li>Notes from client: {{account.notes.client_notes}}</li>
-                {% endif %}
-
-                {% if account.notes.consultant_notes %}
-                <li>Notes from consultant: {{account.notes.consultant_notes}}</li>
-                {% endif %}
-            </ul>
-            
-        </div>
-        {% endfor %}
-
-        <a class="btn btn-success btn-lg btn-block" href="{{url_for('evidence_printout')}}">Go to printout</a>
+        <a class="btn btn-success btn-lg" href="{{url_for('evidence_printout')}}">Go to printout</a>
 
     </div>
   </div>

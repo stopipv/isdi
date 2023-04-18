@@ -12,6 +12,7 @@ Collect evidence of IPS. Basic version collects this data from the phone:
 import json
 import os
 from collections import defaultdict
+from enum import Enum
 from pprint import pprint
 
 import jinja2
@@ -37,17 +38,63 @@ from privacy_scan_android import take_screenshot
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
-DEFAULT = "y"
+FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy", 
+                                 "appId": "mspy.app.id",
+                                 "store": "offstore",
+                                 "url": "https://www.mspy.com/",
+                                 "genres": "spyware",
+                                 "install_time": "January 1, 1970 00:00:00",
+                                 "description": "mSpy is a computer security for parental control. Helps parents to give attention to their children online activities. It checks WhatsApp, Facebook, massage and snapchat messages. mSpy is a computer security for parental control.",
+                                 "permissions": [
+                                    {"permission_name": "Precise location"},
+                                    {"permission_name": "Camera"},
+                                    {"permission_name": "Messages"},
+                                    {"permission_name": "Calls"},
+                                ]   
+                                 }],
+                    "dualuse": [{"app_name": "Snapchat", 
+                                 "appId": "snapchat.app.id",
+                                 "store": "App Store",
+                                 "url": "https://www.snapchat.com",
+                                 "genres": "Photo \& Video",
+                                 "install_time": "January 1, 1970 00:00:00",
+                                 "description": "Snapchat is a fast and fun way to share the moment with your friends and family.",
+                                "permissions": [
+                                    {"permission_name": "Location"},
+                                    {"permission_name": "Camera"},
+                                ]}, 
+                                {"app_name": "FindMy", 
+                                 "appId": "findmy.app.id",
+                                 "store": "System App",
+                                 "url": "https://apps.apple.com/us/app/find-my/id1514844621",
+                                 "genres": "System apps",
+                                 "install_time": "January 1, 1970 00:00:00",
+                                 "description": "View the current location of your Apple devices, locate items you’ve attached AirTag to, keep track of Find My network accessories, and share your location with friends and family in a single, easy-to-use app.",
+                                "permissions": [
+                                    {"permission_name": "Precise location"},
+                                ]}]
+                    }
+
 SCREENSHOT_FOLDER = os.path.join("tmp", "isdi-screenshots/")
+CONTEXT_PKL_FNAME = "context.pkl"
 
-second_factors = ["Phone", "Email", "App"]
-accounts = ["Google", "iCloud", "Microsoft", "Lyft", "Uber", "Doordash", "Grubhub", "Facebook", "Twitter", "Snapchat", "Instagram"]
+DEFAULT = "y"
+SECOND_FACTORS = ["Phone", "Email", "App"]
+ACCOUNTS = ["Google", "iCloud", "Microsoft", "Lyft", "Uber", "Doordash", "Grubhub", "Facebook", "Twitter", "Snapchat", "Instagram"]
 
-yes_no_choices = [( 'yes', 'Yes'), ('no', 'No'), ('unsure', 'Unsure')]
-device_type_choices = [('android', 'Android'), ('ios', 'iOS')]
+YES_NO_CHOICES = [( 'yes', 'Yes'), ('no', 'No'), ('unsure', 'Unsure')]
+DEVICE_TYPE_CHOICES = [('android', 'Android'), ('ios', 'iOS')]
 #two_factor_choices = [empty_choice] + [(x.lower(), x) for x in second_factors]
-two_factor_choices = [(x.lower(), x) for x in second_factors]
-account_choices = [(x, x) for x in accounts]
+TWO_FACTOR_CHOICES = [(x.lower(), x) for x in SECOND_FACTORS] + [('none', 'None')]
+ACCOUNT_CHOICES = [(x, x) for x in ACCOUNTS]
+
+class Pages(Enum):
+    START = 1
+    SCAN = 2
+    SPYWARE = 3
+    DUALUSE = 4
+    ACCOUNTS_USED = 5
+    ACCOUNT_COMP = 6
 
 ## HELPER FORMS FOR EVERY PAGE
 class NotesForm(FlaskForm):
@@ -57,15 +104,15 @@ class NotesForm(FlaskForm):
 ## HELPER FORMS FOR APPS
 class PermissionForm(FlaskForm):
     permission_name = HiddenField("Permission")
-    access = RadioField('Can your [ex-]partner access this information?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    describe = TextAreaField("Please describe how you know this.")
+    access = RadioField('Can your [ex-]partner access this information?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    describe = TextAreaField("How do you know?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class InstallForm(FlaskForm):
-    knew_installed = RadioField('Did you know this app was installed?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    installed = RadioField('Did you install this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    coerced = RadioField('Were you coerced into installing this app?', choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    who = TextAreaField("If you were coerced, who coerced you?")
+    knew_installed = RadioField('Did you know this app was installed?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    installed = RadioField('Did you install this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    coerced = RadioField('Did your [ex-]partner coerce you into installing this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    #who = TextAreaField("If you were coerced, who coerced you?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
@@ -81,35 +128,38 @@ class DualUseAppForm(FlaskForm):
 
 ## HELPER FORMS FOR ACCOUNTS
 class SuspiciousLoginsForm(FlaskForm):
-    recognize = RadioField("Do you recognize all logged-in devices?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    recognize = RadioField("Do you recognize all logged-in devices?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe_logins = TextAreaField("Which devices do you not recognize?")
     login_screenshot = MultipleFileField('Add screenshot(s)')
-    activity_log = RadioField("Are there any suspicious logins in the activity log?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    activity_log = RadioField("In the login history, do you see any suspicious logins?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe_activity = TextAreaField("Which logins are suspicious, and why?")
     activity_screenshot = MultipleFileField('Add screenshot(s)')
 
 class PasswordForm(FlaskForm):
-    know = RadioField("Does your [ex-]partner know the password for this account?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    guess = RadioField("Do you believe they could guess the password?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Does your [ex-]partner know the password for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    guess = RadioField("Do you believe your [ex-]partner could guess the password?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
 
 class RecoveryForm(FlaskForm):
-    phone_present = RadioField("Is there a recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    phone_access = RadioField("Could your partner have access to the recovery phone number?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    phone_present = RadioField("Is there a recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    phone = TextAreaField("What is the recovery phone number?")
+    phone_access = RadioField("Do you believe your [ex-]partner has access to the recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     phone_screenshot = MultipleFileField('Add screenshot(s)')
-    email_present = RadioField("Is there a recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    email_access = RadioField("Could your partner have access to the recovery email address?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    email_present = RadioField("Is there a recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    email = TextAreaField("What is the recovery email address?")
+    email_access = RadioField("Do you believe your [ex-]partner has access to the recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     email_screenshot = MultipleFileField('Add screenshot(s)')
 
 class TwoFactorForm(FlaskForm):
-    enabled = RadioField("Is two-factor authentication enabled?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
-    second_factor_type = RadioField("What type of two-factor authentication is it?", choices=two_factor_choices, validators=[InputRequired()], default=DEFAULT)
-    second_factor_access = RadioField("Could your partner have access to the second factor?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    enabled = RadioField("Is two-factor authentication enabled?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    second_factor_type = RadioField("What type of two-factor authentication is it?", choices=TWO_FACTOR_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    describe = TextAreaField("Which phone/email/app is set as the second factor?")
+    second_factor_access = RadioField("Do you believe your [ex-]partner has access to this second factor?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SecurityQForm(FlaskForm):
-    present = RadioField("Does the account use security questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    present = RadioField("Does the account use security questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     questions = TextAreaField("Which questions are set?")
-    know = RadioField("Would your [ex-]partner know the answer to any of these questions?", choices=yes_no_choices, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Do you believe your [ex-]partner knows the answer to any of these questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class AccountInfoForm(FlaskForm):
@@ -124,9 +174,9 @@ class AccountInfoForm(FlaskForm):
 ## INDIVIDUAL PAGES
 class StartForm(FlaskForm):
     title = "Welcome to <Name of tool>"
-    name = StringField('Name', validators=[InputRequired()])
+    name = StringField('Client name', validators=[InputRequired()])
     consultant_name = StringField('Consultant name', validators=[InputRequired()])
-    device_type = RadioField('Device type', choices=device_type_choices, validators=[InputRequired()], default=DEFAULT)
+    device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()], default=DEFAULT)
     submit = SubmitField("Continue")
 
 class ScanForm(FlaskForm):
@@ -178,25 +228,25 @@ def unpack_evidence_context(session, task="evidence"):
         accounts = [],
     )
     
-    if "step1" in session.keys():
+    if 'step{}'.format(Pages.START.value) in session.keys():
         context['device_owner'] = session['step1']['name']
         context['consultant'] = session['step1']['consultant_name']
         context['device'] = session['step1']['device_type']
 
-    if "step3" in session.keys():
+    if 'step{}'.format(Pages.SPYWARE.value) in session.keys():
         context['spyware'] = session['step3']['spyware_apps']
 
-    if "step4" in session.keys():
+    if 'step{}'.format(Pages.DUALUSE.value) in session.keys():
         context['dualuse'] = session['step4']['dual_use_apps']
 
-    if "step6" in session.keys():
+    if 'step{}'.format(Pages.ACCOUNT_COMP.value) in session.keys():
         context['accounts'] = session['step6']['accounts']
 
     if "apps" in session.keys():
 
         # remove permissions from the orig list because it merges weird
         permissionless_apps = []
-        for app in context['dualuse']:
+        for app in session['apps']['dualuse']:
             newapp = dict()
             for k, v in app.items():
                 if k != "permissions":
@@ -205,10 +255,10 @@ def unpack_evidence_context(session, task="evidence"):
             
         # combine the information in both dicts
         spyware = defaultdict(dict)
-        for item in session['step3']['spyware_apps'] + context['spyware']:
+        for item in session['step{}'.format(Pages.SPYWARE.value)]['spyware_apps'] + session['apps']['spyware']:
             spyware[item['app_name']].update(item)
         dualuse = defaultdict(dict)
-        for item in session['step4']['dual_use_apps'] + permissionless_apps:
+        for item in session['step{}'.format(Pages.DUALUSE.value)]['dual_use_apps'] + permissionless_apps:
             dualuse[item['app_name']].update(item)
 
         context['dualuse'] = list(dualuse.values())
@@ -235,36 +285,92 @@ def create_printout(context):
 
     return filename
 
-def create_printout_summary(context):
-    return "SUMMARY!"
+def create_overall_summary(context, second_person=False):
+    concerns = dict(
+        spyware = [],
+        dualuse = [],
+        accounts = []
+    )
 
-def create_app_summary(app, spyware):
+    for app in context['spyware']:
+        summary, concerning = create_app_summary(app, spyware=True, second_person=second_person)
+        if concerning:
+            concerns['spyware'].append(dict(
+                name = app['app_name'], 
+                concern_type = "spyware app",
+                summary = summary
+            ))
+
+    for app in context['dualuse']:
+        summary, concerning = create_app_summary(app, spyware=False, second_person=second_person)
+        if concerning:
+            concerns['dualuse'].append(dict(
+                name = app['app_name'], 
+                concern_type = "dual use app",
+                summary = summary
+            ))
+
+    for account in context['accounts']:
+        access, ability, access_concern, ability_concern = create_account_summary(account, second_person=second_person)
+        if access_concern or ability_concern:
+            summary = ""
+            if access_concern: 
+                summary += access + " "
+            if ability_concern: 
+                summary += ability
+            concerns['accounts'].append(dict(
+                name = account['account_name'], 
+                concern_type = "account",
+                summary = summary
+            ))
+
+    return concerns
+
+def create_app_summary(app, spyware, second_person=False):
+
+    agent = "you"
+    pronoun = "you"
+    possessive = "your"
+    if not second_person:
+        agent = "the client"
+        pronoun = "they"
+        possessive = "their"
 
     sentences = []
+    concern = False
+    if spyware:
+        concern = True
+        sentences.append("{} is an app designed for surveillance.".format(app['app_name']))
 
     # for all apps, look at install information
     form = app['install_form']
     if form['knew_installed'] != 'yes':
-        sentences.append("The client did not know that this app was installed on the phone.")
+        concern = True
+        sentences.append("{} did not know that this app was installed on the phone.".format(agent.capitalize()))
+        if spyware:
+            sentences.append("This indicates that another person installed the app with the intention of surveilling {}.".format(agent))
+
     elif form['installed'] != 'yes':
         # 
         # TODO: check if it is a system app
         #
         system_app = True
         if system_app:
-            sentences.append("The client did not install this app. However, this is a system app which was likely installed on the phone when it was purchased.")
+            sentences.append("{} did not install this app. However, this is a system app which was likely installed on the phone when it was purchased.".format(agent.capitalize()))
         else:
+            concern = True
             if form['installed'] == 'no':
-                sentences.append("The client knew this app was installed on the phone, but they did not install it.")
+                sentences.append("{} knew this app was installed on the phone, but did not install it.".format(agent.capitalize()))
             if form['installed'] == 'unsure':
-                sentences.append("The client knew this app was installed on the phone, but they are unsure whether they installed it.")
+                sentences.append("{} knew this app was installed on the phone, but {} are unsure whether {} installed it.".format(agent.capitalize(), pronoun, pronoun))
             sentences.append("This indicates that another person installed this app, which would require physical access to the phone.")
         
 
     elif form['coerced'] != 'no':
-        sentences.append("The client was coerced into installing this app by \"{},\" indicating that person is using the app to surveil the client.".format(form['who']))
+        concern = True
+        sentences.append("{} [ex-]partner coerced {} to install this app, indicating that person is using the app to surveil {}.".format(possessive.capitalize(), agent, agent))
     else: 
-        sentences.append("The client installed this app voluntarily.")
+        sentences.append("{} installed this app voluntarily.".format(agent.capitalize()))
 
     # for spyware apps, look at permission stuff
     if not spyware:
@@ -272,29 +378,44 @@ def create_app_summary(app, spyware):
         for perm in app['permissions']:
             if perm['access'] != 'no':
                 any_issues = True
-                sentences.append("The [ex-]partner can use this app to access the phone's {}.".format(perm['permission_name'].lower()))
+                concern = True
+                sentences.append("{} [ex-]partner can use this app to access the phone's {}.".format(possessive.capitalize(), perm['permission_name'].lower()))
 
         if not any_issues:
-            sentences.append("There is no evidence that this app is being used maliciously against the client.")
+            sentences.append("There is no evidence that this app is being used maliciously against {}.".format(agent))
 
-    return " ".join(sentences)
+    return " ".join(sentences), concern
 
-def create_account_summary(account):
+def create_account_summary(account, second_person=False):
     
-    # generally, more high level because there is a lot going on.
+    agent = "you"
+    pronoun = "you"
+    possessive = "your"
+    if not second_person:
+        agent = "the client"
+        pronoun = "they"
+        possessive = "their"
 
-    sentences = []
+    # generally, more high level because there is a lot going on.
+    access_sentences = []
+    access_concern = False
 
     # Suspicious logins
     form = account["suspicious_logins"]
+    suspicious_logins = False
     if form['recognize'] != "yes":
-        sentences.append("There is evidence that someone other than the client is currently logged into this account.")
+        access_concern = True
+        suspicious_logins = True
         if form['describe_logins'] != "":
-            sentences.append("The suspicious devices include {}.".format(form['describe_logins']))
-    elif form['activity_log'] != "yes":
-        sentences.append("There is evidence that someone other than the client has recently logged into this account.")
+            access_sentences.append("There is evidence that someone other than {} is currently logged into this account using {}.".format(agent, form['describe_logins']))
+        else:
+            access_sentences.append("There is evidence that someone other than {} is currently logged into this account.".format(agent))
+    elif form['activity_log'] != "no":
+        access_concern = True
+        suspicious_logins = True
+        access_sentences.append("There is evidence that someone other than {} has recently logged into this account.".format(agent))
     else:
-        sentences.append("There is no evidence that someone other than the client has logged into this account recently.")
+        access_sentences.append("There is no evidence that someone other than {} has logged into this account recently.".format(agent))
 
     # Passwords
     pwd = False
@@ -320,20 +441,35 @@ def create_account_summary(account):
     if form['present'] and form['know'] != 'no':
         questions= True
 
+    ability_sentences = []
+    ability_concern = False
     
     if not (pwd or recovery or twofactor or questions):
-        sentences.append("There is no evidence that anyone else has access to this account.")
+
+        other = ""
+        if suspicious_logins:
+            other = "other "
+        ability_sentences.append("There is no {}evidence that anyone else could access this account.".format(other))
     else:
+        ability_concern = True
         methods = []
         if pwd: methods.append("the password")
         if recovery: methods.append("the recovery contact information")
         if questions: methods.append("the security questions")
-        sentences.append("There is evidence that another person could access this account via these methods: {}.".format(", ".join(methods)))
+
+        also = ""
+        if suspicious_logins:
+            also = "also "
+
+        if len(methods) > 1:
+            ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via these methods: {}.".format(also, possessive, ", ".join(methods)))
+        else: 
+            ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via {}.".format(also, possessive, methods[0]))
 
         if twofactor: 
-            sentences.append("The [ex-]partner has access to the second authentication factor; if they know the password, they could access this account without alerting the client.")
+            ability_sentences.append("{} [ex-]partner has access to the second authentication factor; if they know the password, they could access this account without alerting {}.".format(possessive.capitalize(), agent))
 
-    return " ".join(sentences)
+    return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
 
 def screenshot(device, fname):
     """Take a screenshot and return the file where the screenshot is"""
@@ -383,6 +519,10 @@ def reformat_verbose_apps(verbose_apps):
         minimal_app['appId'] = verbose_app['appId']
         minimal_app['icon'] = verbose_app['application_icon']
         minimal_app['url'] = verbose_app['developerwebsite']
+        minimal_app['genres'] = []
+        if verbose_app['genres'] != "":
+            minimal_app['genres'] = verbose_app['genres'].split(", ")
+        minimal_app['store'] = verbose_app['store']
 
         # the way ISDi does permissions is messed up rn, have to fix on the backend
         minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
@@ -491,7 +631,7 @@ def get_suspicious_apps(device, device_owner):
         raise Exception(error)
 
     clientid = "1"
-    if session['clientid']:
+    if 'clientid' in session.keys():
         clientid = session['clientid']
 
     scan_d = {

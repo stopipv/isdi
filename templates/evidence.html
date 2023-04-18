@@ -47,9 +47,9 @@
                     <p>There is not much preparation required for iOS. 
                         <ol>
                             <li>Connect the USB cable</li>
+                            <li>Unlock the device and press Scan.</li>
                             <li>On the device, you should see a prompt asking if you trust this device. Please select "Trust",
-                                and enter your passcode to unlock the device.</li>
-                            <li>Leave the device unlocked and press Scan.</li>
+                                and enter your passcode to start the scan.</li>
                         </ol> 
                         <br>
                         <b>Troubleshooting:</b> Sometimes the system might fail to recognize the
@@ -158,7 +158,6 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
-                                    <tr><th>{{nested.install_form.who.label}}</th><td>{{nested.install_form.who}}</td></tr>
                                     <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
                                 </tbody>
                             </table>
@@ -251,7 +250,6 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
-                                    <tr><th>{{nested.install_form.who.label}}</th><td>{{nested.install_form.who}}</td></tr>
                                     <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
                                 </tbody>
                             </table>
@@ -406,6 +404,7 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.phone.label}}</th><td>{{nested.recovery_settings.phone}}</td></tr>
                                     <tr><th>{{nested.recovery_settings.phone_screenshot.label}}</th><td>{{nested.recovery_settings.phone_screenshot}}</td></tr>
                                     {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
                                     <tr><th>{{subform.label}}</th><td>
@@ -419,6 +418,7 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.email.label}}</th><td>{{nested.recovery_settings.email}}</td></tr>
                                     <tr><th>{{nested.recovery_settings.email_screenshot.label}}</th><td>{{nested.recovery_settings.email_screenshot}}</td></tr>
                                 </tbody>
                             </table>
@@ -428,7 +428,20 @@
                             {{ nested.two_factor_settings.hidden_tag() }}
                             <table>
                                 <tbody>
-                                    {% for subform in [nested.two_factor_settings.enabled, nested.two_factor_settings.second_factor_type, nested.two_factor_settings.second_factor_access] %}
+                                    {% for subform in [nested.two_factor_settings.enabled, nested.two_factor_settings.second_factor_type] %}
+                                        <tr><th>{{subform.label}}</th><td>
+                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                            {% for option in subform %}
+                                            <label class="btn btn-light" for="{{option.id}}">
+                                                {{option.label.text}}
+                                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                            </label>
+                                            {% endfor %}
+                                        </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.two_factor_settings.describe.label}}</th><td>{{nested.two_factor_settings.describe}}</td></tr>
+                                    {% with subform = nested.two_factor_settings.second_factor_access %}
                                     <tr><th>{{subform.label}}</th><td>
                                         <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
                                         {% for option in subform %}
@@ -439,7 +452,7 @@
                                         </label>
                                         {% endfor %}
                                     </div></td></tr>
-                                    {% endfor %}
+                                    {% endwith %}
                                     <tr><th>{{nested.two_factor_settings.screenshot.label}}</th><td>{{nested.two_factor_settings.screenshot}}</td></tr>
                                 </tbody>
                             </table>

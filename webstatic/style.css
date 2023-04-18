@@ -287,6 +287,10 @@ table.printout_columns {
     page-break-after: always;
 }
 
+table.printout_columns tr {
+    page-break-after: always;
+}
+
 table.printout_columns th {
     text-align: left;
     font-style: italic;
@@ -309,4 +313,49 @@ table.printout_columns + table {
     padding: 5px 10px;
     margin-right: 10px;
     box-shadow: 4px 4px 4px #ccc;
+    margin-bottom: 20px;
+}
+
+.footer {
+    float: bottom;
+}
+
+.definition {
+    border: 1px solid black;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+table.appinfo th {
+    width: 25%;
+}
+    
+.overallsummary li {
+    margin-bottom: 15px;
+}
+
+.summarybubble {
+    border-radius: 15px;
+    padding: 10px 20px;
+    background-color: rgb(218, 210, 225);
+    margin-top: 10px;
+    margin-bottom: 20px
+}
+
+.summarybubble .number {
+    font-size: 45pt;
+}
+
+.summarybubble th {
+    width: 15%;
+    text-align: center;
+}
+
+.summarybubble td {
+    padding: 5px 10px;
+}
+
+.summarybubble li {
+    margin-bottom: 8px;
 }

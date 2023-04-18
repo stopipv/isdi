@@ -26,33 +26,68 @@
 <div class="printout-summary">
     <h1>Summary of findings</h1>
     <hr />
-    <p>{{summary}}</p>
+    <div class="overallsummary">
+        {% with num_apps = concerns.spyware|length + concerns.dualuse|length %}
+            <h3>{{num_apps}} concerning app{% if num_apps != 1 %}s{%endif%} installed on the device</h3>
+            <ol>
+                {% for concern in concerns.spyware + concerns.dualuse %}
+                <li><b>{{concern.name}}</b>: {{concern.summary}}</li>
+                {% endfor %}
+            </ol>
+        {% endwith %}
+        <h3>{{concerns.accounts|length}} potentially compromised account{% if concerns.accounts|length != 1 %}s{%endif%}</h3>
+        <ol>
+            {% for concern in concerns.accounts %}
+            <li><b>{{concern.name}} account</b>: {{concern.summary}}</li>
+            {% endfor %}
+        </ol>
+    </div>
 </div>
 
-<h1>Detailed findings</h1>
-<hr />
-<h1>Spyware Apps</h1>
+<h1>Spyware Apps: {{spyware|length}} found</h1>
+<hr>
+<br>
 <div class="definition">
-    <p>Spyware apps are apps purposefully designed for surveillance. When installed on someone's phone, they can allow
+    <p><b>Definition</b>: Spyware apps are apps purposefully designed for surveillance. When installed on someone's phone, they can allow
         the installer to view the phone owner's location, messages, calls, and/or a myriad of other data. </p>
 </div>
-<br>
 {% if spyware|length > 0 %}
+{% for app in spyware %}
+<h2>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
-        {% for app in spyware %}
         <tr>
             <td>
-                <h2>{{app.app_name}}</h2>
                 <div class="appsummary">
                     <p><b>Investigation summary:</b> {{app.summary}}</p>
                 </div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
                 <h3>App information</h3>
-                <table>
+                <table class="appinfo">
                     <tbody>
+                        <tr>
+                            <th>App ID</th>
+                            <td>{{app.appId}}</td>
+                        </tr>
+                        <tr>
+                            <th>App URL</th>
+                            <td><a href={{app.url}}>{{app.url}}</a></td>
+                        </tr>
+                        <tr>
+                            <th>App store</th>
+                            <td>{{app.store}}</td>
+                        </tr>
                         <tr>
                             <th>App description</th>
                             <td>{{app.description}}</td>
+                        </tr>
+                        <tr>
+                            <th>App genres</th>
+                            <td>{{app.genres}}</td>
                         </tr>
                         <tr>
                             <th>Install time</th>
@@ -62,11 +97,6 @@
                             <th>Permissions requested</th>
                             <td>{% for perm in app.permissions %}{{perm.permission_name}}{{ ", " if not loop.last else
                                 "" }}{% endfor %}</td>
-                        </tr>
-                        <tr>
-                            <th>Recent permissions used</th>
-                            <td>{% for perm in app.recent_permissions %}{{perm.permission_name}}{{ ", " if not loop.last
-                                else "" }}{% endfor %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -84,59 +114,84 @@
                             <td>{{form.installed | capitalize}}</td>
                         </tr>
                         <tr>
-                            <th>Was the client coerced into installing this app?</th>
+                            <th>Did the client's [ex-]partner coerce the client into installing this app?</th>
                             <td>{{form.coerced |
                                 capitalize}}</td>
                         </tr>
                     </tbody>
                 </table>
                 {% endwith %}
+                {% if app.notes.client_notes %}
                 <h3>Client comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
-                        else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{app.notes.client_notes}}" </p>
+                </p>
+                {% endif %}
+                {% if app.notes.consultant_notes %}
                 <h3>Consultant comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if app.notes.consultant_notes
-                        %}{{app.notes.consultant_notes}} {% else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{app.notes.consultant_notes}}" </p>
+                </p>
+                {% endif %}
             </td>
             <td valign="top" class="screenshot">
                 <img src="{{screenshot_dir}}test-screenshot.jpeg" />
             </td>
         </tr>
-        {% endfor %}
     </tbody>
 </table>
+{% endfor %}
+{% else %}
+<div style="page-break-after:always">
+    <p>No spyware apps were found on this device.</p>
+</div>
 {% endif %}
 
-<h1>Dual-Use Apps</h1>
+
+<h1>Dual-Use Apps: {{dualuse|length}} found</h1>
+<hr>
+<br>
 <div class="definition">
-    <p>Dual-use apps are apps designed for a legitimate purpose, such as theft prevention. However, they have
+    <p><b>Definition</b>: Dual-use apps are apps designed for a legitimate purpose, such as theft prevention. However, they have
         capabilities which can be misused to surveil the owner of the phone.</p>
 </div>
-<br>
 {% if dualuse|length > 0 %}
+{% for app in dualuse %}
+<h2>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
-        {% for app in dualuse %}
         <tr>
             <td>
-                <h2>{{app.app_name}}</h2>
                 <div class="appsummary">
                     <p><b>Investigation summary:</b> {{app.summary}}</p>
                 </div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
                 <h3>App information</h3>
-                <table>
+                <table class="appinfo">
                     <tbody>
                         <tr>
-                            <th>App description</th>
+                            <th>App ID</th>
+                            <td>{{app.appId}}</td>
+                        </tr>
+                        <tr>
+                            <th>Developer URL</th>
+                            <td><a href={{app.url}}>{{app.url}}</a></td>
+                        </tr>
+                        <tr>
+                            <th>App store</th>
+                            <td>{{app.store}}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
                             <td>{{app.description}}</td>
+                        </tr>
+                        <tr>
+                            <th>Genres</th>
+                            <td>{{app.genres}}</td>
                         </tr>
                         <tr>
                             <th>Install time</th>
@@ -168,7 +223,7 @@
                             <td>{{form.installed | capitalize}}</td>
                         </tr>
                         <tr>
-                            <th>Was the client coerced into installing this app?</th>
+                            <th>Did the client's [ex-]partner coerce the client into installing this app?</th>
                             <td>{{form.coerced |
                                 capitalize}}</td>
                         </tr>
@@ -181,48 +236,62 @@
                         </tr>
                         {% if permission.describe %}
                         <tr>
-                            <th>How can the [ex-]partner access the client's {{permission.permission_name.lower()}}?</th>
+                            <th>How can the [ex-]partner access the client's {{permission.permission_name.lower()}}?
+                            </th>
                             <td>"{{permission.describe}}"</td>
                         </tr>
                         {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
+                {% if app.notes.client_notes %}
                 <h3>Client comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
-                        else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{app.notes.client_notes}}" </p>
+                </p>
+                {% endif %}
+                {% if app.notes.consultant_notes %}
                 <h3>Consultant comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if app.notes.client_notes %}{{app.notes.client_notes}} {%
-                        else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{app.notes.consultant_notes}}" </p>
+                </p>
+                {% endif %}
             </td>
             <td valign="top" class="screenshot">
                 <img src="{{screenshot_dir}}test-screenshot.jpeg" />
             </td>
         </tr>
-        {% endfor %}
     </tbody>
 </table>
+{% endfor %}
+{% else %}
+<div style="page-break-after:always">
+    <p>No dual use apps were found on this device.</p>
+</div>
 {% endif %}
 
-<h1>Account Check</h1>
+<h1>Account Compromise Check: {{accounts|length}} investigated</h1>
+<hr>
+<br>
 {% if accounts|length > 0 %}
+{% for account in accounts %}
+<h2>{{loop.index}}. {{account.account_name}} account</h2>
 <table class="printout_columns">
     <tbody>
-        {% for account in accounts %}
         <tr>
             <td>
-                <h2>{{account.account_name}}</h2>
                 <div class="appsummary">
-                    <p><b>Investigation summary:</b> {{account.summary}}</p>
+                    <p><b>Investigation summary:</b>
+                    <ul>
+                        <li><i>Evidence of access</i>: {{account.access_summary}}</li>
+                        <li><i>Potential for access</i>: {{account.ability_summary}}</li>
+                    </ul>
                 </div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
                 <h3>Login activity check</h3>
                 <table>
                     <tbody>
@@ -277,8 +346,8 @@
                         </tr>
                         {% if form.phone_present != 'no' %}
                         <tr>
-                            <th>(ADD) What is the recovery phone number?</th>
-                            <td>"123-456-7890"</td>
+                            <th>What is the recovery phone number?</th>
+                            <td>{{form.phone}}</td>
                         </tr>
                         <tr>
                             <th>Could the [ex-]partner have access to this recovery phone number?</th>
@@ -291,8 +360,8 @@
                         </tr>
                         {% if form.email_present != 'no' %}
                         <tr>
-                            <th>(ADD) What is the recovery email address?</th>
-                            <td>"email@email.com"</td>
+                            <th>What is the recovery email address?</th>
+                            <td>{{form.email}}</td>
                         </tr>
                         <tr>
                             <th>Could the [ex-]partner have access to this recovery email address?</th>
@@ -315,6 +384,10 @@
                             <th>What type of two-factor authentication is it?</th>
                             <td>{{form.second_factor_type |
                                 capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Which phone/email/app is set as the second factor?</th>
+                            <td>{{form.describe}}</td>
                         </tr>
                         <tr>
                             <th>Could the [ex-]partner have access to this second factor?</th>
@@ -344,33 +417,32 @@
                         {% endwith %}
                     </tbody>
                 </table>
+                {% if account.notes.client_notes %}
                 <h3>Client comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if account.notes.client_notes
-                        %}{{account.notes.client_notes}} {% else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{account.notes.client_notes}}" </p>
+                </p>
+                {% endif %}
+                {% if account.notes.consultant_notes %}
                 <h3>Consultant comments</h3>
-                <blockquote>
-                    <p>
-                        &gt; {% if account.notes.client_notes
-                        %}{{account.notes.client_notes}} {% else %}None. {% endif %}
-                    </p>
-                </blockquote>
+                <p>
+                    <p>&gt; "{{account.notes.consultant_notes}}" </p>
+                </p>
+                {% endif %}
             </td>
             <td valign="top" class="screenshot">
                 <img src="{{screenshot_dir}}test-screenshot.jpeg" />
             </td>
         </tr>
-        <tr></tr>
-        {% endfor %}
     </tbody>
 </table>
+{% endfor %}
 {% endif %}
 
 <hr />
-<p>
-    <em>&lt;Name of tool&gt; Investigation Report. &copy; Madison Tech Clinic,
-        University of Wisconsin Madison.</em>
-</p>
+<div class="footer">
+    <p>
+        <em>&lt;Name of tool&gt; Investigation Report. &copy; Madison Tech Clinic,
+            University of Wisconsin Madison.</em>
+    </p>
+</div>
