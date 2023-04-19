@@ -56,16 +56,11 @@
 <h2>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
-        <tr>
+        <tr valign="top">
             <td>
                 <div class="appsummary">
                     <p><b>Investigation summary:</b> {{app.summary}}</p>
                 </div>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>
                 <h3>App information</h3>
                 <table class="appinfo">
                     <tbody>
@@ -135,7 +130,10 @@
                 {% endif %}
             </td>
             <td valign="top" class="screenshot">
-                <img src="{{screenshot_dir}}test-screenshot.jpeg" />
+                {% for filename in app.screenshots %}
+                <img src="{{screenshot_dir}}{{filename}}" />
+                <p>{{filename}}</p>
+                {% endfor %}
             </td>
         </tr>
     </tbody>
@@ -160,16 +158,11 @@
 <h2>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
-        <tr>
+        <tr valign="top">
             <td>
                 <div class="appsummary">
                     <p><b>Investigation summary:</b> {{app.summary}}</p>
                 </div>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>
                 <h3>App information</h3>
                 <table class="appinfo">
                     <tbody>
@@ -257,7 +250,10 @@
                 {% endif %}
             </td>
             <td valign="top" class="screenshot">
-                <img src="{{screenshot_dir}}test-screenshot.jpeg" />
+                    {% for filename in app.screenshots %}
+                    <img src="{{screenshot_dir}}{{filename}}" />
+                    <p>{{filename}}</p>
+                    {% endfor %}
             </td>
         </tr>
     </tbody>
@@ -277,7 +273,7 @@
 <h2>{{loop.index}}. {{account.account_name}} account</h2>
 <table class="printout_columns">
     <tbody>
-        <tr>
+        <tr valign="top">
             <td>
                 <div class="appsummary">
                     <p><b>Investigation summary:</b>
@@ -286,11 +282,6 @@
                         <li><i>Potential for access</i>: {{account.ability_summary}}</li>
                     </ul>
                 </div>
-            </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>
                 <h3>Login activity questionnaire</h3>
                 <table>
                     <tbody>
@@ -429,7 +420,10 @@
                 {% endif %}
             </td>
             <td valign="top" class="screenshot">
-                <img src="{{screenshot_dir}}test-screenshot.jpeg" />
+                {% for filename in account.screenshots %}
+                <img src="{{screenshot_dir}}{{filename}}" />
+                <p>{{filename}}</p>
+                {% endfor %}
             </td>
         </tr>
     </tbody>

@@ -277,6 +277,12 @@ table.printout_columns td.screenshot {
 td.screenshot img {
     margin-left: 15px;
     width: 250px;
+    border: 1px solid black;
+}
+
+td.screenshot p {
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 div.printout-summary {

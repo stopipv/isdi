@@ -175,6 +175,11 @@ def evidence_printout():
 
     # add screenshot directory
     context["screenshot_dir"] = config.SCREENSHOT_LOCATION
+
+    # add fake screenshots
+    context["spyware"][0]['screenshots'] = ['step3-1.png']
+    context["dualuse"][1]['screenshots'] = ['step4-1.png']
+    context["accounts"][0]['screenshots'] = ['step6-1.png', 'step6-2.png']
     
     for app in context["spyware"]:
          summary, concerning = create_app_summary(app, spyware=True)
