@@ -104,7 +104,7 @@ class NotesForm(FlaskForm):
 ## HELPER FORMS FOR APPS
 class PermissionForm(FlaskForm):
     permission_name = HiddenField("Permission")
-    access = RadioField('Can your [ex-]partner access this information?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    access = RadioField('Can your [ex-]partner access this information using this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe = TextAreaField("How do you know?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
@@ -128,7 +128,7 @@ class DualUseAppForm(FlaskForm):
 
 ## HELPER FORMS FOR ACCOUNTS
 class SuspiciousLoginsForm(FlaskForm):
-    recognize = RadioField("Do you recognize all logged-in devices?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    recognize = RadioField("Do you recognize all devices logged into this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe_logins = TextAreaField("Which devices do you not recognize?")
     login_screenshot = MultipleFileField('Add screenshot(s)')
     activity_log = RadioField("In the login history, do you see any suspicious logins?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
@@ -140,17 +140,17 @@ class PasswordForm(FlaskForm):
     guess = RadioField("Do you believe your [ex-]partner could guess the password?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
 
 class RecoveryForm(FlaskForm):
-    phone_present = RadioField("Is there a recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    phone_present = RadioField("Is there a recovery phone number set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     phone = TextAreaField("What is the recovery phone number?")
     phone_access = RadioField("Do you believe your [ex-]partner has access to the recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     phone_screenshot = MultipleFileField('Add screenshot(s)')
-    email_present = RadioField("Is there a recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    email_present = RadioField("Is there a recovery email address set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     email = TextAreaField("What is the recovery email address?")
-    email_access = RadioField("Do you believe your [ex-]partner has access to the recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    email_access = RadioField("Do you believe your [ex-]partner has access to this recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     email_screenshot = MultipleFileField('Add screenshot(s)')
 
 class TwoFactorForm(FlaskForm):
-    enabled = RadioField("Is two-factor authentication enabled?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    enabled = RadioField("Is two-factor authentication enabled for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     second_factor_type = RadioField("What type of two-factor authentication is it?", choices=TWO_FACTOR_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe = TextAreaField("Which phone/email/app is set as the second factor?")
     second_factor_access = RadioField("Do you believe your [ex-]partner has access to this second factor?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
