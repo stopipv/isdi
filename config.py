@@ -80,7 +80,7 @@ PLATFORM = ('darwin' if platform == 'darwin'
             else 'linux' if platform.startswith('linux')
             else 'win32' if platform == 'win32' else None)
 
-ADB_PATH = os.path.join(ANDROID_HOME, 'adb-', PLATFORM)
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb-', PLATFORM))
 
 #LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
 LIBIMOBILEDEVICE_PATH = ''
