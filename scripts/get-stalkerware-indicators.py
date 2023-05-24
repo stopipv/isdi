@@ -70,7 +70,10 @@ try:
                 # if app is not in the csv file, add it
                 if app not in old_apps:
                     new_app_count += 1
-                    writer.writerow([app, "", "", element['name']])
+                    if 'names' not in element:
+                        element['names'] = []
+                    names = ','.join(element['names'])
+                    writer.writerow([app, "playstore", "spyware", names])
 except csv.Error as e:
     print("Error parsing CSV app flags file: {}".format(e))
     sys.exit(1)
