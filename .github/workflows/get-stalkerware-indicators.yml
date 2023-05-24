@@ -44,7 +44,7 @@ jobs:
         add-paths: |
           static_data/app-flags.csv
 
-        token: ${{ secrets.PAT }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Update stalkerware indicators
         committer: GitHub <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
