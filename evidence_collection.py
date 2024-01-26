@@ -278,8 +278,9 @@ def create_printout(context):
     output_text = template.render(context)
 
     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
-    options = {'enable-local-file-access': None}
-    pdfkit.from_string(output_text, filename, configuration=config, css=css_path, options=options)
+    options = {'enable-local-file-access': None,
+            'footer-right': '[page]'}
+    pdfkit.from_string(output_text, filename, configuration=config, options=options, css=css_path) 
 
     print("Printout created. Filename is", filename)
 

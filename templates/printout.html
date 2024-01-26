@@ -1,7 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* margins for printing */
+        body  { padding: 5mm; font-size: 14pt; } 
+        .new-page { padding-top: 5mm; }
+
+        h3 {font-size: 16pt; }
+
+        .app-padding-top {padding-top: 12mm;}
+    </style>
+</head>
+
+<body>
 <div id="printout-header">
-    <img src="https://brand.wisc.edu/content/uploads/2016/11/uw-crest-color-300x180.png" />
+    <img id="printout-header" width="50px" src="https://pages.cs.wisc.edu/~srstephenso2/misc/uwlogo.png"/>
     <h1>&lt; Name of Tool &gt; - Investigation Report</h1>
-    <table border="0">
+    <table border="0" id="prelim-data">
         <tbody>
             <tr>
                 <th align="left">Time of investigation:</th>
@@ -28,14 +43,14 @@
     <hr />
     <div class="overallsummary">
         {% with num_apps = concerns.spyware|length + concerns.dualuse|length %}
-            <h3>{{num_apps}} concerning app{% if num_apps != 1 %}s{%endif%} installed on the device</h3>
+            <h3>{{num_apps}} Concerning App{% if num_apps != 1 %}s{%endif%} Installed on the Device</h3>
             <ol>
                 {% for concern in concerns.spyware + concerns.dualuse %}
                 <li><b>{{concern.name}}</b>: {{concern.summary}}</li>
                 {% endfor %}
             </ol>
         {% endwith %}
-        <h3>{{concerns.accounts|length}} potentially compromised account{% if concerns.accounts|length != 1 %}s{%endif%}</h3>
+        <h3>{{concerns.accounts|length}} Potentially Compromised Account{% if concerns.accounts|length != 1 %}s{%endif%}</h3>
         <ol>
             {% for concern in concerns.accounts %}
             <li><b>{{concern.name}} account</b>: {{concern.summary}}</li>
@@ -44,6 +59,7 @@
     </div>
 </div>
 
+<div class="new-page">
 <h1>Spyware Apps: {{spyware|length}} found</h1>
 <hr>
 <br>
@@ -53,7 +69,7 @@
 </div>
 {% if spyware|length > 0 %}
 {% for app in spyware %}
-<h2>{{loop.index}}. {{app.app_name}}</h2>
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
         <tr valign="top">
@@ -144,8 +160,9 @@
     <p>No spyware apps were found on this device.</p>
 </div>
 {% endif %}
+</div>
 
-
+<div class="new-page">
 <h1>Dual-Use Apps: {{dualuse|length}} found</h1>
 <hr>
 <br>
@@ -155,7 +172,7 @@
 </div>
 {% if dualuse|length > 0 %}
 {% for app in dualuse %}
-<h2>{{loop.index}}. {{app.app_name}}</h2>
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{app.app_name}}</h2>
 <table class="printout_columns">
     <tbody>
         <tr valign="top">
@@ -264,13 +281,15 @@
     <p>No dual use apps were found on this device.</p>
 </div>
 {% endif %}
+</div>
 
+<div class="new-page">
 <h1>Account Compromise Check: {{accounts|length}} investigated</h1>
 <hr>
 <br>
 {% if accounts|length > 0 %}
 {% for account in accounts %}
-<h2>{{loop.index}}. {{account.account_name}} account</h2>
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{account.account_name}} account</h2>
 <table class="printout_columns">
     <tbody>
         <tr valign="top">
@@ -430,7 +449,9 @@
 </table>
 {% endfor %}
 {% endif %}
+</div>
 
+<!--
 <hr />
 <div class="footer">
     <p>
@@ -438,3 +459,7 @@
             University of Wisconsin Madison.</em>
     </p>
 </div>
+-->
+
+</body>
+</html>

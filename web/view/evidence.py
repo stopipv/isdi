@@ -40,7 +40,8 @@ from web import app
 
 bootstrap = Bootstrap(app)
 
-USE_PICKLE = True
+USE_PICKLE_FOR_SUMMARY = True
+USE_FAKE_DATA = True
 
 @app.route("/evidence/", methods={'GET'})
 def evidence_default():
@@ -108,9 +109,10 @@ def evidence(step):
                     session['apps'] = {"spyware": spyware, "dualuse": dualuse}
 
                 except Exception as e:
-                    #print(traceback.format_exc())
-                    #flash(str(e), "error")
-                    #return redirect(url_for('evidence', step=step))
+                    if not USE_FAKE_DATA:
+                        print(traceback.format_exc())
+                        flash(str(e), "error")
+                        return redirect(url_for('evidence', step=step))
                    
                     # use fake data
                     session['apps'] = FAKE_APP_DATA
@@ -150,7 +152,7 @@ def evidence(step):
 @app.route('/evidence/summary', methods=['GET'])
 def evidence_summary():
     # to speed up dev...
-    if USE_PICKLE and os.path.isfile(CONTEXT_PKL_FNAME):
+    if USE_PICKLE_FOR_SUMMARY and os.path.isfile(CONTEXT_PKL_FNAME):
         context = pickle.load(open(CONTEXT_PKL_FNAME, 'rb'))
     else:
         context = unpack_evidence_context(session, task="evidencesummary")
@@ -162,7 +164,7 @@ def evidence_summary():
 
 @app.route("/evidence/printout", methods=["GET"])
 def evidence_printout():
-    if USE_PICKLE and os.path.isfile(CONTEXT_PKL_FNAME):
+    if USE_PICKLE_FOR_SUMMARY and os.path.isfile(CONTEXT_PKL_FNAME):
         context = pickle.load(open(CONTEXT_PKL_FNAME, 'rb'))
     else:
         context = unpack_evidence_context(session, task="evidencesummary")

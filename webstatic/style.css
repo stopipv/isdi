@@ -266,8 +266,8 @@ div.notes textarea {
 
 #printout-header img {
     position: absolute;
-    top: -50px;
-    right: -100px;
+    top: -10px;
+    right: 0px;
 }
 
 table.printout_columns td.screenshot {
@@ -318,7 +318,6 @@ table.printout_columns + table {
     background-color: rgb(208, 206, 206);
     padding: 5px 10px;
     margin-right: 10px;
-    box-shadow: 4px 4px 4px #ccc;
     margin-bottom: 20px;
 }
 
