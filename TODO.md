@@ -1,26 +1,25 @@
-## TODO
-1. ~Add link to play store for the app (Right now it shows a static content from the database).~ - No internet, so this is the best option.
-2. Step by step guidance to use this tool - README.md
-3. Troubleshooting document
-4. ~Check `MobileDevice/` to write a python script that can do the scanning stuff.~   (Does not work on python3!!)
-5. The `app_details` function in phone_scanner does not work, possibly because
-   of `all_permissions` function. Need to dig deep.
+# TODO
 
+- [ ] Come up with a name:)
 
+## Data Collection
+- [ ] Be able to take a screenshot and include it in the final evidence document
+   - Some functionality in ISDi already, dig around for it
+- [ ] Capture & display app install time
+- [ ] Capture & display app descriptions
+- [ ] Handle inconsistencies coming from ISDI (e.g., the list of permissions)
+- [ ] Activity logging for anything the consultant does? Could be printed out along with the evidence document to show authenticity
 
-## Data TODO
-1. A csv file containing all the `appIds`,
-`store`={'android', 'ios', 'offstpre'}, and `flag`={'dual-use', 'spyware'}
-2. A file containing `appId`, `name`, and `url` of all apps we have seen so far.
+## Evidence Document
+- [ ] Automatically censor client contact info from the document (including screenshots)
 
+## Workflow
+- [ ] Change the account compromise section
+   - Currently, the consultant selects the accounts they will check and then fills in the details for all of them at once
+   - Make it so that the consultant can click a button to add a new account, fill in the details for that account, and repeat as they go through accounts
 
-
-
-## Data visualization
-1. Create an interface for retrieveing and viewing the stored data. 
-   a. The stored scan results
-   b. Dumps of phones associated with the client
-   c. Technograph, TAQ10 results, and summary form
-   d. All notes associated with the client
+## Style
+- [ ] Improve look of summary page
+- [ ] Add option to input info about the abuser so we can tailor the evidence document to the client (e.g., Mark has accessed the phone vs. the person of concern has accessed the phone)
 
 
