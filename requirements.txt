@@ -1,6 +1,7 @@
 # appJar==0.90.0
 pandas
 flask
+Werkzeug==2.3.7
 dataset
 rsonlite==0.1.0
 Flask-WTF==0.14.2
