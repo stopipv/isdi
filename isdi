@@ -26,6 +26,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
-    PORT = 6200 if not config.TEST else 6202
+    HOST = "127.0.0.1" if config.DEBUG else "0.0.0.0"
+    PORT = 6200 if not (config.TEST or config.DEBUG) else 6202
     Timer(1, open_browser).start()
-    app.run(host="0.0.0.0", port=PORT, debug=config.DEBUG, use_reloader= False)
+    app.run(host=HOST, port=PORT, debug=config.DEBUG, use_reloader=(not config.DEBUG))

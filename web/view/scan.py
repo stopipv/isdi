@@ -170,9 +170,10 @@ def scan():
     if device == 'ios':
         pii_fpath = sc.dump_path(ser, 'Device_Info')
         print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
-        cmd = os.unlink(pii_fpath)
-        # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
-        print('iOS PII deleted.')
+        if pii_fpath.exists():
+            cmd = os.unlink(pii_fpath)
+            # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
+            print('iOS PII deleted.')
 
     print("Creating appinfo...")
     create_mult_appinfo([(scanid, appid, json.dumps(

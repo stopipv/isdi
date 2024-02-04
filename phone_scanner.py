@@ -42,7 +42,7 @@ class AppScan(object):
     def get_apps(self, serialno: str, from_device: bool) -> list:
         pass
 
-    def get_offstore_apps(self, serialno):
+    def get_offstore_apps(self, serialno, from_device=False):
         return []
 
     def dump_path(self, serial, fkind='json'):
@@ -133,7 +133,7 @@ class AppScan(object):
                     ), self.app_info_conn, params=(installed_apps)).set_index('appId')
             td.index.rename('appId', inplace=True)
         elif self.device_type == 'ios':
-            td = self.get_app_titles(serialno)
+            td = self.get_app_titles(serialno).set_index('appId')
 
         r.set_index('appId', inplace=True)
         r.loc[td.index, 'title'] = td.get('title','')
@@ -233,14 +233,14 @@ class AndroidScan(AppScan):
         self.installed_apps = installed_apps
         return installed_apps
 
-    def get_system_apps(self, serialno, from_device=False):
+    def get_system_apps(self, serialno, from_device=False) -> list:
         if from_device:
             apps = self._get_apps_from_device(serialno, '-s')
         else:
             apps = []  ## TODO: fix this later, not sure how to get from dump
         return apps
 
-    def get_offstore_apps(self, serialno, from_device=False):
+    def get_offstore_apps(self, serialno, from_device=False) -> list:
         if not from_device:
             return []  # TODO: fix this later, not sure how to get from dump
         offstore = []
@@ -462,7 +462,7 @@ class IosScan(AppScan):
         print('iOS INFO DUMPED.')
         return self.installed_apps
 
-    def get_system_apps(self, serialno) -> list:
+    def get_system_apps(self, serialno, from_device=False) -> list:
         if self.parse_dump:
             return self.parse_dump.system_apps()
         else:
@@ -611,10 +611,10 @@ class TestScan(AppScan):
     def devices(self):
         return ["testdevice1", "testdevice2"]
 
-    def get_system_apps(self, serialno):
+    def get_system_apps(self, serialno, from_device=False) -> list:
         return self.get_apps(serialno)[:10]
 
-    def get_offstore_apps(self, serialno):
+    def get_offstore_apps(self, serialno, from_device=False) -> list:
         return self.get_apps(serialno)[-4:]
 
     def uninstall(self, serial, appid):

@@ -463,7 +463,6 @@ class IosDump(PhoneDump):
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
-            d.set_index('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -576,7 +575,7 @@ class IosDump(PhoneDump):
     def installed_apps_titles(self) -> pd.DataFrame:
         if self:
             return self.df.rename(index=str,
-                                  columns={'CFBundleExecutable': 'title'})
+                                  columns={'CFBundleExecutable': 'title'}).set_index('appId')
 
     def installed_apps(self):
         #return self.df.index
@@ -596,5 +595,5 @@ if __name__ == "__main__":
         print(json.dumps(ddump.info('ru.kidcontrol.gpstracker'), indent=2))
     elif sys.argv[2] == 'ios':
         ddump = IosDump(fname)
-        # print(ddump.installed_apps())
+        print(ddump.installed_apps())
         print(ddump.installed_apps_titles().to_csv())
