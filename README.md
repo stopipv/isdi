@@ -9,6 +9,9 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 [![ISDI_Linter](https://github.com/stopipv/isdi/actions/workflows/super-linter.yml/badge.svg)](https://github.com/stopipv/isdi/actions/workflows/super-linter.yml)
 [![Sync with IOC stalkerware indicators](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml/badge.svg)](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml)
 
+## Contribution Guidelines
+For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
+
 
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
@@ -60,9 +63,6 @@ sudo apt install adb expect libimobiledevice-utils ideviceinstaller ifuse
 ```
 
 #### Windows Subsystem Linux (v2)
-
-For Debian or Debian-derivatives, please follow first the [steps for debian](#debian-family)
-
 Installing **adb** is not so straightforward in WSL2, and
 it won't work straightaway. You have to ensure having the *same* version of adb
 *both* in WSL2 and in normal Windows (with `adb version`), then you will need to
