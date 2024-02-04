@@ -12,6 +12,7 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
+
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 

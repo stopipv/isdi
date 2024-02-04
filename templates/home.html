@@ -37,21 +37,6 @@
                 <input class="form-control" name="device_owner" id="device_owner" 
                        placeholder="Nickname for device? Whose is it?"
                        rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
-                <!--
-            	     <label class="font-weight-bold lead">Who primarily uses this device?</label>
-                     <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
-                     rows="4"></textarea>
-                     <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-		     {% for k,v in device_primary_user.items() %}
-                     <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
-                     <input type="radio" name="device_primary_user" id="{{ k }}"
-		     value="{{ k }}" autocomplete="off"
-		     {% if device_primary_user_sel == k %} checked {% endif %}
-		     > {{ v }}
-                     </label>
-		     {% endfor %}
-                     </div>
-                -->
 		<br>
                 <button class="btn btn-primary mx-2">Scan now</button>
             </form>
@@ -87,17 +72,6 @@
 	    </form>
 	    {% endif %}
         </div>
-        <!-- <div class="border-warning visible">
-            <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-		<input type="hidden" class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
-                       value="{{ clientid }}" readonly>
-                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
-                          rows="4" {% if not serial %}disabled{% endif %}></textarea>
-                <button onclick="postform(this)" id="btn-metainfo-submit"
-                        class="btn btn-primary btn-lg my-3">Save notes about this scan
-                </button>
-            </form>
-        </div>-->
     </div>
     <div class="col-md-9 border py-2" style="height: 87vh">
         <div id="msg" class="alert alert-primary" style="">  {{ error | safe }}   </div>
