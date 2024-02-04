@@ -40,8 +40,11 @@ TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
-    ("~test" if TEST else "")
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
+
+# IOC stalkware indicators
+IOC_PATH = "data/stalkerware-indicators/"
+IOC_FILE = IOC_PATH + "ioc.yaml"
 
 # IOC stalkware indicators
 IOC_PATH = "data/stalkerware-indicators/"
@@ -122,10 +125,14 @@ if not REPORT_PATH.exists():
     os.mkdir(REPORT_PATH)
 
 
-def hmac_serial(ser):
-    return hmac.new(PII_KEY, ser.encode('utf8'),
+def hmac_serial(ser: str) -> str:
+    """Returns a string starting with HSN_<hmac(ser)>. If ser already have 'HSN_', 
+    it returns the same value."""
+    if ser.startswith('HSN_'):
+        return ser
+    hser = hmac.new(PII_KEY, ser.encode('utf8'),
                     digestmod=hashlib.sha256).hexdigest()
-
+    return f'HSN_{hser}'
 
 def add_to_error(*args):
     global ERROR_LOG
