@@ -1,0 +1,3 @@
+[submodule "stalkerware-indicators"]
+	path = stalkerware-indicators
+	url = git@github.com:AssoEchap/stalkerware-indicators.git

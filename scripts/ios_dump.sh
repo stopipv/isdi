@@ -19,8 +19,8 @@ cd phone_dumps/"$1"_ios
 ideviceinstaller -u "$serial" -l -o xml -o list_all > $2
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
-sed -i -e 's/<data>/<string>/g' $2
-sed -i -e 's/<\/data>/<\/string>/g' $2
+# sed -i -e 's/<data>/<string>/g' $2
+# sed -i -e 's/<\/data>/<\/string>/g' $2
 
 # maybe for macOS...
 # plutil -convert json $2 
@@ -28,8 +28,8 @@ sed -i -e 's/<\/data>/<\/string>/g' $2
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
 ideviceinfo -u "$serial" -x > $3
 
-sed -i -e 's/<data>/<string>/g' $3
-sed -i -e 's/<\/data>/<\/string>/g' $3
+# sed -i -e 's/<data>/<string>/g' $3
+# sed -i -e 's/<\/data>/<\/string>/g' $3
 
 # remove identifying info (delete file after saving 
 # relevant bits of scan in server.py, actually)
