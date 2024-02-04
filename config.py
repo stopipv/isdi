@@ -6,6 +6,17 @@ from runcmd import run_command, catch_err
 import hashlib
 import hmac
 
+import logging
+import logging.handlers as handlers
+
+def setup_logger():
+    handler = handlers.RotatingFileHandler(
+        'logs/app.log', maxBytes=100000, 
+        backupCount=30)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
 
