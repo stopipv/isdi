@@ -484,6 +484,7 @@ class IosScan(AppScan):
 
     def device_info(self, serial):
         dumped = self._dump_phone(serial)
+        self._load_dump(serial)
         if dumped:
             device_info_print, device_info_map = self.parse_dump.device_info()
             return (device_info_print, device_info_map)
