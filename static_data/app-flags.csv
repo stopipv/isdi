@@ -2552,7 +2552,7 @@ kr.co.cr.app,playstore,dual-use,통화녹음
 com.meowsbox.btgps,playstore,dual-use,Bluetooth GPS Output
 com.tai.cloud,playstore,dual-use,Easy sync for cloud contacts
 com.aip.mapsstreetview.worldmap.earthmap,playstore,dual-use,"Live Street View, World Map, Maps Directions"
-epic.mychart.android,playstore,dual-use,MyChart
+epic.mychart.android,playstore,safe,MyChart
 xdk.himanshu.btlgps,playstore,dual-use,BTL GPS Tracking 2
 com.gpscoordinatesandlocation,playstore,dual-use,My GPS Coordinates
 com.eit.tns,playstore,dual-use,Kingstrack GPS Tracking System
