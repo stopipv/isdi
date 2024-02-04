@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+The mainfile of ISDi repo. 
+"""
 import webbrowser
 from threading import Timer
 
@@ -6,7 +9,12 @@ import config
 from db import init_db
 from web import app, sa
 
+PORT = 6200 if not (config.TEST or config.DEBUG) else 6202
+HOST = "127.0.0.1" if config.DEBUG else "0.0.0.0"
+
 def open_browser():
+    """Opens a browser to make it easy to navigate to ISDi
+    """
     if not config.TEST:
         webbrowser.open('http://127.0.0.1:' + str(PORT), new=0, autoraise=True)
 
@@ -15,13 +23,12 @@ if __name__ == "__main__":
     if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
         print("Running in test mode.")
         config.set_test_mode(True)
-        print("Checking mode = {}\nApp flags: {}\nSQL_DB: {}"
-              .format(config.TEST, config.APP_FLAGS_FILE,
-                      config.SQL_DB_PATH))
-    print("TEST={}".format(config.TEST))
+        print(f"Checking mode = {config.TEST}\n"
+              "App flags: {config.APP_FLAGS_FILE}\n"
+              "SQL_DB: {config.SQL_DB_PATH}")
+
+    print(f"TEST={config.TEST}")
     init_db(app, sa, force=config.TEST)
     config.setup_logger()
-    HOST = "127.0.0.1" if config.DEBUG else "0.0.0.0"
-    PORT = 6200 if not (config.TEST or config.DEBUG) else 6202
     Timer(1, open_browser).start()
-    app.run(host=HOST, port=PORT, debug=config.DEBUG, use_reloader=(not config.DEBUG))
+    app.run(host=HOST, port=PORT, debug=config.DEBUG, use_reloader=config.DEBUG)
