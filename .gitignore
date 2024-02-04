@@ -137,9 +137,6 @@ error.txt
 ## To be removed
 toremove/
 
-## To be removed
-toremove/
-
 reports/*.csv
 apps/
 data/

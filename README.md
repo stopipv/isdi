@@ -12,7 +12,8 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
-Also checks for signs of jailbroken iOS devices or rooted Android devices.
+## Contribution Guidelines
+For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
 ## Installing ISDi :computer:
 
@@ -61,9 +62,6 @@ sudo apt install adb expect libimobiledevice-utils ideviceinstaller ifuse
 ```
 
 #### Windows Subsystem Linux (v2)
-
-For Debian or Debian-derivatives, please follow first the [steps for debian](#debian-family)
-
 Installing **adb** is not so straightforward in WSL2, and
 it won't work straightaway. You have to ensure having the *same* version of adb
 *both* in WSL2 and in normal Windows (with `adb version`), then you will need to
