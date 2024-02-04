@@ -90,14 +90,14 @@ function retrieve {
 
 services=(package location media.camera netpolicy mount 
           cpuinfo dbinfo meminfo
-          procstats batterystats netstats usagestats
+          procstats batterystats "netstats detail" usagestats
           activity appops)
 
 function dump {
     for a in ${services[*]}; do
         echo "DUMP OF SERVICE $a"
         scan $a
-    done 
+    done
     echo "DUMP OF SERVICE net_stats"
     $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
     for namespace in secure system global; do

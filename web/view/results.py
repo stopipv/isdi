@@ -1,6 +1,7 @@
 from web import app
+from web.view.index import get_device
 from flask import request, render_template, redirect, url_for
-from db import get_scan_res_from_db, get_app_info_from_db
+from db import get_scan_res_from_db, get_app_info_from_db, first_element_or_none
 
 @app.route("/view_results", methods=['POST', 'GET'])
 def view_results():
@@ -8,13 +9,16 @@ def view_results():
     #clientid = request.form.get('clientid', request.args.get('clientid'))
     # hmac'ed serial of results we want to view
     scan_res_pk = request.form.get('scan_res', request.args.get('scan_res'))
-    print(get_scan_res_from_db(scan_res_pk))
-    print(get_app_info_from_db(scan_res_pk)[0].keys())
+    scan_res = first_element_or_none(get_scan_res_from_db(scan_res_pk))
+    if not scan_res:
+        return f"No scan found with id={scan_res_pk}"
+    serial = scan_res['serial']
+    device = scan_res['device']
+    model = scan_res['device_model']
 
-    # TODO: maybe unneccessary, but likely nice for returning without
-    # re-drawing screen.
-    last_serial = request.form.get(
-        'last_serial', request.args.get('last_serial'))
+    sc = get_device(device)
+    
+
     '''
     template_d = dict(
         task="home",
