@@ -23,7 +23,7 @@ def error():
 # TODO: @sam the catch_err should only catch the os level errors, not
 # application level errors. They should go to particular application specific
 # handling.
-def catch_err(p, cmd='', msg='', time=10):
+def catch_err(p, cmd='', msg='', time=10) -> str:
     """TODO: Therer are two different types. homogenize them"""
     try:
         p.wait(time)

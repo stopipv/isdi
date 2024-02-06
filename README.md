@@ -6,6 +6,13 @@ in ["Clinical Computer Security for Victims of Intimate Partner Violence"
 (USENIX 2019)](https://www.usenix.org/conference/usenixsecurity19/presentation/havron). The blacklist is based
 on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 2018)](https://www.computer.org/csdl/pds/api/csdl/proceedings/download-article/12OmNxWuiny/pdf).
 
+[![ISDI_Linter](https://github.com/stopipv/isdi/actions/workflows/super-linter.yml/badge.svg)](https://github.com/stopipv/isdi/actions/workflows/super-linter.yml)
+[![Sync with IOC stalkerware indicators](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml/badge.svg)](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml)
+
+## Contribution Guidelines
+For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
+
+
 ## Contribution Guidelines
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
@@ -48,16 +55,6 @@ brew install --cask android-platform-tools
 ```
 brew install expect libimobiledevice ideviceinstaller
 ```
-```
-brew install autoconf
-brew install automake
-brew install libtool
-brew install --cask macfuse
-cd ifuse
-./autogen.sh
-make
-sudo make install
-```
 
 #### Debian family
 
@@ -66,21 +63,11 @@ sudo apt install adb expect libimobiledevice-utils ideviceinstaller ifuse
 ```
 
 #### Windows Subsystem Linux (v2)
-
-For Debian or Debian-derivatives, please follow first the [steps for debian](#debian-family)
-
 Installing **adb** is not so straightforward in WSL2, and
 it won't work straightaway. You have to ensure having the *same* version of adb
 *both* in WSL2 and in normal Windows (with `adb version`), then you will need to
 start the adb process first in Windows, then in WSL2 (with for example `adb
 devices`).
-
-You also need to install [patchelf](https://nixos.org/patchelf.html) (on Debian-based systems, this
-can be done like `sudo apt install patchelf`) and then run
-`./scripts/patch_ios_dylibs.sh`. You may need to re-run this script if you are
-collaborating and other ISDi users overwrite the iOS binaries with their own 
-absolute shared object paths. [More details here (including for macOS users)](notes.md).
-
 
 ## Running ISDi
 
@@ -153,7 +140,7 @@ privacy checkup feature), as it will be easy for you to see the mobile device
 screen(s) in real time on the Mac side-by-side with the scanner.
 
 **How to do it:** 
-you can mirror Android device screens in a new window using
+You can mirror Android device screens in a new window using
 [scrcpy](https://github.com/Genymobile/scrcpy), and cast iOS device screens on
 macOS with QuickTime 10 (launch it and click File --> New Movie Recording -->
 (on dropdown by red button) the iPhone/iPad name).
