@@ -43,8 +43,15 @@ TEST_APP_LIST = 'static_data/android.test.apps_list'
 TITLE = {'title': "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else '')}
 
 APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db' + \
-    ("~test" if TEST else "")
+APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
+
+# IOC stalkware indicators
+IOC_PATH = "data/stalkerware-indicators/"
+IOC_FILE = IOC_PATH + "ioc.yaml"
+
+# IOC stalkware indicators
+IOC_PATH = "data/stalkerware-indicators/"
+IOC_FILE = IOC_PATH + "ioc.yaml"
 
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
@@ -74,12 +81,12 @@ set_test_mode(TEST)
 STATIC_DATA = THIS_DIR / 'static_data'
 
 # TODO: We should get rid of this, ADB_PATH is very confusing
-ANDROID_HOME = os.getenv('ANDROID_HOME', STATIC_DATA)
+ANDROID_HOME = os.getenv('ANDROID_HOME', '')
 PLATFORM = ('darwin' if platform == 'darwin'
             else 'linux' if platform.startswith('linux')
             else 'win32' if platform == 'win32' else None)
-ADB_PATH = shlex.quote(str(ANDROID_HOME / ('adb-' + PLATFORM)))
-#ADB_PATH = 'adb'
+
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb'))
 
 #LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
 LIBIMOBILEDEVICE_PATH = ''
@@ -121,10 +128,14 @@ if not REPORT_PATH.exists():
     os.mkdir(REPORT_PATH)
 
 
-def hmac_serial(ser):
-    return hmac.new(PII_KEY, ser.encode('utf8'),
+def hmac_serial(ser: str) -> str:
+    """Returns a string starting with HSN_<hmac(ser)>. If ser already have 'HSN_', 
+    it returns the same value."""
+    if ser.startswith('HSN_'):
+        return ser
+    hser = hmac.new(PII_KEY, ser.encode('utf8'),
                     digestmod=hashlib.sha256).hexdigest()
-
+    return f'HSN_{hser}'
 
 def add_to_error(*args):
     global ERROR_LOG

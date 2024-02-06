@@ -10,45 +10,25 @@
             <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
         </span> 
     </h4>
-
-    <p><!-- {{ title.title }} is  -->An <a href="https://github.com/stopipv/isdi" target="_blank" rel="noopener">open-source</a> app
-        for scanning mobile devices (e.g., Android and iOS devices) for apps that
-        can be used to spy on, track, or <br>otherwise monitor a person.<br/>
-    </p -->
-    <!-- div class="row container">
-            <a class="btn btn-info" href="/form" target="_blank" rel="noopener">Start Consult Form</a>
-    </div>    <br -->
-
-    <div class="row container">
-
-    </div>
     <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
 	 </form> -->
 </div>
-<div class="row">
+<div class="row  h-100">
     <div class="col-md-3 border py-2" style="height:90vh;">
-        <form onsubmit="return false" name="form-newclient" id="form-newclient">
-            <div class="pull-left">
-	        <label for="clientid"><i>Session ID:</i>
-	            <input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
-                           value="{{ clientid }}" readonly/>
-                </label>
-            <div onClick=" if (confirm('Did you finish scanning ALL devices of the current client? Do you want to scan devices for a new client?')) {
-                 window.location.href = '/?newid=y';
-             }" id="btn-newclient"
-                     class="btn btn-success btn-small">New client (all devices scanned)</div>
-            </div>
-        </form>
-
         <div align="center">
+            <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
+                for scanning Android and iOS devices to find apps that
+                can be used to spy, track, or otherwise monitor a person.
+            </p>
+            <hr/>
             <label class="font-weight-bold lead">What type of device is this?</label>
             <form id="scan_select" method="GET" action="/scan">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS"] %}
                     <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
                         <input type="radio" name="device" id="{{ a | lower }}"
-			       value="{{ a| lower }}" autocomplete="off"
+			       value="{{ a | lower }}" autocomplete="off"
 			       {% if device==a.lower() %} checked {% endif %}
 			> {{ a }}
                     </label>
@@ -58,21 +38,6 @@
                 <input class="form-control" name="device_owner" id="device_owner" 
                        placeholder="Nickname for device? Whose is it?"
                        rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
-                <!--
-            	     <label class="font-weight-bold lead">Who primarily uses this device?</label>
-                     <textarea class="form-control " name="device_owner" id="device_owner" type="text" placeholder="Take notes here."
-                     rows="4"></textarea>
-                     <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-		     {% for k,v in device_primary_user.items() %}
-                     <label class="btn btn-outline-secondary {% if device_primary_user_sel==k %} active {% endif %}">
-                     <input type="radio" name="device_primary_user" id="{{ k }}"
-		     value="{{ k }}" autocomplete="off"
-		     {% if device_primary_user_sel == k %} checked {% endif %}
-		     > {{ v }}
-                     </label>
-		     {% endfor %}
-                     </div>
-                -->
 		<br>
                 <button class="btn btn-primary mx-2">Scan now</button>
             </form>
@@ -86,7 +51,9 @@
 	    {% if currently_scanned %}
       <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
 		    {% for scanned in currently_scanned %}
-        {{ scanned.device_model }} ({{ scanned.device_primary_user }})<br>
+      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
+          {{ scanned.device_model }} ({{ scanned.device_primary_user }})
+      </a><br>
 		    {% endfor %}
 
 	    {% endif %}
@@ -106,24 +73,13 @@
 	    </form>
 	    {% endif %}
         </div>
-        <!-- <div class="border-warning visible">
-            <form onsubmit="return false" name="form-metainfo" id="form-metainfo">
-		<input type="hidden" class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
-                       value="{{ clientid }}" readonly>
-                <textarea class="form-control " name="notes" id="notes" type="text" placeholder="Take notes here."
-                          rows="4" {% if not serial %}disabled{% endif %}></textarea>
-                <button onclick="postform(this)" id="btn-metainfo-submit"
-                        class="btn btn-primary btn-lg my-3">Save notes about this scan
-                </button>
-            </form>
-        </div>-->
     </div>
     <div class="col-md-9 border py-2" style="height: 90vh">
         <div id="msg" class="alert alert-primary">  {{ error | safe }}   </div>
         <div class="w-100" style="height: 80vh; overflow: auto;">
             {% if device_name %}
             <label>Scanned: <b>{{ device_name }}</b></label>
-	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
+  	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
             {% endif %}
             <table class="table table-bordered w-100">
                 <thead>
