@@ -1,155 +1,513 @@
-<script>
-    function get(url){
-        $('#loadingDiv').show();
-        $('#msg').html("")
-        $.get(url, function(data) {
-            $('#msg').html(data);
-            $('#loadingDiv').hide();
-        }).done(function(data) {
-        }).fail(function(data) {
-            alert("Failed:" + JSON.serialize(data));
-        })
-    }
-   
-    var loading = $('#loadingDiv').hide();
-    $(document).ready(function() {
-        $('#loadingDiv').hide();
-    });
-    
-</script>
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
 
+{% block content %}
 <div class="container">
-    <div>
-        <h4 class="display-4"> Evidence Collection</h4>
-        <hr/>
-        
-        {% if not scanned %}
-        <h2>Device information</h2>
-            <form method="post">
-                Name: <input name="name"/>
-                <br/><br/>
-                What type of device is this? 
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for a in ["Android", "iOS"] %}
-                            <label class="btn btn-outline-secondary">
-                                <input type="radio" name="device" id="{{ a | lower }}"
-                           value="{{ a| lower }}" autocomplete="off"
-                           {% if device==a.lower() %} checked {% endif %}
-                    > {{ a }}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <br>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            <br>
+
+            <h2>{{ form.title }}</h2>
+            <hr>
+            <form action method="post" class="form" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form) }}
+
+                {% if step == 1 %}
+                <table id="scan-form">
+                    <tbody>
+                        <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
+                        <tr><th><label>{{ form.consultant_name.label }}</label></th><td> {{ form.consultant_name }}</td> </tr>
+                        <tr><th><label>{{form.device_type.label}}</label></th><td>
+                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}> 
+                            {% for option in form.device_type %}
+                            <label class="btn btn-secondary" for="{{option.id}}">
+                                {{option.label.text}}
+                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                <span class="glyphicon glyphicon-ok"></span>
                             </label>
-                    {% endfor %}
+                            {% endfor %}
+                            </div>
+                        </td></tr>
+                    </tbody>
+                </table>
+                <br>
+                {% endif %}
+
+                {% if step == 2 %}
+                    {% if 'ios' == device %}
+                    <h3>For iPhones<img class="small" src="/webstatic/images/apple.resized.png"> </h3>
+                    <p>There is not much preparation required for iOS. 
+                        <ol>
+                            <li>Connect the USB cable</li>
+                            <li>Unlock the device and press Scan.</li>
+                            <li>On the device, you should see a prompt asking if you trust this device. Please select "Trust",
+                                and enter your passcode to start the scan.</li>
+                        </ol> 
+                        <br>
+                        <b>Troubleshooting:</b> Sometimes the system might fail to recognize the
+                        iOS device. Try opening iTunes on macOS, and see if the device is
+                        listed. Disconnect the device from the USB cable, reconnect, and try scanning again.</p>
+                    {% else %}
+                    <h3>For Android phones<img class="small"src="/webstatic/images/android.resiz.png"> </h3>
+                    <p>  
+                        For an Android device, the <code>developer options</code> on the device need to be
+                        activated. Developer options provide functionality for this system to communicate with 
+                        your device. The exact steps might vary from device manufacturer and version of
+                        Android, but roughly the following steps will help you activate developer
+                        options and USB debugging. 
+                        <ol>
+                        <li>Go to Settings. Either find the Settings app in the device drawer, or
+                            pull down from the top notification bar, on the top right you will see a gear
+                            type icon (<b>&#9881;</b>) for settings.</li>
+                        <li>Scroll down to find About Phone, search for <code>Build number</code>,
+                            tap on the build number 6-8 times to activate the developer mode. For some
+                            devices, Build number might be hidden under Software info. (<b>Warning:</b> For
+                            most device we can turn it off (see step 4), but there are some devices this
+                            cannot be undone. This will not interfere with any of the device’s common
+                            functionality, but does not leave the device at the state as it was before the
+                            scanning.)</li>
+                        <li>Turn on <code>USB debugging</code>. Go to
+                            <code>Settings</code>&rarr;<code>Developer options</code>&rarr;<code>USB debugging</code>.
+                            Tap on the toggle switch to turn it on.</li>
+                        <li>Hit Scan to start the scan.</li>
+                        </ol></p>
+                    {% endif %}
+                <br>
+                {% endif %}
+
+                {% if step == 3 %}
+                {% if form.spyware_apps|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware_apps|length }}</b> potential spyware apps found
+                </div>
+                {% elif form.spyware_apps|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware_apps|length }}</b> potential spyware app found
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No spyware apps found!
+                </div>
+                {% endif %}
+                <br>
+                {% for nested in form.spyware_apps %}
+                {% if loop.index0 == 0 %}
+                <details open>
+                {% else %}
+                <details>
+                {% endif %}
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ spyware[loop.index0].app_name }}</b>
+                    <img src="/webstatic/images/complete.png">
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th valign="top">App name</th><td>
+                                {% if spyware[loop.index0].url %}
+                                    <a href={{spyware[loop.index0].url}}>{{spyware[loop.index0].app_name}}</a> 
+                                    {% else %}
+                                    {{spyware[loop.index0].app_name}}
+                                {% endif %} 
+                                </td></tr>
+                                {% if spyware[loop.index0].application_icon %}
+                                <tr><th valign="top">Icon</th><td><img src={{spyware[loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if spyware[loop.index0].description %}
+                                <tr><th valign="top">Description</th><td>{{spyware[loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th valign="top">Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
+                                {% if spyware[loop.index0].permissions|length > 0 %}
+                                <tr><th valign="top">Permissions used</th><td>{{spyware[loop.index0].permissions}}</td></tr>
+                                {% endif %}
+                            </table>
                         </div>
-                <br/><br/>
-                <button type="submit">Submit</button>
-          </form>
-        <br></br>
-        {% endif %}
-
-        {% if scanned %}
-        <h2>Scan results for {{device_owner}}'s {{device}} device</h2>
-        <div id="summary">
-            <div>
-                <b>Spyware apps:</b>
-                {% if spyware %}
-                    {% for app in spyware %}
-                    <div>{{app["title"]}} (ID: {{app["appId"]}})</div>
-                    {% endfor %}
-                {% else %}
-                    <div>None found</div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
                 {% endif %}
-            </div>
-            <br/>
-            <div>
-                <b>Dual-use apps:</b>
-                {% if dual_use %}
-                    {% for app in dual_use %}
-                    <div>{{app["title"]}} (ID: {{app["appId"]}})</div>
-                    {% endfor %}
+
+                {% if step == 4 %}
+                {% if form.dual_use_apps|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dual_use_apps|length }}</b> potential dual use apps found
+                </div>
+                {% elif form.dual_use_apps|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dual_use_apps|length }}</b> potential dual use app found
+                </div>
                 {% else %}
-                    <div>None found</div>
+                <div class="result-overview">
+                    <br>
+                    <img src="/webstatic/images/no-concerns.png">
+                    No dual use apps found!
+                </div>
                 {% endif %}
+                <br>
+                {% for nested in form.dual_use_apps %}
+                {% set outer_loop = loop %}
+                {% if outer_loop.index0 == 0 %}
+                <details open>
+                {% else %}
+                <details>
+                {% endif %}
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ dualuse[outer_loop.index0].app_name }}</b>
+                    <img src="/webstatic/images/inprogress.png">
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th valign="top">App name</th><td>
+                                {% if dualuse[outer_loop.index0].url %}
+                                    <a href={{dualuse[outer_loop.index0].url}}>{{dualuse[outer_loop.index0].app_name}}</a> 
+                                    {% else %}
+                                    {{dualuse[outer_loop.index0].app_name}}
+                                {% endif %} 
+                                </td></tr>
+                                {% if dualuse[outer_loop.index0].application_icon %}
+                                <tr><th valign="top">Icon</th><td><img src={{dualuse[outer_loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if dualuse[outer_loop.index0].description %}
+                                <tr><th valign="top">Description</th><td>{{dualuse[outer_loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
+                                {% if dualuse[outer_loop.index0].permissions|length > 0 %}
+                                <tr><th valign="top">Permissions used</th><td>
+                                    {% for perm in dualuse[outer_loop.index0].permissions %}
+                                    {{perm.permission_name}}{% if loop.index < dualuse[outer_loop.index0].permissions|length %}, {% endif %}
+                                    {% endfor %}
+                                </td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% for perm in nested.permissions %}
+                        <h5>Permission check: {{dualuse[outer_loop.index0].permissions[loop.index0].permission_name}}</h5>
+                        <div class="subform">
+                            {{ perm.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{perm.access.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}> 
+                                        {% for option in perm.access %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
+                                    <tr><th>{{perm.screenshot.label}}</th><td>{{perm.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endfor %}
+
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+                {% endif %}
+
+                {% if step == 5 %}
+                <div class="account-buttons">
+                    {% for field in form %}
+                        {% if field.type == "BooleanField" %}
+                            <div id="ck-button">{{field}}
+                                <span>
+                                    <img src="/webstatic/images/accounts/{{field.label.text.lower()}}.png">{{ field.label }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if step == 6 %}
+                {% if form.accounts|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.accounts|length }}</b> accounts to check
+                </div>
+                {% elif form.accounts|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.accounts|length }}</b> account to check
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No accounts to check!
+                </div>
+                {% endif %}
+
+                {% for nested in form.accounts %}
+                {% if loop.index0 == 0 %}
+                <details open>
+                {% else %}
+                <details>
+                {% endif %}
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ accounts[loop.index0].account_name }}</b>
+                    <img src="/webstatic/images/notstarted.png">
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <h5>{{ nested.suspicious_logins.label }}</h5>
+                        <div class="subform">
+                            {{nested.suspicious_logins.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{nested.suspicious_logins.recognize.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.recognize.id}}> 
+                                        {% for option in nested.suspicious_logins.recognize %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.suspicious_logins.describe_logins.label}}</th><td>{{nested.suspicious_logins.describe_logins}}</td></tr>
+                                    <tr><th>{{nested.suspicious_logins.login_screenshot.label}}</th><td>{{nested.suspicious_logins.login_screenshot}}</td></tr>
+
+                                    <tr><th>{{nested.suspicious_logins.activity_log.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}> 
+                                        {% for option in nested.suspicious_logins.activity_log %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.suspicious_logins.describe_activity.label}}</th><td>{{nested.suspicious_logins.describe_activity}}</td></tr>
+                                    <tr><th>{{nested.suspicious_logins.activity_screenshot.label}}</th><td>{{nested.suspicious_logins.activity_screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ nested.password_check.label }}</h5>
+                        <div class="subform">
+                            {{ nested.password_check.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.password_check.know, nested.password_check.guess] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ nested.recovery_settings.label }}</h5>
+                        <div class="subform">
+                            {{ nested.recovery_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.recovery_settings.phone_present, nested.recovery_settings.phone_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.phone.label}}</th><td>{{nested.recovery_settings.phone}}</td></tr>
+                                    <tr><th>{{nested.recovery_settings.phone_screenshot.label}}</th><td>{{nested.recovery_settings.phone_screenshot}}</td></tr>
+                                    {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.recovery_settings.email.label}}</th><td>{{nested.recovery_settings.email}}</td></tr>
+                                    <tr><th>{{nested.recovery_settings.email_screenshot.label}}</th><td>{{nested.recovery_settings.email_screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ nested.two_factor_settings.label }}</h5>
+                        <div class="subform">
+                            {{ nested.two_factor_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.two_factor_settings.enabled, nested.two_factor_settings.second_factor_type] %}
+                                        <tr><th>{{subform.label}}</th><td>
+                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                            {% for option in subform %}
+                                            <label class="btn btn-light" for="{{option.id}}">
+                                                {{option.label.text}}
+                                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                            </label>
+                                            {% endfor %}
+                                        </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{nested.two_factor_settings.describe.label}}</th><td>{{nested.two_factor_settings.describe}}</td></tr>
+                                    {% with subform = nested.two_factor_settings.second_factor_access %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endwith %}
+                                    <tr><th>{{nested.two_factor_settings.screenshot.label}}</th><td>{{nested.two_factor_settings.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ nested.security_questions.label }}</h5>
+                        <div class="subform">
+                            {{ nested.security_questions.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{nested.security_questions.present.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.present.id}}> 
+                                        {% for option in nested.security_questions.present %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.security_questions.questions.label}}</th><td>{{nested.security_questions.questions}}</td></tr>
+                                    <tr><th>{{nested.security_questions.know.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.know.id}}> 
+                                        {% for option in nested.security_questions.know %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{nested.security_questions.screenshot.label}}</th><td>{{nested.security_questions.screenshot}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+                {% endif %}
+
+                <br>
+                <div><span class="primarybutton">{{form.submit}}</span></div>
+            </form>
+            {% if step > 1 %}
+            <a href="{{ url_for('evidence', step=step-1) }}" class="btn btn-default">Previous</a>
+            {% endif %}
+            <br>
+            <br>
+            <br>
+            <div class="progress mb-4">
+                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
             </div>
         </div>
-        <br/><br/>
-        {% endif %}
-        
-        <form method="POST", action="/evidence/summary">
-        <input type="hidden" name="dual_use" value={{dual_use_str}} />
-        <input type="hidden" name="spyware" value={{spyware}} />
-
-        {% if spyware %}
-        <h2>Spyware Apps</h2>
-        {% for app in spyware %}
-        <div class="jumbotron">
-            <h3>{{app["title"]}}</h3>
-                Did you know this app was installed on your device? 
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary">
-                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
-                           value="{{ a| lower }}" autocomplete="off"> 
-                            {{ a }}
-                            </label>
-                    {% endfor %}
-                </div>
-                <br/><br/>
-                Did you install this app?
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary">
-                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
-                           value="{{ a| lower }}" autocomplete="off"> 
-                            {{ a }}
-                            </label>
-                    {% endfor %}
-                </div>
-                <br/><br/>
-                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
-                <br/>
-        </div>
-        <hr/>
-        {% endfor %}
-        {% endif %}
-
-
-        {% if dual_use %}
-        <h2>Dual-Use Apps</h2>
-        {% for app in dual_use %}
-        <div class="jumbotron">
-            <h3>{{app["title"]}}</h3>
-                Did you know this app was installed on your device? 
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary">
-                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
-                           value="{{ a| lower }}" autocomplete="off"> 
-                            {{ a }}
-                            </label>
-                    {% endfor %}
-                </div>
-                <br/><br/>
-                Did you install this app?
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    {% for a in ["Yes", "No"] %}
-                            <label class="btn btn-outline-secondary">
-                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
-                           value="{{ a| lower }}" autocomplete="off"> 
-                            {{ a }}
-                            </label>
-                    {% endfor %}
-                </div>
-                <br/><br/>
-                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
-                <br/>
-        </div>
-        {% endfor %}
-
-        <button type="submit">Submit</button>
-        </form>
-        {% endif %}
-
-
-	<br><br>
     </div>
 </div>
-
+{% endblock %}

@@ -1,10 +1,8 @@
+
 input[type=radio] {
     margin: 2px;
 }
 
-#applist tr td a {
-    /* color: unset;*/
-}
 a.appid {
     color: unset;
 }
@@ -16,6 +14,7 @@ a.appid {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
+  font-size: 25pt;
   src: url(http://localhost:6200/webstatic/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
 }
 
@@ -33,4 +32,335 @@ a.appid {
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+}
+
+details {
+    user-select: none;
+  }
+  
+  details>summary span.icon {
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 2px;
+    float: left;
+  }
+
+  details>summary img {
+    float: right;
+    align-self: center;
+    width: 24px;
+    margin: 2px 10px;
+  }
+  
+  details[open] {
+    background-color: rgb(208, 206, 206);
+    border-radius: 20px;
+  }
+
+  details[open] summary span.icon {
+    transform: rotate(180deg) translate(7px, 0px);
+  }
+
+  details[open] div.content {
+    color: black;
+    padding: 10px 30px;
+  }
+
+  details[open] div.subform {
+    margin-left: 20px;
+    margin-bottom: 5px;
+  }
+  
+  summary {
+    display: flex;
+    cursor: pointer;
+    background-color: rgb(180, 142, 207);
+    color: black;
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 14pt;
+  }
+  
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .primarybutton {
+    float: right;
+  }
+
+  .primarybutton>input {
+    background-color: rgb(66, 15, 103);
+    border: rgb(66, 15, 103);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  
+  .secondarybutton {
+    float: left;
+  }
+
+  select {
+    border-radius: 10px;
+    padding: 2.5px;
+    margin: 8px;
+    margin-bottom: 8px;
+  }
+
+  details[open]>select {
+    border: 0px;
+    margin-bottom: 8px;
+  }
+
+  th>label {
+    padding-right: 10px;
+    font-style: normal;
+    font-weight: normal;
+  }
+
+  input {
+    margin: 5px;
+  }
+
+  .header {
+    padding: 5px 15px;
+    text-align: left;
+    background: rgb(66, 15, 103);
+    color: white;
+    font-size: 10px;
+  }
+
+div.progress-bar {
+    fill: green;
+    background-color: green;
+}
+
+textarea {
+    width: 100%;
+    margin: 5px;
+}
+
+div.result-overview {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 14pt;
+    padding: 10px;
+}
+
+div.result-overview>img {
+    width: 100px;
+    margin: 10px;
+}
+
+#ck-button {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+    padding: 15px;
+    width: 45%;
+    font-size: 16px;
+    cursor: pointer;
+    align-content: center;
+    align-items: center;
+}
+
+#ck-button label {
+    float:left;
+    width:4.0em;
+    margin: 5px;
+    font-weight: 300;
+}
+
+#ck-button label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+}
+
+#ck-button>input {
+    visibility: visible;
+    float: right;
+    width: 25px;
+    margin: 10px;
+    align-self: center;
+}
+
+#ck-button input[type='checkbox']:checked + span>label {
+    font-weight: bolder;
+}
+
+div.account-buttons {
+    margin: 20px;
+    width: 100%;
+    display:block;
+    overflow: auto;
+}
+
+#ck-button img {
+    height: 25px;
+    margin: 5px;
+    float: left;
+}
+
+input[type='checkbox'] {
+    accent-color: green;
+    transform: scale(2);
+    margin: 20px;
+}
+
+.checked {
+    background-color: red;
+}
+
+
+img.small {
+    width: 30px;
+    margin-left: 10px;
+}
+
+div.app-info th {
+    font-style: italic;
+    font-weight: normal;
+    padding-right: 10px;
+}
+
+
+.btn span.glyphicon {    			
+	opacity: 0;				
+}
+
+.btn.active span.glyphicon {				
+	opacity: 1;				
+}
+
+.btn-group>label.btn {
+    border-color: rgb(208, 206, 206);
+    margin: 5px 0px;
+}
+
+input[type="file"] {
+    margin: 5px 0px;
+}
+
+textarea {
+    margin: 5px 0px;
+}
+
+div.notes textarea {
+    width: 250%;
+}
+
+#printout-header {
+    position: relative;
+    margin-bottom: 50px;
+}
+
+#printout-header img {
+    position: absolute;
+    top: -10px;
+    right: 0px;
+}
+
+table.printout_columns td.screenshot {
+    width: 30%;
+}
+
+td.screenshot img {
+    margin-left: 15px;
+    width: 250px;
+    border: 1px solid black;
+}
+
+td.screenshot p {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+div.printout-summary {
+    page-break-after: always;
+}
+
+table.printout_columns {
+    page-break-after: always;
+}
+
+table.printout_columns tr {
+    page-break-after: always;
+}
+
+table.printout_columns th {
+    text-align: left;
+    font-style: italic;
+    font-weight: normal;
+    
+}
+table.printout_columns + table {
+    border: 1px;
+}
+
+#printout-header th {
+    font-style: italic;
+    font-weight: normal;
+}
+
+.appsummary {
+    border: 1px solid black;
+    border-left: 5px solid black; 
+    background-color: rgb(208, 206, 206);
+    padding: 5px 10px;
+    margin-right: 10px;
+    margin-bottom: 20px;
+}
+
+.footer {
+    float: bottom;
+}
+
+.definition {
+    border: 1px solid black;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+table.appinfo th {
+    width: 25%;
+}
+    
+.overallsummary li {
+    margin-bottom: 15px;
+}
+
+.summarybubble {
+    border-radius: 15px;
+    padding: 10px 20px;
+    background-color: rgb(218, 210, 225);
+    margin-top: 10px;
+    margin-bottom: 20px
+}
+
+.summarybubble .number {
+    font-size: 45pt;
+}
+
+.summarybubble th {
+    width: 15%;
+    text-align: center;
+}
+
+.summarybubble td {
+    padding: 5px 10px;
+}
+
+.summarybubble li {
+    margin-bottom: 8px;
 }

@@ -8,4 +8,4 @@ from .privacy import privacy, privacy_scan
 from .error import get_nothing
 from .results import view_results
 from .save import record_applist, record_scanres, delete_app
-from .evidence import evidence, evidence_summary
+from .evidence import evidence, evidence_summary, evidence_printout

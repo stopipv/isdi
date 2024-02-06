@@ -1,8 +1,9 @@
+from flask import redirect, render_template, request, session, url_for
+
 import config
-from web import app
-from flask import render_template, request, session
-from phone_scanner import AndroidScan, IosScan, TestScan
 from db import get_client_devices_from_db, new_client_id
+from phone_scanner import AndroidScan, IosScan, TestScan
+from web import app
 
 # FIXME: why are we scanning devices before people clicked on scan now?
 android = AndroidScan()
@@ -30,6 +31,8 @@ def index():
     # ask the DB for a new client ID (additional checks in DB).
     if 'clientid' not in session or (newid is not None):
         session['clientid']=new_client_id()
+
+    return redirect(url_for('evidence', step=1))
 
     return render_template(
         'main.html',

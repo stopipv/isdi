@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* margins for printing */
+        body  { padding: 5mm; font-size: 14pt; } 
+        .new-page { padding-top: 5mm; }
+
+        h3 {font-size: 16pt; }
+
+        .app-padding-top {padding-top: 12mm;}
+    </style>
+</head>
+
+<body>
+<div id="printout-header">
+    <img id="printout-header" width="50px" src="https://pages.cs.wisc.edu/~srstephenso2/misc/uwlogo.png"/>
+    <h1>&lt; Name of Tool &gt; - Investigation Report</h1>
+    <table border="0" id="prelim-data">
+        <tbody>
+            <tr>
+                <th align="left">Time of investigation:</th>
+                <td>{{current_time}}</td>
+            </tr>
+            <tr>
+                <th align="left">Client name:</th>
+                <td>{{device_owner}}</td>
+            </tr>
+            <tr>
+                <th align="left">Consultant name:</th>
+                <td>{{consultant}}</td>
+            </tr>
+            <tr>
+                <th align="left">Device analyzed:</th>
+                <td>{{device}} phone</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="printout-summary">
+    <h1>Summary of findings</h1>
+    <hr />
+    <div class="overallsummary">
+        {% with num_apps = concerns.spyware|length + concerns.dualuse|length %}
+            <h3>{{num_apps}} Concerning App{% if num_apps != 1 %}s{%endif%} Installed on the Device</h3>
+            <ol>
+                {% for concern in concerns.spyware + concerns.dualuse %}
+                <li><b>{{concern.name}}</b>: {{concern.summary}}</li>
+                {% endfor %}
+            </ol>
+        {% endwith %}
+        <h3>{{concerns.accounts|length}} Potentially Compromised Account{% if concerns.accounts|length != 1 %}s{%endif%}</h3>
+        <ol>
+            {% for concern in concerns.accounts %}
+            <li><b>{{concern.name}} account</b>: {{concern.summary}}</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+
+<div class="new-page">
+<h1>Spyware Apps: {{spyware|length}} found</h1>
+<hr>
+<br>
+<div class="definition">
+    <p><b>Definition</b>: Spyware apps are apps purposefully designed for surveillance. When installed on someone's phone, they can allow
+        the installer to view the phone owner's location, messages, calls, and/or a myriad of other data. </p>
+</div>
+{% if spyware|length > 0 %}
+{% for app in spyware %}
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{app.app_name}}</h2>
+<table class="printout_columns">
+    <tbody>
+        <tr valign="top">
+            <td>
+                <div class="appsummary">
+                    <p><b>Investigation summary:</b> {{app.summary}}</p>
+                </div>
+                <h3>App information</h3>
+                <table class="appinfo">
+                    <tbody>
+                        <tr>
+                            <th>App ID</th>
+                            <td>{{app.appId}}</td>
+                        </tr>
+                        <tr>
+                            <th>App URL</th>
+                            <td><a href={{app.url}}>{{app.url}}</a></td>
+                        </tr>
+                        <tr>
+                            <th>App store</th>
+                            <td>{{app.store}}</td>
+                        </tr>
+                        <tr>
+                            <th>App description</th>
+                            <td>{{app.description}}</td>
+                        </tr>
+                        <tr>
+                            <th>App genres</th>
+                            <td>{{app.genres}}</td>
+                        </tr>
+                        <tr>
+                            <th>Install time</th>
+                            <td>{{app.install_time}}</td>
+                        </tr>
+                        <tr>
+                            <th>Permissions requested</th>
+                            <td>{% for perm in app.permissions %}{{perm.permission_name}}{{ ", " if not loop.last else
+                                "" }}{% endfor %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Client questionnaire</h3>
+                {% with form = app.install_form %}
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Did you know this app was installed?</th>
+                            <td>{{form.knew_installed |
+                                capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Did you install this app?</th>
+                            <td>{{form.installed | capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Did your [ex-]partner coerce you into installing this app?</th>
+                            <td>{{form.coerced |
+                                capitalize}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endwith %}
+                {% if app.notes.client_notes %}
+                <h3>Client comments</h3>
+                <p>
+                    <p>&gt; {{app.notes.client_notes}} </p>
+                </p>
+                {% endif %}
+                {% if app.notes.consultant_notes %}
+                <h3>Consultant comments</h3>
+                <p>
+                    <p>&gt; {{app.notes.consultant_notes}} </p>
+                </p>
+                {% endif %}
+            </td>
+            <td valign="top" class="screenshot">
+                {% for filename in app.screenshots %}
+                <img src="{{screenshot_dir}}{{filename}}" />
+                <p>{{filename}}</p>
+                {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endfor %}
+{% else %}
+<div style="page-break-after:always">
+    <p>No spyware apps were found on this device.</p>
+</div>
+{% endif %}
+</div>
+
+<div class="new-page">
+<h1>Dual-Use Apps: {{dualuse|length}} found</h1>
+<hr>
+<br>
+<div class="definition">
+    <p><b>Definition</b>: Dual-use apps are apps designed for a legitimate purpose, such as theft prevention. However, they have
+        capabilities which can be misused to surveil the owner of the phone.</p>
+</div>
+{% if dualuse|length > 0 %}
+{% for app in dualuse %}
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{app.app_name}}</h2>
+<table class="printout_columns">
+    <tbody>
+        <tr valign="top">
+            <td>
+                <div class="appsummary">
+                    <p><b>Investigation summary:</b> {{app.summary}}</p>
+                </div>
+                <h3>App information</h3>
+                <table class="appinfo">
+                    <tbody>
+                        <tr>
+                            <th>App ID</th>
+                            <td>{{app.appId}}</td>
+                        </tr>
+                        <tr>
+                            <th>Developer URL</th>
+                            <td><a href={{app.url}}>{{app.url}}</a></td>
+                        </tr>
+                        <tr>
+                            <th>App store</th>
+                            <td>{{app.store}}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{app.description}}</td>
+                        </tr>
+                        <tr>
+                            <th>Genres</th>
+                            <td>{{app.genres}}</td>
+                        </tr>
+                        <tr>
+                            <th>Install time</th>
+                            <td>{{app.install_time}}</td>
+                        </tr>
+                        <tr>
+                            <th>Permissions requested</th>
+                            <td>{% for perm in app.permissions %}{{perm.permission_name}}{{ ", " if not loop.last else
+                                "" }}{% endfor %}</td>
+                        </tr>
+                        <tr>
+                            <th>Recent permissions used</th>
+                            <td>{% for perm in app.recent_permissions %}{{perm.permission_name}}{{ ", " if not loop.last
+                                else "" }}{% endfor %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Client questionnaire</h3>
+                <table>
+                    <tbody>
+                        {% with form = app.install_form %}
+                        <tr>
+                            <th>Did you know this app was installed?</th>
+                            <td>{{form.knew_installed |
+                                capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Did you install this app?</th>
+                            <td>{{form.installed | capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Did your [ex-]partner coerce you into installing this app?</th>
+                            <td>{{form.coerced |
+                                capitalize}}</td>
+                        </tr>
+                        {% endwith %}
+                        {% for permission in app.permissions %}
+                        <tr>
+                            <th>Can your [ex-]partner access your
+                                {{permission.permission_name.lower()}} using this app?</th>
+                            <td>{{permission.access | capitalize}}</td>
+                        </tr>
+                        {% if permission.describe %}
+                        <tr>
+                            <th>&emsp;-> How do you know?</th>
+                            <td>{{permission.describe}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if app.notes.client_notes %}
+                <h3>Client comments</h3>
+                <p>
+                    <p>&gt; {{app.notes.client_notes}} </p>
+                </p>
+                {% endif %}
+                {% if app.notes.consultant_notes %}
+                <h3>Consultant comments</h3>
+                <p>
+                    <p>&gt; {{app.notes.consultant_notes}} </p>
+                </p>
+                {% endif %}
+            </td>
+            <td valign="top" class="screenshot">
+                    {% for filename in app.screenshots %}
+                    <img src="{{screenshot_dir}}{{filename}}" />
+                    <p>{{filename}}</p>
+                    {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endfor %}
+{% else %}
+<div style="page-break-after:always">
+    <p>No dual use apps were found on this device.</p>
+</div>
+{% endif %}
+</div>
+
+<div class="new-page">
+<h1>Account Compromise Check: {{accounts|length}} investigated</h1>
+<hr>
+<br>
+{% if accounts|length > 0 %}
+{% for account in accounts %}
+<h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{account.account_name}} account</h2>
+<table class="printout_columns">
+    <tbody>
+        <tr valign="top">
+            <td>
+                <div class="appsummary">
+                    <p><b>Investigation summary:</b>
+                    <ul>
+                        <li><i>Evidence of access</i>: {{account.access_summary}}</li>
+                        <li><i>Potential for access</i>: {{account.ability_summary}}</li>
+                    </ul>
+                </div>
+                <h3>Login activity questionnaire</h3>
+                <table>
+                    <tbody>
+                        {% with form = account.suspicious_logins %}
+                        <tr>
+                            <th>Do you recognize all devices logged into this account?</th>
+                            <td>{{form.recognize | capitalize}}</td>
+                        </tr>
+                        {% if form.describe_logins %}
+                        <tr>
+                            <th>&emsp;-> Which devices do you not recognize?</th>
+                            <td>{{form.describe_logins}}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>In the login history, do you see any suspicious logins?</th>
+                            <td>{{form.activity_log | capitalize}}</td>
+                        </tr>
+                        {% if form.describe_activity %}
+                        <tr>
+                            <th>&emsp;-> Which logins are suspicious, and why?</th>
+                            <td>{{form.describe_activity}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                    </tbody>
+                </table>
+                <h3>Password questionnaire</h3>
+                <table>
+                    <tbody>
+                        {% with form = account.password_check %}
+                        <tr>
+                            <th>Does your [ex-]partner know the password to this
+                                account?</th>
+                            <td>{{form.know | capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Do you believe your [ex-]partner could guess the password?</th>
+                            <td>{{form.guess | capitalize}}</td>
+                        </tr>
+                        {% endwith %}
+                    </tbody>
+                </table>
+                <h3>Recovery settings questionnaire</h3>
+                <table>
+                    <tbody>
+                        {% with form = account.recovery_settings %}
+                        <tr>
+                            <th>Is there a recovery phone number set for this account?</th>
+                            <td>{{form.phone_present | capitalize}}</td>
+                        </tr>
+                        {% if form.phone_present != 'no' %}
+                        <tr>
+                            <th>What is the recovery phone number?</th>
+                            <td>{{form.phone}}</td>
+                        </tr>
+                        <tr>
+                            <th>Do you believe your [ex-]partner has access to the recovery phone number?</th>
+                            <td>{{form.phone_access | capitalize}}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Is there a recovery email address set for this account?</th>
+                            <td>{{form.email_present | capitalize}}</td>
+                        </tr>
+                        {% if form.email_present != 'no' %}
+                        <tr>
+                            <th>What is the recovery email address?</th>
+                            <td>{{form.email}}</td>
+                        </tr>
+                        <tr>
+                            <th>Do you believe your [ex-]partner has access to this recovery email address?</th>
+                            <td>{{form.email_access | capitalize}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                    </tbody>
+                </table>
+                <h3>Two-factor authentication questionnaire</h3>
+                <table>
+                    <tbody>
+                        {% with form = account.two_factor_settings %}
+                        <tr>
+                            <th>Is two-factor authentication enabled for this account?</th>
+                            <td>{{form.enabled | capitalize}}</td>
+                        </tr>
+                        {% if form.enabled != 'no' %}
+                        <tr>
+                            <th>What type of two-factor authentication is it?</th>
+                            <td>{{form.second_factor_type |
+                                capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Which phone/email/app is set as the second factor?</th>
+                            <td>{{form.describe}}</td>
+                        </tr>
+                        <tr>
+                            <th>Do you believe your [ex-]partner has access to this second factor?</th>
+                            <td>{{form.second_factor_access | capitalize}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                    </tbody>
+                </table>
+                <h3>Security questions questionnaire</h3>
+                <table>
+                    <tbody>{% with form = account.security_questions %}
+                        <tr>
+                            <th>Does the account use security questions?</th>
+                            <td>{{form.present | capitalize}}</td>
+                        </tr>
+                        {% if form.present != 'no' %}
+                        <tr>
+                            <th>Which questions are set?</th>
+                            <td>{{form.questions | capitalize}}</td>
+                        </tr>
+                        <tr>
+                            <th>Do you believe your [ex-]partner knows the answers to any of these questions?</th>
+                            <td>{{form.know | capitalize}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                    </tbody>
+                </table>
+                {% if account.notes.client_notes %}
+                <h3>Client comments</h3>
+                <p>
+                    <p>&gt; {{account.notes.client_notes}} </p>
+                </p>
+                {% endif %}
+                {% if account.notes.consultant_notes %}
+                <h3>Consultant comments</h3>
+                <p>
+                    <p>&gt; {{account.notes.consultant_notes}} </p>
+                </p>
+                {% endif %}
+            </td>
+            <td valign="top" class="screenshot">
+                {% for filename in account.screenshots %}
+                <img src="{{screenshot_dir}}{{filename}}" />
+                <p>{{filename}}</p>
+                {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endfor %}
+{% endif %}
+</div>
+
+<!--
+<hr />
+<div class="footer">
+    <p>
+        <em>&lt;Name of tool&gt; Investigation Report. &copy; Madison Tech Clinic,
+            University of Wisconsin Madison.</em>
+    </p>
+</div>
+-->
+
+</body>
+</html>

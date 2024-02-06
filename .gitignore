@@ -137,7 +137,8 @@ error.txt
 ## To be removed
 toremove/
 
-reports/*.csv
+reports/*
+screenshots/*
 apps/
 data/
 static_data/app-info.db.gz
@@ -154,3 +155,5 @@ __MACOSX
 *~test
 *.apk
 dumps/android_scan.logs
+
+*.pkl

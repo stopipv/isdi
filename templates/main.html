@@ -87,7 +87,11 @@
         </script>
     </head>
 
-    <body class="container-fluid">
+    <body>
+    <body>
+        <div class="header">
+            <h3>Name of tool!</h3>
+        </div>
       {% block content %}
         {% if task == 'home' %}
           {% include 'home.html' %}
@@ -114,5 +118,6 @@
           {% include "formedit.html" %}
         {% endif %}
       {% endblock %}
+      </body>
   </body>
 </html>

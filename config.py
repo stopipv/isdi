@@ -7,6 +7,8 @@ from sys import platform
 
 from runcmd import catch_err, run_command
 
+SCREENSHOT_LOCATION = "/Users/Soph/research/evidence-project/ips-evidence-collector/screenshots/"
+
 DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
 
