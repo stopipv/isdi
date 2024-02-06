@@ -55,7 +55,7 @@ function scan {
 function scan_spy {
     if [[ ! -e $ofname ]]; then
         echo "Run scan first"
-        return -1
+        return 1
     fi
     grep -Eio '[a-zA-Z0-9\.]*spy[a-zA-Z0-9\.]*' $ofname | sort -u
 }
@@ -65,7 +65,7 @@ function retrieve {
     # Make a python parser for this might be much faster
     if [[ ! -e $ofname ]]; then
         echo "Run scan first"
-        return -1
+        return 1
     fi
     app="$1"
     process_uid=$(grep -A1 "Package \[$app\]" $ofname | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
@@ -90,14 +90,14 @@ function retrieve {
 
 services=(package location media.camera netpolicy mount 
           cpuinfo dbinfo meminfo
-          procstats batterystats netstats usagestats
+          procstats batterystats "netstats detail" usagestats
           activity appops)
 
 function dump {
     for a in ${services[*]}; do
         echo "DUMP OF SERVICE $a"
         scan $a
-    done 
+    done
     echo "DUMP OF SERVICE net_stats"
     $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
     for namespace in secure system global; do
