@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import hmac
 import hashlib
-import pandas as pd
-import config
-import os, sys
-import sqlite3
-from datetime import datetime
-from collections import defaultdict
-from android_permissions import all_permissions
-from runcmd import run_command, catch_err
-import parse_dump
-import blocklist
+import hmac
+import os
 import re
 import shlex
+import sqlite3
+import sys
+from collections import defaultdict
+from datetime import datetime
+
+import pandas as pd
+
+import blocklist
+import config
+import parse_dump
+from android_permissions import all_permissions
+from runcmd import catch_err, run_command
 
 
 class AppScan(object):
@@ -100,7 +103,7 @@ class AppScan(object):
                 d['permissions'] = pd.Series(info.get('permissions',''))
                 #d['permissions'] = [info.get('permissions','')]
                 d['title'] = pd.Series(info.get('title',''))
-                del info['permissions']
+                #del info['permissions']
             print("AppInfo: ", info, appid, dfname, ddump)
             return d.fillna(''), info
         except KeyError as ex:
