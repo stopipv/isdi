@@ -41,7 +41,7 @@ from web import app
 bootstrap = Bootstrap(app)
 
 USE_PICKLE_FOR_SUMMARY = True
-USE_FAKE_DATA = True
+USE_FAKE_DATA = False
 
 @app.route("/evidence/", methods={'GET'})
 def evidence_default():
