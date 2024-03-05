@@ -12,7 +12,9 @@ from plistlib import load
 
 import pandas as pd
 from rsonlite import simpleparse
+
 import config
+
 
 def count_lspaces(l):
     # print(">>", repr(l))
@@ -582,7 +584,7 @@ class IosDump(PhoneDump):
         if self.df is None:
             return []
         print("parse_dump (installed_apps): >>", self.df.columns, len(self.df))
-        return self.df['appId'].to_list()
+        return self.df['CFBundleIdentifier'].to_list()
 
 
 if __name__ == "__main__":

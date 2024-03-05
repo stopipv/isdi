@@ -125,8 +125,8 @@ class AppScan(object):
             )
         r = blocklist.app_title_and_flag(
             pd.DataFrame({'appId': installed_apps}),
-            offstore_apps=self.get_offstore_apps(serialno, from_device=from_device),
-            system_apps=self.get_system_apps(serialno, from_device=from_device)
+            offstore_apps=self.get_offstore_apps(serialno),
+            system_apps=self.get_system_apps(serialno)
         )
         r['title'] = r.title.fillna('')
         if self.device_type == 'android':
