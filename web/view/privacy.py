@@ -1,7 +1,8 @@
 from flask import request, render_template
 from web import app
 from web.view import get_device
-from privacy_scan_android import do_privacy_check
+from privacy_scan_android import do_privacy_check, take_screenshot
+import web.view.evidence
 import config
 
 @app.route("/privacy", methods=['GET'])
@@ -20,5 +21,7 @@ def privacy():
 @app.route("/privacy/<device>/<cmd>", methods=['GET'])
 def privacy_scan(device, cmd):
     sc = get_device(device)
-    res = do_privacy_check(sc.serialno, cmd)
+    # res = do_privacy_check(sc.serialno, cmd)
+    res = do_privacy_check('', cmd)
+    print("Screenshot Taken")
     return res
