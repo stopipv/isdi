@@ -3,7 +3,7 @@
 <head>
     <style>
         /* margins for printing */
-        body  { padding: 5mm; font-size: 14pt; } 
+        body  { padding: 5mm; font-size: 14pt; }
         .new-page { padding-top: 5mm; }
 
         h3 {font-size: 16pt; }
@@ -148,7 +148,6 @@
             <td valign="top" class="screenshot">
                 {% for filename in app.screenshots %}
                 <img src="{{screenshot_dir}}{{filename}}" />
-                <p>{{filename}}</p>
                 {% endfor %}
             </td>
         </tr>
@@ -173,6 +172,7 @@
 {% if dualuse|length > 0 %}
 {% for app in dualuse %}
 <h2 {% if loop.index > 1 %}class="app-padding-top"{%endif%}>{{loop.index}}. {{app.app_name}}</h2>
+
 <table class="printout_columns">
     <tbody>
         <tr valign="top">
@@ -219,27 +219,78 @@
                         </tr>
                     </tbody>
                 </table>
-                <h3>Client questionnaire</h3>
+            </td>
+        </tr>
+        <tr valign="top">
+            <th><h3>Client Questionaire</h3><th>
+        </tr>
+
+        {% set screenshots = [] %}
+        {% for filename in app.screenshots %}
+        {% if app.app_name.replace(' ', '') in filename and "dualuse_" in filename %}
+          {{ screenshots.append(filename) }}
+        {% endif %}
+        {% endfor %}
+
+        <tr valign="top">
+            <td valign="top">
                 <table>
                     <tbody>
-                        {% with form = app.install_form %}
-                        <tr>
-                            <th>Did you know this app was installed?</th>
-                            <td>{{form.knew_installed |
-                                capitalize}}</td>
+                        <tr valign="top">
+                            {% with form = app.install_form %}
+                            <tr>
+                                <th>Did you know this app was installed?</th>
+                                <td>{{form.knew_installed |
+                                  capitalize}}</td>
+                            </tr>
+                            <tr>
+                                <th>Did you install this app?</th>
+                                <td>{{form.installed | capitalize}}</td>
+                            </tr>
+                            <tr>
+                                <th>Did your [ex-]partner coerce you into installing this app?</th>
+                                <td>{{form.coerced |
+                                  capitalize}}</td>
+                            </tr>
+                            {% endwith %}
                         </tr>
-                        <tr>
-                            <th>Did you install this app?</th>
-                            <td>{{form.installed | capitalize}}</td>
-                        </tr>
-                        <tr>
-                            <th>Did your [ex-]partner coerce you into installing this app?</th>
-                            <td>{{form.coerced |
-                                capitalize}}</td>
-                        </tr>
-                        {% endwith %}
-                        {% for permission in app.permissions %}
-                        <tr>
+                  </tbody>
+              </table>
+          </td>
+          <td class="screenshot">
+              {% if screenshots|length > 0 %}
+              <div class="image-container">
+                 <img src="{{screenshot_dir}}{{screenshots|first}}" />
+              </div>
+              {% endif %}
+          </td>
+      </tr>
+
+      {% for filename in screenshots[1::] %}
+      <tr valign="top">
+          <td />
+          <td class="screenshot">
+              <div class="image-container">
+                 <img src="{{screenshot_dir}}{{filename}}" />
+              </div>
+          </td>
+        </tr>
+        {% endfor %}
+
+        {% for permission in app.permissions %}
+
+        {% set screenshots = [] %}
+        {% for filename in app.screenshots %}
+        {% if app.app_name.replace(' ', '') in filename and permission.permission_name.replace(' ', '') in filename %}
+          {{ screenshots.append(filename) }}
+        {% endif %}
+        {% endfor %}
+
+        <tr valign="top">
+            <td>
+                <table>
+                    <tbody>
+                        <tr valign="top">
                             <th>Can your [ex-]partner access your
                                 {{permission.permission_name.lower()}} using this app?</th>
                             <td>{{permission.access | capitalize}}</td>
@@ -250,9 +301,33 @@
                             <td>{{permission.describe}}</td>
                         </tr>
                         {% endif %}
-                        {% endfor %}
                     </tbody>
                 </table>
+            </td>
+            <td class="screenshot">
+              {% if screenshots|length > 0 %}
+              <div class="image-container">
+                 <img src="{{screenshot_dir}}{{screenshots|first}}" />
+              </div>
+              {% endif %}
+
+            </td>
+        </tr>
+
+        {% for filename in screenshots[1::] %}
+        <tr valign="top">
+            <td />
+            <td class="screenshot">
+                <div class="image-container">
+                   <img src="{{screenshot_dir}}{{filename}}" />
+                </div>
+            </td>
+          </tr>
+          {% endfor %}
+       {% endfor %}
+
+        <tr valign="top">
+            <td>
                 {% if app.notes.client_notes %}
                 <h3>Client comments</h3>
                 <p>
@@ -265,12 +340,6 @@
                     <p>&gt; {{app.notes.consultant_notes}} </p>
                 </p>
                 {% endif %}
-            </td>
-            <td valign="top" class="screenshot">
-                    {% for filename in app.screenshots %}
-                    <img src="{{screenshot_dir}}{{filename}}" />
-                    <p>{{filename}}</p>
-                    {% endfor %}
             </td>
         </tr>
     </tbody>
@@ -441,7 +510,6 @@
             <td valign="top" class="screenshot">
                 {% for filename in account.screenshots %}
                 <img src="{{screenshot_dir}}{{filename}}" />
-                <p>{{filename}}</p>
                 {% endfor %}
             </td>
         </tr>
@@ -450,7 +518,6 @@
 {% endfor %}
 {% endif %}
 </div>
-
 <!--
 <hr />
 <div class="footer">
@@ -460,6 +527,6 @@
     </p>
 </div>
 -->
-
 </body>
 </html>
+

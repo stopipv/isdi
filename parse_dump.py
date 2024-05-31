@@ -102,7 +102,7 @@ def split_equalto_delim(k):
     return k.split('=', 1)
 
 def prune_empty_keys(d):
-    """d is an multi-layer dictionary. The function 
+    """d is an multi-layer dictionary. The function
     converts a sequence of keys into
     array if all have empty values"""
     if not isinstance(d, dict):
@@ -316,7 +316,7 @@ class AndroidDump(PhoneDump):
             }
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
         # parser error (tested on SM-G965U,Samsung,8.0.0)
-        
+
         net_stats = pd.read_csv(io.StringIO(
             '\n'.join(d['net_stats'])
         ), on_bad_lines='warn')
@@ -538,7 +538,7 @@ class IosDump(PhoneDump):
         if party in ['system', 'user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
                     .format(party))
-            # permissions are an array that returns the permission id and an explanation. 
+            # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res['permissions'] = [(p.capitalize(), r) for p, r in permissions]
         res['title'] = app['CFBundleExecutable']
@@ -556,7 +556,7 @@ class IosDump(PhoneDump):
 
         return res
 
-    # TODO: The following function is incorrect or incomplete. Commenting out for now. 
+    # TODO: The following function is incorrect or incomplete. Commenting out for now.
     # def all(self):
     #     for appidx in range(self.df.shape[0]):
     #         app = self.df.iloc[appidx,:].dropna()

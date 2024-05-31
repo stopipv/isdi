@@ -18,10 +18,9 @@ def privacy():
     )
 
 
-@app.route("/privacy/<device>/<cmd>", methods=['GET'])
-def privacy_scan(device, cmd):
+@app.route("/privacy/<device>/<cmd>/<context>", methods=['GET'])
+def privacy_scan(device, cmd, context):
     sc = get_device(device)
-    # res = do_privacy_check(sc.serialno, cmd)
-    res = do_privacy_check('', cmd)
+    res = do_privacy_check(sc.serialno, cmd, context)
     print("Screenshot Taken")
     return res

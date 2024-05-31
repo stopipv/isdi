@@ -4,33 +4,29 @@
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
 
 {% block content %}
 
 <script>
-$(document).ready(function() {
-    var loading = $('#loadingDiv').hide();
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
 
-    // Define get() function in global scope
-    window.get = function(url) {
-        loading.show();
-        $('#msg').html("");
-        $.get(url)
-            .done(function(data) {
-                $('#msg').html(data);
-            })
-            .fail(function(xhr, status, error) {
-                $('#msg').html("Error occurred: " + error);
-            })
-            .always(function() {
-                loading.hide();
-            });
-    };
-
-    // Hide loading spinner initially
-    loading.hide();
-});
+    fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+}
 </script>
+
 <div class="container">
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -191,12 +187,7 @@ $(document).ready(function() {
                             </table>
                         </div>
                         <div>
-                          <button type="button" onclick="get('/privacy/android/screenshot')" value="screenshot">Screenshot</button>
-                          <div class="jumbotron" id="msg">
-                          </div>
-                          <br><br>
-                          <div id="loadingDiv" align="center"><img src="{{ url_for('static', filename='images/waiting.gif') }}"/></div>
-                          <!-- <button type="button" onclick="fetch('/privacy/android/screenshot').then((response) => response.json()).then((json) => console.log(json));" value="screenshot">Screenshot</button> -->
+                          <button id="spyware_{{ spyware[loop.index0].app_name.replace(' ','') }}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>
@@ -286,9 +277,10 @@ $(document).ready(function() {
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
-                                    <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
+
                                 </tbody>
                             </table>
+                            <button id="dualuse_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
                         </div>
 
                         {% for perm in nested.permissions %}
@@ -308,9 +300,9 @@ $(document).ready(function() {
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
-                                    <tr><th>{{perm.screenshot.label}}</th><td>{{perm.screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="dualuseperm_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}_{{dualuse[outer_loop.index0].permissions[loop.index0].permission_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
                         </div>
                         {% endfor %}
 
@@ -386,7 +378,7 @@ $(document).ready(function() {
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_logins.label}}</th><td>{{nested.suspicious_logins.describe_logins}}</td></tr>
-                                    <tr><th>{{nested.suspicious_logins.login_screenshot.label}}</th><td>{{nested.suspicious_logins.login_screenshot}}</td></tr>
+                                    <button id="accounts_{{accounts[loop.index0].account_name.replace(' ','')}}" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
 
                                     <tr><th>{{nested.suspicious_logins.activity_log.label}}</th><td>
                                         <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}>
@@ -399,7 +391,7 @@ $(document).ready(function() {
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_activity.label}}</th><td>{{nested.suspicious_logins.describe_activity}}</td></tr>
-                                    <tr><th>{{nested.suspicious_logins.activity_screenshot.label}}</th><td>{{nested.suspicious_logins.activity_screenshot}}</td></tr>
+                                    <button id="loginactivity_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
                                 </tbody>
                             </table>
                         </div>
@@ -441,7 +433,8 @@ $(document).ready(function() {
                                     </div></td></tr>
                                     {% endfor %}
                                     <tr><th>{{nested.recovery_settings.phone.label}}</th><td>{{nested.recovery_settings.phone}}</td></tr>
-                                    <tr><th>{{nested.recovery_settings.phone_screenshot.label}}</th><td>{{nested.recovery_settings.phone_screenshot}}</td></tr>
+
+                                    <button id="recovery_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
                                     {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
                                     <tr><th>{{subform.label}}</th><td>
                                         <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
@@ -455,9 +448,9 @@ $(document).ready(function() {
                                     </div></td></tr>
                                     {% endfor %}
                                     <tr><th>{{nested.recovery_settings.email.label}}</th><td>{{nested.recovery_settings.email}}</td></tr>
-                                    <tr><th>{{nested.recovery_settings.email_screenshot.label}}</th><td>{{nested.recovery_settings.email_screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="recoveryemail_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.two_factor_settings.label }}</h5>
                         <div class="subform">
@@ -489,9 +482,10 @@ $(document).ready(function() {
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endwith %}
-                                    <tr><th>{{nested.two_factor_settings.screenshot.label}}</th><td>{{nested.two_factor_settings.screenshot}}</td></tr>
+
                                 </tbody>
                             </table>
+                            <button id="twofactor_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('twofactor')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.security_questions.label }}</h5>
                         <div class="subform">
@@ -519,9 +513,9 @@ $(document).ready(function() {
                                         </label>
                                         {% endfor %}
                                     </div></td></tr>
-                                    <tr><th>{{nested.security_questions.screenshot.label}}</th><td>{{nested.security_questions.screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="securityq_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>

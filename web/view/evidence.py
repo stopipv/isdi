@@ -1,4 +1,3 @@
-
 import os
 import pickle
 import traceback
@@ -36,12 +35,13 @@ from evidence_collection import (
     reformat_verbose_apps,
     remove_unwanted_data,
     unpack_evidence_context,
+    get_screenshots
 )
 from web import app
 
 bootstrap = Bootstrap(app)
 
-USE_PICKLE_FOR_SUMMARY = True
+USE_PICKLE_FOR_SUMMARY = False
 USE_FAKE_DATA = False
 
 @app.route("/evidence/", methods={'GET'})
@@ -180,25 +180,28 @@ def evidence_printout():
     context["screenshot_dir"] = config.SCREENSHOT_LOCATION
 
     # add fake screenshots
-    context["spyware"][0]['screenshots'] = ['step3-1.png']
-    context["dualuse"][1]['screenshots'] = ['step4-1.png']
-    context["accounts"][0]['screenshots'] = ['step6-1.png', 'step6-2.png']
+    # context["spyware"][0]['screenshots'] = ['step3-1.png']
+    # context["dualuse"][1]['screenshots'] = ['step4-1.png']
+    # context["accounts"][0]['screenshots'] = ['step6-1.png', 'step6-2.png']
 
     for app in context["spyware"]:
          summary, concerning = create_app_summary(app, spyware=True)
          app['summary'] = summary
          app['concerning'] = concerning
+         app['screenshots'] = get_screenshots('spyware', app['app_name'], context["screenshot_dir"])
 
     for app in context["dualuse"]:
          summary, concerning = create_app_summary(app, spyware=False)
          app['summary'] = summary
          app['concerning'] = concerning
+         app['screenshots'] = get_screenshots('dualuse', app['app_name'], context["screenshot_dir"])
 
     for account in context["accounts"]:
         access, ability, access_concern, ability_concern = create_account_summary(account)
         account["access_summary"] = access
         account["ability_summary"] = ability
         account["concerning"] = access_concern or ability_concern
+        account['screenshots'] = get_screenshots('accounts', account['account_name'], context["screenshot_dir"])
 
     context["concerns"] = create_overall_summary(context)
 

@@ -36,6 +36,7 @@ from flask import url_for, session
 import random
 import config
 import os
+from datetime import datetime
 
 from wtforms.validators import ValidationError
 adb=config.ADB_PATH
@@ -135,11 +136,11 @@ def take_screenshot(ser, fname=None):
 def wait(t):
     time.sleep(t)
 
-def do_privacy_check(ser, command):
+def do_privacy_check(ser, command, context):
     def add_image(img, nocache=False):
         rand = random.randint(0, 10000)
         return "<img height='400px' src='" + \
-            url_for('static', filename='images/' + img) + "?{}'/>".format(rand if nocache else '')
+            url_for('static', filename=img) + "?{}'/>".format(rand if nocache else '')
 
     command = command.lower()
     if command == "account": # 1. Account ownership  & 3. Sync (if present)
@@ -175,8 +176,10 @@ def do_privacy_check(ser, command):
                     "and what data is being synced.")
 
     elif command == "screenshot":
-        take_screenshot(ser, fname="webstatic/images/tmp.png")
-        return add_image("tmp.png", nocache=True)
+        curr_time = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+        fname = 'images/screenshots/' + context + '_' + curr_time + '.png';
+        take_screenshot(ser, fname='webstatic/' + fname)
+        return add_image(fname, nocache=True)
     else:
         return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 

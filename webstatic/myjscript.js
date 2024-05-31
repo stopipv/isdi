@@ -104,27 +104,27 @@ function animateUpdate() {
  }
 
 
-function fetch(url, device) {
-    startProgressbar();
-    $.get(url, function (data) {
-        perc = 100;
-        updateProgress(100);
-        var d = $.parseJSON(data);
-        var ser = d['serial'];
-        $('#device-id').attr("value", device);
-        $('#device-id').css("font-size", "0.25in");
-        var s = "";
-        s += create_tab(d['apps'], device, ser);
-        s += '<input type="hidden" name="url" value="';
-        s += url.replace('/scan/', '') + '"></input>';
-        $('#applist').html(s);
-        $('input[value=ignore]').prop('checked', 'checked');
-        $('#btn-submit').prop('disabled', false);
-        $('#error-notice').html(d['error'])
-    }).fail(function (err) {
-        perc = 100;
-        $('#error-notice').html(JSON.stringify(err));
-    });
-}
+// function fetch(url, device) {
+//     startProgressbar();
+//     $.get(url, function (data) {
+//         perc = 100;
+//         updateProgress(100);
+//         var d = $.parseJSON(data);
+//         var ser = d['serial'];
+//         $('#device-id').attr("value", device);
+//         $('#device-id').css("font-size", "0.25in");
+//         var s = "";
+//         s += create_tab(d['apps'], device, ser);
+//         s += '<input type="hidden" name="url" value="';
+//         s += url.replace('/scan/', '') + '"></input>';
+//         $('#applist').html(s);
+//         $('input[value=ignore]').prop('checked', 'checked');
+//         $('#btn-submit').prop('disabled', false);
+//         $('#error-notice').html(d['error'])
+//     }).fail(function (err) {
+//         perc = 100;
+//         $('#error-notice').html(JSON.stringify(err));
+//     });
+// }
 
 

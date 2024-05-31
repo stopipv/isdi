@@ -476,6 +476,12 @@ def create_account_summary(account, second_person=False):
 
     return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
 
+def get_screenshots(context, name, dir):
+    screenshots = os.listdir(dir)
+    name = name.replace(' ', '')
+    return list(filter(lambda x: context in x and name in x, screenshots))
+
+
 def screenshot(device, fname):
     """Take a screenshot and return the file where the screenshot is"""
     fname = os.path.join(SCREENSHOT_FOLDER, fname)
