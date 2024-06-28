@@ -103,6 +103,11 @@ def evidence(step):
 
             # collect apps if we need to
             if step == Pages.SCAN.value:
+                # Ensure any previous screenshots have been removed before scan
+                print("Removing files:")
+                os.system("ls webstatic/images/screenshots/")
+                os.system("rm webstatic/images/screenshots/*")
+
                 try:
                     verbose_apps = get_suspicious_apps(session['step{}'.format(Pages.START.value)]['device_type'],
                                                        session['step{}'.format(Pages.START.value)]['name'])
