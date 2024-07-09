@@ -33,4 +33,4 @@ Werkzeug==2.3.8
 WTForms
 WTForms-Alchemy
 WTForms-Components
-zipp==3.11.0
+zipp==3.19.1
