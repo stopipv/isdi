@@ -522,7 +522,28 @@ class IosScan(AppScan):
         else:
             print(">> The iOS dumping failed for some reason. Check above for more information")
             return False
-
+    def screenshot():
+        cmd = "idb list-targets"
+        process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        lines = output.split('\n')
+        obArray = []
+        for line in lines:
+            obArray.append(line.split('|'))
+        deviceID = ""
+        for deviceInfo in obArray:
+            if deviceInfo[2] == " Booted ":
+                deviceID = deviceInfo[1]
+        cmd2 = "idb connect " + deviceID
+        process = subprocess.Popen(cmd2.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        date = os.system("date")
+        fileDestination = "./phone_dumps/"+date+"Video.mp4"
+        cmd3 = " idb record-video --udid" + deviceID + " " + fileDestination
+        process = subprocess.Popen(cmd3.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        os.system("cd ./phone_dumps/")
+        os.system("ffmpeg -i "+date+"Video.mp4 -frames:v 1 "+date+"Pic.jpg")
     def uninstall(self, serial, appid):
         #cmd = '{cli} -i {serial} --uninstall_only --bundle_id {appid!r}'
         #cmd = 'ideviceinstaller --udid {} --uninstall {appid!r}'.format(serial, appid)
