@@ -139,7 +139,7 @@ toremove/
 
 reports/*.csv
 apps/
-data/
+*.db
 static_data/app-info.db.gz
 static_data/all_android_apps_5k_*.csv
 webstatic/images/tmp.png
