@@ -233,12 +233,12 @@ class AndroidDump(PhoneDump):
         lvls = ["" for _ in range(20)]  # Max 20 levels allowed
         i = 0
         while i < len(lines):
-            l = lines[i]
+            line = lines[i]
             i += 1
-            if not l.strip():  # subsection ends
+            if not line.strip():  # subsection ends
                 continue
-            l = l.replace("\t", " " * 5)
-            t_spcnt = count_lspaces(l)
+            line = line.replace("\t", " " * 5)
+            t_spcnt = count_lspaces(line)
             # print(t_spcnt, curr_spcnt, curr_lvl)
             # if t_spcnt == 1:
             #     print(repr(l))
@@ -254,7 +254,7 @@ class AndroidDump(PhoneDump):
             #         "t_spc: {} <--> curr_lvl: {}\n{}".format(t_spcnt, curr_lvl, l)
             # print(lvls[:curr_lvl], curr_lvl, curr_spcnt)
             curr = get_d_at_level(res, lvls[:curr_lvl])
-            k = l.strip().rstrip(":")
+            k = line.strip().rstrip(":")
             lvls[curr_lvl] = k  # '{} --> {}'.format(curr_lvl, k)
             curr[lvls[curr_lvl]] = {}
         return prune_empty_keys(res)

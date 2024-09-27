@@ -244,7 +244,7 @@ class AndroidScan(AppScan):
             return installed_apps
 
     def _get_apps_from_dump(self, serialno):
-        hmac_serial = config.hmac_serial(serialno)
+        # hmac_serial = config.hmac_serial(serialno)
         # Try to read from the dump
         dump_file = self.dump_path(serialno)
         self.dump_d = parse_dump.AndroidDump(dump_file)
@@ -257,12 +257,13 @@ class AndroidScan(AppScan):
         if from_device:
             installed_apps = self._get_apps_from_device(serialno, "-u")
             if installed_apps:
-                q = run_command(
-                    "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
-                    ser=serialno,
-                    hmac_serial=hmac_serial,
-                    nowait=True,
-                )
+                # q = run_command(
+                #     "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
+                #     ser=serialno,
+                #     hmac_serial=hmac_serial,
+                #     nowait=True,
+                # )
+                pass
         else:
             # Try loading from the dump
             installed_apps = self._get_apps_from_dump(hmac_serial)
@@ -273,7 +274,7 @@ class AndroidScan(AppScan):
         if from_device:
             apps = self._get_apps_from_device(serialno, "-s")
         else:
-            apps = []  ## TODO: fix this later, not sure how to get from dump
+            apps = []  # TODO: fix this later, not sure how to get from dump
         return apps
 
     def get_offstore_apps(self, serialno, from_device=False):
@@ -283,24 +284,24 @@ class AndroidScan(AppScan):
         rooted, reason = self.isrooted(serialno)
         approved = config.APPROVED_INSTALLERS
         if not rooted:
-            for l in self._get_apps_from_device(serialno, "-i -u -s"):
-                l = l.split()
-                if len(l) == 2:
-                    apps, t = l
+            for line in self._get_apps_from_device(serialno, "-i -u -s"):
+                line = line.split()
+                if len(line) == 2:
+                    apps, t = line
                     installer = t.replace("installer=", "")
                     if installer not in approved and installer != "null":
                         # if system is rooted, won't make any difference spoofing wise
                         approved.add(installer)
         print(f"Approved Installers:{approved}")
-        for l in self._get_apps_from_device(serialno, "-i -u -3"):
-            l = l.split()
-            if len(l) == 2:
-                apps, t = l
+        for line in self._get_apps_from_device(serialno, "-i -u -3"):
+            line = line.split()
+            if len(line) == 2:
+                apps, t = line
                 installer = t.replace("installer=", "")
                 if installer not in approved:
                     offstore.append(apps)
             else:
-                print(">>>>>> ERROR: {}".format(l), file=sys.stderr)
+                print(">>>>>> ERROR: {}".format(line), file=sys.stderr)
         return offstore
 
     def devices(self):
@@ -342,7 +343,7 @@ class AndroidScan(AppScan):
         )
 
         cmd = '{cli} -s {serial} shell dumpsys batterystats | grep -i "Start clock time:" | head -n1'
-        runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
+        # runcmd = catch_err(run_command(cmd, serial=serial), cmd=cmd)
         # m['last_full_charge'] = datetime.strptime(runcmd.split(':')[1].strip(), '%Y-%m-%d-%H-%M-%S')
         m["last_full_charge"] = datetime.now()
         return "{brand} {model} (running Android {version})".format(**m), m
@@ -608,7 +609,7 @@ class IosScan(AppScan):
             return ("", {})
 
     def _load_dump(self, serial) -> parse_dump.IosDump:
-        hmac_serial = config.hmac_serial(serial)
+        # hmac_serial = config.hmac_serial(serial)
         path = self.dump_path(serial, fkind="Dir")
         # dumped = catch_err(run_command(cmd)).strip()
         dumpf = os.path.join(path, config.IOS_DUMPFILES["Apps"])
@@ -670,10 +671,11 @@ class IosScan(AppScan):
                 rooted["True"].append(
                     "Filesystem *might* be rooted. Conduct additional checks."
                 )
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             print("Couldn't find Jailbroken FS check log.")
             # TODO: trigger error message? like
-            # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
+            # TODO: show a try again, maybe it's not plugged in properly. still not working? 
+            # this could be due to many many many reasons.
             # return (True, ['FS check failed, jailbreak not necessarily occurring.'])
 
         try:
@@ -681,9 +683,10 @@ class IosScan(AppScan):
                 JAILBROKEN_SSH_LOG = fh.readlines()
             if "0\n" in JAILBROKEN_SSH_LOG:
                 rooted["True"].append("SSH is enabled.")
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             # TODO: trigger error message? like
-            # TODO: show a try again, maybe it's not plugged in properly. still not working? this could be due to many many many reasons.
+            # TODO: show a try again, maybe it's not plugged in properly. still not working?
+            #  this could be due to many many many reasons.
             print("Couldn't find Jailbroken SSH check log.")
 
         # if app["Path"].split("/")[-1] in ["Cydia.app"]
@@ -695,7 +698,8 @@ class IosScan(AppScan):
         # add to jailbroken log
         # FIXME: load from private data blocklist. More to be added.
         """
-        # FIXME: NEED to apply first to df. self.installed_apps not sufficient. dotapps.append(app["Path"].split("/")[-1])
+        # FIXME: NEED to apply first to df. self.installed_apps not sufficient.
+        #  dotapps.append(app["Path"].split("/")[-1])
 
         apps_titles = self.parse_dump.installed_apps_titles()["title"].tolist()
         # TODO: convert to set check
