@@ -9,22 +9,23 @@ from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
 from plistlib import load
-from typing import List,Dict
+from typing import List, Dict
 
 import pandas as pd
 from rsonlite import simpleparse
 import config
 
-def count_lspaces(l):
+
+def count_lspaces(lspaces):
     # print(">>", repr(l))
-    return re.search(r'\S', l).start()
+    return re.search(r"\S", lspaces).start()
 
 
 def get_d_at_level(d, lvl):
-    for l in lvl:
-        if l not in d:
-            d[l] = {}
-        d = d[l]
+    for level in lvl:
+        if level not in d:
+            d[level] = {}
+        d = d[level]
     return d
 
 
@@ -39,7 +40,8 @@ def clean_json(d):
 def _match_keys_w_one(d, key, only_last=False):
     """Returns a list of keys that matches @key"""
     sk = re.compile(key)
-    if not d: return []
+    if not d:
+        return []
     if isinstance(d, list):
         d = d[0]
     ret = [k for k in d if sk.match(k) is not None]
@@ -54,7 +56,7 @@ def match_keys(d, keys):
     Returns a list of lists
     """
     if isinstance(keys, str):
-        keys = keys.split('//')
+        keys = keys.split("//")
     ret = _match_keys_w_one(d, keys[0])
     if len(keys) == 1:
         return ret
@@ -98,33 +100,35 @@ def _extract_one(d, lkeys):
 
 
 def split_equalto_delim(k):
-    return k.split('=', 1)
+    return k.split("=", 1)
+
 
 def prune_empty_keys(d):
-    """d is an multi-layer dictionary. The function 
+    """d is an multi-layer dictionary. The function
     converts a sequence of keys into
     array if all have empty values"""
     if not isinstance(d, dict):
         return d
     if not any(d.values()):
         return list(d.keys())
-    for k,v in d.items():
+    for k, v in d.items():
         d[k] = prune_empty_keys(v)
     return d
 
 
 def retrieve(dict_, nest):
-    '''
+    """
     Navigates dictionaries like dict_[nest0][nest1][nest2]...
     gracefully.
-    '''
-    dict_ = dict_.to_dict() # for pandas
+    """
+    dict_ = dict_.to_dict()  # for pandas
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
-        return ""
+        return f"{e}"
     except TypeError as e:
-        return ""
+        return f"{e}"
+
 
 class PhoneDump(object):
     def __init__(self, dev_type, fname):
@@ -143,7 +147,7 @@ class PhoneDump(object):
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
         self.dumpf = fname
-        super(AndroidDump, self).__init__('android', fname)
+        super(AndroidDump, self).__init__("android", fname)
         self.df = self.load_file()
 
     # def _extract_lines(self, service):
@@ -164,36 +168,41 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def custom_parse(service, lines):
-        if service == 'appops':
+        if service == "appops":
             return lines
 
     @staticmethod
     def new_parse_dump_file(self, fname):
-        """Not used working using simple parse to parse the files. """
+        """Not used working using simple parse to parse the files."""
         if not Path(fname).exists():
             print("File: {!r} does not exists".format(fname))
         data = open(fname)
         d = {}
-        service = ''
+        service = ""
         join_lines = []
         custom_parse_services = {"appops"}
+
         def _parse(lines):
             try:
                 if service in custom_parse_services:
                     return AndroidDump.custom_parse(service, lines)
                 else:
-                    return simpleparse('\n'.join(join_lines))
+                    return simpleparse("\n".join(join_lines))
             except Exception as ex:
-                print("Could not parse for {} service={}. Exception={}"\
-                      .format(fname, service, ex))
+                print(
+                    "Could not parse for {} service={}. Exception={}".format(
+                        fname, service, ex
+                    )
+                )
                 return lines
 
         for i, l in enumerate(data):
-            if l.startswith('----'): continue
-            if l.startswith('DUMP OF SERVICE'):
+            if l.startswith("----"):
+                continue
+            if l.startswith("DUMP OF SERVICE"):
                 if service:
                     d[service] = _parse(join_lines)
-                service = l.strip().rsplit(' ', 1)[1]
+                service = l.strip().rsplit(" ", 1)[1]
                 join_lines = []
             else:
                 join_lines.append(l)
@@ -210,7 +219,7 @@ class AndroidDump(PhoneDump):
             if not l:
                 a = False
                 break
-            if l.startswith('DUMP OF'):
+            if l.startswith("DUMP OF"):
                 fp.seek(lastpos)
                 return content
             lastpos = fp.tell()
@@ -221,13 +230,14 @@ class AndroidDump(PhoneDump):
         res: Dict[str, dict] = {}
         curr_spcnt = [0]
         curr_lvl = 0
-        lvls = ['' for _ in range(20)]  # Max 20 levels allowed
+        lvls = ["" for _ in range(20)]  # Max 20 levels allowed
         i = 0
         while i < len(lines):
-            l = lines[i]; i += 1
+            l = lines[i]
+            i += 1
             if not l.strip():  # subsection ends
                 continue
-            l = l.replace('\t', ' '*5)
+            l = l.replace("\t", " " * 5)
             t_spcnt = count_lspaces(l)
             # print(t_spcnt, curr_spcnt, curr_lvl)
             # if t_spcnt == 1:
@@ -238,14 +248,14 @@ class AndroidDump(PhoneDump):
             while curr_spcnt and curr_spcnt[-1] > 0 and t_spcnt <= curr_spcnt[-1] - 2:
                 curr_lvl -= 1
                 curr_spcnt.pop()
-            if curr_spcnt[-1]>0:
+            if curr_spcnt[-1] > 0:
                 curr_spcnt[-1] = t_spcnt
             # assert (t_spcnt != 0) or (curr_lvl == 0), \
             #         "t_spc: {} <--> curr_lvl: {}\n{}".format(t_spcnt, curr_lvl, l)
             # print(lvls[:curr_lvl], curr_lvl, curr_spcnt)
             curr = get_d_at_level(res, lvls[:curr_lvl])
-            k = l.strip().rstrip(':')
-            lvls[curr_lvl] = k   # '{} --> {}'.format(curr_lvl, k)
+            k = l.strip().rstrip(":")
+            lvls[curr_lvl] = k  # '{} --> {}'.format(curr_lvl, k)
             curr[lvls[curr_lvl]] = {}
         return prune_empty_keys(res)
 
@@ -255,25 +265,23 @@ class AndroidDump(PhoneDump):
             print("File: {!r} does not exists".format(fname))
         fp = open(fname)
         d = {}
-        service = ''
+        service = ""
         curr_spcnt, curr_lvl = 0, 0
         while True:
             l = fp.readline().rstrip()
-            if l.startswith('----'):
+            if l.startswith("----"):
                 continue
 
-            if l.startswith('DUMP OF SERVICE'): # Service
-                service = l.strip().rsplit(' ', 1)[1]
+            if l.startswith("DUMP OF SERVICE"):  # Service
+                service = l.strip().rsplit(" ", 1)[1]
                 content = self._extract_info_lines(fp)
                 print(f"Content: {service!r}", content[:10])
                 d[service] = self._parse_dump_service_info_lines(content)
 
-            elif l.startswith('DUMP OF SETTINGS'): # Setting
-                setting = 'settings_' + l.strip().rsplit(' ', 1)[1]
+            elif l.startswith("DUMP OF SETTINGS"):  # Setting
+                setting = "settings_" + l.strip().rsplit(" ", 1)[1]
                 content = self._extract_info_lines(fp)
-                settings_d = dict(
-                    l.split('=', 1) for l in content if '=' in l
-                )
+                settings_d = dict(l.split("=", 1) for l in content if "=" in l)
                 d[setting] = settings_d
             else:
                 if not l:
@@ -282,11 +290,11 @@ class AndroidDump(PhoneDump):
         return d
 
     def load_file(self, failed_before=False):
-        fname = self.fname.rsplit('.', 1)[0] + '.txt'
-        json_fname = fname.rsplit('.', 1)[0] + '.json'
+        fname = self.fname.rsplit(".", 1)[0] + ".txt"
+        json_fname = fname.rsplit(".", 1)[0] + ".json"
         d = {}
         if os.path.exists(json_fname):
-            with open(json_fname, 'r') as f:
+            with open(json_fname, "r") as f:
                 try:
                     d = json.load(f)
                 except Exception as ex:
@@ -295,51 +303,54 @@ class AndroidDump(PhoneDump):
                         os.unlink(json_fname)
                         return self.load_file(failed_before=True)
         else:
-            with open(json_fname, 'w') as f:
+            with open(json_fname, "w") as f:
                 try:
                     d = self.parse_dump_file(fname)
                     json.dump(d, f, indent=2)
                 except Exception as ex:
                     print("File ({!r}) could not be opened or parsed.".format(fname))
                     print("Exception: {}".format(ex))
-                    raise(ex)
+                    raise (ex)
                     return {}
         return d
 
     @staticmethod
     def get_data_usage(d, process_uid):
-        if 'net_stats' not in d:
-            return {
-                "foreground": "unknown",
-                "background": "unknown"
-            }
+        if "net_stats" not in d:
+            return {"foreground": "unknown", "background": "unknown"}
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
         # parser error (tested on SM-G965U,Samsung,8.0.0)
-        
-        net_stats = pd.read_csv(io.StringIO(
-            '\n'.join(d['net_stats'])
-        ), on_bad_lines='warn')
+
+        net_stats = pd.read_csv(
+            io.StringIO("\n".join(d["net_stats"])), on_bad_lines="warn"
+        )
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
-            ['uid_tag_int', 'cnt_set', 'rx_bytes', 'tx_bytes']].astype(int)
+            ["uid_tag_int", "cnt_set", "rx_bytes", "tx_bytes"]
+        ].astype(int)
 
         def s(c):
-            return (d[d['cnt_set'] == c].eval('rx_bytes+tx_bytes').sum()
-                    / (1024*1024))
+            return d[d["cnt_set"] == c].eval("rx_bytes+tx_bytes").sum() / (1024 * 1024)
+
         return {
             "foreground": "{:.2f} MB".format(s(1)),
-            "background": "{:.2f} MB".format(s(0))
+            "background": "{:.2f} MB".format(s(0)),
         }
 
     @staticmethod
     def get_battery_stat(d, uidu):
-        b = list(get_all_leaves(match_keys(
-            d, "batterystats//Statistics since last charge//Estimated power use .*"
-            "//^Uid {}:.*".format(uidu))
-        ))
+        b = list(
+            get_all_leaves(
+                match_keys(
+                    d,
+                    "batterystats//Statistics since last charge//Estimated power use .*"
+                    "//^Uid {}:.*".format(uidu),
+                )
+            )
+        )
         if not b:
             return "0 (mAh)"
         else:
-            t = b[0].split(':')
+            t = b[0].split(":")
             return t[1]
         return b
 
@@ -349,12 +360,13 @@ class AndroidDump(PhoneDump):
             return {}
 
         def get_appid_h(txt):
-            m = re.match(r'Package \[(?P<appId>.*)\] \((?P<h>.*)\)', txt)
+            m = re.match(r"Package \[(?P<appId>.*)\] \((?P<h>.*)\)", txt)
             if m:
                 return m.groups()
+
         packages = map(
             get_appid_h,
-            get_all_leaves(match_keys(d, '^package$//^Packages//^Package .*'))
+            get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*")),
         )
         return [c for c in packages if c]
 
@@ -363,36 +375,37 @@ class AndroidDump(PhoneDump):
         if not d:
             return {}
         package = extract(
-            d,
-            match_keys(d, '^package$//^Packages//^Package \[{}\].*'.format(appid))
+            d, match_keys(d, "^package$//^Packages//^Package \[{}\].*".format(appid))
         )
 
-        other_info = [get_all_leaves(match_keys(package, v))
-                      for v in ['userId', 'firstInstallTime', 'lastUpdateTime']]
-        res = dict(map(
-            split_equalto_delim, [x[0] for x in other_info if x]
-        ))
+        other_info = [
+            get_all_leaves(match_keys(package, v))
+            for v in ["userId", "firstInstallTime", "lastUpdateTime"]
+        ]
+        res = dict(map(split_equalto_delim, [x[0] for x in other_info if x]))
 
-        if 'userId' not in res:
+        if "userId" not in res:
             print("UserID not found in res={}".format(res))
             return {}
-        process_uid = res['userId']
-        del res['userId']
-        memory = match_keys(d, 'meminfo//Total PSS by process//.*: {}.*'.format(appid))
-        uidu_match = list(get_all_leaves(
-            match_keys(d, 'procstats//CURRENT STATS//\* {} / .*'.format(appid))
-        ))
+        process_uid = res["userId"]
+        del res["userId"]
+        memory = match_keys(d, "meminfo//Total PSS by process//.*: {}.*".format(appid))
+        uidu_match = list(
+            get_all_leaves(
+                match_keys(d, "procstats//CURRENT STATS//\* {} / .*".format(appid))
+            )
+        )
         print(uidu_match)
         if uidu_match:
-            uidu = uidu_match[-1].split(' / ')
+            uidu = uidu_match[-1].split(" / ")
         else:
             uidu = "Not Found"
         if len(uidu) > 1:
             uidu = uidu[1]
         else:
             uidu = uidu[0]
-        res['data_usage'] = self.get_data_usage(d, process_uid)
-        res['battery_usage'] = self.get_battery_stat(d, uidu)  # (mAh)
+        res["data_usage"] = self.get_data_usage(d, process_uid)
+        res["battery_usage"] = self.get_battery_stat(d, uidu)  # (mAh)
         # print('RESULTS')
         # print(res)
         # print('END RESULTS')
@@ -413,23 +426,25 @@ class IosDump(PhoneDump):
     #    'UISupportedInterfaceOrientations']
     # INDEX = 'CFBundleIdentifier'
     def __init__(self, fplist, finfo=None):
-        self.device_type = 'ios'
+        self.device_type = "ios"
         self.fname = fplist
         if finfo:
             self.finfo = finfo
             self.deviceinfo = self.load_device_info()
-            self.device_class = self.deviceinfo.get('DeviceClass', "")
+            self.device_class = self.deviceinfo.get("DeviceClass", "")
         else:
-            self.device_class = 'iPhone/iPad'
+            self.device_class = "iPhone/iPad"
         self.df = self.load_file()
 
         # FIXME: not efficient to load here everytime?
         # load permissions mappings and apps plist
         self.permissions_map = {}
         self.model_make_map = {}
-        with open(os.path.join(config.STATIC_DATA, 'ios_permissions.json'), 'r') as fh:
+        with open(os.path.join(config.STATIC_DATA, "ios_permissions.json"), "r") as fh:
             self.permissions_map = json.load(fh)
-        with open(os.path.join(config.STATIC_DATA, 'ios_device_identifiers.json'), 'r') as fh:
+        with open(
+            os.path.join(config.STATIC_DATA, "ios_device_identifiers.json"), "r"
+        ) as fh:
             self.model_make_map = json.load(fh)
 
     def __nonzero__(self):
@@ -440,7 +455,7 @@ class IosDump(PhoneDump):
 
     def load_device_info(self):
         try:
-            with open(self.finfo, 'rb') as data:
+            with open(self.finfo, "rb") as data:
                 device_info = load(data)
             return device_info
 
@@ -451,7 +466,7 @@ class IosDump(PhoneDump):
                 "ProductType": "",
                 "ModelNumber": "",
                 "RegionInfo": "",
-                "ProductVersion": ""
+                "ProductVersion": "",
             }
 
     def load_file(self):
@@ -459,11 +474,11 @@ class IosDump(PhoneDump):
         try:
             # FIXME: somehow, get the ios_apps.plist into a dataframe.
             print("fname is: {}".format(self.fname))
-            with open(self.fname, 'rb') as app_data:
+            with open(self.fname, "rb") as app_data:
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
-            d['appId'] = d['CFBundleIdentifier']
-            d.set_index('appId', inplace=True)
+            d["appId"] = d["CFBundleIdentifier"]
+            d.set_index("appId", inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -473,33 +488,58 @@ class IosDump(PhoneDump):
     def check_unseen_permissions(self, permissions):
         for permission in permissions:
             if permission not in self.permissions_map:
-                print('Have not seen '+str(permission)+' before. Making note of this...')
-                permission_human_readable = permission.replace('kTCCService','')
-                with open(os.path.join(config.THIS_DIR,'ios_permissions.json'), 'w') as fh:
+                print(
+                    "Have not seen "
+                    + str(permission)
+                    + " before. Making note of this..."
+                )
+                permission_human_readable = permission.replace("kTCCService", "")
+                with open(
+                    os.path.join(config.THIS_DIR, "ios_permissions.json"), "w"
+                ) as fh:
                     self.permissions_map[permission] = permission_human_readable
                     fh.write(json.dumps(self.permissions_map))
-                print('Noted.')
-            #print('\t'+msg+": "+str(PERMISSIONS_MAP[permission])+"\tReason: "+app.get(permission,'system app'))
+                print("Noted.")
+            # print('\t'+msg+": "+str(PERMISSIONS_MAP[permission])+"\tReason: "+app.get(permission,'system app'))
 
     def get_permissions(self, app):
-        '''
-            Returns a list of tuples (permission, developer-provided reason for permission).
-            Could modify this function to include whether or not the permission can be adjusted
-            in Settings.
-        '''
-        system_permissions = retrieve(app, ['Entitlements', 'com.apple.private.tcc.allow'])
-        adjustable_system_permissions = retrieve(app, ['Entitlements','com.apple.private.tcc.allow.overridable'])
+        """
+        Returns a list of tuples (permission, developer-provided reason for permission).
+        Could modify this function to include whether or not the permission can be adjusted
+        in Settings.
+        """
+        system_permissions = retrieve(
+            app, ["Entitlements", "com.apple.private.tcc.allow"]
+        )
+        adjustable_system_permissions = retrieve(
+            app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
+        )
         third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
-        self.check_unseen_permissions(list(system_permissions)+list(adjustable_system_permissions))
+        self.check_unseen_permissions(
+            list(system_permissions) + list(adjustable_system_permissions)
+        )
 
         # (permission used, developer reason for requesting the permission)
-        all_permissions = list(set(map(lambda x: \
-                (self.permissions_map[x], app.get(x, default="permission granted by system")),\
-                list(set(system_permissions) | \
-                set(adjustable_system_permissions) | set(third_party_permissions)))))
-        pii = retrieve(app, ['Entitlements',
-                             'com.apple.private.MobileGestalt.AllowedProtectedKeys'])
-        #print("\tPII: "+str(pii))
+        all_permissions = list(
+            set(
+                map(
+                    lambda x: (
+                        self.permissions_map[x],
+                        app.get(x, default="permission granted by system"),
+                    ),
+                    list(
+                        set(system_permissions)
+                        | set(adjustable_system_permissions)
+                        | set(third_party_permissions)
+                    ),
+                )
+            )
+        )
+        pii = retrieve(
+            app,
+            ["Entitlements", "com.apple.private.MobileGestalt.AllowedProtectedKeys"],
+        )
+        # print("\tPII: "+str(pii))
         return all_permissions
 
     def device_info(self):
@@ -509,53 +549,68 @@ class IosDump(PhoneDump):
         # https://gist.github.com/shu223/c108bd47b4c9271e55b5
         m = {}
         try:
-            m['model'] = self.model_make_map[self.deviceinfo['ProductType']]
+            m["model"] = self.model_make_map[self.deviceinfo["ProductType"]]
         except KeyError as e:
-            m['model'] = "{DeviceClass} (Model {ModelNumber} {RegionInfo})"\
-                .format(**self.deviceinfo)
-        m['version'] = self.deviceinfo['ProductVersion']
+            m["model"] = "{DeviceClass} (Model {ModelNumber} {RegionInfo})".format(
+                **self.deviceinfo
+            )
+        m["version"] = self.deviceinfo["ProductVersion"]
         return "{model} (running iOS {version})".format(**m), m
 
     def info(self, appid):
         """
-            Returns dict containing the following:
-            'permission': tuple (all permissions of appid, developer
-            reasons for requesting the permissions)
-            'title': the human-friendly name of the app.
-            'jailbroken': tuple (whether or not phone is suspected to be jailbroken, rationale)
-            'phone_kind': tuple (make, OS version)
+        Returns dict containing the following:
+        'permission': tuple (all permissions of appid, developer
+        reasons for requesting the permissions)
+        'title': the human-friendly name of the app.
+        'jailbroken': tuple (whether or not phone is suspected to be jailbroken, rationale)
+        'phone_kind': tuple (make, OS version)
         """
         d = self.df
         res = {
-            'title':'',
-            'jailbroken':'', #TODO: These are never set: phone_kind and jailbroken
-            'phone_kind':''
+            "title": "",
+            "jailbroken": "",  # TODO: These are never set: phone_kind and jailbroken
+            "phone_kind": "",
         }
-        #app = self.df.iloc[appidx,:].dropna()
-        app = self.df[self.df['CFBundleIdentifier']==appid].squeeze().dropna()
+        # app = self.df.iloc[appidx,:].dropna()
+        app = self.df[self.df["CFBundleIdentifier"] == appid].squeeze().dropna()
         party = app.ApplicationType.lower()
-        if party in ['system', 'user']:
-            print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
-                    .format(party))
-            # permissions are an array that returns the permission id and an explanation. 
+        if party in ["system", "user"]:
+            print(
+                app["CFBundleName"],
+                "("
+                + app["CFBundleIdentifier"]
+                + ") is a {} app and has permissions:".format(party),
+            )
+            # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
-        res['permissions'] = [(p.capitalize(), r) for p, r in permissions]
-        res['title'] = app['CFBundleExecutable']
-        res['App Version'] = app['CFBundleVersion']
-        res['Install Date'] = '''
+        res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
+        res["title"] = app["CFBundleExecutable"]
+        res["App Version"] = app["CFBundleVersion"]
+        res["Install Date"] = (
+            """
         Apple does not officially record iOS app installation dates.  To view when
         '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
         *purchase date* of '{}', follow these instructions:
         https://www.ipvtechresearch.org/post/guides/apple/.  These are the
         closest possible approximations to installation date available to
-        end-users.  '''.format(res['title'], self.device_class, res['title'])
-        res['Battery Usage'] = "To see recent battery usage of '{title}': "\
-                               "[Settings -> Battery -> Battery Usage].".format(**res)
-        res['Data Usage'] = "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(res['title'])
+        end-users.  """.format(
+                res["title"], self.device_class, res["title"]
+            )
+        )
+        res["Battery Usage"] = (
+            "To see recent battery usage of '{title}': "
+            "[Settings -> Battery -> Battery Usage].".format(**res)
+        )
+        res["Data Usage"] = (
+            "To see recent data usage (not including Wifi) of '{}': [Settings -> Cellular -> Cellular Data].".format(
+                res["title"]
+            )
+        )
 
         return res
 
-    # TODO: The following function is incorrect or incomplete. Commenting out for now. 
+    # TODO: The following function is incorrect or incomplete. Commenting out for now.
     # def all(self):
     #     for appidx in range(self.df.shape[0]):
     #         app = self.df.iloc[appidx,:].dropna()
@@ -570,31 +625,34 @@ class IosDump(PhoneDump):
     #             print("")
 
     def system_apps(self):
-        #return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
-        return self.df.query('ApplicationType=="System"')['CFBundleIdentifier']
+        # return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
+        return self.df.query('ApplicationType=="System"')["CFBundleIdentifier"]
 
     def installed_apps_titles(self) -> pd.DataFrame:
         if self:
-            return self.df.rename(index=str,
-                                  columns={'CFBundleExecutable': 'title'})
+            return self.df.rename(index=str, columns={"CFBundleExecutable": "title"})
 
     def installed_apps(self):
-        #return self.df.index
+        # return self.df.index
         if self.df is None:
             return []
         print("parse_dump (installed_apps): >>", self.df.columns, len(self.df))
-        return self.df['appId'].to_list()
+        return self.df["appId"].to_list()
 
 
 if __name__ == "__main__":
     fname = sys.argv[1]
     # data = [l.strip() for l in open(fname)]
     ddump: PhoneDump
-    if sys.argv[2] == 'android':
+    if sys.argv[2] == "android":
         ddump = AndroidDump(fname)
-        json.dump(ddump.parse_dump_file(fname), open(fname.rsplit('.', 1)[0] + '.json', 'w'), indent=2)
-        print(json.dumps(ddump.info('ru.kidcontrol.gpstracker'), indent=2))
-    elif sys.argv[2] == 'ios':
+        json.dump(
+            ddump.parse_dump_file(fname),
+            open(fname.rsplit(".", 1)[0] + ".json", "w"),
+            indent=2,
+        )
+        print(json.dumps(ddump.info("ru.kidcontrol.gpstracker"), indent=2))
+    elif sys.argv[2] == "ios":
         ddump = IosDump(fname)
         # print(ddump.installed_apps())
         print(ddump.installed_apps_titles().to_csv())
