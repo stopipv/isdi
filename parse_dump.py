@@ -215,15 +215,15 @@ class AndroidDump(PhoneDump):
         content: List[str] = []
         a = True
         while a:
-            l = fp.readline()
-            if not l:
+            line = fp.readline()
+            if not line:
                 a = False
                 break
-            if l.startswith("DUMP OF"):
+            if line.startswith("DUMP OF"):
                 fp.seek(lastpos)
                 return content
             lastpos = fp.tell()
-            content.append(l.rstrip())
+            content.append(line.rstrip())
         return content
 
     def _parse_dump_service_info_lines(self, lines) -> dict:
@@ -266,27 +266,27 @@ class AndroidDump(PhoneDump):
         fp = open(fname)
         d = {}
         service = ""
-        curr_spcnt, curr_lvl = 0, 0
+        # curr_spcnt, curr_lvl = 0, 0
         while True:
-            l = fp.readline().rstrip()
-            if l.startswith("----"):
+            line = fp.readline().rstrip()
+            if line.startswith("----"):
                 continue
 
-            if l.startswith("DUMP OF SERVICE"):  # Service
-                service = l.strip().rsplit(" ", 1)[1]
+            if line.startswith("DUMP OF SERVICE"):  # Service
+                service = line.strip().rsplit(" ", 1)[1]
                 content = self._extract_info_lines(fp)
                 print(f"Content: {service!r}", content[:10])
                 d[service] = self._parse_dump_service_info_lines(content)
 
-            elif l.startswith("DUMP OF SETTINGS"):  # Setting
-                setting = "settings_" + l.strip().rsplit(" ", 1)[1]
+            elif line.startswith("DUMP OF SETTINGS"):  # Setting
+                setting = "settings_" + line.strip().rsplit(" ", 1)[1]
                 content = self._extract_info_lines(fp)
                 settings_d = dict(l.split("=", 1) for l in content if "=" in l)
                 d[setting] = settings_d
             else:
-                if not l:
+                if not line:
                     break
-                print(f"Something wrong! --> {l!r}")
+                print(f"Something wrong! --> {line!r}")
         return d
 
     def load_file(self, failed_before=False):
@@ -375,7 +375,7 @@ class AndroidDump(PhoneDump):
         if not d:
             return {}
         package = extract(
-            d, match_keys(d, "^package$//^Packages//^Package \[{}\].*".format(appid))
+            d, match_keys(d, "^package$//^Packages//^Package [{}].*".format(appid))
         )
 
         other_info = [
@@ -389,10 +389,10 @@ class AndroidDump(PhoneDump):
             return {}
         process_uid = res["userId"]
         del res["userId"]
-        memory = match_keys(d, "meminfo//Total PSS by process//.*: {}.*".format(appid))
+        # memory = match_keys(d, "meminfo//Total PSS by process//.*: {}.*".format(appid))
         uidu_match = list(
             get_all_leaves(
-                match_keys(d, "procstats//CURRENT STATS//\* {} / .*".format(appid))
+                match_keys(d, "procstats//CURRENT STATS//* {} / .*".format(appid))
             )
         )
         print(uidu_match)
@@ -535,10 +535,10 @@ class IosDump(PhoneDump):
                 )
             )
         )
-        pii = retrieve(
-            app,
-            ["Entitlements", "com.apple.private.MobileGestalt.AllowedProtectedKeys"],
-        )
+        # pii = retrieve(
+        #     app,
+        #     ["Entitlements", "com.apple.private.MobileGestalt.AllowedProtectedKeys"],
+        # )
         # print("\tPII: "+str(pii))
         return all_permissions
 
@@ -550,7 +550,7 @@ class IosDump(PhoneDump):
         m = {}
         try:
             m["model"] = self.model_make_map[self.deviceinfo["ProductType"]]
-        except KeyError as e:
+        except KeyError:
             m["model"] = "{DeviceClass} (Model {ModelNumber} {RegionInfo})".format(
                 **self.deviceinfo
             )
@@ -566,7 +566,7 @@ class IosDump(PhoneDump):
         'jailbroken': tuple (whether or not phone is suspected to be jailbroken, rationale)
         'phone_kind': tuple (make, OS version)
         """
-        d = self.df
+        # d = self.df
         res = {
             "title": "",
             "jailbroken": "",  # TODO: These are never set: phone_kind and jailbroken

@@ -5,7 +5,6 @@ import shlex
 from pathlib import Path
 from sys import platform
 
-from runcmd import catch_err, run_command
 
 DEV_SUPPRTED = ["android", "ios"]  # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
