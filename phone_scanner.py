@@ -43,7 +43,7 @@ class AppScan(object):
         raise Exception("Not implemented")
 
     def get_apps(self, serialno: str, from_device: bool) -> list:
-        pass
+        return []
 
     def get_offstore_apps(self, serialno):
         return []

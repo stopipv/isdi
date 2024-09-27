@@ -9,6 +9,7 @@ from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
 from plistlib import load
+from typing import List,Dict
 
 import pandas as pd
 from rsonlite import simpleparse

@@ -90,7 +90,10 @@ ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb'))
 LIBIMOBILEDEVICE_PATH = ''
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
+if PLATFORM:
+    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
+else:
+    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-none")))
 
 DUMP_DIR = THIS_DIR / 'phone_dumps'
 SCRIPT_DIR = THIS_DIR / 'scripts'
