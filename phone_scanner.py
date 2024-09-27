@@ -7,7 +7,6 @@ import os
 import re
 import shlex
 import sqlite3
-import subprocess
 import sys
 from collections import defaultdict
 from datetime import datetime
