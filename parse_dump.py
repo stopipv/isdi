@@ -5,15 +5,15 @@ import operator
 import os
 import re
 import sys
+import config
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
 from plistlib import load
 from typing import List, Dict
-
 import pandas as pd
 from rsonlite import simpleparse
-import config
+
 
 
 def count_lspaces(lspaces):
@@ -587,17 +587,16 @@ class IosDump(PhoneDump):
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
         res["title"] = app["CFBundleExecutable"]
         res["App Version"] = app["CFBundleVersion"]
-        res["Install Date"] = (
-            """
+        res[
+            "Install Date"
+            ] = """
         Apple does not officially record iOS app installation dates.  To view when
         '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
         *purchase date* of '{}', follow these instructions:
         https://www.ipvtechresearch.org/post/guides/apple/.  These are the
         closest possible approximations to installation date available to
-        end-users.  """.format(
-                res["title"], self.device_class, res["title"]
-            )
-        )
+        end-users.  """.format(res["title"], self.device_class, res["title"])
+        
         res["Battery Usage"] = (
             "To see recent battery usage of '{title}': "
             "[Settings -> Battery -> Battery Usage].".format(**res)

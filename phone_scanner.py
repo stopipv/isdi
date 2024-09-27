@@ -9,9 +9,7 @@ import sys
 import blocklist
 import config
 import parse_dump
-
 import pandas as pd
-
 from collections import defaultdict
 from datetime import datetime
 from android_permissions import all_permissions

@@ -2,10 +2,8 @@ import hashlib
 import hmac
 import os
 import shlex
-
 from pathlib import Path
 from sys import platform
-
 
 DEV_SUPPRTED = ["android", "ios"]  # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
@@ -89,7 +87,9 @@ PLATFORM = (
     else (
         "linux"
         if platform.startswith("linux")
-        else "win32" if platform == "win32" else None
+        else "win32" 
+        if platform == "win32" 
+        else None
     )
 )
 
