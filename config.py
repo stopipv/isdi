@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import os
 import shlex
+
 from pathlib import Path
 from sys import platform
 

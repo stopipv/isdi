@@ -281,7 +281,7 @@ class AndroidDump(PhoneDump):
             elif line.startswith("DUMP OF SETTINGS"):  # Setting
                 setting = "settings_" + line.strip().rsplit(" ", 1)[1]
                 content = self._extract_info_lines(fp)
-                settings_d = dict(l.split("=", 1) for l in content if "=" in l)
+                settings_d = dict(line.split("=", 1) for line in content if "=" in line)
                 d[setting] = settings_d
             else:
                 if not line:

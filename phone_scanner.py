@@ -6,14 +6,14 @@ import re
 import shlex
 import sqlite3
 import sys
-from collections import defaultdict
-from datetime import datetime
-
-import pandas as pd
-
 import blocklist
 import config
 import parse_dump
+
+import pandas as pd
+
+from collections import defaultdict
+from datetime import datetime
 from android_permissions import all_permissions
 from runcmd import catch_err, run_command
 
@@ -595,7 +595,11 @@ class IosScan(AppScan):
         cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
         self.serialno = None
         s = catch_err(run_command(cmd), cmd=cmd, msg="")
-        d = [l.strip() for l in s.split("\n") if l.strip() and _is_device(l.strip())]
+        d = [
+            line.strip()
+            for line in s.split("\n")
+            if line.strip() and _is_device(line.strip())
+        ]
         print("Devices found:", d)
         return d
 
@@ -674,7 +678,7 @@ class IosScan(AppScan):
         except FileNotFoundError:
             print("Couldn't find Jailbroken FS check log.")
             # TODO: trigger error message? like
-            # TODO: show a try again, maybe it's not plugged in properly. still not working? 
+            # TODO: show a try again, maybe it's not plugged in properly. still not working?
             # this could be due to many many many reasons.
             # return (True, ['FS check failed, jailbreak not necessarily occurring.'])
 
