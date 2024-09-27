@@ -29,8 +29,9 @@ def catch_err(p : subprocess.Popen[bytes], cmd='', msg='', time=10, large_output
     try:
         large_output_var = b''
         if large_output:
-            for line in p.stdout:
-                large_output_var += line
+            if p.stdout:
+                for line in p.stdout:
+                    large_output_var += line
 
         p.wait(time)
         print("Returncode: ", p.returncode)
