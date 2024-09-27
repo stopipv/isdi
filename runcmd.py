@@ -56,7 +56,10 @@ def catch_err(p : subprocess.Popen[bytes], cmd='', msg='', time=10, large_output
             if large_output:
                 s = large_output_var.decode()
             else:
-                s = p.stdout.read().decode()
+                if p.stdout:
+                    s = p.stdout.read().decode()
+                else:
+                    return ""
             
             if (len(s) <= 100 and re.search('(?i)(fail|error)', s)) or \
                     'insufficient permissions for device: user in plugdev group; are your udev rules wrong?'\
