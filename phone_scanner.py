@@ -7,6 +7,7 @@ import os
 import re
 import shlex
 import sqlite3
+import subprocess
 import sys
 from collections import defaultdict
 from datetime import datetime
@@ -387,15 +388,50 @@ class AndroidScan(AppScan):
             Doesn't return all reasons by default. First match will return.
             TODO: make consistent with iOS isrooted, which returns all reasons discovered.
         '''
+        root_checks = []
+
+        #SU binary check
         cmd = "{cli} -s {serial} shell 'command -v su'"
         s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
         if not s or s == -1 or 'not found' in s or len(s) == 0 or (s == "[android]: Error running ''. Error (1):"):
             print(config.error())
             reason = "couldn't find 'su' tool on the phone."
-            return (False, reason)
+            c1 = (False, reason)
+            root_checks.append(c1)
         else:
             reason = "found '{}' tool on the phone. Verify whether this is a su binary.".format(s.strip())
-            return (True, reason)
+            c1 = (True, reason)
+            root_checks.append(c1)
+
+        
+        #OEM Unlock check
+        cmd2 = "{cli} -s {serial} shell getprop ro.boot.flash.locked"
+        s2 = catch_err(run_command(cmd2, serial=shlex.quote(serial)))
+        if s2.strip() == "0":
+            reason = "Bootloader unlocked."
+            c2 = (True,reason)
+            root_checks.append(c2)
+        else:
+            reason = "Bootloader is locked"
+            c2 = (False, reason)
+            root_checks.append(c2)
+
+        #Frida check
+        cmd3 = "{cli} -s {serial} shell ps -A"
+        s3 = catch_err(run_command(cmd3, serial=shlex.quote(serial)),large_output=True)
+        found = False
+        for line in s3.split("\n"):
+            if "frida" in line:
+                reason = "Frida server found."
+                c3 = (True,reason)
+                root_checks.append(c3)
+                found = True
+        if not found:
+            reason = "Frida server NOT found."
+            c3 = (False,reason)
+            root_checks.append(c3)
+        
+        
         
         installed_apps = self.installed_apps
         if not installed_apps:
@@ -410,8 +446,20 @@ class AndroidScan(AppScan):
         if root_pkgs_check:
             reason = "found the following app(s) on the phone: '{}'."\
                     .format(str(root_pkgs_check))
-            return (True, reason)
-    
+            root_checks.append((True, reason))
+
+        tmp_boolean = False
+        tmp_reason = ""
+        for b,reason in root_checks:
+            if b:
+                print(reason)
+                tmp_boolean = True
+                tmp_reason += f"{reason}\n"
+        
+        if tmp_boolean:
+            return (True,tmp_reason)
+        else:
+            return (False, "Checks pass")
 
 class IosScan(AppScan):
     """

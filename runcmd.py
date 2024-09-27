@@ -1,4 +1,5 @@
 #import config
+from multiprocessing import Process
 import re
 # import shlex
 import subprocess
@@ -23,9 +24,14 @@ def error():
 # TODO: @sam the catch_err should only catch the os level errors, not
 # application level errors. They should go to particular application specific
 # handling.
-def catch_err(p, cmd='', msg='', time=10) -> str:
+def catch_err(p : subprocess.Popen[bytes], cmd='', msg='', time=10, large_output=False) -> str:
     """TODO: Therer are two different types. homogenize them"""
     try:
+        large_output_var = b''
+        if large_output:
+            for line in p.stdout:
+                large_output_var += line
+
         p.wait(time)
         print("Returncode: ", p.returncode)
         if p.returncode != 0:
@@ -41,7 +47,11 @@ def catch_err(p, cmd='', msg='', time=10) -> str:
             # config.add_to_error(m)
             return m
         else:
-            s = p.stdout.read().decode()
+            if large_output:
+                s = large_output_var.decode()
+            else:
+                s = p.stdout.read().decode()
+            
             if (len(s) <= 100 and re.search('(?i)(fail|error)', s)) or \
                     'insufficient permissions for device: user in plugdev group; are your udev rules wrong?'\
                     in s:
