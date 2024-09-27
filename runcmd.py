@@ -36,7 +36,12 @@ def catch_err(p : subprocess.Popen[bytes], cmd='', msg='', time=10, large_output
         p.wait(time)
         print("Returncode: ", p.returncode)
         if p.returncode != 0:
-            err_msg = p.stderr.read().decode('utf-8')
+            
+            if p.stderr:
+                err_msg = p.stderr.read().decode('utf-8')
+            else:
+                err_msg = "stderr was none. This may indicate large issues with process."
+
             m = ("[{}]: Error running {!r}. Error ({}): {}\n{}".format(
                 'android', cmd, p.returncode, err_msg, msg
             ))
