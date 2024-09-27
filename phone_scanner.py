@@ -34,6 +34,7 @@ class AppScan(object):
                 .format(dev_type, config.DEV_SUPPRTED)
         self.device_type = dev_type
         self.cli = cli   # The cli of the device, e.g., adb or mobiledevice
+        self.parse_dump = None #Only here to please the linter
 
     def setup(self):
         """If the device needs some setup to work."""
@@ -45,7 +46,13 @@ class AppScan(object):
     def get_apps(self, serialno: str, from_device: bool) -> list:
         return []
 
-    def get_offstore_apps(self, serialno):
+    def get_offstore_apps(self, serialno, from_device=None):
+        return []
+    
+    def get_system_apps(self, serialno, from_device=None):
+        return [] 
+
+    def get_app_titles(self, serialno):
         return []
 
     def dump_path(self, serial, fkind='json'):
@@ -155,23 +162,24 @@ class AppScan(object):
         return r[['title', 'flags', 'score', 'class_', 'html_flags']]
 
     def flag_apps(self, serialno):
-        installed_apps = self.get_apps(serialno, from_device=False)
-        app_flags = blocklist.flag_apps(installed_apps)
-        return app_flags
+        # installed_apps = self.get_apps(serialno, from_device=False)
+        # app_flags = [] #blocklist.flag_apps(installed_apps)
+        return []
 
     def uninstall(self, serial, appid):
         pass
 
     def save(self, table, **kwargs):
-        try:
-            tab = db.get_table(table)
-            kwargs['device'] = kwargs.get('device', self.device_type)
-            tab.insert(kwargs)
-            db.commit()
-            return True
-        except Exception as ex:
-            print(">> Exception:", ex, file=sys.stderr)
-            return False
+        # try:
+        #     tab = db.get_table(table)
+        #     kwargs['device'] = kwargs.get('device', self.device_type)
+        #     tab.insert(kwargs)
+        #     db.commit()
+        #     return True
+        # except Exception as ex:
+        #     print(">> Exception:", ex, file=sys.stderr)
+        #     return False
+        return False
 
     def device_info(self, serial):
         return "Test Phone", {}

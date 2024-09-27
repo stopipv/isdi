@@ -117,7 +117,7 @@ def open_or_create_random_key(fpath, keylen=32):
         create()
     k = fpath.open('rb').read(keylen)
     if len(k) != keylen:
-        creatte()
+        create()
     return fpath.open('rb').read()
 
 PII_KEY = open_or_create_random_key(PII_KEY_PATH, keylen=32)
