@@ -1,7 +1,32 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
+
 {% block content %}
+
+<script>
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+
+    fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+}
+</script>
+
 <div class="container">
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -26,7 +51,7 @@
                         <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
                         <tr><th><label>{{ form.consultant_name.label }}</label></th><td> {{ form.consultant_name }}</td> </tr>
                         <tr><th><label>{{form.device_type.label}}</label></th><td>
-                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}> 
+                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}>
                             {% for option in form.device_type %}
                             <label class="btn btn-secondary" for="{{option.id}}">
                                 {{option.label.text}}
@@ -44,25 +69,25 @@
                 {% if step == 2 %}
                     {% if 'ios' == device %}
                     <h3>For iPhones<img class="small" src="/webstatic/images/apple.resized.png"> </h3>
-                    <p>There is not much preparation required for iOS. 
+                    <p>There is not much preparation required for iOS.
                         <ol>
                             <li>Connect the USB cable</li>
                             <li>Unlock the device and press Scan.</li>
                             <li>On the device, you should see a prompt asking if you trust this device. Please select "Trust",
                                 and enter your passcode to start the scan.</li>
-                        </ol> 
+                        </ol>
                         <br>
                         <b>Troubleshooting:</b> Sometimes the system might fail to recognize the
                         iOS device. Try opening iTunes on macOS, and see if the device is
                         listed. Disconnect the device from the USB cable, reconnect, and try scanning again.</p>
                     {% else %}
                     <h3>For Android phones<img class="small"src="/webstatic/images/android.resiz.png"> </h3>
-                    <p>  
+                    <p>
                         For an Android device, the <code>developer options</code> on the device need to be
-                        activated. Developer options provide functionality for this system to communicate with 
+                        activated. Developer options provide functionality for this system to communicate with
                         your device. The exact steps might vary from device manufacturer and version of
                         Android, but roughly the following steps will help you activate developer
-                        options and USB debugging. 
+                        options and USB debugging.
                         <ol>
                         <li>Go to Settings. Either find the Settings app in the device drawer, or
                             pull down from the top notification bar, on the top right you will see a gear
@@ -122,10 +147,10 @@
                             <table>
                                 <tr><th valign="top">App name</th><td>
                                 {% if spyware[loop.index0].url %}
-                                    <a href={{spyware[loop.index0].url}}>{{spyware[loop.index0].app_name}}</a> 
+                                    <a href={{spyware[loop.index0].url}}>{{spyware[loop.index0].app_name}}</a>
                                     {% else %}
                                     {{spyware[loop.index0].app_name}}
-                                {% endif %} 
+                                {% endif %}
                                 </td></tr>
                                 {% if spyware[loop.index0].application_icon %}
                                 <tr><th valign="top">Icon</th><td><img src={{spyware[loop.index0].application_icon}}></td></tr>
@@ -148,7 +173,7 @@
                                 <tbody>
                                     {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -158,9 +183,11 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
-                                    <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div>
+                          <button id="spyware_{{ spyware[loop.index0].app_name.replace(' ','') }}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>
@@ -210,10 +237,10 @@
                             <table>
                                 <tr><th valign="top">App name</th><td>
                                 {% if dualuse[outer_loop.index0].url %}
-                                    <a href={{dualuse[outer_loop.index0].url}}>{{dualuse[outer_loop.index0].app_name}}</a> 
+                                    <a href={{dualuse[outer_loop.index0].url}}>{{dualuse[outer_loop.index0].app_name}}</a>
                                     {% else %}
                                     {{dualuse[outer_loop.index0].app_name}}
-                                {% endif %} 
+                                {% endif %}
                                 </td></tr>
                                 {% if dualuse[outer_loop.index0].application_icon %}
                                 <tr><th valign="top">Icon</th><td><img src={{dualuse[outer_loop.index0].application_icon}}></td></tr>
@@ -240,7 +267,7 @@
                                 <tbody>
                                     {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -250,9 +277,10 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endfor %}
-                                    <tr><th>{{nested.install_form.screenshot.label}}</th><td>{{nested.install_form.screenshot}}</td></tr>
+
                                 </tbody>
                             </table>
+                            <button id="dualuse_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
                         </div>
 
                         {% for perm in nested.permissions %}
@@ -262,7 +290,7 @@
                             <table>
                                 <tbody>
                                     <tr><th>{{perm.access.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}>
                                         {% for option in perm.access %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -272,9 +300,9 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
-                                    <tr><th>{{perm.screenshot.label}}</th><td>{{perm.screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="dualuseperm_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}_{{dualuse[outer_loop.index0].permissions[loop.index0].permission_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
                         </div>
                         {% endfor %}
 
@@ -340,7 +368,7 @@
                             <table>
                                 <tbody>
                                     <tr><th>{{nested.suspicious_logins.recognize.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.recognize.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.recognize.id}}>
                                         {% for option in nested.suspicious_logins.recognize %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -350,10 +378,10 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_logins.label}}</th><td>{{nested.suspicious_logins.describe_logins}}</td></tr>
-                                    <tr><th>{{nested.suspicious_logins.login_screenshot.label}}</th><td>{{nested.suspicious_logins.login_screenshot}}</td></tr>
+                                    <button id="accounts_{{accounts[loop.index0].account_name.replace(' ','')}}" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
 
                                     <tr><th>{{nested.suspicious_logins.activity_log.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}>
                                         {% for option in nested.suspicious_logins.activity_log %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -363,7 +391,7 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_activity.label}}</th><td>{{nested.suspicious_logins.describe_activity}}</td></tr>
-                                    <tr><th>{{nested.suspicious_logins.activity_screenshot.label}}</th><td>{{nested.suspicious_logins.activity_screenshot}}</td></tr>
+                                    <button id="loginactivity_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
                                 </tbody>
                             </table>
                         </div>
@@ -374,7 +402,7 @@
                                 <tbody>
                                     {% for subform in [nested.password_check.know, nested.password_check.guess] %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -394,7 +422,7 @@
                                 <tbody>
                                     {% for subform in [nested.recovery_settings.phone_present, nested.recovery_settings.phone_access] %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -405,10 +433,11 @@
                                     </div></td></tr>
                                     {% endfor %}
                                     <tr><th>{{nested.recovery_settings.phone.label}}</th><td>{{nested.recovery_settings.phone}}</td></tr>
-                                    <tr><th>{{nested.recovery_settings.phone_screenshot.label}}</th><td>{{nested.recovery_settings.phone_screenshot}}</td></tr>
+
+                                    <button id="recovery_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
                                     {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -419,9 +448,9 @@
                                     </div></td></tr>
                                     {% endfor %}
                                     <tr><th>{{nested.recovery_settings.email.label}}</th><td>{{nested.recovery_settings.email}}</td></tr>
-                                    <tr><th>{{nested.recovery_settings.email_screenshot.label}}</th><td>{{nested.recovery_settings.email_screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="recoveryemail_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.two_factor_settings.label }}</h5>
                         <div class="subform">
@@ -430,7 +459,7 @@
                                 <tbody>
                                     {% for subform in [nested.two_factor_settings.enabled, nested.two_factor_settings.second_factor_type] %}
                                         <tr><th>{{subform.label}}</th><td>
-                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                             {% for option in subform %}
                                             <label class="btn btn-light" for="{{option.id}}">
                                                 {{option.label.text}}
@@ -443,7 +472,7 @@
                                     <tr><th>{{nested.two_factor_settings.describe.label}}</th><td>{{nested.two_factor_settings.describe}}</td></tr>
                                     {% with subform = nested.two_factor_settings.second_factor_access %}
                                     <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
                                         {% for option in subform %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -453,9 +482,10 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     {% endwith %}
-                                    <tr><th>{{nested.two_factor_settings.screenshot.label}}</th><td>{{nested.two_factor_settings.screenshot}}</td></tr>
+
                                 </tbody>
                             </table>
+                            <button id="twofactor_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('twofactor')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.security_questions.label }}</h5>
                         <div class="subform">
@@ -463,7 +493,7 @@
                             <table>
                                 <tbody>
                                     <tr><th>{{nested.security_questions.present.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.present.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.present.id}}>
                                         {% for option in nested.security_questions.present %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -474,7 +504,7 @@
                                     </div></td></tr>
                                     <tr><th>{{nested.security_questions.questions.label}}</th><td>{{nested.security_questions.questions}}</td></tr>
                                     <tr><th>{{nested.security_questions.know.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.know.id}}> 
+                                        <div class="btn-group" data-toggle="buttons" id={{nested.security_questions.know.id}}>
                                         {% for option in nested.security_questions.know %}
                                         <label class="btn btn-light" for="{{option.id}}">
                                             {{option.label.text}}
@@ -483,9 +513,9 @@
                                         </label>
                                         {% endfor %}
                                     </div></td></tr>
-                                    <tr><th>{{nested.security_questions.screenshot.label}}</th><td>{{nested.security_questions.screenshot}}</td></tr>
                                 </tbody>
                             </table>
+                            <button id="securityq_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>

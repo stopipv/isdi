@@ -5,7 +5,7 @@ from web import app
 from web.view.index import get_device
 from flask import render_template, request, session, redirect, url_for
 import db
-from db import (get_client_devices_from_db, new_client_id, create_scan, 
+from db import (get_client_devices_from_db, new_client_id, create_scan,
                 create_mult_appinfo, first_element_or_none)
 
 
@@ -40,7 +40,7 @@ def scan():
             from_dump = int(t_from_dump)
         except:
             from_dump = False
-        
+
     currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d = dict(
         task="home",
@@ -183,7 +183,7 @@ def scan():
         isrooted=(
             "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
             .format(rooted_reason) if rooted
-            else "Don't know" if rooted is None 
+            else "Don't know" if rooted is None
             else "No"
         ),
         device_name=device_name_print,
@@ -197,5 +197,5 @@ def scan():
         error=config.error()
     ))
     return render_template("main.html", **template_d), 200
- 
+
 

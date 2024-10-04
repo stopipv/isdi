@@ -1,4 +1,3 @@
-
 import os
 import pickle
 import traceback
@@ -13,6 +12,7 @@ from flask import (
     send_from_directory,
     session,
     url_for,
+    jsonify
 )
 from flask_bootstrap import Bootstrap
 
@@ -35,12 +35,13 @@ from evidence_collection import (
     reformat_verbose_apps,
     remove_unwanted_data,
     unpack_evidence_context,
+    get_screenshots
 )
 from web import app
 
 bootstrap = Bootstrap(app)
 
-USE_PICKLE_FOR_SUMMARY = True
+USE_PICKLE_FOR_SUMMARY = False
 USE_FAKE_DATA = False
 
 @app.route("/evidence/", methods={'GET'})
@@ -52,7 +53,7 @@ def evidence_default():
 def evidence(step):
     """
     TODO: Evidence stuff!
-    """ 
+    """
 
     spyware = []
     dualuse = []
@@ -97,13 +98,18 @@ def evidence(step):
                     clean_data.pop(k)
 
                 clean_data['accounts_used'] = accounts_used
-            
+
             session['step{}'.format(step)] = clean_data
 
             # collect apps if we need to
             if step == Pages.SCAN.value:
+                # Ensure any previous screenshots have been removed before scan
+                print("Removing files:")
+                os.system("ls webstatic/images/screenshots/")
+                os.system("rm webstatic/images/screenshots/*")
+
                 try:
-                    verbose_apps = get_suspicious_apps(session['step{}'.format(Pages.START.value)]['device_type'], 
+                    verbose_apps = get_suspicious_apps(session['step{}'.format(Pages.START.value)]['device_type'],
                                                        session['step{}'.format(Pages.START.value)]['name'])
                     spyware, dualuse = reformat_verbose_apps(verbose_apps)
                     session['apps'] = {"spyware": spyware, "dualuse": dualuse}
@@ -113,7 +119,7 @@ def evidence(step):
                         print(traceback.format_exc())
                         flash(str(e), "error")
                         return redirect(url_for('evidence', step=step))
-                   
+
                     # use fake data
                     session['apps'] = FAKE_APP_DATA
 
@@ -123,7 +129,7 @@ def evidence(step):
             else:
                 # Redirect to finish
                 return redirect(url_for('evidence_summary'))
-            
+
     # If form data for this step is already in the session, populate the form with it
     if 'step{}'.format(step) in session:
         form.process(data=session['step{}'.format(step)])
@@ -146,7 +152,7 @@ def evidence(step):
     if 'step{}'.format(Pages.START.value) in session.keys():
         context["device_owner"] = session['step{}'.format(Pages.START.value)]["name"]
         context["device"] = session['step{}'.format(Pages.START.value)]["device_type"]
-    
+
     return render_template('main.html', **context)
 
 @app.route('/evidence/summary', methods=['GET'])
@@ -179,28 +185,31 @@ def evidence_printout():
     context["screenshot_dir"] = config.SCREENSHOT_LOCATION
 
     # add fake screenshots
-    context["spyware"][0]['screenshots'] = ['step3-1.png']
-    context["dualuse"][1]['screenshots'] = ['step4-1.png']
-    context["accounts"][0]['screenshots'] = ['step6-1.png', 'step6-2.png']
-    
+    # context["spyware"][0]['screenshots'] = ['step3-1.png']
+    # context["dualuse"][1]['screenshots'] = ['step4-1.png']
+    # context["accounts"][0]['screenshots'] = ['step6-1.png', 'step6-2.png']
+
     for app in context["spyware"]:
          summary, concerning = create_app_summary(app, spyware=True)
          app['summary'] = summary
          app['concerning'] = concerning
+         app['screenshots'] = get_screenshots('spyware', app['app_name'], context["screenshot_dir"])
 
     for app in context["dualuse"]:
          summary, concerning = create_app_summary(app, spyware=False)
          app['summary'] = summary
          app['concerning'] = concerning
+         app['screenshots'] = get_screenshots('dualuse', app['app_name'], context["screenshot_dir"])
 
     for account in context["accounts"]:
         access, ability, access_concern, ability_concern = create_account_summary(account)
         account["access_summary"] = access
         account["ability_summary"] = ability
         account["concerning"] = access_concern or ability_concern
+        account['screenshots'] = get_screenshots('accounts', account['account_name'], context["screenshot_dir"])
 
     context["concerns"] = create_overall_summary(context)
-    
+
     pprint(context)
 
     filename = create_printout(context)

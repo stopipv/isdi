@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## For scanning the phone and downloading some specific information of the phone
-## Input: serial number 
+## Input: serial number
 
 if [[ $# -lt 1 ]]; then
     echo -e "You have to provide a serial number. #Num args: $#"
@@ -70,12 +70,12 @@ function retrieve {
     app="$1"
     process_uid=$(grep -A1 "Package \[$app\]" $ofname | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
     process_uidu=$(grep -Eo "app=ProcessRecord{[a-f0-9]+ [0-9]+:$app/([a-z0-9]*)" $ofname  | cut -d '/' -f 2 | sort -u)
-    
+
     echo $process_uid $process_uidu
     # Install date
     printf 'Install: %s\n' "$(awk "/Package \[$app\]/{flag=1;next}/install permissions:/{flag=0}flag" $ofname | grep Time | tr -d '  ')"
 
-    # Memory info 
+    # Memory info
     printf 'Memory: %s\n' "$(awk '/Total PSS by process/{flag=1;next}/Total PSS/{flag=0}flag' $ofname | grep $app | sed '/^\s*$/d')"
 
     # Network info - cnt_set=0 => background,rx_bytes
@@ -88,7 +88,7 @@ function retrieve {
 }
 
 
-services=(package location media.camera netpolicy mount 
+services=(package location media.camera netpolicy mount
           cpuinfo dbinfo meminfo
           procstats batterystats "netstats detail" usagestats
           activity appops)
@@ -108,7 +108,7 @@ function dump {
 
 function full_scan {
     # If file older than 20 min then receate
-    if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
+    if [[ $(find "$ofname" -mmin +20 -print) ]]; then
         echo "File is still pretty fresh"
         echo "Not re-dumping"
     else
@@ -118,10 +118,10 @@ function full_scan {
     bash ./scripts/pull_apks.sh "$serial"
 }
 
-if [[ "$1" == "scan" ]]; then 
+if [[ "$1" == "scan" ]]; then
     (>&2 echo "------ Running full scan ------- $2")
     $adb devices
-    full_scan >> ./dumps/android_scan.logs & 
+    full_scan >> ./dumps/android_scan.logs &
     sleep 120;  # sleep for 2 minutes
     # Clear the settings to remove developer options
     $adb $serial shell pm clear com.android.settings

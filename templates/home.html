@@ -8,7 +8,7 @@
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
             <a class='btn btn-normal' href="/evidence/1" target="_blank" rel="noopener" data-toggle="tooltip" title="Collect evidence here."><u>Evidence</u></a>
             <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
-        </span> 
+        </span>
     </h4>
     <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
 	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
@@ -35,7 +35,7 @@
 		    {% endfor %}
                 </div>
                 <br/><br/>
-                <input class="form-control" name="device_owner" id="device_owner" 
+                <input class="form-control" name="device_owner" id="device_owner"
                        placeholder="Nickname for device? Whose is it?"
                        rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
 		<br>
@@ -51,7 +51,7 @@
 	    {% if currently_scanned %}
       <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
 		    {% for scanned in currently_scanned %}
-      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
+      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=0">
           {{ scanned.device_model }} ({{ scanned.device_primary_user }})
       </a><br>
 		    {% endfor %}

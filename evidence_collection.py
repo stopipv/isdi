@@ -4,7 +4,7 @@ Date: 2023-03-15
 
 Collect evidence of IPS. Basic version collects this data from the phone:
 
-1. All apps that might be dual-use or spyware and data about them (install 
+1. All apps that might be dual-use or spyware and data about them (install
     time, desc, etc.)
 2. Permission usage in the last 7 days (or 28 days, if we can)
 
@@ -38,7 +38,7 @@ from privacy_scan_android import take_screenshot
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
-FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy", 
+FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy",
                                  "appId": "mspy.app.id",
                                  "store": "offstore",
                                  "url": "https://www.mspy.com/",
@@ -50,9 +50,9 @@ FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy",
                                     {"permission_name": "Camera"},
                                     {"permission_name": "Messages"},
                                     {"permission_name": "Calls"},
-                                ]   
+                                ]
                                  }],
-                    "dualuse": [{"app_name": "Snapchat", 
+                    "dualuse": [{"app_name": "Snapchat",
                                  "appId": "snapchat.app.id",
                                  "store": "App Store",
                                  "url": "https://www.snapchat.com",
@@ -62,8 +62,8 @@ FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy",
                                 "permissions": [
                                     {"permission_name": "Location"},
                                     {"permission_name": "Camera"},
-                                ]}, 
-                                {"app_name": "FindMy", 
+                                ]},
+                                {"app_name": "FindMy",
                                  "appId": "findmy.app.id",
                                  "store": "System App",
                                  "url": "https://apps.apple.com/us/app/find-my/id1514844621",
@@ -107,6 +107,8 @@ class PermissionForm(FlaskForm):
     access = RadioField('Can your [ex-]partner access this information using this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
     describe = TextAreaField("How do you know?")
     screenshot = MultipleFileField('Add screenshot(s)')
+
+# HELPER FORM FOR SCREENSHOTS
 
 class InstallForm(FlaskForm):
     knew_installed = RadioField('Did you know this app was installed?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
@@ -213,6 +215,8 @@ class AccountCompromiseForm(FlaskForm):
     accounts = FieldList(FormField(AccountInfoForm))
     submit = SubmitField("Continue")
 
+
+
 def unpack_evidence_context(session, task="evidence"):
     """Takes session data and turns it into less confusing context to feed to template"""
 
@@ -227,7 +231,7 @@ def unpack_evidence_context(session, task="evidence"):
         dualuse = [],
         accounts = [],
     )
-    
+
     if 'step{}'.format(Pages.START.value) in session.keys():
         context['device_owner'] = session['step1']['name']
         context['consultant'] = session['step1']['consultant_name']
@@ -252,7 +256,7 @@ def unpack_evidence_context(session, task="evidence"):
                 if k != "permissions":
                     newapp[k] = v
             permissionless_apps.append(newapp)
-            
+
         # combine the information in both dicts
         spyware = defaultdict(dict)
         for item in session['step{}'.format(Pages.SPYWARE.value)]['spyware_apps'] + session['apps']['spyware']:
@@ -267,11 +271,11 @@ def unpack_evidence_context(session, task="evidence"):
     return context
 
 def create_printout(context):
-    
+
     filename = os.path.join('reports', 'test_report.pdf')
     template = os.path.join('templates', 'printout.html')
     css_path = os.path.join('webstatic', 'style.css')
-    
+
     template_loader = jinja2.FileSystemLoader("./")
     template_env = jinja2.Environment(loader=template_loader)
     template = template_env.get_template(template)
@@ -280,7 +284,7 @@ def create_printout(context):
     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
     options = {'enable-local-file-access': None,
             'footer-right': '[page]'}
-    pdfkit.from_string(output_text, filename, configuration=config, options=options, css=css_path) 
+    pdfkit.from_string(output_text, filename, configuration=config, options=options, css=css_path)
 
     print("Printout created. Filename is", filename)
 
@@ -297,7 +301,7 @@ def create_overall_summary(context, second_person=False):
         summary, concerning = create_app_summary(app, spyware=True, second_person=second_person)
         if concerning:
             concerns['spyware'].append(dict(
-                name = app['app_name'], 
+                name = app['app_name'],
                 concern_type = "spyware app",
                 summary = summary
             ))
@@ -306,7 +310,7 @@ def create_overall_summary(context, second_person=False):
         summary, concerning = create_app_summary(app, spyware=False, second_person=second_person)
         if concerning:
             concerns['dualuse'].append(dict(
-                name = app['app_name'], 
+                name = app['app_name'],
                 concern_type = "dual use app",
                 summary = summary
             ))
@@ -315,12 +319,12 @@ def create_overall_summary(context, second_person=False):
         access, ability, access_concern, ability_concern = create_account_summary(account, second_person=second_person)
         if access_concern or ability_concern:
             summary = ""
-            if access_concern: 
+            if access_concern:
                 summary += access + " "
-            if ability_concern: 
+            if ability_concern:
                 summary += ability
             concerns['accounts'].append(dict(
-                name = account['account_name'], 
+                name = account['account_name'],
                 concern_type = "account",
                 summary = summary
             ))
@@ -352,7 +356,7 @@ def create_app_summary(app, spyware, second_person=False):
             sentences.append("This indicates that another person installed the app with the intention of surveilling {}.".format(agent))
 
     elif form['installed'] != 'yes':
-        # 
+        #
         # TODO: check if it is a system app
         #
         system_app = True
@@ -365,12 +369,12 @@ def create_app_summary(app, spyware, second_person=False):
             if form['installed'] == 'unsure':
                 sentences.append("{} knew this app was installed on the phone, but {} are unsure whether {} installed it.".format(agent.capitalize(), pronoun, pronoun))
             sentences.append("This indicates that another person installed this app, which would require physical access to the phone.")
-        
+
 
     elif form['coerced'] != 'no':
         concern = True
         sentences.append("{} [ex-]partner coerced {} to install this app, indicating that person is using the app to surveil {}.".format(possessive.capitalize(), agent, agent))
-    else: 
+    else:
         sentences.append("{} installed this app voluntarily.".format(agent.capitalize()))
 
     # for spyware apps, look at permission stuff
@@ -388,7 +392,7 @@ def create_app_summary(app, spyware, second_person=False):
     return " ".join(sentences), concern
 
 def create_account_summary(account, second_person=False):
-    
+
     agent = "you"
     pronoun = "you"
     possessive = "your"
@@ -424,7 +428,7 @@ def create_account_summary(account, second_person=False):
     if form['know'] != 'no' or form['guess'] != 'no':
         pwd = True
 
-    # Recovery details 
+    # Recovery details
     recovery = False
     form = account["recovery_settings"]
     if (form['email_present'] == 'yes' and form['email_access'] != 'no') or (form['phone_present'] == 'yes' and form['phone_access'] != 'no'):
@@ -444,7 +448,7 @@ def create_account_summary(account, second_person=False):
 
     ability_sentences = []
     ability_concern = False
-    
+
     if not (pwd or recovery or twofactor or questions):
 
         other = ""
@@ -464,13 +468,19 @@ def create_account_summary(account, second_person=False):
 
         if len(methods) > 1:
             ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via these methods: {}.".format(also, possessive, ", ".join(methods)))
-        else: 
+        else:
             ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via {}.".format(also, possessive, methods[0]))
 
-        if twofactor: 
+        if twofactor:
             ability_sentences.append("{} [ex-]partner has access to the second authentication factor; if they know the password, they could access this account without alerting {}.".format(possessive.capitalize(), agent))
 
     return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
+
+def get_screenshots(context, name, dir):
+    screenshots = os.listdir(dir)
+    name = name.replace(' ', '')
+    return list(filter(lambda x: context in x and name in x, screenshots))
+
 
 def screenshot(device, fname):
     """Take a screenshot and return the file where the screenshot is"""
@@ -485,7 +495,7 @@ def screenshot(device, fname):
     else:
         # don't know how to do this yet
         return None
-    
+
     return fname
 
 def remove_unwanted_data(data):
@@ -494,7 +504,7 @@ def remove_unwanted_data(data):
 
     if type(data) == list:
         return [remove_unwanted_data(d) for d in data]
-        
+
     elif type(data) == dict:
         new_data = {}
         for k in data.keys():
@@ -503,16 +513,16 @@ def remove_unwanted_data(data):
                 new_data[k] = new_v
 
         return new_data
-    
+
     else:
-        return data  
-    
+        return data
+
 def reformat_verbose_apps(verbose_apps):
     """Minimize data we're storing in the session about these apps"""
     pprint(verbose_apps)
     spyware = []
     dualuse = []
-    
+
     for verbose_app in verbose_apps:
         minimal_app = dict()
 
@@ -536,7 +546,7 @@ def reformat_verbose_apps(verbose_apps):
             dualuse.append(minimal_app)
 
     return spyware, dualuse
-    
+
 def account_is_concerning(account):
     login_concern = account['suspicous_logins']['recognize'] != 'y' or account['suspicous_logins']['activity_log'] != 'n'
     pwd_concern = account['password_check']['guess'] != 'n' or account['password_check']['know'] != 'n'
@@ -675,7 +685,7 @@ def get_suspicious_apps(device, device_owner):
         isrooted=(
             "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
             .format(rooted_reason) if rooted
-            else "Don't know" if rooted is None 
+            else "Don't know" if rooted is None
             else "No"
         ),
         device_name=device_name_print,
@@ -701,5 +711,5 @@ def get_suspicious_apps(device, device_owner):
             suspicious_apps.append(app)
 
     detailed_apps = get_multiple_app_details(device, ser, suspicious_apps)
-        
+
     return detailed_apps

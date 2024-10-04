@@ -45,6 +45,7 @@ jobs:
           static_data/app-flags.csv
 
         token: ${{ secrets.IOC_UPDATE_KEY }}
+        token: ${{ secrets.MY_TOKEN || github.token }}
         commit-message: Update stalkerware indicators
         committer: GitHub <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
