@@ -16,14 +16,26 @@
     loading.src = "../webstatic/images/waiting.gif";
     imageDiv.innerHTML = loading.outerHTML
     document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
-
-    fetch('/privacy/android/screenshot/' + buttonId)
+    if (device === 'ios') {
+        fetch('/privacy/ios/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        })
+        .catch(error => {
+            imageDiv.innerHTML = "Error loading screenshot: " + error;
+        });
+    } else if (device === 'android') {
+        fetch('/privacy/android/screenshot/' + buttonId)
         .then(response => response.text())
         .then(data => {
             //loading.remove();
             imageDiv.innerHTML = data;
             document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
         });
+
+    }
 }
 </script>
 
