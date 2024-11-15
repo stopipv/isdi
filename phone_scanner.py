@@ -19,6 +19,11 @@ import parse_dump
 from android_permissions import all_permissions
 from runcmd import catch_err, run_command
 
+import subprocess
+import time
+import random
+from flask import url_for, session
+from privacy_scan_android import do_privacy_check
 
 class AppScan(object):
     device_type = ''
@@ -623,4 +628,42 @@ class TestScan(AppScan):
     def uninstall(self, serial, appid):
         return True
 
+def iosScreenshot(serialNumber, context, nocache = False):
+    def addIOSImage(img, nocache=False):
+        rand = random.randint(0, 10000)
+        return "<img height='400px' src='" + \
+            url_for('static', filename=img) + "?{}'/>".format(rand if nocache else '')
+    curr_time = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+    homePro = subprocess.run(["pwd"], stdout=subprocess.PIPE)
+    homeDir = str(homePro.stdout.decode('utf-8')).strip()
 
+    # Verify the directory exists and create it if not
+    dir_path = os.path.join(homeDir, "webstatic/images/screenshots")
+    os.makedirs(dir_path, exist_ok=True)
+    fname = 'images/screenshots/' + context + '_' + curr_time + '.png'
+    print("File Destination:"+ fname)
+
+    linkPro = subprocess.Popen(["pymobiledevice3", "lockdown", "start-tunnel"], stdout= subprocess.PIPE)
+    time.sleep(2)
+    output = linkPro.stdout
+    rsdAddress = ""
+    rsdPort = ""
+    i = 0
+    for lineByte in output:
+        line = lineByte.decode('utf-8') 
+        print(line)
+        if i == 6:
+            break
+        if "RSD Address" in line:
+            rsdAddress = line[13:]
+        if "RSD Port" in line:
+            lineSplit = line.split(":")
+            rsdPort = lineSplit[1][1:]
+        i += 1
+    print("rsdAddress:"+ rsdAddress)
+    print("rsdPort:" + rsdPort)
+    tempFname = 'webstatic/' + fname
+    command = "pymobiledevice3 developer dvt screenshot " + tempFname + " --rsd " + rsdAddress + " " + rsdPort
+    print (command)
+    subprocess.run(shlex.split(command))
+    return addIOSImage(fname, nocache=True)
