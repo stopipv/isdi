@@ -40,13 +40,13 @@ class AppScan(object):
     def devices(self):
         raise Exception("Not implemented")
 
-    def get_apps(self, serialno: str, from_device: bool) -> list:
-        return []
+    def get_system_apps(self, serialno, from_device: bool) -> list:
+        pass
+    
+    def get_apps(self, serialno: str, from_dump: bool) -> list:
+        pass
 
-    def get_offstore_apps(self, serialno, from_device=None):
-        return []
-
-    def get_system_apps(self, serialno, from_device=None):
+    def get_offstore_apps(self, serialno:str, from_dump: bool) -> list:
         return []
 
     def get_app_titles(self, serialno):
@@ -126,35 +126,31 @@ class AppScan(object):
             print(">>> Exception:::", ex, file=sys.stderr)
             return pd.DataFrame([]), dict()
 
-    def find_spyapps(self, serialno, from_dump=True):
+    def find_spyapps(self, serialno, from_dump=False):
         """Finds the apps in the phone and add flags to them based on @blocklist.py
         Return the sorted dataframe
         This is the **main** function that is called from the views in web/view/scan.py
         """
-        from_device = not from_dump
-        installed_apps = self.get_apps(serialno, from_device=from_device)
+        installed_apps = self.get_apps(serialno, from_dump=from_dump)
 
         if len(installed_apps) <= 0:
             return pd.DataFrame(
                 [], columns=["title", "flags", "score", "class_", "html_flags"]
             )
         r = blocklist.app_title_and_flag(
-            pd.DataFrame({"appId": installed_apps}),
-            offstore_apps=self.get_offstore_apps(serialno, from_device=from_device),
-            system_apps=self.get_system_apps(serialno, from_device=from_device),
+            pd.DataFrame({'appId': installed_apps}),
+            offstore_apps=self.get_offstore_apps(serialno, from_dump=from_dump),
+            system_apps=self.get_system_apps(serialno, from_dump=from_dump)
         )
         r["title"] = r.title.fillna("")
         if self.device_type == "android":
             td = pd.read_sql(
-                "select appid as appId, title from apps where appid in (?{})".format(
-                    ", ?" * (len(installed_apps) - 1)
-                ),
-                self.app_info_conn,
-                params=(installed_apps),
-            ).set_index("appId")
-            td.index.rename("appId", inplace=True)
-        elif self.device_type == "ios":
-            td = self.get_app_titles(serialno)
+                'select appid as appId, title from apps where appid in (?{})'.format(
+                    ', ?'*(len(installed_apps)-1)
+                    ), self.app_info_conn, params=(installed_apps)).set_index('appId')
+            td.index.rename('appId', inplace=True)
+        elif self.device_type == 'ios':
+            td = self.get_app_titles(serialno).set_index('appId')
 
         r.set_index("appId", inplace=True)
         r.loc[td.index, "title"] = td.get("title", "")
@@ -176,9 +172,9 @@ class AppScan(object):
         return r[["title", "flags", "score", "class_", "html_flags"]]
 
     def flag_apps(self, serialno):
-        # installed_apps = self.get_apps(serialno, from_device=False)
-        # app_flags = [] #blocklist.flag_apps(installed_apps)
-        return []
+        installed_apps = self.get_apps(serialno, from_dump=False)
+        app_flags = blocklist.flag_apps(installed_apps)
+        return app_flags
 
     def uninstall(self, serial, appid):
         pass
@@ -249,11 +245,11 @@ class AndroidScan(AppScan):
         app_and_codes = self.dump_d.apps()
         return [a for a, c in app_and_codes]
 
-    def get_apps(self, serialno, from_device=True) -> list:
-        print(f"Getting Android apps: {serialno} from_device={from_device}")
+    def get_apps(self, serialno: str, from_dump: bool=True) -> list:
+        print(f"Getting Android apps: {serialno} from_dump={from_dump}")
         hmac_serial = config.hmac_serial(serialno)
-        if from_device:
-            installed_apps = self._get_apps_from_device(serialno, "-u")
+        if (not from_dump):
+            installed_apps = self._get_apps_from_device(serialno, '-u')
             if installed_apps:
                 # q = run_command(
                 #     "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
@@ -268,15 +264,15 @@ class AndroidScan(AppScan):
         self.installed_apps = installed_apps
         return installed_apps
 
-    def get_system_apps(self, serialno, from_device=False):
-        if from_device:
-            apps = self._get_apps_from_device(serialno, "-s")
+    def get_system_apps(self, serialno, from_dump=False):
+        if (not from_dump):
+            apps = self._get_apps_from_device(serialno, '-s')
         else:
             apps = []  # TODO: fix this later, not sure how to get from dump
         return apps
 
-    def get_offstore_apps(self, serialno, from_device=False):
-        if not from_device:
+    def get_offstore_apps(self, serialno, from_dump=False):
+        if from_dump:
             return []  # TODO: fix this later, not sure how to get from dump
         offstore = []
         rooted, reason = self.isrooted(serialno)
@@ -566,10 +562,10 @@ class IosScan(AppScan):
             self._dump_phone(serialno)
         return self.parse_dump.installed_apps_titles()
 
-    def get_apps(self, serialno: str, from_device: bool) -> list:
+    def get_apps(self, serialno: str, from_dump: bool) -> list:
         """iOS always read everything from dump, so nothing to change."""
         self.serialno = serialno
-        if from_device:
+        if not from_dump:
             if not self._dump_phone(serialno):
                 print("Failed to dump the phone. Check error on the terminal")
                 return []
@@ -578,7 +574,7 @@ class IosScan(AppScan):
         print("iOS INFO DUMPED.")
         return self.installed_apps
 
-    def get_system_apps(self, serialno) -> list:
+    def get_system_apps(self, serialno:str, from_dump: bool) -> list:
         if self.parse_dump:
             return self.parse_dump.system_apps()
         else:
@@ -781,10 +777,10 @@ class TestScan(AppScan):
     def devices(self):
         return ["testdevice1", "testdevice2"]
 
-    def get_system_apps(self, serialno):
-        return self.get_apps(serialno)[:10]
+    def get_system_apps(self, serialno, from_dump=False):
+        return self.get_apps(serialno, from_dump)[:10]
 
-    def get_offstore_apps(self, serialno):
+    def get_offstore_apps(self, serialno, from_dump=False):
         return self.get_apps(serialno)[-4:]
 
     def uninstall(self, serial, appid):

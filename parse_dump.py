@@ -477,8 +477,8 @@ class IosDump(PhoneDump):
             with open(self.fname, "rb") as app_data:
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
-            d["appId"] = d["CFBundleIdentifier"]
-            d.set_index("appId", inplace=True)
+            d['appId'] = d['CFBundleIdentifier']
+            # d.set_index('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -502,7 +502,7 @@ class IosDump(PhoneDump):
                 print("Noted.")
             # print('\t'+msg+": "+str(PERMISSIONS_MAP[permission])+"\tReason: "+app.get(permission,'system app'))
 
-    def get_permissions(self, app):
+    def get_permissions(self, app: str) -> list:
         """
         Returns a list of tuples (permission, developer-provided reason for permission).
         Could modify this function to include whether or not the permission can be adjusted
@@ -576,20 +576,13 @@ class IosDump(PhoneDump):
         app = self.df[self.df["CFBundleIdentifier"] == appid].squeeze().dropna()
         party = app.ApplicationType.lower()
         if party in ["system", "user"]:
-            print(
-                app["CFBundleName"],
-                "("
-                + app["CFBundleIdentifier"]
-                + ") is a {} app and has permissions:".format(party),
-            )
+            print(f"{app["CFBundleName"]} ({app["CFBundleIdentifier"]}) is a {party} app and has permissions:")
             # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
         res["title"] = app["CFBundleExecutable"]
         res["App Version"] = app["CFBundleVersion"]
-        res[
-            "Install Date"
-            ] = """
+        res["Install Date"] = """
         Apple does not officially record iOS app installation dates.  To view when
         '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
         *purchase date* of '{}', follow these instructions:
