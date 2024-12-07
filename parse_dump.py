@@ -320,10 +320,14 @@ class AndroidDump(PhoneDump):
             return {"foreground": "unknown", "background": "unknown"}
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
         # parser error (tested on SM-G965U,Samsung,8.0.0)
+        try:
+            net_stats = pd.read_csv(io.StringIO(
+                '\n'.join(d['net_stats'])
+            ), on_bad_lines='warn')
+        except pd.errors.EmptyDataError:
+            config.logging.warning(f"No net_stats for {d['appId']} is empty and has been skipped.")
+            net_stats = pd.DataFrame()
 
-        net_stats = pd.read_csv(
-            io.StringIO("\n".join(d["net_stats"])), on_bad_lines="warn"
-        )
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
             ["uid_tag_int", "cnt_set", "rx_bytes", "tx_bytes"]
         ].astype(int)
@@ -478,7 +482,6 @@ class IosDump(PhoneDump):
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
-            # d.set_index('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -575,8 +578,9 @@ class IosDump(PhoneDump):
         # app = self.df.iloc[appidx,:].dropna()
         app = self.df[self.df["CFBundleIdentifier"] == appid].squeeze().dropna()
         party = app.ApplicationType.lower()
-        if party in ["system", "user"]:
-            print(f"{app["CFBundleName"]} ({app["CFBundleIdentifier"]}) is a {party} app and has permissions:")
+        permissions = []
+        if party in ["system", "user", "hidden"]:
+            print(f"{app['CFBundleName']} ({app['CFBundleIdentifier']}) is a {party} app and has permissions:")
             # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
@@ -622,7 +626,8 @@ class IosDump(PhoneDump):
 
     def installed_apps_titles(self) -> pd.DataFrame:
         if self:
-            return self.df.rename(index=str, columns={"CFBundleExecutable": "title"})
+            return self.df.rename(index=str,
+                                  columns={'CFBundleExecutable': 'title'}).set_index('appId')
 
     def installed_apps(self):
         # return self.df.index
@@ -646,5 +651,5 @@ if __name__ == "__main__":
         print(json.dumps(ddump.info("ru.kidcontrol.gpstracker"), indent=2))
     elif sys.argv[2] == "ios":
         ddump = IosDump(fname)
-        # print(ddump.installed_apps())
+        print(ddump.installed_apps())
         print(ddump.installed_apps_titles().to_csv())

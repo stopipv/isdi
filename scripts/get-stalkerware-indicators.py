@@ -51,7 +51,7 @@ old_apps = []
 try:
     with open(config.APP_FLAGS_FILE, "r") as f:
         reader = csv.reader(f)
-        old_apps = [row[0] for row in csv.reader(f)]
+        old_apps = set([row[0] for row in csv.reader(f)])
 except csv.Error as e:
     print("Error parsing CSV app flags file: {}".format(e))
     sys.exit(1)
@@ -62,7 +62,7 @@ new_app_count = 0
 try:
     # append new apps to app-flags.csv for all ioc apps
     with open(config.APP_FLAGS_FILE, "a") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator='\n')
         for element in ioc:
             if 'packages' not in element:
                 continue
@@ -72,7 +72,7 @@ try:
                     new_app_count += 1
                     if 'names' not in element:
                         element['names'] = []
-                    names = ','.join(element['names'])
+                    names = ' / '.join(element['names'])
                     writer.writerow([app, "playstore", "spyware", names])
 except csv.Error as e:
     print("Error parsing CSV app flags file: {}".format(e))

@@ -86,7 +86,7 @@ class AppScan(object):
             config.DUMP_DIR, "{}_{}.{}".format(hmac_serial, self.device_type, fkind)
         )
 
-    def app_details(self, serialno, appid):
+    def app_details(self, serialno, appid) -> (dict, dict):
         try:
             d = pd.read_sql(
                 "select * from apps where appid=?", self.app_info_conn, params=(appid,)
@@ -107,21 +107,20 @@ class AppScan(object):
 
             info = ddump.info(appid)
 
-            print("BEGIN APP INFO")
-            print("info={}".format(info))
-            print("END APP INFO")
+            config.logging.info('BEGIN APP INFO')
+            config.logging.info("info={}".format(info))
+            config.logging.info('END APP INFO')
             # FIXME: sloppy iOS hack but should fix later, just add these to DF
             # directly.
             if self.device_type == "ios":
                 # TODO: add extra info about iOS? Like idevicediagnostics
                 # ioregentry AppleARMPMUCharger or IOPMPowerSource or
                 # AppleSmartBattery.
-                d["permissions"] = pd.Series(info.get("permissions", ""))
-                # d['permissions'] = [info.get('permissions','')]
-                d["title"] = pd.Series(info.get("title", ""))
-                # del info['permissions']
-            print("AppInfo: ", info, appid, dfname, ddump)
-            return d.fillna(""), info
+                d['permissions'] = pd.Series(info.get('permissions',''), dtype=object)
+                d['title'] = pd.Series(info.get('title',''))
+                del info['permissions']
+            d = d.fillna('').to_dict(orient='index').get(0, {})
+            return d, info
         except KeyError as ex:
             print(">>> Exception:::", ex, file=sys.stderr)
             return pd.DataFrame([]), dict()
@@ -264,14 +263,14 @@ class AndroidScan(AppScan):
         self.installed_apps = installed_apps
         return installed_apps
 
-    def get_system_apps(self, serialno, from_dump=False):
+    def get_system_apps(self, serialno, from_dump=False) -> list:
         if (not from_dump):
             apps = self._get_apps_from_device(serialno, '-s')
         else:
             apps = []  # TODO: fix this later, not sure how to get from dump
         return apps
 
-    def get_offstore_apps(self, serialno, from_dump=False):
+    def get_offstore_apps(self, serialno, from_dump=False) -> list:
         if from_dump:
             return []  # TODO: fix this later, not sure how to get from dump
         offstore = []
@@ -364,18 +363,12 @@ class AndroidScan(AppScan):
         )
         return s != -1
 
-    def app_details(self, serialno, appid):
+    def app_details(self, serialno, appid) -> (dict, dict):
         d, info = super(AndroidScan, self).app_details(serialno, appid)
         # part that requires android to be connected / store this somehow.
         hf_recent, non_hf_recent, non_hf, stats = all_permissions(
             self.dump_path(serialno), appid
         )
-        # print(f"Permissions:\n"\
-        #       f"hf_recent=\n{hf_recent}\n"\
-        #       f"non_hf_recent=\n{non_hf_recent}\n"\
-        #       f"no_hf=\n{non_hf}\n"\
-        #       f"stats=\n{stats}\n")
-
         # FIXME: some appopps in non_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
         info["Date of Scan"] = datetime.now().strftime(config.DATE_STR)
@@ -406,13 +399,15 @@ class AndroidScan(AppScan):
                 ),
                 axis=1,
             )
-
         # print("hf_recent['label']=", hf_recent['label'].tolist())
-        # print(~hf_recent['timestamp'].str.contains('unknown'))
-        d.at[0, "permissions"] = hf_recent["label"].tolist()
-        non_hf_recent.drop("appId", axis=1, inplace=True)
-        d.at[0, "non_hf_permissions_html"] = non_hf_recent.to_html()
-
+        #print(~hf_recent['timestamp'].str.contains('unknown'))
+        non_hf_recent.drop('appId', axis=1, inplace=True)
+        d = d.fillna('').to_dict(orient='index').get(0, {})
+        print(d)
+        # d.at[0, 'permissions'] = hf_recent['label'].tolist()
+        # d.at[0, 'non_hf_permissions_html'] = non_hf_recent.to_html()
+        d['permissions'] = hf_recent['label'].tolist()
+        d['non_hf_permissions_html'] = non_hf_recent.to_html()
         print("App info dict:", d)
 
         # hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
@@ -589,12 +584,13 @@ class IosScan(AppScan):
         cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
         self.serialno = None
         s = catch_err(run_command(cmd), cmd=cmd, msg="")
+
         d = [
             line.strip()
             for line in s.split("\n")
             if line.strip() and _is_device(line.strip())
         ]
-        print("Devices found:", d)
+        config.logging.info("Devices found:", d)
         return d
 
     def device_info(self, serial):

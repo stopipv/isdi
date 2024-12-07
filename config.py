@@ -1,9 +1,31 @@
 import hashlib
 import hmac
 import os
+import secrets
 import shlex
 from pathlib import Path
 from sys import platform
+
+import logging
+import logging.handlers as handlers
+
+def setup_logger():
+    """
+    Set up a logger with a rotating file handler.
+
+    The logger will write in a file named 'app.log' in the 'logs' directory.
+    The log file will rotate when it reaches 100,000 bytes, keeps a maximum of 30 files.
+
+    Returns:
+        logging.Logger: The configured logger object.
+    """
+    handler = handlers.RotatingFileHandler(
+        'logs/app.log', maxBytes=100000, 
+        backupCount=30)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    return logger
 
 DEV_SUPPRTED = ["android", "ios"]  # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
@@ -15,6 +37,7 @@ source_files = {
     "offstore": "static_data/offstore_apks.csv",
 }
 spyware_list_file = "static_data/spyware.csv"  # hand picked
+
 
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "0")))
@@ -41,40 +64,38 @@ TEST_APP_LIST = "static_data/android.test.apps_list"
 
 TITLE = {"title": "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else "")}
 
+
 APP_FLAGS_FILE = "static_data/app-flags.csv"
 APP_INFO_SQLITE_FILE = "sqlite:///static_data/app-info.db"
 
 # IOC stalkware indicators
-IOC_PATH = "data/stalkerware-indicators/"
-IOC_FILE = IOC_PATH + "ioc.yaml"
-
-# IOC stalkware indicators
-IOC_PATH = "data/stalkerware-indicators/"
-IOC_FILE = IOC_PATH + "ioc.yaml"
+IOC_PATH = "stalkerware-indicators"
+IOC_FILE = os.path.join(IOC_PATH, "ioc.yaml")
 
 # we will resolve the database path using an absolute path to __FILE__ because
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
-SQL_DB_PATH = "sqlite:///{}".format(str(THIS_DIR / "data/fieldstudy.db"))
-# SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
-
+SQL_DB_PATH = f"sqlite:///{str(THIS_DIR / 'data/fieldstudy.db')}"
+#SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
 
 def set_test_mode(test):
-    global TEST, APP_FLAGS_FILE, SQL_DB_PATH
-    TEST = test
-    if TEST:
-        if not APP_FLAGS_FILE.endswith("~test"):
-            APP_FLAGS_FILE = APP_FLAGS_FILE + "~test"
-        if not SQL_DB_PATH.endswith("~test"):
-            SQL_DB_PATH = SQL_DB_PATH + "~test"
+    """
+    Sets the test mode to the given value and returns the new values of APP_FLAGS_FILE and SQL_DB_PATH.
+    """
+    app_flags_file, sql_db_path = APP_FLAGS_FILE, SQL_DB_PATH
+    if test:
+        if not app_flags_file.endswith('~test'):
+            app_flags_file = APP_FLAGS_FILE + "~test"
+        if not sql_db_path.endswith('~test'):
+            sql_db_path = sql_db_path + "~test"
     else:
-        if APP_FLAGS_FILE.endswith("~test"):
-            APP_FLAGS_FILE = APP_FLAGS_FILE.replace("~test", "")
-        if SQL_DB_PATH.endswith("~test"):
-            SQL_DB_PATH = SQL_DB_PATH.replace("~test", "")
+        if app_flags_file.endswith('~test'):
+            app_flags_file = app_flags_file.replace("~test", '')
+        if sql_db_path.endswith('~test'):
+            sql_db_path = sql_db_path.replace("~test", '')
+    return app_flags_file, sql_db_path
 
-
-set_test_mode(TEST)
+APP_FLAGS_FILE, SQL_DB_PATH = set_test_mode(TEST)
 
 
 STATIC_DATA = THIS_DIR / "static_data"
@@ -117,10 +138,18 @@ PII_KEY_PATH = STATIC_DATA / "pii.key"
 
 
 def open_or_create_random_key(fpath, keylen=32):
-    def create():
-        import secrets
+    """
+    Opens the file at the given path or creates a new file with a random key of the specified length.
 
-        with fpath.open("wb") as f:
+    Args:
+        fpath (str): The path to the file.
+        keylen (int, optional): The length of the random key. Defaults to 32.
+
+    Returns:
+        bytes: The contents of the file as bytes.
+    """
+    def create():
+        with fpath.open('wb') as f:
             f.write(secrets.token_bytes(keylen))
 
     if not fpath.exists():
@@ -162,5 +191,5 @@ def error():
     if len(ERROR_LOG) > 0:
         e, ERROR_LOG = ERROR_LOG[0], ERROR_LOG[1:]
 
-        print("ERROR: {}".format(e))
+        print(f"ERROR: {e}")
     return e.replace("\n", "<br/>")

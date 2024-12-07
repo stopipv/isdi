@@ -98,13 +98,14 @@ def scan():
                 "debugging is turned on on the device, and then scan again."
     error += "{} <b>Please follow the <a href='/instruction' target='_blank'"\
              " rel='noopener'>setup instructions here,</a> if needed.</b>"
-    if device == 'ios':
-        # go through pairing process and do not scan until it is successful.
-        isconnected, reason = sc.setup()
-        template_d["error"] = error.format(reason)
-        template_d["currently_scanned"] = currently_scanned
-        if not isconnected:
-            return render_template("main.html", **template_d), 201
+
+    # if device == 'ios':
+    #     # go through pairing process and do not scan until it is successful.
+    #     isconnected, reason = sc.setup()
+    #     template_d["error"] = error.format(reason)
+    #     template_d["currently_scanned"] = currently_scanned
+    #     if not isconnected:
+    #         return render_template("main.html", **template_d), 201
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
@@ -115,6 +116,8 @@ def scan():
             print(d)
             device_name_print = f"{d['device_model']} ({d['device_primary_user']})"
             device_name_map = d
+        else:
+            print("ERROR: Could not find device info:", d)
     else:
         device_name_print, device_name_map = sc.device_info(serial=ser)
 
