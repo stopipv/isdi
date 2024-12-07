@@ -1,10 +1,10 @@
-from pathlib import Path
-import os
-import shlex
-from sys import platform
 import hashlib
 import hmac
+import os
 import secrets
+import shlex
+from pathlib import Path
+from sys import platform
 
 import logging
 import logging.handlers as handlers
@@ -27,41 +27,46 @@ def setup_logger():
     logger.addHandler(handler)
     return logger
 
-DEV_SUPPRTED = ['android', 'ios']    # 'windows', 'mobileos', later
+DEV_SUPPRTED = ["android", "ios"]  # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
 
 # Used by data_process only.
 source_files = {
-    'playstore': 'static_data/android_apps_crawl.csv.gz',
-    'appstore': 'static_data/ios_apps_crawl.csv.gz',
-    'offstore': 'static_data/offstore_apks.csv',
+    "playstore": "static_data/android_apps_crawl.csv.gz",
+    "appstore": "static_data/ios_apps_crawl.csv.gz",
+    "offstore": "static_data/offstore_apks.csv",
 }
-SPYWARE_LIST_FILE = 'static_data/spyware.csv'   # hand picked
+spyware_list_file = "static_data/spyware.csv"  # hand picked
+
 
 # ---------------------------------------------------------
 DEBUG = bool(int(os.getenv("DEBUG", "0")))
 TEST = bool(int(os.getenv("TEST", "0")))
 
 DEVICE_PRIMARY_USER = {
-    'me': 'Me',
-    'child': 'A child of mine',
-    'partner': 'My current partner/spouse',
-    'family_other': 'Another family member',
-    'other': 'Someone else'
+    "me": "Me",
+    "child": "A child of mine",
+    "partner": "My current partner/spouse",
+    "family_other": "Another family member",
+    "other": "Someone else",
 }
 
-ANDROID_PERMISSIONS_CSV = 'static_data/android_permissions.csv'
-IOS_DUMPFILES = {'Jailbroken-FS': 'ios_jailbroken.log', 
-                 'Jailbroken-SSH': 'ios_jailbreak_ssh.retcode',
-                 'Apps': 'ios_apps.plist', 'Info': 'ios_info.xml'}
+ANDROID_PERMISSIONS_CSV = "static_data/android_permissions.csv"
+IOS_DUMPFILES = {
+    "Jailbroken-FS": "ios_jailbroken.log",
+    "Jailbroken-SSH": "ios_jailbreak_ssh.retcode",
+    "Apps": "ios_apps.plist",
+    "Info": "ios_info.xml",
+}
 
-TEST_APP_LIST = 'static_data/android.test.apps_list'
-#TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
-tt_str = ' (test)' if TEST else ''
-TITLE = {'title': "IPV Spyware Discovery (ISDi){tt_str}"}
+TEST_APP_LIST = "static_data/android.test.apps_list"
+# TITLE = "Anti-IPS: Stop Intimate Partner Surveillance"
 
-APP_FLAGS_FILE = 'static_data/app-flags.csv'
-APP_INFO_SQLITE_FILE = 'sqlite:///static_data/app-info.db'
+TITLE = {"title": "IPV Spyware Discovery (ISDi){}".format(" (test)" if TEST else "")}
+
+
+APP_FLAGS_FILE = "static_data/app-flags.csv"
+APP_INFO_SQLITE_FILE = "sqlite:///static_data/app-info.db"
 
 # IOC stalkware indicators
 IOC_PATH = "stalkerware-indicators"
@@ -93,34 +98,45 @@ def set_test_mode(test):
 APP_FLAGS_FILE, SQL_DB_PATH = set_test_mode(TEST)
 
 
-STATIC_DATA = THIS_DIR / 'static_data'
+STATIC_DATA = THIS_DIR / "static_data"
 
 # TODO: We should get rid of this, ADB_PATH is very confusing
-ANDROID_HOME = os.getenv('ANDROID_HOME', '')
-PLATFORM = ('darwin' if platform == 'darwin'
-            else 'linux' if platform.startswith('linux')
-            else 'win32' if platform == 'win32' else None)
+ANDROID_HOME = os.getenv("ANDROID_HOME", "")
+PLATFORM = (
+    "darwin"
+    if platform == "darwin"
+    else (
+        "linux"
+        if platform.startswith("linux")
+        else "win32" 
+        if platform == "win32" 
+        else None
+    )
+)
 
-ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, 'adb'))
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, "adb"))
 
-#LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
-LIBIMOBILEDEVICE_PATH = ''
+# LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
+LIBIMOBILEDEVICE_PATH = ""
 # MOBILEDEVICE_PATH = 'mobiledevice'
 # MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
+if PLATFORM:
+    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
+else:
+    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-none")))
 
-DUMP_DIR = THIS_DIR / 'phone_dumps'
-SCRIPT_DIR = THIS_DIR / 'scripts'
+DUMP_DIR = THIS_DIR / "phone_dumps"
+SCRIPT_DIR = THIS_DIR / "scripts"
 
-DATE_STR = '%Y-%m-%d %I:%M %p'
+DATE_STR = "%Y-%m-%d %I:%M %p"
 ERROR_LOG = []
 
-APPROVED_INSTALLERS = {
-    'com.android.vending',
-    'com.sec.android.preloadinstaller'}
+APPROVED_INSTALLERS = {"com.android.vending", "com.sec.android.preloadinstaller"}
 
-REPORT_PATH = THIS_DIR / 'reports'
+REPORT_PATH = THIS_DIR / "reports"
 PII_KEY_PATH = STATIC_DATA / "pii.key"
+
+
 def open_or_create_random_key(fpath, keylen=32):
     """
     Opens the file at the given path or creates a new file with a random key of the specified length.
@@ -138,10 +154,11 @@ def open_or_create_random_key(fpath, keylen=32):
 
     if not fpath.exists():
         create()
-    k = fpath.open('rb').read(keylen)
+    k = fpath.open("rb").read(keylen)
     if len(k) != keylen:
         create()
-    return fpath.open('rb').read()
+    return fpath.open("rb").read()
+
 
 PII_KEY = open_or_create_random_key(PII_KEY_PATH, keylen=32)
 
@@ -153,23 +170,24 @@ if not REPORT_PATH.exists():
 
 
 def hmac_serial(ser: str) -> str:
-    """Returns a string starting with HSN_<hmac(ser)>. If ser already have 'HSN_', 
+    """Returns a string starting with HSN_<hmac(ser)>. If ser already have 'HSN_',
     it returns the same value."""
-    if ser.startswith('HSN_'):
+    if ser.startswith("HSN_"):
         return ser
-    hser = hmac.new(PII_KEY, ser.encode('utf8'),
-                    digestmod=hashlib.sha256).hexdigest()
-    return f'HSN_{hser}'
+    hser = hmac.new(PII_KEY, ser.encode("utf8"), digestmod=hashlib.sha256).hexdigest()
+    return f"HSN_{hser}"
+
 
 def add_to_error(*args):
-    m = '\n'.join(str(e) for e in args)
+    global ERROR_LOG
+    m = "\n".join(str(e) for e in args)
     print(m)
     ERROR_LOG.append(m)
 
 
 def error():
     global ERROR_LOG
-    e = ''
+    e = ""
     if len(ERROR_LOG) > 0:
         e, ERROR_LOG = ERROR_LOG[0], ERROR_LOG[1:]
 

@@ -16,7 +16,7 @@ serial=$(idevice_id -l 2>&1 | tail -n 1)
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -u "$serial" -l -o xml -o list_all > $2
+ideviceinstaller -u "$serial" -l -o xml -o list_all > "$2"
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 # sed -i -e 's/<data>/<string>/g' $2

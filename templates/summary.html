@@ -1,0 +1,35 @@
+<script>
+    function get(url){
+        $('#loadingDiv').show();
+        $('#msg').html("")
+        $.get(url, function(data) {
+            $('#msg').html(data);
+            $('#loadingDiv').hide();
+        }).done(function(data) {
+        }).fail(function(data) {
+            alert("Failed:" + JSON.serialize(data));
+        })
+    }
+   
+    var loading = $('#loadingDiv').hide();
+    $(document).ready(function() {
+        $('#loadingDiv').hide();
+    });
+    
+</script>
+
+<div class="container">
+    <div>
+        <h4 class="display-4">Evidence Summary</h4>
+        <hr/>
+        <h2>Dual-Use apps</h2>
+        <div>
+            <i>Snapchat (hardcoded)</i>
+            {% for app in app_summaries %}
+                <div>Recognized: {{app["recognized"]}}</div>
+                <div>Installed: {{app["installed"]}}</div>
+                <div>Who installed: {{app["installer"]}}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
