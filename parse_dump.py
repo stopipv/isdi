@@ -462,7 +462,7 @@ class IosDump(PhoneDump):
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
             d['appId'] = d['CFBundleIdentifier']
-            d.set_index('appId', inplace=True)
+            # d.set_index('appId', inplace=True)
             return d
         except Exception as ex:
             print(ex)
@@ -480,7 +480,7 @@ class IosDump(PhoneDump):
                 print('Noted.')
             #print('\t'+msg+": "+str(PERMISSIONS_MAP[permission])+"\tReason: "+app.get(permission,'system app'))
 
-    def get_permissions(self, app):
+    def get_permissions(self, app: str) -> list:
         '''
             Returns a list of tuples (permission, developer-provided reason for permission).
             Could modify this function to include whether or not the permission can be adjusted
@@ -536,8 +536,8 @@ class IosDump(PhoneDump):
         if party in ['system', 'user']:
             print(app['CFBundleName'],"("+app['CFBundleIdentifier']+") is a {} app and has permissions:"\
                     .format(party))
-            # permissions are an array that returns the permission id and an explanation. 
-            permissions = self.get_permissions(app)
+        # permissions are an array that returns the permission id and an explanation. 
+        permissions = self.get_permissions(app)
         res['permissions'] = [(p.capitalize(), r) for p, r in permissions]
         res['title'] = app['CFBundleExecutable']
         res['App Version'] = app['CFBundleVersion']
