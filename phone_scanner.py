@@ -86,7 +86,7 @@ class AppScan(object):
             config.DUMP_DIR, "{}_{}.{}".format(hmac_serial, self.device_type, fkind)
         )
 
-    def app_details(self, serialno, appid) -> (dict, dict):
+    def app_details(self, serialno, appid) -> tuple[dict, dict]:
         try:
             d = pd.read_sql(
                 "select * from apps where appid=?", self.app_info_conn, params=(appid,)
@@ -123,9 +123,9 @@ class AppScan(object):
             return d, info
         except KeyError as ex:
             print(">>> Exception:::", ex, file=sys.stderr)
-            return pd.DataFrame([]), dict()
+            return dict(), dict()
 
-    def find_spyapps(self, serialno, from_dump=False):
+    def find_spyapps(self, serialno, from_dump=True):
         """Finds the apps in the phone and add flags to them based on @blocklist.py
         Return the sorted dataframe
         This is the **main** function that is called from the views in web/view/scan.py
@@ -146,10 +146,10 @@ class AppScan(object):
             td = pd.read_sql(
                 'select appid as appId, title from apps where appid in (?{})'.format(
                     ', ?'*(len(installed_apps)-1)
-                    ), self.app_info_conn, params=(installed_apps)).set_index('appId')
+                    ), self.app_info_conn, params=(installed_apps), index_col='appId')
             td.index.rename('appId', inplace=True)
         elif self.device_type == 'ios':
-            td = self.get_app_titles(serialno).set_index('appId')
+            td = self.get_app_titles(serialno)
 
         r.set_index("appId", inplace=True)
         r.loc[td.index, "title"] = td.get("title", "")
@@ -250,12 +250,12 @@ class AndroidScan(AppScan):
         if (not from_dump):
             installed_apps = self._get_apps_from_device(serialno, '-u')
             if installed_apps:
-                # q = run_command(
-                #     "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
-                #     ser=serialno,
-                #     hmac_serial=hmac_serial,
-                #     nowait=True,
-                # )
+                q = run_command(
+                    "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
+                    ser=serialno,
+                    hmac_serial=hmac_serial,
+                    nowait=True,
+                )
                 pass
         else:
             # Try loading from the dump
@@ -363,7 +363,7 @@ class AndroidScan(AppScan):
         )
         return s != -1
 
-    def app_details(self, serialno, appid) -> (dict, dict):
+    def app_details(self, serialno, appid) -> tuple[dict, dict]:
         d, info = super(AndroidScan, self).app_details(serialno, appid)
         # part that requires android to be connected / store this somehow.
         hf_recent, non_hf_recent, non_hf, stats = all_permissions(
@@ -402,10 +402,7 @@ class AndroidScan(AppScan):
         # print("hf_recent['label']=", hf_recent['label'].tolist())
         #print(~hf_recent['timestamp'].str.contains('unknown'))
         non_hf_recent.drop('appId', axis=1, inplace=True)
-        d = d.fillna('').to_dict(orient='index').get(0, {})
         print(d)
-        # d.at[0, 'permissions'] = hf_recent['label'].tolist()
-        # d.at[0, 'non_hf_permissions_html'] = non_hf_recent.to_html()
         d['permissions'] = hf_recent['label'].tolist()
         d['non_hf_permissions_html'] = non_hf_recent.to_html()
         print("App info dict:", d)
@@ -433,7 +430,7 @@ class AndroidScan(AppScan):
             or len(s) == 0
             or (s == "[android]: Error running ''. Error (1):")
         ):
-            print(config.error())
+            print(f">>> isrooted.1 <<< >> {config.error()}")
             reason = "couldn't find 'su' tool on the phone."
             c1 = (False, reason)
             root_checks.append(c1)
