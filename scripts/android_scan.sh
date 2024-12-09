@@ -5,10 +5,10 @@
 
 if [[ $# -lt 1 ]]; then
     echo -e "You have to provide a serial number. #Num args: $#"
-    exit -1
+    exit 1
 fi
 platform='unknown'
-unamestr=`uname`
+unamestr="$(uname)"
 if [[ "$unamestr" == 'Linux' ]]; then
    platform='linux'
 elif [[ "$unamestr" == 'Darwin' ]]; then
@@ -21,7 +21,7 @@ if command -v adb &>/dev/null;
 then
     adb=$(command -v adb)
 else
-    echo "Trying static adb. Unlikely to work on newer MAC or Linux. Please install `adb`"
+    echo "Trying static adb. Unlikely to work on newer MAC or Linux. Please install 'adb'"
     if [[ $platform == 'darwin' ]]; then
         adb='static_data/adb-darwin'
     elif [[ $platform == 'linux' ]]; then
@@ -45,7 +45,7 @@ ofname=$dump_dir/${hmac_serial:3}_android.txt
 email="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 function scan {
     act=$1
-    $adb $serial shell dumpsys $act | \
+    $adb "$serial" shell dumpsys "$act" | \
         sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
 }
 
@@ -57,7 +57,7 @@ function scan_spy {
         echo "Run scan first"
         return 1
     fi
-    grep -Eio '[a-zA-Z0-9\.]*spy[a-zA-Z0-9\.]*' $ofname | sort -u
+    grep -Eio '[a-zA-Z0-9\.]*spy[a-zA-Z0-9\.]*' "$ofname" | sort -u
 }
 
 
@@ -71,7 +71,7 @@ function retrieve {
     process_uid=$(grep -A1 "Package \[$app\]" $ofname | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
     process_uidu=$(grep -Eo "app=ProcessRecord{[a-f0-9]+ [0-9]+:$app/([a-z0-9]*)" $ofname  | cut -d '/' -f 2 | sort -u)
     
-    echo $process_uid $process_uidu
+    echo "$process_uid  $process_uidu"
     # Install date
     printf 'Install: %s\n' "$(awk "/Package \[$app\]/{flag=1;next}/install permissions:/{flag=0}flag" $ofname | grep Time | tr -d '  ')"
 
@@ -96,13 +96,13 @@ services=(package location media.camera netpolicy mount
 function dump {
     for a in ${services[*]}; do
         echo "DUMP OF SERVICE $a"
-        scan $a
+        scan "$a"
     done
     echo "DUMP OF SERVICE net_stats"
     $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
     for namespace in secure system global; do
 	echo "DUMP OF SETTINGS $namespace"
-	$adb shell settings list $namespace
+	$adb shell settings list "$namespace"
     done
 }
 
@@ -130,7 +130,7 @@ elif [[ "$1" == "info" ]]; then
     retrieve $3
 else
     echo "$ bash $0 <scan|info> <serial_no> [appId]"
-    exit -1;
+    exit 1;
 fi
 
 
