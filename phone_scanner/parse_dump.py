@@ -15,7 +15,6 @@ import pandas as pd
 from rsonlite import simpleparse
 
 
-
 def count_lspaces(lspaces):
     # print(">>", repr(l))
     return re.search(r"\S", lspaces).start()
@@ -323,11 +322,13 @@ class AndroidDump(PhoneDump):
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
         # parser error (tested on SM-G965U,Samsung,8.0.0)
         try:
-            net_stats = pd.read_csv(io.StringIO(
-                '\n'.join(d['net_stats'])
-            ), on_bad_lines='warn')
+            net_stats = pd.read_csv(
+                io.StringIO("\n".join(d["net_stats"])), on_bad_lines="warn"
+            )
         except pd.errors.EmptyDataError:
-            config.logging.warning(f"No net_stats for {d['appId']} is empty and has been skipped.")
+            config.logging.warning(
+                f"No net_stats for {d['appId']} is empty and has been skipped."
+            )
             net_stats = pd.DataFrame()
 
         d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
@@ -483,7 +484,7 @@ class IosDump(PhoneDump):
             with open(self.fname, "rb") as app_data:
                 apps_plist = load(app_data)
             d = pd.DataFrame(apps_plist)
-            d['appId'] = d['CFBundleIdentifier']
+            d["appId"] = d["CFBundleIdentifier"]
             return d
         except Exception as ex:
             print(ex)
@@ -492,7 +493,8 @@ class IosDump(PhoneDump):
 
     def check_unseen_permissions(self, permissions):
         for permission in permissions:
-            if not permission: continue  # Empty permission, skip
+            if not permission:
+                continue  # Empty permission, skip
             if permission not in self.permissions_map:
                 print(f"Have not seen {permission} before. Making note of this...")
                 permission_human_readable = permission.replace("kTCCService", "")
@@ -579,20 +581,26 @@ class IosDump(PhoneDump):
         party = app.ApplicationType.lower()
         permissions = []
         if party in ["system", "user", "hidden"]:
-            print(f"{app['CFBundleName']} ({app['CFBundleIdentifier']}) is a {party} app and has permissions:")
+            print(
+                f"{app['CFBundleName']} ({app['CFBundleIdentifier']}) is a {party} app and has permissions:"
+            )
             # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
         res["title"] = app["CFBundleExecutable"]
         res["App Version"] = app["CFBundleVersion"]
-        res["Install Date"] = """
+        res["Install Date"] = (
+            """
         Apple does not officially record iOS app installation dates.  To view when
         '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
         *purchase date* of '{}', follow these instructions:
         https://www.ipvtechresearch.org/post/guides/apple/.  These are the
         closest possible approximations to installation date available to
-        end-users.  """.format(res["title"], self.device_class, res["title"])
-        
+        end-users.  """.format(
+                res["title"], self.device_class, res["title"]
+            )
+        )
+
         res["Battery Usage"] = (
             "To see recent battery usage of '{title}': "
             "[Settings -> Battery -> Battery Usage].".format(**res)
@@ -625,8 +633,9 @@ class IosDump(PhoneDump):
 
     def installed_apps_titles(self) -> pd.DataFrame:
         if self:
-            return self.df.rename(index=str,
-                                  columns={'CFBundleExecutable': 'title'}).set_index('appId')
+            return self.df.rename(
+                index=str, columns={"CFBundleExecutable": "title"}
+            ).set_index("appId")
 
     def installed_apps(self):
         # return self.df.index

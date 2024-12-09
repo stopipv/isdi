@@ -9,6 +9,7 @@ from sys import platform
 import logging
 import logging.handlers as handlers
 
+
 def setup_logger():
     """
     Set up a logger with a rotating file handler.
@@ -20,12 +21,13 @@ def setup_logger():
         logging.Logger: The configured logger object.
     """
     handler = handlers.RotatingFileHandler(
-        'logs/app.log', maxBytes=100000, 
-        backupCount=30)
+        "logs/app.log", maxBytes=100000, backupCount=30
+    )
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
     return logger
+
 
 DEV_SUPPRTED = ["android", "ios"]  # 'windows', 'mobileos', later
 THIS_DIR = Path(__file__).absolute().parent
@@ -76,7 +78,8 @@ IOC_FILE = os.path.join(IOC_PATH, "ioc.yaml")
 # there are a couple of sources of truth that may disagree with their "path
 # relavitity". Needless to say, FIXME
 SQL_DB_PATH = f"sqlite:///{str(THIS_DIR / 'data/fieldstudy.db')}"
-#SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
+# SQL_DB_CONSULT_PATH = 'sqlite:///data/consultnotes.db' + ("~test" if TEST else "")
+
 
 def set_test_mode(test):
     """
@@ -84,16 +87,17 @@ def set_test_mode(test):
     """
     app_flags_file, sql_db_path = APP_FLAGS_FILE, SQL_DB_PATH
     if test:
-        if not app_flags_file.endswith('~test'):
+        if not app_flags_file.endswith("~test"):
             app_flags_file = APP_FLAGS_FILE + "~test"
-        if not sql_db_path.endswith('~test'):
+        if not sql_db_path.endswith("~test"):
             sql_db_path = sql_db_path + "~test"
     else:
-        if app_flags_file.endswith('~test'):
-            app_flags_file = app_flags_file.replace("~test", '')
-        if sql_db_path.endswith('~test'):
-            sql_db_path = sql_db_path.replace("~test", '')
+        if app_flags_file.endswith("~test"):
+            app_flags_file = app_flags_file.replace("~test", "")
+        if sql_db_path.endswith("~test"):
+            sql_db_path = sql_db_path.replace("~test", "")
     return app_flags_file, sql_db_path
+
 
 APP_FLAGS_FILE, SQL_DB_PATH = set_test_mode(TEST)
 
@@ -108,9 +112,7 @@ PLATFORM = (
     else (
         "linux"
         if platform.startswith("linux")
-        else "win32" 
-        if platform == "win32" 
-        else None
+        else "win32" if platform == "win32" else None
     )
 )
 
@@ -148,8 +150,9 @@ def open_or_create_random_key(fpath, keylen=32):
     Returns:
         bytes: The contents of the file as bytes.
     """
+
     def create():
-        with fpath.open('wb') as f:
+        with fpath.open("wb") as f:
             f.write(secrets.token_bytes(keylen))
 
     if not fpath.exists():

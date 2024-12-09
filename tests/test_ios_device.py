@@ -10,5 +10,3 @@ d.connect()
 ip = InstallationProxy(d)
 print(ip.lookup_applications())
 """
-
-

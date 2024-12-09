@@ -42,11 +42,11 @@ class AppScan(object):
 
     def get_system_apps(self, serialno, from_device: bool) -> list:
         pass
-    
+
     def get_apps(self, serialno: str, from_dump: bool) -> list:
         pass
 
-    def get_offstore_apps(self, serialno:str, from_dump: bool) -> list:
+    def get_offstore_apps(self, serialno: str, from_dump: bool) -> list:
         return []
 
     def get_app_titles(self, serialno):
@@ -107,19 +107,19 @@ class AppScan(object):
 
             info = ddump.info(appid)
 
-            config.logging.info('BEGIN APP INFO')
+            config.logging.info("BEGIN APP INFO")
             config.logging.info("info={}".format(info))
-            config.logging.info('END APP INFO')
+            config.logging.info("END APP INFO")
             # FIXME: sloppy iOS hack but should fix later, just add these to DF
             # directly.
             if self.device_type == "ios":
                 # TODO: add extra info about iOS? Like idevicediagnostics
                 # ioregentry AppleARMPMUCharger or IOPMPowerSource or
                 # AppleSmartBattery.
-                d['permissions'] = pd.Series(info.get('permissions',''), dtype=object)
-                d['title'] = pd.Series(info.get('title',''))
-                del info['permissions']
-            d = d.fillna('').to_dict(orient='index').get(0, {})
+                d["permissions"] = pd.Series(info.get("permissions", ""), dtype=object)
+                d["title"] = pd.Series(info.get("title", ""))
+                del info["permissions"]
+            d = d.fillna("").to_dict(orient="index").get(0, {})
             return d, info
         except KeyError as ex:
             print(">>> Exception:::", ex, file=sys.stderr)
@@ -137,18 +137,22 @@ class AppScan(object):
                 [], columns=["title", "flags", "score", "class_", "html_flags"]
             )
         r = blocklist.app_title_and_flag(
-            pd.DataFrame({'appId': installed_apps}),
+            pd.DataFrame({"appId": installed_apps}),
             offstore_apps=self.get_offstore_apps(serialno, from_dump=from_dump),
-            system_apps=self.get_system_apps(serialno, from_dump=from_dump)
+            system_apps=self.get_system_apps(serialno, from_dump=from_dump),
         )
         r["title"] = r.title.fillna("")
         if self.device_type == "android":
             td = pd.read_sql(
-                'select appid as appId, title from apps where appid in (?{})'.format(
-                    ', ?'*(len(installed_apps)-1)
-                    ), self.app_info_conn, params=(installed_apps), index_col='appId')
-            td.index.rename('appId', inplace=True)
-        elif self.device_type == 'ios':
+                "select appid as appId, title from apps where appid in (?{})".format(
+                    ", ?" * (len(installed_apps) - 1)
+                ),
+                self.app_info_conn,
+                params=(installed_apps),
+                index_col="appId",
+            )
+            td.index.rename("appId", inplace=True)
+        elif self.device_type == "ios":
             td = self.get_app_titles(serialno)
 
         r.set_index("appId", inplace=True)
@@ -244,11 +248,11 @@ class AndroidScan(AppScan):
         app_and_codes = self.dump_d.apps()
         return [a for a, c in app_and_codes]
 
-    def get_apps(self, serialno: str, from_dump: bool=True) -> list:
+    def get_apps(self, serialno: str, from_dump: bool = True) -> list:
         print(f"Getting Android apps: {serialno} from_dump={from_dump}")
         hmac_serial = config.hmac_serial(serialno)
-        if (not from_dump):
-            installed_apps = self._get_apps_from_device(serialno, '-u')
+        if not from_dump:
+            installed_apps = self._get_apps_from_device(serialno, "-u")
             if installed_apps:
                 q = run_command(
                     "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
@@ -264,8 +268,8 @@ class AndroidScan(AppScan):
         return installed_apps
 
     def get_system_apps(self, serialno, from_dump=False) -> list:
-        if (not from_dump):
-            apps = self._get_apps_from_device(serialno, '-s')
+        if not from_dump:
+            apps = self._get_apps_from_device(serialno, "-s")
         else:
             apps = []  # TODO: fix this later, not sure how to get from dump
         return apps
@@ -400,11 +404,11 @@ class AndroidScan(AppScan):
                 axis=1,
             )
         # print("hf_recent['label']=", hf_recent['label'].tolist())
-        #print(~hf_recent['timestamp'].str.contains('unknown'))
-        non_hf_recent.drop('appId', axis=1, inplace=True)
+        # print(~hf_recent['timestamp'].str.contains('unknown'))
+        non_hf_recent.drop("appId", axis=1, inplace=True)
         print(d)
-        d['permissions'] = hf_recent['label'].tolist()
-        d['non_hf_permissions_html'] = non_hf_recent.to_html()
+        d["permissions"] = hf_recent["label"].tolist()
+        d["non_hf_permissions_html"] = non_hf_recent.to_html()
         print("App info dict:", d)
 
         # hf_recent['label'] = hf_recent['label'].map(str) + " (last used by app: "+\
@@ -420,21 +424,23 @@ class AndroidScan(AppScan):
         """
         # FIXME: load these from a private database instead.  from OWASP,
         # https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
- 
-        root_pkgs_check_str = "\\|".join([
-            "com.noshufou.android.su",
-            "com.thirdparty.superuser",
-            "eu.chainfire.supersu",
-            "com.koushikdutta.superuser",
-            "com.zachspong.temprootremovejb",
-            "com.ramdroid.appquarantine",
-        ])
+
+        root_pkgs_check_str = "\\|".join(
+            [
+                "com.noshufou.android.su",
+                "com.thirdparty.superuser",
+                "eu.chainfire.supersu",
+                "com.koushikdutta.superuser",
+                "com.zachspong.temprootremovejb",
+                "com.ramdroid.appquarantine",
+            ]
+        )
         print(root_pkgs_check_str)
         root_checks = {
             "su binary": ("command -v su", "0"),
-            "oem unlock": ("getprop ro.boot.flash.locked", "0"), 
+            "oem unlock": ("getprop ro.boot.flash.locked", "0"),
             "frida server": ("ps -A | grep frida", "0"),
-            "root_pkgs": (f"pm list packages | grep {root_pkgs_check_str}", "0")
+            "root_pkgs": (f"pm list packages | grep {root_pkgs_check_str}", "0"),
         }
         for k, v in root_checks.items():
             cmd = "{cli} -s {serial} shell '{v[0]}'"
@@ -442,7 +448,6 @@ class AndroidScan(AppScan):
             if s.strip() == v[1]:
                 return (True, f"The device is rooted: Found:  {k!r}.")
         return (False, "The device is probably not rooted.")
-
 
 
 class IosScan(AppScan):
@@ -508,7 +513,7 @@ class IosScan(AppScan):
         print("iOS INFO DUMPED.")
         return self.installed_apps
 
-    def get_system_apps(self, serialno:str, from_dump: bool) -> list:
+    def get_system_apps(self, serialno: str, from_dump: bool) -> list:
         if self.parse_dump:
             return self.parse_dump.system_apps()
         else:
