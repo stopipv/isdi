@@ -2505,6 +2505,7 @@ com.yottajoy.gdrive,playstore,dual-use,GDriveSync
 com.quality.droid.apps.easy_gps_locator,playstore,dual-use,Easy GPS Locator
 com.mashaapps.mobile.number.tracker,playstore,dual-use,GPS Mobile Number Location
 com.lsdroid.cerberus,playstore,spyware,Cerberus anti theft
+com.ssurebrec,playstore,spyware,Cerberus anti theft
 de.afischer.aftrack.lite,playstore,dual-use,AFTrack-Lite - GPS Tracking
 com.softians.gpstracker.mobilelocationtracer.routefinder,playstore,dual-use,Girl Friend Mobile Number Location Tracker
 de.dieterthiess.celltracker,playstore,dual-use,Cell Tracker (Unreleased)
@@ -2552,7 +2553,7 @@ kr.co.cr.app,playstore,dual-use,통화녹음
 com.meowsbox.btgps,playstore,dual-use,Bluetooth GPS Output
 com.tai.cloud,playstore,dual-use,Easy sync for cloud contacts
 com.aip.mapsstreetview.worldmap.earthmap,playstore,dual-use,"Live Street View, World Map, Maps Directions"
-epic.mychart.android,playstore,dual-use,MyChart
+epic.mychart.android,playstore,safe,MyChart
 xdk.himanshu.btlgps,playstore,dual-use,BTL GPS Tracking 2
 com.gpscoordinatesandlocation,playstore,dual-use,My GPS Coordinates
 com.eit.tns,playstore,dual-use,Kingstrack GPS Tracking System
@@ -3425,6 +3426,7 @@ backup.email.inapp,playstore,dual-use,Backup message & call to Email
 com.goodbarber.matematicalite,playstore,dual-use,Find my Phone Lite
 org.swiftapps.swiftbackup,playstore,dual-use,Swift Backup (Beta)
 com.shravan.map,playstore,dual-use,Friend Finder Lite
+com.saurik.Cydia,offstore,dual-use,Cydia
 com.familyhawk.FHSenior,appstore,dual-use,Locate365 - Family Locator
 rars.TrackoApp.ios,appstore,dual-use,TrackoApp GPS Locator - Find Family & Friends
 com.singhsurma.locator,appstore,dual-use,Device Locator: Track and Locate Family Members and Lost or Stolen iPhones
@@ -4799,6 +4801,7 @@ com.fp.backup,playstore,spyware,FlexiSpy
 com.android.phone.dialer,playstore,spyware,FlexiSpy
 com.lsdroid.cerberuss,playstore,spyware,Cerberus
 com.lsdroid.cerberus.persona,playstore,spyware,Cerberus
+com.lsdroid.cerberus.persona2,playstore,spyware,Cerberus
 com.lsdroid.cerberus.kids,playstore,spyware,Cerberus
 com.lsdroid.cerberus.client,playstore,spyware,Cerberus
 android.helper.system,playstore,spyware,"celSpy,eyeZy,mSpy,mSpyOnline,FakeSys"
@@ -5174,3 +5177,13 @@ com.eytewqrm.wvdkgmrl,playstore,spyware,
 com.epbzrqcg.syzzkuqx,playstore,spyware,
 com.laucass.phonecontrolenabler,playstore,spyware,
 com.laucass.phonecontroltarget,playstore,spyware,
+com.surebrec,playstore,spyware,Cerberus
+com.ssurebrec,playstore,spyware,Cerberus
+com.tutorial.instalao,playstore,spyware,MeuSpy
+com.aisistem.instalao,playstore,spyware,MeuSpy
+br.com.appfornecedor.legal,playstore,spyware,MeuSpy
+com.mtf.download,playstore,spyware,MobileTrackerFree / MonitorLoverman / MTrack / CellTracker / TrackMobil
+iiw.orqjtwbkx,playstore,spyware,MonitorChecker / AndrMonitor / AndroidMon / Dromon
+efexmsz.mzuooelftl,playstore,spyware,MonitorChecker / AndrMonitor / AndroidMon / Dromon
+com.wisemo.wsmguest.v18,playstore,spyware,
+org.findmykids.child,playstore,spyware,

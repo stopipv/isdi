@@ -5,7 +5,3 @@ brew "expect"
 
 brew "libimobiledevice"
 brew "ideviceinstaller"
-
-brew "autoconf"
-brew "automake"
-brew "libtool"

@@ -36,7 +36,7 @@ from flask import url_for
 import random
 import config
 adb=config.ADB_PATH
-
+print(f">>>>>>>>>>>>>>> {adb} <<<<<<<<<<<<<<<<<<<<")
 
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(
@@ -122,8 +122,8 @@ def take_screenshot(ser, fname=None):
     #     keycode(ser, 'power'); keycode(ser, 'menu') # Wakes the screen up
     if not fname:
         fname = "tmp_screencap.png"
-    # cmd = "{cli} shell screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g' > '{fname}'"
-    cmd = "{cli} shell screencap -p > '{fname}'"
+    cmd = "{cli} shell screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g' > '{fname}'"
+    # cmd = "{cli} shell screencap -p > '{fname}'"
     run_command(cmd, cli=thiscli(ser), fname=fname)
     
 

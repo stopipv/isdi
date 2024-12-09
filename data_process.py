@@ -37,9 +37,9 @@ def create_app_flags_file():
     sys.stderr.write("Concatenating...")
     fulld = pd.concat(dlist)
     sys.stderr.write("done\n")
-    spyware = pd.read_csv(config.spyware_list_file, index_col='appId')
+    spyware = pd.read_csv(config.SPYWARE_LIST_FILE, index_col='appId')
     fulld.loc[spyware.index, 'flag'] = 'spyware'
-    print("Writing to the file: {}".format(config.APP_FLAGS_FILE))
+    print("Writing to the file: {config.APP_FLAGS_FILE}")
     fulld.to_csv(config.APP_FLAGS_FILE)
 
 

@@ -4,28 +4,43 @@ import os
 from web import app
 from web.view.index import get_device
 from flask import render_template, request, session, redirect, url_for
+import db
 from db import (get_client_devices_from_db, new_client_id, create_scan, 
-    create_mult_appinfo)
+                create_mult_appinfo, first_element_or_none)
+
+
+
+
+def get_param(key):
+    return request.form.get(key, request.args.get(key))
 
 @app.route("/scan", methods=['POST', 'GET'])
 def scan():
     """
     Needs three attribute for a device
     :param device: "android" or "ios" or test
+    :param devid: id of the android device
+    :param cientid: id of the cient
     :return: a flask view template
     """
     #clientid = request.form.get('clientid', request.args.get('clientid'))
     if 'clientid' not in session:
         return redirect(url_for('index'))
 
-    device_primary_user = request.form.get(
-        'device_primary_user',
-        request.args.get('device_primary_user'))
-    device = request.form.get('device', request.args.get('device'))
-    action = request.form.get('action', request.args.get('action'))
-    device_owner = request.form.get(
-        'device_owner', request.args.get('device_owner'))
-
+    clientid = session['clientid']
+    device_primary_user = get_param('device_primary_user')
+    device = get_param('device')
+    action = get_param('action')
+    device_owner = get_param('device_owner')
+    ser =  get_param('devid')
+    t_from_dump = get_param('from_dump')
+    from_dump = False
+    if t_from_dump:
+        try:
+            from_dump = int(t_from_dump)
+        except:
+            from_dump = False
+        
     currently_scanned = get_client_devices_from_db(session['clientid'])
     template_d = dict(
         task="home",
@@ -42,6 +57,8 @@ def scan():
     print('CURRENTLY SCANNED: {}'.format(currently_scanned))
     print('DEVICE OWNER IS: {}'.format(device_owner))
     print('PRIMARY USER IS: {}'.format(device_primary_user))
+    print('SERIAL NO: {}'.format(ser))
+    print('FROM DUMP: {}'.format(from_dump))
     print('-' * 80)
     print('CLIENT ID IS: {}'.format(session['clientid']))
     print('-' * 80)
@@ -55,7 +72,8 @@ def scan():
         template_d["error"] = "Please give the device a nickname."
         return render_template("main.html", **template_d), 201
 
-    ser = sc.devices()
+    if not ser:
+        ser = first_element_or_none(sc.devices())
 
     print("Devices: {}".format(ser))
     if not ser:
@@ -67,7 +85,6 @@ def scan():
         template_d["error"] = error
         return render_template("main.html", **template_d), 201
 
-    ser = first_element_or_none(ser)
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
 
@@ -81,21 +98,32 @@ def scan():
                 "debugging is turned on on the device, and then scan again."
     error += "{} <b>Please follow the <a href='/instruction' target='_blank'"\
              " rel='noopener'>setup instructions here,</a> if needed.</b>"
-    if device == 'ios':
-        # go through pairing process and do not scan until it is successful.
-        isconnected, reason = sc.setup()
-        template_d["error"] = error.format(reason)
-        template_d["currently_scanned"] = currently_scanned
-        if not isconnected:
-            return render_template("main.html", **template_d), 201
+
+    # if device == 'ios':
+    #     # go through pairing process and do not scan until it is successful.
+    #     isconnected, reason = sc.setup()
+    #     template_d["error"] = error.format(reason)
+    #     template_d["currently_scanned"] = currently_scanned
+    #     if not isconnected:
+    #         return render_template("main.html", **template_d), 201
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
-    device_name_print, device_name_map = sc.device_info(serial=ser)
+    device_name_print, device_name_map = "<NOT FOUND>", {}
+    if from_dump:
+        d = db.get_device_info(ser)
+        if d:
+            print(d)
+            device_name_print = f"{d['device_model']} ({d['device_primary_user']})"
+            device_name_map = d
+        else:
+            print("ERROR: Could not find device info:", d)
+    else:
+        device_name_print, device_name_map = sc.device_info(serial=ser)
 
     # Finds all the apps in the device
     # @apps have appid, title, flags, TODO: add icon
-    apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+    apps = sc.find_spyapps(serialno=ser, from_dump=from_dump).fillna('').to_dict(orient='index')
     if len(apps) <= 0:
         print("The scanning failed for some reason.")
         error = "The scanning failed. This could be due to many reasons. Try"\
@@ -124,17 +152,29 @@ def scan():
         scan_d['last_full_charge'] = device_name_map.get(
             'last_full_charge', "<Unknown>")
 
-    rooted, rooted_reason = sc.isrooted(ser)
+    print(f"Getting from dump: {from_dump}")
+    if from_dump:
+        rooted, rooted_reason = db.get_is_rooted(ser)
+    else:
+        rooted, rooted_reason = sc.isrooted(ser)
     scan_d['is_rooted'] = rooted
     scan_d['rooted_reasons'] = json.dumps(rooted_reason)
 
     # TODO: here, adjust client session.
-    scanid = create_scan(scan_d)
+    if from_dump:
+        scanid = db.get_most_recent_scan_id(ser)
+        if scanid == -1:
+            template_d["error"] = "The serial number provided does not have a scan yet, "\
+                "and you want to read from the dump. Please connect the device and scan first."
+            return render_template("main.html", **template_d), 201
+    else:
+        scanid = create_scan(scan_d)
 
     if device == 'ios':
         pii_fpath = sc.dump_path(ser, 'Device_Info')
         print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
-        cmd = os.unlink(pii_fpath)
+        if os.path.exists(pii_fpath):
+            cmd = os.unlink(pii_fpath)
         # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
         print('iOS PII deleted.')
 
@@ -162,9 +202,4 @@ def scan():
     ))
     return render_template("main.html", **template_d), 200
  
-
-def first_element_or_none(l):
-    if l and len(l) > 0:
-        return l[0]
-
 

@@ -3,7 +3,7 @@ from time import strftime
 import logging
 import config
 from flask import Flask, g, session, request
-from flask_sqlalchemy import Model, SQLAlchemy
+from flask_sqlalchemy import model, SQLAlchemy
 from flask_migrate import Migrate
 
 app = Flask(__name__, static_folder='../webstatic',
