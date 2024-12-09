@@ -418,89 +418,31 @@ class AndroidScan(AppScan):
         Doesn't return all reasons by default. First match will return.
         TODO: make consistent with iOS isrooted, which returns all reasons discovered.
         """
-        root_checks = []
-
-        # SU binary check
-        cmd = "{cli} -s {serial} shell 'command -v su'"
-        s = catch_err(run_command(cmd, serial=shlex.quote(serial)))
-        if (
-            not s
-            or s == -1
-            or "not found" in s
-            or len(s) == 0
-            or (s == "[android]: Error running ''. Error (1):")
-        ):
-            print(f">>> isrooted.1 <<< >> {config.error()}")
-            reason = "couldn't find 'su' tool on the phone."
-            c1 = (False, reason)
-            root_checks.append(c1)
-        else:
-            reason = "found '{}' tool on the phone. Verify whether this is a su binary.".format(
-                s.strip()
-            )
-            c1 = (True, reason)
-            root_checks.append(c1)
-
-        # OEM Unlock check
-        cmd2 = "{cli} -s {serial} shell getprop ro.boot.flash.locked"
-        s2 = catch_err(run_command(cmd2, serial=shlex.quote(serial)))
-        if s2.strip() == "0":
-            reason = "Bootloader unlocked."
-            c2 = (True, reason)
-            root_checks.append(c2)
-        else:
-            reason = "Bootloader is locked"
-            c2 = (False, reason)
-            root_checks.append(c2)
-
-        # Frida check
-        cmd3 = "{cli} -s {serial} shell ps -A"
-        s3 = catch_err(run_command(cmd3, serial=shlex.quote(serial)), large_output=True)
-        found = False
-        for line in s3.split("\n"):
-            if "frida" in line:
-                reason = "Frida server found."
-                c3 = (True, reason)
-                root_checks.append(c3)
-                found = True
-        if not found:
-            reason = "Frida server NOT found."
-            c3 = (False, reason)
-            root_checks.append(c3)
-
-        installed_apps = self.installed_apps
-        if not installed_apps:
-            installed_apps = self.get_apps(serial)
-
         # FIXME: load these from a private database instead.  from OWASP,
         # https://sushi2k.gitbooks.io/the-owasp-mobile-security-testing-guide/content/0x05j-Testing-Resiliency-Against-Reverse-Engineering.html
-        root_pkgs = [
+ 
+        root_pkgs_check_str = "\\|".join([
             "com.noshufou.android.su",
             "com.thirdparty.superuser",
             "eu.chainfire.supersu",
             "com.koushikdutta.superuser",
             "com.zachspong.temprootremovejb",
             "com.ramdroid.appquarantine",
-        ]
-        root_pkgs_check = list(set(root_pkgs) & set(installed_apps))
-        if root_pkgs_check:
-            reason = "found the following app(s) on the phone: '{}'.".format(
-                str(root_pkgs_check)
-            )
-            root_checks.append((True, reason))
+        ])
+        print(root_pkgs_check_str)
+        root_checks = {
+            "su binary": ("command -v su", "0"),
+            "oem unlock": ("getprop ro.boot.flash.locked", "0"), 
+            "frida server": ("ps -A | grep frida", "0"),
+            "root_pkgs": (f"pm list packages | grep {root_pkgs_check_str}", "0")
+        }
+        for k, v in root_checks.items():
+            cmd = "{cli} -s {serial} shell '{v[0]}'"
+            s = catch_err(run_command(cmd, serial=shlex.quote(serial), v=v))
+            if s.strip() == v[1]:
+                return (True, f"The device is rooted: Found:  {k!r}.")
+        return (False, "The device is probably not rooted.")
 
-        tmp_boolean = False
-        tmp_reason = ""
-        for b, reason in root_checks:
-            if b:
-                print(reason)
-                tmp_boolean = True
-                tmp_reason += f"{reason}\n"
-
-        if tmp_boolean:
-            return (True, tmp_reason)
-        else:
-            return (False, "Checks pass")
 
 
 class IosScan(AppScan):
