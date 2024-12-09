@@ -4,8 +4,8 @@ import os
 from web import app
 from web.view.index import get_device
 from flask import render_template, request, session, redirect, url_for
-import db
-from db import (get_client_devices_from_db, new_client_id, create_scan, 
+from phone_scanner import db
+from phone_scanner.db import (get_client_devices_from_db, new_client_id, create_scan, 
                 create_mult_appinfo, first_element_or_none)
 
 

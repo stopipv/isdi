@@ -6,14 +6,14 @@ import re
 import shlex
 import sqlite3
 import sys
-import blocklist
 import config
-import parse_dump
 import pandas as pd
 from collections import defaultdict
 from datetime import datetime
-from android_permissions import all_permissions
-from runcmd import catch_err, run_command
+from . import blocklist
+from . import parse_dump
+from .android_permissions import all_permissions
+from .runcmd import catch_err, run_command
 
 
 class AppScan(object):

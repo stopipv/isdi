@@ -116,7 +116,7 @@ def prune_empty_keys(d):
     return d
 
 
-def retrieve(dict_, nest):
+def retrieve(dict_: pd.DataFrame, nest: list) -> str:
     """
     Navigates dictionaries like dict_[nest0][nest1][nest2]...
     gracefully.
@@ -125,9 +125,11 @@ def retrieve(dict_, nest):
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
-        return f"{e}"
+        print(f"KeyError: {e} for dict_={dict_} and nest={nest}")
+        return ""
     except TypeError as e:
-        return f"{e}"
+        print(f"TypeError: {e} for dict_={dict_} and nest={nest}")
+        return ""
 
 
 class PhoneDump(object):
@@ -490,12 +492,9 @@ class IosDump(PhoneDump):
 
     def check_unseen_permissions(self, permissions):
         for permission in permissions:
+            if not permission: continue  # Empty permission, skip
             if permission not in self.permissions_map:
-                print(
-                    "Have not seen "
-                    + str(permission)
-                    + " before. Making note of this..."
-                )
+                print(f"Have not seen {permission} before. Making note of this...")
                 permission_human_readable = permission.replace("kTCCService", "")
                 with open(
                     os.path.join(config.THIS_DIR, "ios_permissions.json"), "w"

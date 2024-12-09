@@ -1,7 +1,7 @@
 from web import app
 from web.view.index import get_device
 from flask import request, render_template, redirect, url_for
-from db import get_scan_res_from_db, get_app_info_from_db, first_element_or_none
+from phone_scanner.db import get_scan_res_from_db, get_app_info_from_db, first_element_or_none
 
 @app.route("/view_results", methods=['POST', 'GET'])
 def view_results():

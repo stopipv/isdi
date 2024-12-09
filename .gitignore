@@ -153,4 +153,4 @@ __MACOSX
 
 *~test
 *.apk
-dumps/android_scan.logs
+phone_dumps/dumps/android_scan.logs

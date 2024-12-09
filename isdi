@@ -6,7 +6,7 @@ import webbrowser
 from threading import Timer
 
 import config
-from db import init_db
+from phone_scanner import db
 from web import app, sa
 
 PORT = 6200 if not (config.TEST or config.DEBUG) else 6202
@@ -28,7 +28,7 @@ if __name__ == "__main__":
               "SQL_DB: {config.SQL_DB_PATH}")
 
     print(f"TEST={config.TEST}")
-    init_db(app, sa, force=config.TEST)
+    db.init_db(app, sa, force=config.TEST)
     config.setup_logger()
     Timer(1, open_browser).start()
     app.run(host=HOST, port=PORT, debug=config.DEBUG, use_reloader=config.DEBUG)

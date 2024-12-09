@@ -3,12 +3,11 @@ Must work completely from the dumps, no interaction with the device is required.
 """
 
 from rsonlite import simpleparse
-from runcmd import run_command, catch_err
 import pandas as pd
 import datetime
 import config
 import re
-import json
+from .runcmd import run_command, catch_err
 
 #MAP = config.ANDROID_PERMISSIONS
 DUMPPKG = 'dumppkg'
@@ -20,7 +19,7 @@ def _parse_time(time_str):
     Modified from virhilo's answer at https://stackoverflow.com/a/4628148/851699
     :param time_str: A string identifying a duration.  (eg. 2h13m)
     :return datetime.timedelta: A datetime.timedelta object
-        r'^+((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
+        r'^+((?P<days>[\\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\\.\d]+?)ms)?')
     """
     timedelta_re = re.compile(
         r'^.((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
