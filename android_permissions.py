@@ -20,7 +20,7 @@ def _parse_time(time_str):
     Modified from virhilo's answer at https://stackoverflow.com/a/4628148/851699
     :param time_str: A string identifying a duration.  (eg. 2h13m)
     :return datetime.timedelta: A datetime.timedelta object
-        r'^\+((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
+        r'^+((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
     """
     timedelta_re = re.compile(
         r'^.((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?')
@@ -87,7 +87,7 @@ def package_info(dumpf, appid):
     # requested permissions:
     # install permissions:
     # runtime permissions:
-    cmd = "sed -n -e '/Package \[{appid}\]/,/Package \[/p' '{dumpf}'"\
+    cmd = "sed -n -e '/Package \\[{appid}\]/,/Package \\[/p' '{dumpf}'"\
         .format(appid=appid, dumpf=dumpf.replace('.json', '.txt'))
     print(cmd)
     # TODO: Need to udpate it once the catch_err function is fixed.
@@ -219,14 +219,14 @@ def all_permissions(dumpf, appid):
 
     permissions = pd.read_csv(config.ANDROID_PERMISSIONS_CSV)
     permissions['label'] = permissions.apply(
-        lambda x: (x['permission'].rsplit('.', 1)[-1] if x['label'] == 'null'
+        lambda x: (x['permission'].rsplit('.', n=1)[-1] if x['label'] == 'null'
                    else x['label']),
         axis=1
     )
     app_permissions_tbl = permissions[permissions['permission'].isin(
         app_perms)].reset_index(drop=True)
     app_permissions_tbl['permission_abbrv'] = app_permissions_tbl\
-        .permission.str.rsplit('.', 1).str[-1]
+        .permission.str.rsplit('.', n=1).str[-1]
 
     # TODO: really 'unknown'?
     hf_recent_permissions = pd.merge(
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     #    print(permission)
 
     app_permissions_tbl['permission_abbrv'] = app_permissions_tbl['permission']\
-        .apply(lambda x: x.rsplit('.', 1)[-1])
+        .apply(lambda x: x.rsplit('.', n=1)[-1])
 
     # TODO: really 'unknown'?
     hf_recent_permissions = pd.merge(
