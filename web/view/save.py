@@ -1,5 +1,8 @@
+from flask import request, session
+import config
 from web import app
-from db import update_appinfo, update_mul_appinfo, create_report
+from db import get_serial_from_db, save_note, update_appinfo, update_mul_appinfo, create_report, get_device_from_db
+from web.view.index import get_device
 
 
 @app.route('/saveapps/<scanid>', methods=["POST"])
