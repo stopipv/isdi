@@ -2,6 +2,7 @@ from phone_scanner import AndroidScan, IosScan
 
 """Fake Tests!!"""
 
+
 def test_android():
     a = AndroidScan()
     d = a.devices()
@@ -20,6 +21,5 @@ def test_ios():
     print(a.find_spyapps(d[0]))
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_android()

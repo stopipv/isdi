@@ -11,6 +11,7 @@ sys.path.append(os.getcwd())
 
 import config
 
+
 def requirements():
     # check if submodule is initialized
     if not os.path.exists(config.IOC_PATH) and not os.path.exists(config.IOC_FILE):
@@ -22,6 +23,7 @@ def requirements():
         print("app-flags.csv not found")
         return False
     return True
+
 
 # check requirements
 if not requirements():
@@ -44,14 +46,14 @@ except Exception as e:
     sys.exit(1)
 
 # get packages from every element of ioc dict
-apps = [element['packages'] for element in ioc if 'packages' in element]
+apps = [element["packages"] for element in ioc if "packages" in element]
 
 # read app-flags.csv csv file
 old_apps = []
 try:
     with open(config.APP_FLAGS_FILE, "r") as f:
         reader = csv.reader(f)
-        old_apps = [row[0] for row in csv.reader(f)]
+        old_apps = set([row[0] for row in csv.reader(f)])
 except csv.Error as e:
     print("Error parsing CSV app flags file: {}".format(e))
     sys.exit(1)
@@ -62,17 +64,17 @@ new_app_count = 0
 try:
     # append new apps to app-flags.csv for all ioc apps
     with open(config.APP_FLAGS_FILE, "a") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         for element in ioc:
-            if 'packages' not in element:
+            if "packages" not in element:
                 continue
-            for app in element['packages']:
+            for app in element["packages"]:
                 # if app is not in the csv file, add it
                 if app not in old_apps:
                     new_app_count += 1
-                    if 'names' not in element:
-                        element['names'] = []
-                    names = ','.join(element['names'])
+                    if "names" not in element:
+                        element["names"] = []
+                    names = " / ".join(element["names"])
                     writer.writerow([app, "playstore", "spyware", names])
 except csv.Error as e:
     print("Error parsing CSV app flags file: {}".format(e))

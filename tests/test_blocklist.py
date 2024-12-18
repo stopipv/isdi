@@ -4,20 +4,20 @@ import pandas as pd
 import sys
 
 test_list = [
-    ('com.spyware.app', True),
-    ('com.antispyware.app', False),
-    ('com.spyware-anti.app', True),
-    ('com.something.Anti-Spyware.com', False),
-    ('com.something.Anti-something-Spyware.com', False),
-    ('com.-something-Spyware.com', True),
-    ('com.Trackware.com', True),
-    ('com.AntiTrackware.com', False),
-    ('com.spyware-removal.com', False),
+    ("com.spyware.app", True),
+    ("com.antispyware.app", False),
+    ("com.spyware-anti.app", True),
+    ("com.something.Anti-Spyware.com", False),
+    ("com.something.Anti-something-Spyware.com", False),
+    ("com.-something-Spyware.com", True),
+    ("com.Trackware.com", True),
+    ("com.AntiTrackware.com", False),
+    ("com.spyware-removal.com", False),
 ]
 # regex_ = r'(?i)(?!.*anti)[\-\s]*(spy|track|keylog)'
 # regex_ = r'(?i)((?!.*anti)[\-\s]*.*(spy|track)).*'
-regex_pos = r'(?i)(spy|track|keylog)'
-regex_neg = r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'
+regex_pos = r"(?i)(spy|track|keylog)"
+regex_neg = r"(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])"
 
 
 def test_regex():
@@ -31,14 +31,22 @@ def test_blocklist():
 
 
 def test_app_title_and_flags():
-    d = pd.DataFrame({
-        'appId': ['core.framework', 'com.android.system',
-                  'LEM.TrackMe', 'com.spy2mobile.light']
-    })
-    ret = app_title_and_flag(d, ['core.framework', 'com.android.system'])
+    d = pd.DataFrame(
+        {
+            "appId": [
+                "core.framework",
+                "com.android.system",
+                "LEM.TrackMe",
+                "com.spy2mobile.light",
+            ]
+        }
+    )
+    ret = app_title_and_flag(d, ["core.framework", "com.android.system"])
     assert len(ret) == len(ret.appId)
-    # assert ret.flags == 
-    ret.to_csv(index=None) == """appId,title,flags
+    # assert ret.flags ==
+    ret.to_csv(
+        index=None
+    ) == """appId,title,flags
 LEM.TrackMe,TrackMe - GPS Tracker,"['dual-use', 'regex-spy']"
 com.android.system, System Service,"['spyware', 'co-occurrence', 'offstore-app']"
 com.spy2mobile.light, Data Backup,"['spyware', 'co-occurrence', 'regex-spy']"

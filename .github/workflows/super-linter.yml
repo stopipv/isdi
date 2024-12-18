@@ -25,10 +25,10 @@ jobs:
         uses: github/super-linter@v4
         env:
           # Validate only new pull requests
-          VALIDATE_ALL_CODEBASE: false
+          # VALIDATE_ALL_CODEBASE: false
           # Uncommenting the following enables linting for only Python and bash files
-          # VALIDATE_PYTHON: true
-          # VALIDATE_BASH: true
-          # VALIDATE_BASH_EXEC: true
+          VALIDATE_PYTHON: true
+          VALIDATE_BASH: true
+          VALIDATE_BASH_EXEC: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

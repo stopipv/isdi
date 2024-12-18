@@ -33,8 +33,8 @@ from wtforms import (
 from wtforms.validators import InputRequired
 
 import config
-from db import create_mult_appinfo, create_scan
-from privacy_scan_android import take_screenshot
+from phone_scanner.db import create_mult_appinfo, create_scan
+from phone_scanner.privacy_scan_android import take_screenshot
 from web.view.index import get_device
 from web.view.scan import first_element_or_none
 
@@ -56,7 +56,7 @@ FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy",
                                  "appId": "snapchat.app.id",
                                  "store": "App Store",
                                  "url": "https://www.snapchat.com",
-                                 "genres": "Photo \& Video",
+                                 "genres": "Photo and Video",
                                  "install_time": "January 1, 1970 00:00:00",
                                  "description": "Snapchat is a fast and fun way to share the moment with your friends and family.",
                                 "permissions": [
@@ -175,7 +175,7 @@ class AccountInfoForm(FlaskForm):
 
 ## INDIVIDUAL PAGES
 class StartForm(FlaskForm):
-    title = "Welcome to <Name of tool>"
+    title = "Welcome to SHERLOC"
     name = StringField('Client name', validators=[InputRequired()])
     consultant_name = StringField('Consultant name', validators=[InputRequired()])
     device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()], default=DEFAULT)

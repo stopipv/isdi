@@ -141,6 +141,7 @@ reports/*
 screenshots/*
 apps/
 data/
+*.db
 static_data/app-info.db.gz
 static_data/all_android_apps_5k_*.csv
 webstatic/images/tmp.png
@@ -155,5 +156,4 @@ __MACOSX
 *~test
 *.apk
 dumps/android_scan.logs
-
-*.pkl
+phone_dumps/dumps/android_scan.logs

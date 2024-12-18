@@ -1,7 +1,7 @@
 import re
 import sys
 
-whitelist=[
+whitelist = [
     r"com.google.*",
     r"com.whatsap.*",
     r"com.android.",
@@ -9,11 +9,12 @@ whitelist=[
     r"com.sec.",
 ]
 
+
 def check(apk):
     for w in whitelist:
         if re.match(w, apk):
             return 1
     return 0
 
-print(check(sys.argv[1]))
 
+print(check(sys.argv[1]))

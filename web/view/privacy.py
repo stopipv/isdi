@@ -1,10 +1,13 @@
-from flask import request, render_template
+from flask import render_template, request
+
+import config
+import web.view.evidence
+
+#from phone_scanner import iosScreenshot
+from phone_scanner.privacy_scan_android import do_privacy_check, take_screenshot
 from web import app
 from web.view import get_device
-from privacy_scan_android import do_privacy_check, take_screenshot
-from phone_scanner import iosScreenshot
-import web.view.evidence
-import config
+
 
 @app.route("/privacy", methods=['GET'])
 def privacy():
@@ -25,7 +28,7 @@ def privacy_scan(device, cmd, context):
     sc = get_device(device)
     if(device == "ios"):
         print("Taking a IOS screenhsot")
-        res = iosScreenshot(sc.serialno, context, nocache=True)
+        res = take_screenshot(sc.serialno, context, nocache=True)
     else:
         res = do_privacy_check(sc.serialno, cmd, context)
     print("Screenshot Taken")
