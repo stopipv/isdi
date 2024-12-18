@@ -39,7 +39,7 @@ import os
 from datetime import datetime
 
 from wtforms.validators import ValidationError
-adb=config.ADB_PATH
+adb = config.ADB_PATH
 print(f">>>>>>>>>>>>>>> {adb} <<<<<<<<<<<<<<<<<<<<")
 
 
