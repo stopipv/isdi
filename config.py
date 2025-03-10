@@ -1,14 +1,12 @@
 import hashlib
 import hmac
-import os
+import os, sys
 import secrets
 import shlex
 from pathlib import Path
-from sys import platform
-
+import platform
 import logging
 import logging.handlers as handlers
-
 
 def setup_logger():
     """
@@ -57,8 +55,8 @@ ANDROID_PERMISSIONS_CSV = "static_data/android_permissions.csv"
 IOS_DUMPFILES = {
     "Jailbroken-FS": "ios_jailbroken.log",
     "Jailbroken-SSH": "ios_jailbreak_ssh.retcode",
-    "Apps": "ios_apps.plist",
-    "Info": "ios_info.xml",
+    "Apps": "ios_apps.json",
+    "Info": "ios_info.json",
 }
 
 TEST_APP_LIST = "static_data/android.test.apps_list"
@@ -106,26 +104,15 @@ STATIC_DATA = THIS_DIR / "static_data"
 
 # TODO: We should get rid of this, ADB_PATH is very confusing
 ANDROID_HOME = os.getenv("ANDROID_HOME", "")
-PLATFORM = (
-    "darwin"
-    if platform == "darwin"
-    else (
-        "linux"
-        if platform.startswith("linux")
-        else "win32" if platform == "win32" else None
-    )
-)
+PLATFORM = platform.system().lower()
+if 'microsoft' in platform.release().lower(): ## Check for wsl
+    PLATFORM = "wsl" 
 
-ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, "adb"))
+LIBIMOBILEDEVICE_PATH = "pymobiledevice3.exe" if PLATFORM == "wsl" \
+    else "pymobiledevice3"
+ADB_PATH = shlex.quote(os.path.join(ANDROID_HOME, "adb")) \
+    + (".exe" if PLATFORM in ("wsl", "win32") else "")
 
-# LIBIMOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("libimobiledevice-" + PLATFORM)))
-LIBIMOBILEDEVICE_PATH = ""
-# MOBILEDEVICE_PATH = 'mobiledevice'
-# MOBILEDEVICE_PATH = os.path.join(THISDIR, "mdf")  #'python2 -m MobileDevice'
-if PLATFORM:
-    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-" + PLATFORM)))
-else:
-    MOBILEDEVICE_PATH = shlex.quote(str(STATIC_DATA / ("ios-deploy-none")))
 
 DUMP_DIR = THIS_DIR / "phone_dumps"
 SCRIPT_DIR = THIS_DIR / "scripts"

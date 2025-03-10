@@ -1,5 +1,6 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+idb=pymobiledevice3
 platform='unknown'
 unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then
@@ -10,28 +11,37 @@ elif [[ "$unamestr" == 'FreeBSD' ]]; then
    platform='freebsd'
 fi
 
-echo "$platform" "$adb"
+if grep -qi microsoft /proc/version; then
+    platform="wsl"
+    idb=pymobiledevice3.exe
+fi
 
-serial=$(idevice_id -l 2>&1 | tail -n 1)
+echo "$platform"
+
+
+# serial=$(idevice_id -l 2>&1 | tail -n 1)
+serial=$(${idb} usbmux list | awk -F'"' '/Identifier/ {print $4}')
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -u "$serial" -l -o xml -o list_all > "$2"
+# ideviceinstaller -u "$serial" -l -o xml -o list_all > "$2"
+${idb} apps list > "$2"
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 # sed -i -e 's/<data>/<string>/g' $2
 # sed -i -e 's/<\/data>/<\/string>/g' $2
 
 # maybe for macOS...
-# plutil -convert json $2 
+# plutil -convert json $2
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
-ideviceinfo -u "$serial" -x > $3
+# ideviceinfo -u "$serial" -x > $3
+${idb} lockdown info > "$3"
 
 # sed -i -e 's/<data>/<string>/g' $3
 # sed -i -e 's/<\/data>/<\/string>/g' $3
 
-# remove identifying info (delete file after saving 
+# remove identifying info (delete file after saving
 # relevant bits of scan in server.py, actually)
 #sed -i -e '/<\key>DeviceName<\/key>/,+1d' $3
 #sed -i -e '/<\key>MobileEquipmentIdentifier<\/key>/,+1d' $3
@@ -45,7 +55,7 @@ ideviceinfo -u "$serial" -x > $3
 # delete this after hashing when session ends.
 #sed -i -e '/<\key>InternationalMobileEquipmentIdentity<\/key>/,+1d' $3
 
-# try to check for jailbroken by mounting the entire filesystem. 
+# try to check for jailbroken by mounting the entire filesystem.
 # Gets output:
 # "Failed to start AFC service 'com.apple.afc2' on the device.
 # This service enables access to the root filesystem of your device.
@@ -56,9 +66,9 @@ mkdir -p /tmp/phonescanmnt
 # ifuse -u "$serial" --root /tmp/phonescanmnt &> $4
 
 #lsof -ti tcp:2222 | xargs kill
-iproxy 2222 22 & "${DIR}/ios_ssh_expect.sh" localhost
-echo $? > $5
-cd ..
+# iproxy 2222 22 & "${DIR}/ios_ssh_expect.sh" localhost
+# echo $? > $5
+# cd ..
 
 # for consumption by python
 echo $serial

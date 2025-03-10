@@ -9,7 +9,7 @@ import config
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
-from plistlib import load
+# from plistlib import load
 from typing import List, Dict
 import pandas as pd
 from rsonlite import simpleparse
@@ -463,7 +463,7 @@ class IosDump(PhoneDump):
     def load_device_info(self):
         try:
             with open(self.finfo, "rb") as data:
-                device_info = load(data)
+                device_info = json.load(data)
             return device_info
 
         except Exception as ex:
@@ -479,11 +479,14 @@ class IosDump(PhoneDump):
     def load_file(self):
         # d = pd.read_json(self.fname)[self.COLS].set_index(self.INDEX)
         try:
-            # FIXME: somehow, get the ios_apps.plist into a dataframe.
             print("fname is: {}".format(self.fname))
-            with open(self.fname, "rb") as app_data:
-                apps_plist = load(app_data)
-            d = pd.DataFrame(apps_plist)
+            apps_list = []
+            with open(self.fname, "r") as app_data:
+                apps_json = json.load(app_data)
+                for k in apps_json:
+                    apps_list.append(apps_json[k])
+
+            d = pd.DataFrame(apps_list)
             d["appId"] = d["CFBundleIdentifier"]
             return d
         except Exception as ex:
