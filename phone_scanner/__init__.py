@@ -540,6 +540,7 @@ class IosScan(AppScan):
         # cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
         
         cmd = "{cli} usbmux list"
+
         self.serialno = None
         s = catch_err(run_command(cmd, cli=self.cli), cmd=cmd, msg="")
         try:
