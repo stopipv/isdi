@@ -12,26 +12,29 @@ fi
 
 echo "$platform" "$adb"
 
-serial=$(idevice_id -l 2>&1 | tail -n 1)
+# serial=$(idevice_id -l 2>&1 | tail -n 1)
+serial=$(pymobiledevice3 usbmux list | awk -F'"' '/Identifier/ {print $4}')
 mkdir -p phone_dumps/"$1"_ios
 cd phone_dumps/"$1"_ios
 # gets all of the details about each app (basically what ios_deploy does but with extra fields)
-ideviceinstaller -u "$serial" -l -o xml -o list_all > "$2"
+# ideviceinstaller -u "$serial" -l -o xml -o list_all > "$2"
+pymobiledevice3 apps list > "$2"
 
 # get around bug in Python 3 that doesn't recognize utf-8 encodings.
 # sed -i -e 's/<data>/<string>/g' $2
 # sed -i -e 's/<\/data>/<\/string>/g' $2
 
 # maybe for macOS...
-# plutil -convert json $2 
+# plutil -convert json $2
 
 # gets OS version, serial, etc. -x for xml. Raw is easy to parse, too.
-ideviceinfo -u "$serial" -x > $3
+# ideviceinfo -u "$serial" -x > $3
+pymobiledevice3 lockdown info > "$3"
 
 # sed -i -e 's/<data>/<string>/g' $3
 # sed -i -e 's/<\/data>/<\/string>/g' $3
 
-# remove identifying info (delete file after saving 
+# remove identifying info (delete file after saving
 # relevant bits of scan in server.py, actually)
 #sed -i -e '/<\key>DeviceName<\/key>/,+1d' $3
 #sed -i -e '/<\key>MobileEquipmentIdentifier<\/key>/,+1d' $3
@@ -45,7 +48,7 @@ ideviceinfo -u "$serial" -x > $3
 # delete this after hashing when session ends.
 #sed -i -e '/<\key>InternationalMobileEquipmentIdentity<\/key>/,+1d' $3
 
-# try to check for jailbroken by mounting the entire filesystem. 
+# try to check for jailbroken by mounting the entire filesystem.
 # Gets output:
 # "Failed to start AFC service 'com.apple.afc2' on the device.
 # This service enables access to the root filesystem of your device.

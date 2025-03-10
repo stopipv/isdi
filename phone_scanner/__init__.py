@@ -524,8 +524,8 @@ class IosScan(AppScan):
             """Is it looks like a serial number"""
             return re.match(r"[a-f0-9]+", x) is not None
 
-        # cmd = '{cli} --detect -t1 | tail -n 1'
-        cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
+        # cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
+        cmd = "{}pymobiledevice3 usbmux list | awk -F'\"' '/Identifier/ {{print $4}}'".format(self.cli)
         self.serialno = None
         s = catch_err(run_command(cmd), cmd=cmd, msg="")
 
