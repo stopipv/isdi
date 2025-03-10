@@ -33,4 +33,4 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORE_GITIGNORED_FILES: true
-          FILTER_REGEX_EXCLUDE: *.sh
+          FILTER_REGEX_EXCLUDE: "*.sh"
