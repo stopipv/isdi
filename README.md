@@ -1,7 +1,7 @@
 # IPV Spyware Discovery (ISDi) Tool
 
-Checks Android or iOS devices for apps used to surveil or track victims
-("stalkerware", "spouseware", "spyware"). ISDi's technical details are included
+ISDi tool checks Android or iOS devices for apps that can be used for surveillaince
+(a.k.a "stalkerware", "spouseware", "spyware" apps). ISDi's technical details are included
 in ["Clinical Computer Security for Victims of Intimate Partner Violence"
 (USENIX 2019)](https://www.usenix.org/conference/usenixsecurity19/presentation/havron). The blacklist is based
 on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 2018)](https://www.computer.org/csdl/pds/api/csdl/proceedings/download-article/12OmNxWuiny/pdf).
@@ -13,9 +13,6 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
 
 
-## Contribution Guidelines
-For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
-
 ## Installing ISDi :computer:
 
 Right now, ISDi currently only natively supports **macOS and Linux**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
@@ -24,26 +21,25 @@ follow the remaining instructions as a Linux user would, cloning/running
 ISDi inside the Linux container of your choice. 
 
 ### Python dependencies
-- You will need Python 3.6 or higher (check by running `python3` in your
+- You will need Python 3.8 or higher (check by running `python3` in your
 Terminal and see what happens).  On macOS, you can get this by running the
 following commands in your Terminal application: `xcode-select --install`
 (installs developer tools); followed by `/usr/bin/ruby -e "$(curl -fsSL
 https://raw.githubusercontent.com/Homebrew/install/master/install)"` to get
 Brew (a software package manager); finally, `brew install python` to get Python
-3.6+.
+3.8+.
 
 - Run `pip3 install -r
 requirements.txt` in the base directory of this repository to get the required
 Python modules.
 
+* [pymobiledevice3](https://pypi.org/project/pymobiledevice3/) is used for scanning iOS devices. It will be automatically installed with the above command.
+ 
 ### Operating system dependencies
 
 #### Generic
 * [adb](https://developer.android.com/studio/releases/platform-tools.html)
-* expect
-* libimobiledevice
-* ideviceinstaller
-* ifuse
+
 
 #### macOS
 On macOS you can quickly install project dependencies with Homebrew by running `brew bundle`.
@@ -52,22 +48,15 @@ You can also fulfill the requirements by doing:
 ```
 brew install --cask android-platform-tools
 ```
-```
-brew install expect libimobiledevice ideviceinstaller
-```
 
 #### Debian family
 
 ```
-sudo apt install adb expect libimobiledevice-utils ideviceinstaller ifuse
+sudo apt install adb expect libimobiledevice-utils
 ```
 
 #### Windows Subsystem Linux (v2)
-Installing **adb** is not so straightforward in WSL2, and
-it won't work straightaway. You have to ensure having the *same* version of adb
-*both* in WSL2 and in normal Windows (with `adb version`), then you will need to
-start the adb process first in Windows, then in WSL2 (with for example `adb
-devices`).
+Install `adb` in Windows and make sure `adb.exe` is in the Windows PATH variable. Similarly also install `pymobiledevice3.exe` on Windows using `pip install pymobiledevice3`, and make sure it is in the path. To check if a command is in the path, you can open a command prompt window, type the command, and press enter. 
 
 ## Running ISDi
 
@@ -81,6 +70,7 @@ ISDi defaults to normal (non-debug) mode. To run ISDi in `test` mode, set the `T
 
 ```$ TEST=1 ./isdi```
 
+Run in debug mode: `$  DEBUG=1 ./isdi`
 
 Then navigate to `http://localhost:6200` in the browser of your choice (or `http://localhost:6202` if
 in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
