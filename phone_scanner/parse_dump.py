@@ -5,14 +5,17 @@ import operator
 import os
 import re
 import sys
-import config
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
 from plistlib import load
-from typing import List, Dict
+from pprint import pprint
+from typing import Dict, List
+
 import pandas as pd
 from rsonlite import simpleparse
+
+import config
 
 
 def count_lspaces(lspaces):
@@ -492,10 +495,13 @@ class IosDump(PhoneDump):
             return pd.DataFrame([], columns=["appId"])
 
     def check_unseen_permissions(self, permissions):
+        # flatten the permissions list
+        pprint(permissions)
+
         for permission in permissions:
             if not permission:
                 continue  # Empty permission, skip
-            if permission not in self.permissions_map:
+            if permission not in list(self.permissions_map.keys()):
                 print(f"Have not seen {permission} before. Making note of this...")
                 permission_human_readable = permission.replace("kTCCService", "")
                 with open(
@@ -515,6 +521,15 @@ class IosDump(PhoneDump):
         system_permissions = retrieve(
             app, ["Entitlements", "com.apple.private.tcc.allow"]
         )
+
+        def flatten(matrix):
+            return [item for row in matrix for item in row]
+        def check_nested_list(data):
+            return any(isinstance(item, list) for item in data)
+
+        if check_nested_list(system_permissions):
+            system_permissions = flatten(system_permissions)
+
         adjustable_system_permissions = retrieve(
             app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
         )
@@ -522,6 +537,9 @@ class IosDump(PhoneDump):
         self.check_unseen_permissions(
             list(system_permissions) + list(adjustable_system_permissions)
         )
+
+        pprint("SYSTEM PERMISSIONS")
+        pprint(system_permissions)
 
         # (permission used, developer reason for requesting the permission)
         all_permissions = list(

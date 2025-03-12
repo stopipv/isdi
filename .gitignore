@@ -157,3 +157,6 @@ __MACOSX
 *.apk
 dumps/android_scan.logs
 phone_dumps/dumps/android_scan.logs
+
+tmp-consult-data/*
+context.pkl

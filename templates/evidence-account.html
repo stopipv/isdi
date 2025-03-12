@@ -1,0 +1,228 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
+
+{% block content %}
+
+<script>
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+    if (device === 'ios') {
+        fetch('/privacy/ios/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        })
+        .catch(error => {
+            imageDiv.innerHTML = "Error loading screenshot: " + error;
+        });
+    } else if (device === 'android') {
+        fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+
+    }
+}
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <br>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+
+            <form action method="post" class="form" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form) }}
+
+            <h2>{{ form.title }}</h2>
+            <br>                    
+                    <tr><th><h4>{{form.platform.label}}</h4></th><td>{{form.platform}}</td></tr>
+                    <tr><th><h4>{{form.account_nickname.label}}</h4></th><td>{{form.account_nickname}}</td></tr>
+                    <br/><br/>
+                    {{ form.hidden_tag() }}
+                    <div class="content">
+                        <h5>{{ form.suspicious_logins.label }}</h5>
+                        <div class="subform">
+                            {{form.suspicious_logins.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{form.suspicious_logins.recognize.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{form.suspicious_logins.recognize.id}}>
+                                        {% for option in form.suspicious_logins.recognize %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{form.suspicious_logins.describe_logins.label}}</th><td>{{form.suspicious_logins.describe_logins}}</td></tr>
+                                    <button id="accountnameFIXME" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
+
+                                    <tr><th>{{form.suspicious_logins.activity_log.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{form.suspicious_logins.activity_log.id}}>
+                                        {% for option in form.suspicious_logins.activity_log %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{form.suspicious_logins.describe_activity.label}}</th><td>{{form.suspicious_logins.describe_activity}}</td></tr>
+                                    <button id="loginactivityFIXME" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ form.password_check.label }}</h5>
+                        <div class="subform">
+                            {{ form.password_check.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [form.password_check.know, form.password_check.guess] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5>{{ form.recovery_settings.label }}</h5>
+                        <div class="subform">
+                            {{ form.recovery_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [form.recovery_settings.phone_present, form.recovery_settings.phone_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{form.recovery_settings.phone.label}}</th><td>{{form.recovery_settings.phone}}</td></tr>
+
+                                    <button id="recovery_FIXME" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
+                                    {% for subform in [form.recovery_settings.email_present, form.recovery_settings.email_access] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{form.recovery_settings.email.label}}</th><td>{{form.recovery_settings.email}}</td></tr>
+                                </tbody>
+                            </table>
+                            <button id="recoveryemailFIXME" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
+                        </div>
+                        <h5>{{ form.two_factor_settings.label }}</h5>
+                        <div class="subform">
+                            {{ form.two_factor_settings.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    {% for subform in [form.two_factor_settings.enabled, form.two_factor_settings.second_factor_type] %}
+                                        <tr><th>{{subform.label}}</th><td>
+                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                            {% for option in subform %}
+                                            <label class="btn btn-light" for="{{option.id}}">
+                                                {{option.label.text}}
+                                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                            </label>
+                                            {% endfor %}
+                                        </div></td></tr>
+                                    {% endfor %}
+                                    <tr><th>{{form.two_factor_settings.describe.label}}</th><td>{{form.two_factor_settings.describe}}</td></tr>
+                                    {% with subform = form.two_factor_settings.second_factor_access %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endwith %}
+
+                                </tbody>
+                            </table>
+                            <button id="twofactor_FIXME" type="button" onclick="getScreenshot('twofactor')" value="screenshot">Screenshot</button>
+                        </div>
+                        <h5>{{ form.security_questions.label }}</h5>
+                        <div class="subform">
+                            {{ form.security_questions.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{form.security_questions.present.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{form.security_questions.present.id}}>
+                                        {% for option in form.security_questions.present %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{form.security_questions.questions.label}}</th><td>{{form.security_questions.questions}}</td></tr>
+                                    <tr><th>{{form.security_questions.know.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{form.security_questions.know.id}}>
+                                        {% for option in form.security_questions.know %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                </tbody>
+                            </table>
+                            <button id="securityq_FIXME" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>
+                        </div>
+                        <h5>{{form.notes.label}}</h5>
+                        <div class="subform notes">{{ form.notes }}</div>
+                    </div>
+            <br>
+            <div><span class="primarybutton">{{form.submit}}</span></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

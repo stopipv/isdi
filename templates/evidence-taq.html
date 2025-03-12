@@ -1,0 +1,188 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
+
+{% block content %}
+
+<script>
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+    if (device === 'ios') {
+        fetch('/privacy/ios/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        })
+        .catch(error => {
+            imageDiv.innerHTML = "Error loading screenshot: " + error;
+        });
+    } else if (device === 'android') {
+        fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+
+    }
+}
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <br>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            <br>
+
+
+            <h2>{{form.title}}</h2>
+            <hr>
+            <form action method="post" class="form" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form) }}
+
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.devices.title }}</b>
+                    </summary>
+                    {{ form.devices.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                </details>
+
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.accounts.title }}</b>
+                    </summary>
+                    {{ form.accounts.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+                                    <tr><th><label>{{ form.accounts.pwd_mgmt.label }}</label></th><td> {{ form.accounts.pwd_mgmt }}</td></tr>
+                                    <tr><th>{{form.accounts.pwd_comp.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{form.accounts.id}}>
+                                        {% for option in form.accounts.pwd_comp %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th><label>{{ form.accounts.pwd_comp_which.label }}</label></th><td> {{ form.accounts.pwd_comp_which }}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                     </div>
+                </details>
+
+                
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.sharing.title }}</b>
+                    </summary>
+                    {{ form.sharing.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+
+
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.smarthome.title }}</b>
+                    </summary>
+                    {{ form.smarthome.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+
+
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.kids.title }}</b>
+                    </summary>
+                    {{ form.kids.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+
+
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ form.legal.title }}</b>
+                    </summary>
+                    {{ form.legal.hidden_tag() }}
+                    <div class="content">
+                        <div class="subform">
+                            <table>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+
+
+                <br>
+                <br>
+                <br>
+                <div><span class="primarybutton">{{form.submit}}</span></div>
+                </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,390 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
+
+{% block content %}
+
+<script>
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+    if (device === 'ios') {
+        fetch('/privacy/ios/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        })
+        .catch(error => {
+            imageDiv.innerHTML = "Error loading screenshot: " + error;
+        });
+    } else if (device === 'android') {
+        fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+
+    }
+}
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <br>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            <br>
+            <h2>{{ form.title }}</h2>
+            <hr>
+            <form action method="post" class="form" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form) }}
+
+
+            {% if step == 1 %}
+
+                <table id="scan-form">
+                    <tbody>
+                        <tr><th><label>{{ form.device_nickname.label }}</label></th><td> {{ form.device_nickname }}</td> </tr>
+                        <tr><th><label>{{form.device_type.label}}</label></th><td>
+                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}>
+                            {% for option in form.device_type %}
+                            <label class="btn btn-secondary" for="{{option.id}}">
+                                {{option.label.text}}
+                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                <span class="glyphicon glyphicon-ok"></span>
+                            </label>
+                            {% endfor %}
+                            </div>
+                        </td></tr>
+                    </tbody>
+                </table>
+                <br>
+
+            {% elif step == 2 %}
+
+            <h4>App List</h4>
+            <table>
+                <tbody>
+                    {% for nested in form.apps %}
+                    {{ nested.hidden_tag() }}
+                    <tr>
+                        <th><p>{{scan_data.all_apps[loop.index0].title}}</p></th>
+                        <td><p>{{nested.selected.label}}</p></td>
+                        <td><p>{{nested.selected}}</p></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+
+
+            {% else %}
+
+            {% if form.spyware|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware|length }}</b> potential spyware apps found
+                </div>
+                {% elif form.spyware|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.spyware|length }}</b> potential spyware app found
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No spyware apps found!
+                </div>
+                {% endif %}
+
+                <br>
+
+                {% for nested in form.spyware %}
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ scan_data.check_apps.spyware[loop.index0].title }}</b>
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th valign="top">App name</th><td>
+                                {% if scan_data.check_apps.spyware[loop.index0].url %}
+                                    <a href={{scan_data.check_apps.spyware[loop.index0].url}}>{{scan_data.check_apps.spyware[loop.index0].title}}</a>
+                                    {% else %}
+                                    {{scan_data.check_apps.spyware[loop.index0].title}}
+                                {% endif %}
+                                </td></tr>
+                                {% if scan_data.check_apps.spyware[loop.index0].application_icon %}
+                                <tr><th valign="top">Icon</th><td><img src={{scan_data.check_apps.spyware[loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if scan_data.check_apps.spyware[loop.index0].description %}
+                                <tr><th valign="top">Description</th><td>{{scan_data.check_apps.spyware[loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th valign="top">Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
+                                {% if scan_data.check_apps.spyware[loop.index0].permissions|length > 0 %}
+                                <tr><th valign="top">Permissions used</th><td>{{scan_data.check_apps.spyware[loop.index0].permissions}}</td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                          <button id="spyware_{{ scan_data.check_apps.spyware[loop.index0].title.replace(' ','') }}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                        </div>
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+
+                {% if form.dualuse|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dualuse|length }}</b> potential dual use apps found
+                </div>
+                {% elif form.dualuse|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.dualuse|length }}</b> potential dual use app found
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <br>
+                    <img src="/webstatic/images/no-concerns.png">
+                    No dual use apps found!
+                </div>
+                {% endif %}
+
+                <br>
+                
+                {% for nested in form.dualuse %}
+                {% set outer_loop = loop %}
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ scan_data.check_apps.dualuse[outer_loop.index0].title }}</b>
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th valign="top">App name</th><td>
+                                {% if scan_data.check_apps.dualuse[outer_loop.index0].url %}
+                                    <a href={{scan_data.check_apps.dualuse[outer_loop.index0].url}}>{{scan_data.check_apps.dualuse[outer_loop.index0].title}}</a>
+                                    {% else %}
+                                    {{scan_data.check_apps.dualuse[outer_loop.index0].title}}
+                                {% endif %}
+                                </td></tr>
+                                {% if scan_data.check_apps.dualuse[outer_loop.index0].application_icon %}
+                                <tr><th valign="top">Icon</th><td><img src={{scan_data.check_apps.dualuse[outer_loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if scan_data.check_apps.dualuse[outer_loop.index0].description %}
+                                <tr><th valign="top">Description</th><td>{{scan_data.check_apps.dualuse[outer_loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
+                                {% if scan_data.check_apps.dualuse[outer_loop.index0].permissions|length > 0 %}
+                                <tr><th valign="top">Permissions used</th><td>
+                                    {% for perm in scan_data.check_apps.dualuse[outer_loop.index0].permissions %}
+                                    {{perm.permission_name}}{% if loop.index < scan_data.check_apps.dualuse[outer_loop.index0].permissions|length %}, {% endif %}
+                                    {% endfor %}
+                                </td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+
+                                </tbody>
+                            </table>
+                            <button id="dualuse_{{scan_data.check_apps.dualuse[outer_loop.index0].title.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                        </div>
+
+                        {% for perm in nested.permissions %}
+                        <h5>Permission check: {{scan_data.check_apps.dualuse[outer_loop.index0].permissions[loop.index0]}}</h5>
+                        <div class="subform">
+                            {{ perm.hidden_tag() }}
+                            <table>
+                                <tbody>
+                                    <tr><th>{{perm.access.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}>
+                                        {% for option in perm.access %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
+                                </tbody>
+                            </table>
+                            <button id="dualuseperm_{{scan_data.check_apps.dualuse[outer_loop.index0].title.replace(' ', '')}}_{{scan_data.check_apps.dualuse[outer_loop.index0].permissions[loop.index0]}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
+                        </div>
+                        {% endfor %}
+
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+
+                {% endfor %}
+
+
+                {% if form.other|length > 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.other|length }}</b> other apps flagged for investigation
+                </div>
+                {% elif form.other|length == 1 %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/some-concerns.png">
+                    <br>
+                    <b>{{ form.other|length }}</b> other app flagged for investigation
+                </div>
+                {% else %}
+                <div class="result-overview">
+                    <img src="/webstatic/images/no-concerns.png">
+                    <br>
+                    No other apps flagged for investigation
+                </div>
+                {% endif %}
+                <br>
+                {% for nested in form.other %}
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    <b>{{ scan_data.check_apps.other[loop.index0].title }}</b>
+                    </summary>
+                    {{ nested.hidden_tag() }}
+                    <div class="content">
+                        <div class="app-info">
+                            <h4>App information</h4>
+                            <table>
+                                <tr><th valign="top">App name</th><td>
+                                {% if scan_data.check_apps.other[loop.index0].url %}
+                                    <a href={{scan_data.check_apps.other[loop.index0].url}}>{{scan_data.check_apps.other[loop.index0].title}}</a>
+                                    {% else %}
+                                    {{scan_data.check_apps.other[loop.index0].title}}
+                                {% endif %}
+                                </td></tr>
+                                {% if scan_data.check_apps.other[loop.index0].application_icon %}
+                                <tr><th valign="top">Icon</th><td><img src={{scan_data.check_apps.other[loop.index0].application_icon}}></td></tr>
+                                {% endif %}
+                                {% if scan_data.check_apps.other[loop.index0].description %}
+                                <tr><th valign="top">Description</th><td>{{scan_data.check_apps.other[loop.index0].description}}</td></tr>
+                                {% endif %}
+                                <tr><th valign="top">Install time</th><td>(fake time) January 1, 1970 00:00:00</td></tr>
+                                {% if scan_data.check_apps.other[loop.index0].permissions|length > 0 %}
+                                <tr><th valign="top">Permissions used</th><td>{{scan_data.check_apps.other[loop.index0].permissions}}</td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <hr>
+                        <h4>Questionnaires</h4>
+                        <h5>{{nested.install_form.label}}</h5>
+                        <div class="subform">
+                            {{nested.install_form.hidden_tag()}}
+                            <table>
+                                <tbody>
+                                    {% for subform in [nested.install_form.knew_installed, nested.install_form.installed, nested.install_form.coerced] %}
+                                    <tr><th>{{subform.label}}</th><td>
+                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
+                                        {% for option in subform %}
+                                        <label class="btn btn-light" for="{{option.id}}">
+                                            {{option.label.text}}
+                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </label>
+                                        {% endfor %}
+                                    </div></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                          <button id="other_{{ scan_data.check_apps.other[loop.index0].title.replace(' ','') }}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                        </div>
+                        <h5>{{nested.notes.label}}</h5>
+                        <div class="subform notes">{{ nested.notes }}</div>
+                    </div>
+                </details>
+                <br>
+                {% endfor %}
+
+
+            {% endif %}
+
+                <br>
+                <br>
+                <div><span class="primarybutton">{{form.submit}}</span></div>
+                </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

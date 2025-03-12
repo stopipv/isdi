@@ -28,7 +28,7 @@ def index():
     if "clientid" not in session or (newid is not None):
         session["clientid"] = new_client_id()
     
-    return redirect(url_for('evidence', step=1))
+    return redirect(url_for('evidence_setup'))
 
     return render_template(
         "main.html",

@@ -57,7 +57,6 @@
                 {{ form.hidden_tag() }}
                 {{ wtf.form_errors(form) }}
 
-                {% if step == 1 %}
                 <table id="scan-form">
                     <tbody>
                         <tr><th><label>{{ form.name.label }}</label></th><td> {{ form.name }}</td> </tr>
@@ -76,9 +75,7 @@
                     </tbody>
                 </table>
                 <br>
-                {% endif %}
 
-                {% if step == 2 %}
                     {% if 'ios' == device %}
                     <h3>For iPhones<img class="small" src="/webstatic/images/apple.resized.png"> </h3>
                     <p>There is not much preparation required for iOS.
@@ -118,9 +115,7 @@
                         </ol></p>
                     {% endif %}
                 <br>
-                {% endif %}
 
-                {% if step == 3 %}
                 {% if form.spyware_apps|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -207,9 +202,7 @@
                 </details>
                 <br>
                 {% endfor %}
-                {% endif %}
 
-                {% if step == 4 %}
                 {% if form.dual_use_apps|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -324,9 +317,7 @@
                 </details>
                 <br>
                 {% endfor %}
-                {% endif %}
 
-                {% if step == 5 %}
                 <div class="account-buttons">
                     {% for field in form %}
                         {% if field.type == "BooleanField" %}
@@ -338,9 +329,7 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                {% endif %}
-
-                {% if step == 6 %}
+                
                 {% if form.accounts|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -535,14 +524,11 @@
                 </details>
                 <br>
                 {% endfor %}
-                {% endif %}
 
                 <br>
                 <div><span class="primarybutton">{{form.submit}}</span></div>
             </form>
-            {% if step > 1 %}
             <a href="{{ url_for('evidence', step=step-1) }}" class="btn btn-default">Previous</a>
-            {% endif %}
             <br>
             <br>
             <br>

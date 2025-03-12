@@ -26,6 +26,7 @@ from wtforms import (
     HiddenField,
     MultipleFileField,
     RadioField,
+    SelectMultipleField,
     StringField,
     SubmitField,
     TextAreaField,
@@ -75,14 +76,19 @@ FAKE_APP_DATA = {"spyware": [{"app_name": "MSpy",
                                 ]}]
                     }
 
+TMP_CONSULT_DATA_DIR = "tmp-consult-data"
+
 SCREENSHOT_FOLDER = os.path.join("tmp", "isdi-screenshots/")
 CONTEXT_PKL_FNAME = "context.pkl"
 
-DEFAULT = "y"
+YES_NO_DEFAULT = "yes"
 SECOND_FACTORS = ["Phone", "Email", "App"]
 ACCOUNTS = ["Google", "iCloud", "Microsoft", "Lyft", "Uber", "Doordash", "Grubhub", "Facebook", "Twitter", "Snapchat", "Instagram"]
 
 YES_NO_CHOICES = [( 'yes', 'Yes'), ('no', 'No'), ('unsure', 'Unsure')]
+PERSON_CHOICES = [( 'me', 'Me'), ('poc', 'Person of concern'), ('other', 'Someone else'), ('unsure', 'Unsure')]
+
+LEGAL_CHOICES = [('ro', 'Restraining order'), ('div', 'Divorce or other family court'), ('cl', 'Criminal case'), ('other', 'Other')]
 DEVICE_TYPE_CHOICES = [('android', 'Android'), ('ios', 'iOS')]
 #two_factor_choices = [empty_choice] + [(x.lower(), x) for x in second_factors]
 TWO_FACTOR_CHOICES = [(x.lower(), x) for x in SECOND_FACTORS] + [('none', 'None')]
@@ -104,68 +110,90 @@ class NotesForm(FlaskForm):
 ## HELPER FORMS FOR APPS
 class PermissionForm(FlaskForm):
     permission_name = HiddenField("Permission")
-    access = RadioField('Can your [ex-]partner access this information using this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    access = RadioField('Can your [ex-]partner access this information using this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     describe = TextAreaField("How do you know?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 # HELPER FORM FOR SCREENSHOTS
 
 class InstallForm(FlaskForm):
-    knew_installed = RadioField('Did you know this app was installed?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
-    installed = RadioField('Did you install this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
-    coerced = RadioField('Did your [ex-]partner coerce you into installing this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    knew_installed = RadioField('Did you know this app was installed?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
+    installed = RadioField('Did you install this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
+    coerced = RadioField('Did your [ex-]partner coerce you into installing this app?', choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     #who = TextAreaField("If you were coerced, who coerced you?")
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SpywareAppForm(FlaskForm):
-    app_name = HiddenField("App Name")
+    title = HiddenField("App Name")
     install_form = FormField(InstallForm)
+    title = HiddenField("App Name")
+    appId = HiddenField("App ID")
+    flags = HiddenField("Flags")
+    application_icon = HiddenField("App Icon")
+    app_website = HiddenField("App Website")
+    description = HiddenField("Description")
+    #descriptionHTML = HiddenField("HTML Description")
+    developerwebsite = HiddenField("Developer Website")
+    permissions = HiddenField("Permissions")
+    subclass = HiddenField("Subclass")
+    summary = HiddenField("Summary")
     notes = FormField(NotesForm)
 
 class DualUseAppForm(FlaskForm):
-    app_name = HiddenField("App Name")
+    title = HiddenField("App Name")
     install_form = FormField(InstallForm)
     permissions = FieldList(FormField(PermissionForm))
+    title = HiddenField("App Name")
+    appId = HiddenField("App ID")
+    flags = HiddenField("Flags")
+    application_icon = HiddenField("App Icon")
+    app_website = HiddenField("App Website")
+    description = HiddenField("Description")
+    #descriptionHTML = HiddenField("HTML Description")
+    developerwebsite = HiddenField("Developer Website")
+    subclass = HiddenField("Subclass")
+    summary = HiddenField("Summary")
     notes = FormField(NotesForm)
 
 ## HELPER FORMS FOR ACCOUNTS
 class SuspiciousLoginsForm(FlaskForm):
-    recognize = RadioField("Do you recognize all devices logged into this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    recognize = RadioField("Do you recognize all devices logged into this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     describe_logins = TextAreaField("Which devices do you not recognize?")
     login_screenshot = MultipleFileField('Add screenshot(s)')
-    activity_log = RadioField("In the login history, do you see any suspicious logins?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    activity_log = RadioField("In the login history, do you see any suspicious logins?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     describe_activity = TextAreaField("Which logins are suspicious, and why?")
     activity_screenshot = MultipleFileField('Add screenshot(s)')
 
 class PasswordForm(FlaskForm):
-    know = RadioField("Does your [ex-]partner know the password for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
-    guess = RadioField("Do you believe your [ex-]partner could guess the password?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Does your [ex-]partner know the password for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
+    guess = RadioField("Do you believe your [ex-]partner could guess the password?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
 
 class RecoveryForm(FlaskForm):
-    phone_present = RadioField("Is there a recovery phone number set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    phone_present = RadioField("Is there a recovery phone number set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     phone = TextAreaField("What is the recovery phone number?")
-    phone_access = RadioField("Do you believe your [ex-]partner has access to the recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    phone_access = RadioField("Do you believe your [ex-]partner has access to the recovery phone number?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     phone_screenshot = MultipleFileField('Add screenshot(s)')
-    email_present = RadioField("Is there a recovery email address set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    email_present = RadioField("Is there a recovery email address set for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     email = TextAreaField("What is the recovery email address?")
-    email_access = RadioField("Do you believe your [ex-]partner has access to this recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    email_access = RadioField("Do you believe your [ex-]partner has access to this recovery email address?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     email_screenshot = MultipleFileField('Add screenshot(s)')
 
 class TwoFactorForm(FlaskForm):
-    enabled = RadioField("Is two-factor authentication enabled for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
-    second_factor_type = RadioField("What type of two-factor authentication is it?", choices=TWO_FACTOR_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    enabled = RadioField("Is two-factor authentication enabled for this account?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
+    second_factor_type = RadioField("What type of two-factor authentication is it?", choices=TWO_FACTOR_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     describe = TextAreaField("Which phone/email/app is set as the second factor?")
-    second_factor_access = RadioField("Do you believe your [ex-]partner has access to this second factor?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    second_factor_access = RadioField("Do you believe your [ex-]partner has access to this second factor?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class SecurityQForm(FlaskForm):
-    present = RadioField("Does the account use security questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    present = RadioField("Does the account use security questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     questions = TextAreaField("Which questions are set?")
-    know = RadioField("Do you believe your [ex-]partner knows the answer to any of these questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    know = RadioField("Do you believe your [ex-]partner knows the answer to any of these questions?", choices=YES_NO_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
 
 class AccountInfoForm(FlaskForm):
-    account_name = HiddenField("Account Name")
+    account_nickname = TextAreaField("Account Nickname")
+    account_platform = TextAreaField("Platform")
     suspicious_logins = FormField(SuspiciousLoginsForm)
     password_check = FormField(PasswordForm)
     recovery_settings = FormField(RecoveryForm)
@@ -173,12 +201,25 @@ class AccountInfoForm(FlaskForm):
     security_questions = FormField(SecurityQForm)
     notes = FormField(NotesForm)
 
+class AppSelectForm(FlaskForm):
+    title = HiddenField("App Name")
+    appId = HiddenField("App ID")
+    flags = HiddenField("Flags")
+    application_icon = HiddenField("App Icon")
+    app_website = HiddenField("App Website")
+    description = HiddenField("Description")
+    #descriptionHTML = HiddenField("HTML Description")
+    developerwebsite = HiddenField("Developer Website")
+    permissions = HiddenField("Permissions")
+    subclass = HiddenField("Subclass")
+    summary = HiddenField("Summary")
+    selected = BooleanField("Check this app?")
+
 ## INDIVIDUAL PAGES
 class StartForm(FlaskForm):
-    title = "Welcome to SHERLOC"
-    name = StringField('Client name', validators=[InputRequired()])
-    consultant_name = StringField('Consultant name', validators=[InputRequired()])
-    device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()], default=DEFAULT)
+    title = "Device To Be Scanned"
+    device_nickname = StringField('Device nickname', validators=[InputRequired()])
+    device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()], default=YES_NO_DEFAULT)
     submit = SubmitField("Continue")
 
 class ScanForm(FlaskForm):
@@ -194,6 +235,13 @@ class DualUseForm(FlaskForm):
     title = "Step 2: Dual Use App Check"
     dual_use_apps = FieldList(FormField(DualUseAppForm))
     submit = SubmitField("Continue")
+
+class AppInvestigationForm(FlaskForm):
+    title = "App Investigations"
+    spyware = FieldList(FormField(SpywareAppForm))
+    dualuse = FieldList(FormField(DualUseAppForm))
+    other = FieldList(FormField(SpywareAppForm))
+    submit = SubmitField("Complete scan")
 
 class AccountsUsedForm(FlaskForm):
     title = "Step 3a: Accounts Used"
@@ -211,10 +259,72 @@ class AccountsUsedForm(FlaskForm):
     submit = SubmitField("Continue")
 
 class AccountCompromiseForm(FlaskForm):
-    title = "Step 3b: Account Compromise Check"
-    accounts = FieldList(FormField(AccountInfoForm))
-    submit = SubmitField("Continue")
+    title = "Account Compromise Check"
+    platform = StringField('Platform', validators=[InputRequired()])
+    account_nickname = StringField('Account Nickname')
+    suspicious_logins = FormField(SuspiciousLoginsForm)
+    password_check = FormField(PasswordForm)
+    recovery_settings = FormField(RecoveryForm)
+    two_factor_settings = FormField(TwoFactorForm)
+    security_questions = FormField(SecurityQForm)
+    notes = FormField(NotesForm)
+    submit = SubmitField("Save")
 
+class SetupForm(FlaskForm):
+    title = "Consultation Information"
+    client = StringField('Client Name', validators=[InputRequired()])
+    date = StringField('Consultation Date and Time', validators=[InputRequired()])
+    submit = SubmitField("Start Consultation")
+
+class AppSelectPageForm(FlaskForm):
+    title = "Select Apps to Investigate"
+    apps = FieldList(FormField(AppSelectForm))
+    submit = SubmitField("Select")
+
+### TAQ Forms
+class TAQDeviceComp(FlaskForm):
+    title = "Device Compromise Indicators"
+    live_together = RadioField("Do you live with the person of concern?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    physical_access = RadioField("Has the person of concern had physical access to your devices at any point in time?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+
+class TAQAccounts(FlaskForm):
+    title = "Account and Password Management"
+    pwd_mgmt = StringField("How do you manage passwords?")
+    pwd_comp = RadioField("Do you believe the person of concern knows, or could guess, any of your passwords?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    pwd_comp_which = StringField("Which ones?")
+
+class TAQSharing(FlaskForm):
+    title = "Account Sharing"
+    share_phone_plan = RadioField("Do you share a phone plan with the person of concern?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    phone_plan_admin = SelectMultipleField("If you share a phone plan, who is the family 'head' or plan administrator?", choices=PERSON_CHOICES)
+    share_accounts = RadioField("Do you share any accounts with the person of concern?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+
+class TAQSmartHome(FlaskForm):
+    title = "Smart Home Devices"
+    smart_home = RadioField("Do you have any smart home devices?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    smart_home_setup = SelectMultipleField("Who installed and set up your smart home devices?", choices=PERSON_CHOICES)
+    smart_home_access = RadioField("Did the person of concern ever have physical access to the devices?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    smart_home_account = RadioField("Do you share any smart home accounts with the person of concern?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+
+class TAQKids(FlaskForm):
+    title = "Children's Devices"
+    custody = RadioField("Do you share custody of children with the person of concern?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    child_phys_access = RadioField("Has the person of concern had physical access to any of the child(ren)'s devices?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+    child_phone_plan = RadioField("Does the person of concern pay for the child(ren)'s phone plan?", choices=YES_NO_CHOICES, default=YES_NO_DEFAULT)
+
+class TAQLegal(FlaskForm):
+    title = "Legal Proceedings"
+    legal = SelectMultipleField("Do you have any ongoing legal cases?", choices=LEGAL_CHOICES)
+
+class TAQForm(FlaskForm):
+    title = "Technology Assessment Questionnaire (TAQ)"
+    devices = FormField(TAQDeviceComp)
+    accounts = FormField(TAQAccounts)
+    sharing = FormField(TAQSharing)
+    smarthome = FormField(TAQSmartHome)
+    kids = FormField(TAQKids)
+    legal = FormField(TAQLegal)
+    submit = SubmitField("Save TAQ")
 
 
 def unpack_evidence_context(session, task="evidence"):
@@ -569,13 +679,13 @@ def get_multiple_app_details(device, ser, apps):
 def get_app_details(device, ser, appid):
     sc = get_device(device)
     d, info = sc.app_details(ser, appid)
-    d = d.fillna('')
-    d = d.to_dict(orient='index').get(0, {})
-    d['appId'] = appid
+    #d = d.fillna('')
+    #d = d.to_dict(orient='index').get(0, {})
+    #d['appId'] = appid
 
     return d
 
-def get_suspicious_apps(device, device_owner):
+def get_scan_data(device, device_owner):
 
     # The following code is adapted from web/view/scan.py
 
@@ -667,7 +777,6 @@ def get_suspicious_apps(device, device_owner):
     scan_d['is_rooted'] = rooted
     scan_d['rooted_reasons'] = json.dumps(rooted_reason)
 
-    # TODO: here, adjust client session.
     scanid = create_scan(scan_d)
 
     if device == 'ios':
@@ -698,18 +807,68 @@ def get_suspicious_apps(device, device_owner):
         error=config.error()
     ))
 
-
     # new stuff from Sophie
     pprint(apps)
 
     suspicious_apps = []
+    other_apps = []
 
     for k in apps.keys():
         app = apps[k]
+        app["id"] =k
         if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
-            app["id"] = k
             suspicious_apps.append(app)
+        else:
+            other_apps.append(app)
 
-    detailed_apps = get_multiple_app_details(device, ser, suspicious_apps)
+    detailed_suspicious_apps = get_multiple_app_details(device, ser, suspicious_apps)
+    detailed_other_apps = get_multiple_app_details(device, ser, other_apps)
 
-    return detailed_apps
+    pprint(other_apps)
+
+    return scan_d, detailed_suspicious_apps, detailed_other_apps
+
+class ConsultDataTypes(Enum):
+    TAQ = 1
+    SCANS = 2
+    ACCOUNTS = 3
+    SETUP = 4
+
+def get_data_filename(datatype: ConsultDataTypes):
+
+    if datatype == ConsultDataTypes.SETUP.value:
+        return "setup.json"
+    elif datatype == ConsultDataTypes.TAQ.value:
+        return "taq.json"
+    elif datatype == ConsultDataTypes.SCANS.value:
+        return "scans.json"
+    else:
+        return "accounts.json"
+
+
+# Save data to the right tmp file as JSON
+# Overwrites it always, assume any previous data has been incorporated
+def save_data_as_json(data, datatype: ConsultDataTypes):
+
+    json_object = json.dumps(data)
+
+    fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
+
+    with open(fname, 'w') as outfile:
+        outfile.write(json_object)
+
+    return
+
+def load_json_data(datatype: ConsultDataTypes):
+
+    fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
+    if not os.path.exists(fname):
+        if datatype in [ConsultDataTypes.TAQ, ConsultDataTypes.SETUP] :
+            return dict()
+        else: 
+            return []
+
+    with open(fname, 'r') as openfile:
+        json_object = json.load(openfile)
+
+    return json_object
