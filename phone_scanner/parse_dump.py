@@ -534,6 +534,17 @@ class IosDump(PhoneDump):
             app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
         )
         third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
+
+        # unpack
+        new_sys_permissions = []
+        for permission in system_permissions:
+            if type(permission) == list:
+                for p in permission:
+                    new_sys_permissions.append(p)
+            else:
+                new_sys_permissions.append(permission)
+        system_permissions = new_sys_permissions
+
         self.check_unseen_permissions(
             list(system_permissions) + list(adjustable_system_permissions)
         )

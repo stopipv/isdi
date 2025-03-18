@@ -2,15 +2,12 @@
 Must work completely from the dumps, no interaction with the device is required.
 """
 
-import datetime
-import re
-
-import pandas as pd
 from rsonlite import simpleparse
-
+import pandas as pd
+import datetime
 import config
-
-from .runcmd import catch_err, run_command
+import re
+from .runcmd import run_command, catch_err
 
 # MAP = config.ANDROID_PERMISSIONS
 DUMPPKG = "dumppkg"
@@ -22,9 +19,10 @@ def _parse_time(time_str):
     Modified from virhilo's answer at https://stackoverflow.com/a/4628148/851699
     :param time_str: A string identifying a duration.  (eg. 2h13m)
     :return datetime.timedelta: A datetime.timedelta object
+        r'^+((?P<days>[\\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\\.\d]+?)ms)?')
     """
     timedelta_re = re.compile(
-        r'^.((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?'
+        r"^.((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?((?P<milliseconds>[\.\d]+?)ms)?"
     )
     parts = timedelta_re.match(time_str)
     assert parts is not None, (
@@ -92,7 +90,7 @@ def package_info(dumpf, appid):
     # requested permissions:
     # install permissions:
     # runtime permissions:
-    cmd = "sed -n -e '/Package \\[{appid}\\]/,/Package \\[/p' '{dumpf}'".format(
+    cmd = "sed -n -e '/Package \\[{appid}\]/,/Package \\[/p' '{dumpf}'".format(
         appid=appid, dumpf=dumpf.replace(".json", ".txt")
     )
     print(cmd)

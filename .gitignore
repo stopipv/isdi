@@ -139,6 +139,7 @@ toremove/
 
 reports/*
 screenshots/*
+reports/*.csv
 apps/
 data/
 *.db
