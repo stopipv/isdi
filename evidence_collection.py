@@ -1189,10 +1189,6 @@ def update_scan_by_ser(new_scan: ScanData, all_scan_data: list[ScanData]):
     
     all_scan_data.append(new_scan)
     return all_scan_data
-=======
-    pprint(other_apps)
-
-    return scan_d, detailed_suspicious_apps, detailed_other_apps
 
 class ConsultDataTypes(Enum):
     TAQ = 1
@@ -1216,7 +1212,7 @@ def get_data_filename(datatype: ConsultDataTypes):
 # Overwrites it always, assume any previous data has been incorporated
 def save_data_as_json(data, datatype: ConsultDataTypes):
 
-    json_object = json.dumps(data)
+    json_object = json.dumps(data, cls=EvidenceDataEncoder)
 
     fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
 
