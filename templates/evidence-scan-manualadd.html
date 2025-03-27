@@ -1,0 +1,76 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
+
+{% block content %}
+
+<script>
+  function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+    var imageDiv = document.createElement('div');
+    imageDiv.classList.add("form-screenshot");
+    var loading = document.createElement('img')
+    loading.src = "../webstatic/images/waiting.gif";
+    imageDiv.innerHTML = loading.outerHTML
+    document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+    if (device === 'ios') {
+        fetch('/privacy/ios/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        })
+        .catch(error => {
+            imageDiv.innerHTML = "Error loading screenshot: " + error;
+        });
+    } else if (device === 'android') {
+        fetch('/privacy/android/screenshot/' + buttonId)
+        .then(response => response.text())
+        .then(data => {
+            //loading.remove();
+            imageDiv.innerHTML = data;
+            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+        });
+
+    }
+}
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <br>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+            <br>
+            <h2>{{form.title}}</h2>
+            <hr>
+            <form action method="post" class="form" role="form">
+                {{ form.hidden_tag() }}
+                <b>{{form.device_nickname.label}}:</b> {{form.device_nickname}}
+                <br>
+                <br>
+                <p>List app names below:</p>
+                <ul>
+                    {% for app in form.apps %}
+                    <li>{{ app.hidden_tag() }}{{app.app_name}} <br> {{app.spyware.label}} {{app.spyware}}</li>
+                    {% endfor %}
+                    <li><div><span class="secondarybutton">{{form.addline}}</span></div></li>
+                </ul>
+                <br>
+                <br>
+                <br>
+                <div><span class="primarybutton">{{form.submit}}</span></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

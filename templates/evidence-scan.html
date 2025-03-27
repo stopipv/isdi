@@ -213,6 +213,10 @@
 
                 <br>
                 <br>
+                <div><span class="secondarybutton"><a href="{{ url_for('evidence_home') }}" class="btn btn-default">Abort Scan</a></span></div>
+                {% if form.manualadd %}
+                <div><span class="secondarybutton">{{form.manualadd}}</div>
+                {% endif %}
                 <div><span class="primarybutton">{{form.submit}}</span></div>
                 </form>
         </div>

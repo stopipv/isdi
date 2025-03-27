@@ -222,7 +222,9 @@ class StartForm(FlaskForm):
     title = "Device To Be Scanned"
     device_nickname = StringField('Device nickname', validators=[InputRequired()])
     device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()])
-    submit = SubmitField("Continue")
+    submit = SubmitField("Scan Device")
+    manualadd = SubmitField("Select apps manually")
+
 
 class ScanForm(FlaskForm):
     title = "Scan Instructions"
@@ -281,6 +283,31 @@ class AppSelectPageForm(FlaskForm):
     title = "Select Apps to Investigate"
     apps = FieldList(FormField(AppSelectForm))
     submit = SubmitField("Select")
+
+class ManualAppSelectForm(FlaskForm):
+    app_name = StringField("App Name")
+    spyware = BooleanField("Appears to be a spyware app?")
+
+class ManualAddPageForm(FlaskForm):
+    title = "Manual App Investigation: Select Apps"
+    device_nickname = StringField("Device Nickname", validators=[InputRequired()])
+    apps = FieldList(FormField(ManualAppSelectForm))
+    addline = SubmitField("Add a new app")
+    submit = SubmitField("Submit")
+
+    def update_self(self):
+        # read the data in the form
+        read_form_data = self.data
+
+        # modify the data as you see fit:
+        updated_list = read_form_data['apps']
+        if read_form_data['addline']:
+            updated_list.append({})
+        read_form_data['apps'] = updated_list
+
+        # reload the form from the modified data
+        self.__init__(formdata=None, **read_form_data)
+        self.validate()  # the errors on validation are cancelled in the line above
 
 ### TAQ Forms
 class TAQDeviceCompForm(FlaskForm):
@@ -409,40 +436,6 @@ def create_overall_summary(context, second_person=False):
         dualuse = [],
         accounts = []
     )
-    
-    '''
-    for app in context['spyware']:
-        summary, concerning = create_app_summary(app, spyware=True, second_person=second_person)
-        if concerning:
-            concerns['spyware'].append(dict(
-                name = app['app_name'],
-                concern_type = "spyware app",
-                summary = summary
-            ))
-
-    for app in context['dualuse']:
-        summary, concerning = create_app_summary(app, spyware=False, second_person=second_person)
-        if concerning:
-            concerns['dualuse'].append(dict(
-                name = app['app_name'],
-                concern_type = "dual use app",
-                summary = summary
-            ))
-
-    for account in context['accounts']:
-        access, ability, access_concern, ability_concern = create_account_summary(account, second_person=second_person)
-        if access_concern or ability_concern:
-            summary = ""
-            if access_concern:
-                summary += access + " "
-            if ability_concern:
-                summary += ability
-            concerns['accounts'].append(dict(
-                name = account['account_name'],
-                concern_type = "account",
-                summary = summary
-            ))
-    '''
             
     return concerns
 
@@ -568,9 +561,7 @@ def get_scan_data(device, device_owner):
     if not ser:
         # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
         # needed.
-        error = "<b>A device wasn't detected. Please follow the "\
-            "<a href='/instruction' target='_blank' rel='noopener'>"\
-            "setup instructions here.</a></b>"
+        error = "A device wasn't detected."
         template_d["error"] = error
         raise Exception(error)
 
@@ -851,6 +842,8 @@ class AppInfo(Dictable):
         self.developerwebsite = developerwebsite
         self.investigate = investigate
 
+        # TODO: fix actual permissions
+
         placeholder_permissions = [{
             "permission_name": "Camera",
             "reason": "Needed to capture photos",
@@ -858,13 +851,67 @@ class AppInfo(Dictable):
         
         self.permissions = [PermissionInfo(p) for p in placeholder_permissions]
 
-       # try: 
-        #    self.permissions = [PermissionInfo(**p) for p in permissions]
-       # except:
-        #    self.permissions = permissions
-
         self.install_info = InstallInfo(install_info)
         self.notes = Notes(notes)
+
+        self.report, self.is_concerning = self.generate_app_report()
+
+    def generate_app_report(self, second_person=True, harmdoer="the person of concern"):
+        agent = "you"
+        pronoun = "you"
+        if second_person:
+            agent = "the client"
+            pronoun = "they"
+        
+        spyware = 'spyware' in self.flags
+
+        sentences = []
+        concern = False
+
+        if spyware:
+            concern = True
+            sentences.append("{} is an app designed for surveillance.".format(self.title))
+
+        # for all apps, look at install information
+        if self.install_info.knew_installed != 'yes':
+            concern = True
+            sentences.append("{} did not know that this app was installed on the device.".format(agent.capitalize()))
+            if "system-app" in self.flags:
+                sentences.append("However, this is a system app which was likely installed on the phone when it was purchased.".format(agent.capitalize()))
+            elif spyware:
+                sentences.append("This indicates that another person installed the app with the intention of surveilling {}. Installing the app would require physical access to the device.".format(agent))
+
+        elif self.install_info.installed != 'yes':
+            if "system-app" in self.flags:
+                sentences.append("{} did not install this app. However, this is a system app which was likely installed on the phone when it was purchased.".format(agent.capitalize()))
+            else:
+                concern = True
+                if self.install_info.installed == 'no':
+                    sentences.append("{} knew this app was installed on the phone, but did not install it.".format(agent.capitalize()))
+                if self.install_info.installed == 'unsure':
+                    sentences.append("{} knew this app was installed on the phone, but {} are unsure whether {} installed it.".format(agent.capitalize(), pronoun, pronoun))
+                sentences.append("This indicates that another person installed this app, which would require physical access to the device.")
+
+
+        elif self.install_info.coerced != 'no':
+            concern = True
+            sentences.append("{} coerced {} to install this app, indicating that person is using the app to surveil {}.".format(harmdoer.capitalize(), agent, agent))
+        else:
+            sentences.append("{} installed this app voluntarily.".format(agent.capitalize()))
+
+        # for spyware apps, look at permission stuff
+        if not spyware:
+            any_issues = False
+            for perm in self.permissions:
+                if perm.access == 'yes':
+                    any_issues = True
+                    concern = True
+                    sentences.append("{} can use this app to access the phone's {}.".format(harmdoer.capitalize(), perm.permission_name.lower()))
+
+            if not any_issues:
+                sentences.append("There is no evidence that this app is being used maliciously against {}.".format(agent))
+
+        return " ".join(sentences), concern
 
 
 class CheckApps(Dictable):
@@ -911,6 +958,12 @@ class TAQLegal(DictInitClass):
 class Notes(DictInitClass):
     attrs = ['client_notes', 'consultant_notes']
 
+class RiskFactor():
+    
+    def __init__(self, risk, description):
+        self.risk = risk
+        self.description = description
+
 
 ### REAL CLASSES
 
@@ -929,6 +982,7 @@ class ConsultationData(Dictable):
         self.setup = ConsultSetupData(**setup)
         self.taq = TAQData(**taq)
         self.accounts = [AccountInvestigation(**account) for account in accounts]
+        self.concerning_accounts = [acct for acct in self.accounts if acct.is_concerning]
         self.scans = [ScanData(**scan) for scan in scans]
         self.screenshot_dir = screenshot_dir
 
@@ -959,14 +1013,16 @@ class AccountInvestigation(Dictable):
         self.security_questions = SecurityQuestions(security_questions)
         self.notes = Notes(notes)
 
-        self.access_report = f"ACCOUNT ACCESS REPORT: {self.account_nickname}"
-        self.ability_report = f"ACCESS CAPABILITY REPORT: {self.account_nickname}"
-    '''
-    def generate_report(self, second_person=True):
+        self.access_report, self.ability_report, self.access_concern, self.ability_concern = self.generate_reports()
+
+        self.is_concerning = self.access_concern or self.ability_concern
+
+
+    def generate_reports(self, second_person=True, harmdoer="the person of concern"):
         agent = "you"
         pronoun = "you"
         possessive = "your"
-        if not second_person:
+        if second_person:
             agent = "the client"
             pronoun = "they"
             possessive = "their"
@@ -1035,19 +1091,20 @@ class AccountInvestigation(Dictable):
                 also = "also "
 
             if len(methods) > 1:
-                ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via these methods: {}.".format(also, possessive, ", ".join(methods)))
+                ability_sentences.append("There is {}evidence that {} can access this account via these methods: {}.".format(also, harmdoer, ", ".join(methods)))
             else:
-                ability_sentences.append("There is {}evidence that {} [ex-]partner can access this account via {}.".format(also, possessive, methods[0]))
+                ability_sentences.append("There is {}evidence that {} can access this account via {}.".format(also, harmdoer, methods[0]))
 
             if twofactor:
-                ability_sentences.append("{} [ex-]partner has access to the second authentication factor; if they know the password, they could access this account without alerting {}.".format(possessive.capitalize(), agent))
+                ability_sentences.append("{} has access to the second authentication factor; if they know the password, they could access this account without alerting {}.".format(harmdoer.capitalize(), agent))
 
-       # return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
-        '''
+        return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
+        
 
 
 class ScanData(Dictable):
     def __init__(self,
+                 manual=False,
                  scan_id=0,
                  device_type="",
                  device_nickname="",
@@ -1061,6 +1118,7 @@ class ScanData(Dictable):
                  selected_apps=list(),
                  **kwargs):
 
+        self.manual = manual
         self.scan_id = scan_id
         self.device_type = device_type
         self.device_nickname = device_nickname
@@ -1072,69 +1130,60 @@ class ScanData(Dictable):
         self.rooted_reasons = rooted_reasons
         self.all_apps = [AppInfo(**app) for app in all_apps]
         self.selected_apps = [AppInfo(**app) for app in selected_apps]
+        self.concerning_apps = [app for app in self.selected_apps if app.is_concerning]
 
-        self.report = f"SCAN REPORT: {self.device_nickname}"
+        self.report = self.generate_report()
 
-    # THIS DOESN'T WORK
-    '''
-    def generate_app_report(self, app: AppInfo, spyware=True, second_person=True):
-        agent = "you"
-        pronoun = "you"
-        possessive = "your"
-        if not second_person:
-            agent = "the client"
-            pronoun = "they"
-            possessive = "their"
+    def generate_report(self, harmdoer="the person of concern"):
+        agent = "the client"
 
-        sentences = []
-        concern = False
-        if spyware:
-            concern = True
-            sentences.append("{} is an app designed for surveillance.".format(app.title))
+        report_sentences = []
+        
+        if self.is_rooted:
+            report_sentences.append(
+                "This device is jailbroken, giving the jailbreaker nearly unbounded "
+                "access to the device and {}'s activity on the device.".format(
+                    agent
+                )
+            )
+        else: 
+            report_sentences.append("This device is not jailbroken.")
 
-        # for all apps, look at install information
-        if app != 'yes':
-            concern = True
-            sentences.append("{} did not know that this app was installed on the phone.".format(agent.capitalize()))
-            if spyware:
-                sentences.append("This indicates that another person installed the app with the intention of surveilling {}.".format(agent))
-
-        elif app.knew_installed != 'yes':
-            #
-            # TODO: check if it is a system app
-            #
-            system_app = True
-            if system_app:
-                sentences.append("{} did not install this app. However, this is a system app which was likely installed on the phone when it was purchased.".format(agent.capitalize()))
-            else:
-                concern = True
-                if app.installed == 'no':
-                    sentences.append("{} knew this app was installed on the phone, but did not install it.".format(agent.capitalize()))
-                if app.installed == 'unsure':
-                    sentences.append("{} knew this app was installed on the phone, but {} are unsure whether {} installed it.".format(agent.capitalize(), pronoun, pronoun))
-                sentences.append("This indicates that another person installed this app, which would require physical access to the phone.")
-
-
-        elif app.coerced != 'no':
-            concern = True
-            sentences.append("{} [ex-]partner coerced {} to install this app, indicating that person is using the app to surveil {}.".format(possessive.capitalize(), agent, agent))
+        if len(self.selected_apps) == 0:
+            report_sentences.append("No suspicious apps were found on this device.")
         else:
-            sentences.append("{} installed this app voluntarily.".format(agent.capitalize()))
+            '''
+            plural = ""
+            if len(self.selected_apps) > 1:
+                plural = "s"
+            report_sentences.append(
+                "{} potentially malicious app{} investigated.".format(
+                    len(self.selected_apps), plural
+                )
+            )
+            '''
 
-        # for spyware apps, look at permission stuff
-        if not spyware:
-            any_issues = False
-            for perm in app['permissions']:
-                if perm['access'] != 'no':
-                    any_issues = True
-                    concern = True
-                    sentences.append("{} [ex-]partner can use this app to access the phone's {}.".format(possessive.capitalize(), perm['permission_name'].lower()))
+            if len(self.concerning_apps) > 0:
+                plural = ""
+                verb_plural = "s"
+                if len(self.concerning_apps) > 1:
+                    plural = "s"
+                    verb_plural = ""
 
-            if not any_issues:
-                sentences.append("There is no evidence that this app is being used maliciously against {}.".format(agent))
+                report_sentences.append(
+                    "{} app{} pose{} a concern: {}.".format(
+                        len(self.concerning_apps), plural, verb_plural, ", ".join([app.title for app in self.concerning_apps])
+                    )
+                )
+            else: 
+                report_sentences.append(
+                    "No apps determined to pose a concern."
+                )
 
-        #return " ".join(sentences), concern
-         '''
+        if self.manual:
+            report_sentences.append("This device was not automatically scanned; instead, apps were manually investigated.")
+
+        return " ".join(report_sentences)
 
 
 class TAQData(Dictable):
@@ -1148,15 +1197,128 @@ class TAQData(Dictable):
                  **kwargs):
         self.devices = TAQDevices(devices)
         self.accounts = TAQAccounts(accounts)
+        if self.accounts.pwd_comp_which.strip() == "":
+            self.accounts.pwd_comp_which = "[Not provided]"
         self.sharing = TAQSharing(sharing)
+        if self.sharing.phone_plan_admin == []:
+            self.sharing.phone_plan_admin = ""
         self.smarthome = TAQSmarthome(smarthome)
         self.kids = TAQKids(kids)
         self.legal = TAQKids(legal)
 
-        self.report = "TAQ REPORT"
+        self.risk_factors = self.get_risk_factors()
 
-    def report():
-        return "TODO: Create report"
+    def get_risk_factors(self, second_person=True, harmdoer="the person of concern"):
+        agent = "you"
+        pronoun = "you"
+        if second_person:
+            agent = "the client"
+            pronoun = "they"
+
+        risk_factors = []
+
+        # accounts
+        if self.accounts.pwd_comp != 'no':
+            risk_factors.append(RiskFactor(
+                risk="Risk from password compromise",
+                description="{} believes that {} knows some passwords. Compromised passwords: {}. "
+                            "This could allow {} access to {}'s accounts.".format(
+                                agent.capitalize(), harmdoer, self.accounts.pwd_comp_which, harmdoer, agent
+                            )           
+                )
+            )
+        # TODO: Should we ask if the abuser has accesss to pwd management methods?
+
+        # devices
+        if self.devices.live_together == 'yes':
+            risk_factors.append(RiskFactor(
+                risk="Risk from device access",
+                description="{} lives with {}, giving {} physical access to {}'s devices. "
+                            "With physical access to devices, it is possible that {} could "
+                            "install spyware or access online accounts, and see private information.".format(
+                                agent.capitalize(),harmdoer,harmdoer,agent,harmdoer
+                            ))
+            )
+        elif self.devices.physical_access == 'yes':
+            risk_factors.append(RiskFactor(
+                risk="Risk from device access",
+                description="{} has had physical access to {}'s devices. "
+                "With physical access to devices, it is possible that {} could "
+                "install spyware, access online accounts, and see private information.".format(
+                    harmdoer.capitalize(), agent, harmdoer
+                )))
+
+        # sharing
+        if self.sharing.share_phone_plan == 'yes':
+            admin = ""
+            if self.sharing.phone_plan_admin.strip() != "":
+                admin = ", {},".format(self.sharing.phone_plan_admin)
+            risk_factors.append(RiskFactor(
+                risk="Risk from shared phone plan",
+                description="{} shares a phone plan with {}. This may leak information including call and text history or location. The administrator{} likely has even more privileged access to such information.".format(
+                    agent.capitalize(), harmdoer, admin
+                )
+            ))
+        if self.sharing.share_accounts == 'yes':
+            risk_factors.append(RiskFactor(
+                risk="Risk from shared accounts",
+                description="Some accounts are shared with {}, meaning {} can see any information and activity on those accounts.".format(
+                    harmdoer, harmdoer
+                )
+            ))
+
+        # kids
+        if self.kids.custody == 'yes':
+            if self.kids.child_phone_plan == 'yes':
+                risk_factors.append(RiskFactor(
+                    risk="Risk from child's phone plan",
+                    description="{}'s child shares a phone plan with {}. This may leak information including the child's call and text history or location.".format(
+                        agent.capitalize(), harmdoer
+                    )
+                ))
+            if self.kids.child_phys_access != 'no':
+                risk_factors.append(RiskFactor(
+                    risk="Risk from child's devices",
+                    description="{} has had physical access to devices owned by {}'s child. "
+                    "With physical access to these devices, it is possible that {} could "
+                    "install spyware, access online accounts, and see private information, "
+                    "including information about {}.".format(
+                        harmdoer.capitalize(), agent, harmdoer, agent
+                    )
+                ))
+
+        if self.smarthome.smart_home == 'yes':
+            # TODO: we should ask what devices they have to give more details about the risks
+
+            smarthome_risk = False
+            risk_reasons = []
+
+            # physical access
+            if self.smarthome.smart_home_setup == 'poc':
+                smarthome_risk = True
+                risk_reasons.append("{} set up some of the smart home devices in {}'s home.".format(harmdoer.capitalize(), agent))
+            elif self.smarthome.smart_home_access == 'yes':
+                smarthome_risk = True
+                risk_reasons.append("{} had physical access to some of the smart home devices in {}'s home.".format(harmdoer.capitalize(), agent))
+            
+            # account
+            if self.smarthome.smart_home_account == 'yes':
+                smarthome_risk = True
+                also = ""
+                if len(risk_reasons) > 0:
+                    also = "also "
+                risk_reasons.append("{} can {}access accounts connected to smart home devices in {}'s home.".format(harmdoer.capitalize(), also, agent))
+            
+            # combine risks
+            if smarthome_risk:
+                risk_factors.append(RiskFactor(
+                    risk="Risk from smart home devices",
+                    description="{} As a result, {} may be able to see data collected by those smart home devices.".format(
+                        " ".join(risk_reasons), harmdoer
+                    )
+                ))
+
+        return risk_factors
 
 class ConsultSetupData(Dictable):
     def __init__(self, 

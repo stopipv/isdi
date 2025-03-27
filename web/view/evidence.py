@@ -33,6 +33,7 @@ from evidence_collection import (  # create_account_summary,; create_app_summary
     ConsultDataTypes,
     ConsultSetupData,
     DualUseForm,
+    ManualAddPageForm,
     Pages,
     ScanData,
     ScanForm,
@@ -95,6 +96,10 @@ def evidence_setup():
 
 
             return redirect(url_for('evidence_home'))
+        
+        elif not form.validate():
+            flash("Missing required fields")
+            return redirect(url_for('evidence_setup'))
         
 
     return redirect(url_for('evidence_setup'))
@@ -178,22 +183,26 @@ def evidence_scan_start():
     current_scan = ScanData()
     form = StartForm()
 
-    if request.method == "GET":
-        context = dict(
-            task = "evidence-scan",
-            form = form,
-            title=config.TITLE,
-            scan_data = current_scan.to_dict(),
-            step = 1,
-            id = 0,
-        )
-        pprint(form.data)
+    context = dict(
+        task = "evidence-scan",
+        form = form,
+        title=config.TITLE,
+        scan_data = current_scan.to_dict(),
+        step = 1,
+        id = 0,
+    )
 
+    if request.method == "GET":
+        pprint(form.data)
         return render_template('main.html', **context)
 
     if request.method == "POST":
         pprint(form.data)
         if form.is_submitted() and form.validate():
+
+            if form.manualadd.data:
+                return redirect(url_for('evidence_scan_manualadd', 
+                                        device_nickname=form.data["device_nickname"]))
 
             # clean up the submitted data
             clean_data = remove_unwanted_data(form.data)
@@ -224,16 +233,18 @@ def evidence_scan_start():
                 
                 current_scan.id = len(all_scan_data)
                 all_scan_data.append(current_scan)
-
+            
+                save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
+                return redirect(url_for('evidence_scan_select', ser=current_scan.serial))
 
             except Exception as e:
                 print(traceback.format_exc())
-                flash(e, "error")
-                return redirect(url_for('evidence_scan_start', step=2))
-
+                flash("Scan error: " + str(e))
+                return redirect(url_for('evidence_scan_start'))
             
-            save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
-            return redirect(url_for('evidence_scan_select', ser=current_scan.serial))
+        elif not form.validate():
+            flash("Missing required fields")
+            return redirect(url_for('evidence_scan_start'))
 
     return redirect(url_for('evidence_scan_start'))
 
@@ -288,6 +299,83 @@ def evidence_scan_select(ser):
         
             return redirect(url_for('evidence_scan_investigate', ser=ser))
         
+@app.route("/evidence/scan/manualadd/<string:device_nickname>", methods={'GET', 'POST'})
+def evidence_scan_manualadd(device_nickname):
+
+    form = ManualAddPageForm(apps = [""], device_nickname=device_nickname)
+
+    ### IF IT'S A GET:
+    if request.method == 'GET':
+
+        context = dict(
+            task = "evidence-scan-manualadd",
+            title = config.TITLE,
+            form = form
+        )
+
+        return render_template('main.html', **context)
+    
+    ### IF IT'S A POST:
+    if request.method == 'POST':
+
+        if form.is_submitted():
+
+            # if it's an addline request, do that and reload
+            if form.addline.data:
+                form.update_self()
+                context = dict(
+                    task = "evidence-scan-manualadd",
+                    title = config.TITLE,
+                    form = form
+                )
+                return render_template('main.html', **context)
+
+            elif form.validate():
+                # TODO take data and do something with it
+
+                pprint(form.data)
+
+                selected_apps = []
+                for app in form.data['apps']:
+                    flags = []
+                    if app['spyware']:
+                        flags = ['spyware']
+                    if app['app_name'].strip() != "":
+                        selected_apps.append({
+                            "title": app['app_name'],
+                            "investigate": True,
+                            "flags": flags
+                        })
+
+
+                manual_scan = ScanData(
+                    manual=True,
+                    device_nickname=device_nickname,
+                    serial=device_nickname,
+                    all_apps=[],
+                    selected_apps=selected_apps
+                )
+
+
+                # load all scans
+                all_scan_data = [ScanData(**scan) for scan in 
+                                load_json_data(ConsultDataTypes.SCANS.value)]
+                
+                # add manual scan
+                all_scan_data = update_scan_by_ser(manual_scan, all_scan_data)
+
+                # save
+                save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
+
+                pprint(manual_scan.__dict__)
+
+                for app in manual_scan.selected_apps:
+                    pprint(app.__dict__)
+
+                return redirect(url_for('evidence_scan_investigate', ser=manual_scan.serial))
+                
+
+
 
 
 @app.route("/evidence/scan/investigate/<string:ser>", methods={'GET', 'POST'})
@@ -303,7 +391,6 @@ def evidence_scan_investigate(ser):
 
     pprint([app.to_dict() for app in current_scan.selected_apps])
     pprint("INPUTTED INTO THE INVESTIGATION FORM")
-
     # get apps to investigate from the scan data
     form = AppInvestigationForm(selected_apps=[app.to_dict() for app in current_scan.selected_apps])
 
@@ -337,6 +424,13 @@ def evidence_scan_investigate(ser):
             save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
 
             return redirect(url_for('evidence_home'))
+    
+        elif not form.validate():
+            flash("Missing required fields")
+            return redirect(url_for('evidence_scan_investigate', ser=ser))
+
+    return redirect(url_for('evidence_scan_investigate', ser=ser))
+
 
 
 @app.route("/evidence/account", methods={'GET'})
@@ -393,143 +487,7 @@ def evidence_account(id):
             return redirect(url_for('evidence_home'))
         
         return redirect(url_for('evidence_account', id=id))
-        
 
-
-
-
-
-############################################
-############################################
-############################################
-
-
-@app.route("/evidence/", methods={'GET'})
-def evidence_default():
-    session.clear()
-    return redirect(url_for('evidence', step=1))
-
-@app.route("/evidence/<int:step>", methods=['GET', 'POST'])
-def evidence(step):
-
-    # SAVE SESSION DATA INTO LOCAL VARIABLES
-
-    spyware = []
-    dualuse = []
-    if 'apps' in session.keys():
-        spyware = session['apps']['spyware']
-        dualuse = session['apps']['dualuse']
-
-    accounts=[]
-    # have to do this step numbering better...
-    if 'step{}'.format(Pages.ACCOUNTS_USED.value) in session.keys():
-        accounts=[{"account_name": x} for x in session['step{}'.format(Pages.ACCOUNTS_USED.value)]['accounts_used']]
-
-    pprint(session)
-
-    # FORMS
-
-    forms = {
-        Pages.START.value: StartForm(),
-        Pages.SCAN.value: ScanForm(),
-        Pages.SPYWARE.value: SpywareForm(spyware_apps=spyware),
-        Pages.DUALUSE.value: DualUseForm(dual_use_apps=dualuse),
-        Pages.ACCOUNTS_USED.value: AccountsUsedForm(),
-        Pages.ACCOUNT_COMP.value: AccountCompromiseForm(accounts=accounts),
-    }
-
-    form = forms.get(step, 1)
-
-    # Submit the form if it's a POST
-    if request.method == 'POST':
-        pprint(form.data)
-        if form.is_submitted() and form.validate():
-
-            # clean up the submitted data
-            clean_data = remove_unwanted_data(form.data)
-
-            # for accounts used, have to reformat our data due to limitations with wtforms
-            if step == Pages.ACCOUNTS_USED.value:
-                accounts_used = []
-                accounts_unused = []
-                for k, v in clean_data.items():
-                    if k != "submit" and v == True:
-                        accounts_used.append(k)
-                    elif k != "submit" :
-                        accounts_unused.append(k)
-
-                for k in accounts_unused:
-                    clean_data.pop(k)
-
-                clean_data['accounts_used'] = accounts_used
-
-            # add clean data to the session data
-            session['step{}'.format(step)] = clean_data
-
-            # collect apps if we're on the scan step
-            if step == Pages.SCAN.value:
-                # Ensure any previous screenshots have been removed before scan
-                print("Removing files:")
-                os.system("ls webstatic/images/screenshots/")
-                os.system("rm webstatic/images/screenshots/*")
-
-                try:
-                    verbose_apps = get_scan_data(session['step{}'.format(Pages.START.value)]['device_type'],
-                                                       session['step{}'.format(Pages.START.value)]['name'])
-                    spyware, dualuse = reformat_verbose_apps(verbose_apps)
-                    session['apps'] = {"spyware": spyware, "dualuse": dualuse}
-
-                except Exception as e:
-                    if not USE_FAKE_DATA:
-                        print(traceback.format_exc())
-                        flash(str(e), "error")
-                        return redirect(url_for('evidence', step=step))
-
-                    # use fake data
-                    session['apps'] = FAKE_APP_DATA
-
-            if step < len(forms):
-                # Redirect to next step
-                return redirect(url_for('evidence', step=step+1))
-            else:
-                # Redirect to finish
-                return redirect(url_for('evidence_summary'))
-
-    # If form data for this step is already in the session, populate the form with it
-    if 'step{}'.format(step) in session:
-        form.process(data=session['step{}'.format(step)])
-
-    context = dict(
-        task = "evidence",
-        progress =  int(step / len(forms) * 100),
-        step = step,
-        form = form,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        title=config.TITLE,
-        device_owner = "",
-        device = "",
-        scanned=False,
-        spyware=spyware,
-        dualuse=dualuse,
-        accounts=accounts
-    )
-
-    if 'step{}'.format(Pages.START.value) in session.keys():
-        context["device_owner"] = session['step{}'.format(Pages.START.value)]["name"]
-        context["device"] = session['step{}'.format(Pages.START.value)]["device_type"]
-
-    return render_template('main.html', **context)
-
-@app.route('/evidence/summary', methods=['GET'])
-def evidence_summary():
-    
-    context = unpack_evidence_context(session, task="evidencesummary")
-    context["concerns"] = create_overall_summary(context, second_person=True)
-
-    # TODO: load data into context
-
-
-    return render_template('main.html', **context)
 
 @app.route("/evidence/printout", methods=["GET"])
 def evidence_printout():
@@ -543,34 +501,6 @@ def evidence_printout():
     )
 
     pprint([account.to_dict() for account in consult_data.accounts])
-
-    # TODO: Handle multiple scans
-    # TODO: Generate text of the document
-
-    '''
-    for app in consult_data.scans[1].check_apps.spyware:
-         summary, concerning = create_app_summary(app, spyware=True)
-         app['summary'] = summary
-         app['concerning'] = concerning
-         app['screenshots'] = get_screenshots('spyware', app['app_name'], context["screenshot_dir"])
-
-    for app in consult_data.scans[1].check_apps.dualuse:
-         summary, concerning = create_app_summary(app, spyware=False)
-         app['summary'] = summary
-         app['concerning'] = concerning
-         app['screenshots'] = get_screenshots('dualuse', app['app_name'], context["screenshot_dir"])
-
-    for account in context["accounts"]:
-        access, ability, access_concern, ability_concern = create_account_summary(account)
-        account["access_summary"] = access
-        account["ability_summary"] = ability
-        account["concerning"] = access_concern or ability_concern
-        account['screenshots'] = get_screenshots('accounts', account['account_name'], context["screenshot_dir"])
-
-    context["concerns"] = create_overall_summary(context)
-
-    pprint(context)
-    '''
 
     # create the printout document
     filename = create_printout(consult_data.to_dict())

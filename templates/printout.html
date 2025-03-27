@@ -34,7 +34,54 @@
         <h1>Summary of Findings</h1>
         <hr />
         <div class="overallsummary">
-            {{overall_summary}}
+            <p><i>This is an automated summary generated based on the detailed content of the report.</i></p>
+
+            <h2>Technology Assessment Questionnaire</h2> 
+            {% if taq.risk_factors|length == 0 %}
+                <b>No risk factors identified.</b>
+            {% else%}
+                <b>{{taq.risk_factors|length}} risk factors identified.</b>
+                <table>
+                    <tbody>
+                        {% for item in taq.risk_factors %}
+                        <tr>
+                            <th>{{item.risk}}</th>
+                            <td>{{item.description}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {%endif%}
+    
+            {% for scan in scans%}
+            <h2>Device Scan: {{scan.device_nickname}}</h2>
+            <p><i>Serial Number: {{scan.serial}}</i></p>
+            <p>{{scan.report}}</p>
+            <ol>
+                {% for app in scan.concerning_apps %}
+                <li>
+                <b>{{app.title}}</b>: {{app.report}}
+                </li>
+                {% endfor %}
+            </ol>
+            {%endfor%}
+    
+            <h2>Account Compromise Assessment</h2>
+            {% if concerning_accounts|length == 0 %}
+            No evidence of account compromise at this time.
+            {% else %}
+            {{concerning_accounts|length}} accounts may be compromised:
+            <ul>
+                {% for account in concerning_accounts %}
+                <li><b>Account {{loop.index}} ({{account.account_nickname}})</b>:
+                    {% if account.access_concern %}
+                    {{account.access_report}}
+                    {% endif %}
+                    {{account.ability_report}}
+                </li>
+                {% endfor %}
+            </ul>
+            {%endif%}
         </div>
     </div>
 
@@ -126,17 +173,18 @@
             </tr>
         </tbody>
     </table>
+
 </div>
 
 {% for scan in scans %}
 <div class="new-page">
     <h1>Device Scan ({{loop.index}} of {{scans|length}}) </h1>
     <hr />
-    <h3>Device Information</h3>
+
     <table>
         <tbody>
             <tr>
-                <th>Nickname</th>
+                <th>Device Nickname</th>
                 <td>{{scan.device_nickname}}</td>
             </tr>
             <tr>
@@ -149,16 +197,12 @@
             </tr>
         </tbody>
     </table>
-
-    <h2>Scan Summary</h2>
-    <p>{{scan.report}}</p>
-
+    
     <h2>Applications Checked</h2>
 
     {% if scan.selected_apps|length > 0 %}
         {% for app in scan.selected_apps %}
     <h3>{{app.title|capitalize}}</h3>
-
     <table>
         <tbody>
             <div class="appsummary">
@@ -216,7 +260,7 @@
                     <td>BROKEN</td>
                 </tr>
                 <tr>
-                    <th>Description</th>
+                    <th>App Description</th>
                     <td>
                         {% if app.description %}
                         {{app.description}}
@@ -319,7 +363,6 @@
 
                         </td>
                     </tr>
-
                 {% if screenshots|length > 0 %}
                 {% for filename in screenshots[1::] %}
                 <tr valign="top">
@@ -366,7 +409,7 @@
 <div class="new-page">
     <h1>Account Compromise Check: {{accounts|length}} investigated</h1>
     <hr />
-    <hr>
+
     <br>
     {% if accounts|length > 0 %}
     {% for account in accounts %}
@@ -377,7 +420,7 @@
             <tr valign="top">
                 <td>
                     <div class="appsummary">
-                        <p><b>Investigation summary:</b>
+                        <p><b>Investigation summary (automated):</b>
                         <ul>
                             <li><i>Evidence of access</i>: {{account.access_report}}</li>
                             <li><i>Potential for access</i>: {{account.ability_report}}</li>
