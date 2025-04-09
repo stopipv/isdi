@@ -436,7 +436,7 @@ def create_overall_summary(context, second_person=False):
         dualuse = [],
         accounts = []
     )
-            
+
     return concerns
 
 def get_screenshots(context, name, dir):
@@ -705,13 +705,13 @@ def save_data_as_json(data, datatype: ConsultDataTypes):
     json_object = json.dumps(data, cls=EvidenceDataEncoder)
 
     fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
-    
+
     lock = FileLock(fname + ".lock")
     with lock:
         with open(fname, 'w') as outfile:
             outfile.write(json_object)
 
-    
+
     print("DATA SAVED:", type(data))
 
     return
@@ -725,7 +725,7 @@ def load_json_data(datatype: ConsultDataTypes):
         if not os.path.exists(fname):
             if datatype in [ConsultDataTypes.TAQ.value, ConsultDataTypes.SETUP.value] :
                 return dict()
-            else: 
+            else:
                 return []
 
         with open(fname, 'r') as openfile:
@@ -747,15 +747,15 @@ def load_json_data(datatype: ConsultDataTypes):
 class EvidenceDataEncoder(json.JSONEncoder):
         def default(self, o):
             return o.__dict__
-        
+
 class Dictable:
     def to_dict(self):
         return json.loads(json.dumps(self, cls=EvidenceDataEncoder))
-        
+
 # Base class for nested classes where we'll input data as dict (for ease)
 class DictInitClass (Dictable):
     attrs = []
-    
+
     def __init__(self, datadict=dict()):
         for k in self.attrs:
             if k in list(datadict.keys()):
@@ -779,9 +779,9 @@ class RecoverySettings(DictInitClass):
              'phone',
              'phone_access',
              'phone_screenshot',
-             'email_present', 
-             'email', 
-             'email_access', 
+             'email_present',
+             'email',
+             'email_access',
              'email_screenshot']
 
 class TwoFactorSettings(DictInitClass):
@@ -793,25 +793,25 @@ class TwoFactorSettings(DictInitClass):
 
 
 class SecurityQuestions(DictInitClass):
-    attrs = ['present', 
-             'questions', 
+    attrs = ['present',
+             'questions',
              'know',
              'screenshot']
-    
+
 class PermissionInfo(DictInitClass):
     attrs = ['permission_name',
              'reason',
              'access',
              'describe',
              'screenshot']
-    
+
 class InstallInfo(DictInitClass):
     attrs = ['knew_installed',
              'installed',
              'coerced',
              'screenshot']
-    
-    
+
+
 class AppInfo(Dictable):
     def __init__(self,
                  title="",
@@ -827,7 +827,7 @@ class AppInfo(Dictable):
                  install_info=dict(),
                  notes=dict(),
                  **kwargs):
-        
+
         self.title = title
         self.app_name = app_name
         if self.app_name.strip() == "":
@@ -848,7 +848,7 @@ class AppInfo(Dictable):
             "permission_name": "Camera",
             "reason": "Needed to capture photos",
         }]
-        
+
         self.permissions = [PermissionInfo(p) for p in placeholder_permissions]
 
         self.install_info = InstallInfo(install_info)
@@ -862,7 +862,7 @@ class AppInfo(Dictable):
         if second_person:
             agent = "the client"
             pronoun = "they"
-        
+
         spyware = 'spyware' in self.flags
 
         sentences = []
@@ -915,10 +915,10 @@ class AppInfo(Dictable):
 
 
 class CheckApps(Dictable):
-    def __init__(self, 
-                 spyware=list(), 
-                 dualuse=list(), 
-                 other=list(), 
+    def __init__(self,
+                 spyware=list(),
+                 dualuse=list(),
+                 other=list(),
                  **kwargs):
         pprint(spyware)
         pprint(dualuse)
@@ -928,16 +928,16 @@ class CheckApps(Dictable):
         self.other = [AppInfo(app) for app in other]
 
 class TAQDevices(DictInitClass):
-    attrs = ['live_together', 
+    attrs = ['live_together',
              'physical_access']
 
 class TAQAccounts(DictInitClass):
-    attrs = ['pwd_mgmt', 
-             'pwd_comp', 
+    attrs = ['pwd_mgmt',
+             'pwd_comp',
              'pwd_comp_which']
 
 class TAQSharing(DictInitClass):
-    attrs = ['share_phone_plan', 
+    attrs = ['share_phone_plan',
              'phone_plan_admin',
              'share_accounts']
 
@@ -959,7 +959,7 @@ class Notes(DictInitClass):
     attrs = ['client_notes', 'consultant_notes']
 
 class RiskFactor():
-    
+
     def __init__(self, risk, description):
         self.risk = risk
         self.description = description
@@ -971,7 +971,7 @@ class ConsultationData(Dictable):
 
     def generate_overall_summary(self):
          return "TODO: WRITE CODE TO GENERATE AN OVERALL SUMMARY"
-        
+
     def __init__(self,
                  setup,
                  taq,
@@ -990,16 +990,16 @@ class ConsultationData(Dictable):
 
 
 class AccountInvestigation(Dictable):
-    def __init__(self, 
+    def __init__(self,
                  account_id=0,
-                 platform="", 
-                 account_nickname="", 
+                 platform="",
+                 account_nickname="",
                  suspicious_logins=dict(),
-                 password_check=dict(), 
-                 recovery_settings=dict(),  
+                 password_check=dict(),
+                 recovery_settings=dict(),
                  two_factor_settings=dict(),
                  security_questions=dict(),
-                 notes=dict(), 
+                 notes=dict(),
                  **kwargs):
         self.account_id = account_id
         self.platform = platform
@@ -1099,7 +1099,7 @@ class AccountInvestigation(Dictable):
                 ability_sentences.append("{} has access to the second authentication factor; if they know the password, they could access this account without alerting {}.".format(harmdoer.capitalize(), agent))
 
         return " ".join(access_sentences), " ".join(ability_sentences), access_concern, ability_concern
-        
+
 
 
 class ScanData(Dictable):
@@ -1138,7 +1138,7 @@ class ScanData(Dictable):
         agent = "the client"
 
         report_sentences = []
-        
+
         if self.is_rooted:
             report_sentences.append(
                 "This device is jailbroken, giving the jailbreaker nearly unbounded "
@@ -1146,7 +1146,7 @@ class ScanData(Dictable):
                     agent
                 )
             )
-        else: 
+        else:
             report_sentences.append("This device is not jailbroken.")
 
         if len(self.selected_apps) == 0:
@@ -1175,7 +1175,7 @@ class ScanData(Dictable):
                         len(self.concerning_apps), plural, verb_plural, ", ".join([app.title for app in self.concerning_apps])
                     )
                 )
-            else: 
+            else:
                 report_sentences.append(
                     "No apps determined to pose a concern."
                 )
@@ -1193,7 +1193,7 @@ class TAQData(Dictable):
                  sharing=dict(),
                  smarthome=dict(),
                  kids=dict(),
-                 legal=dict(), 
+                 legal=dict(),
                  **kwargs):
         self.devices = TAQDevices(devices)
         self.accounts = TAQAccounts(accounts)
@@ -1224,7 +1224,7 @@ class TAQData(Dictable):
                 description="{} believes that {} knows some passwords. Compromised passwords: {}. "
                             "This could allow {} access to {}'s accounts.".format(
                                 agent.capitalize(), harmdoer, self.accounts.pwd_comp_which, harmdoer, agent
-                            )           
+                            )
                 )
             )
         # TODO: Should we ask if the abuser has accesss to pwd management methods?
@@ -1300,7 +1300,7 @@ class TAQData(Dictable):
             elif self.smarthome.smart_home_access == 'yes':
                 smarthome_risk = True
                 risk_reasons.append("{} had physical access to some of the smart home devices in {}'s home.".format(harmdoer.capitalize(), agent))
-            
+
             # account
             if self.smarthome.smart_home_account == 'yes':
                 smarthome_risk = True
@@ -1308,7 +1308,7 @@ class TAQData(Dictable):
                 if len(risk_reasons) > 0:
                     also = "also "
                 risk_reasons.append("{} can {}access accounts connected to smart home devices in {}'s home.".format(harmdoer.capitalize(), also, agent))
-            
+
             # combine risks
             if smarthome_risk:
                 risk_factors.append(RiskFactor(
@@ -1321,20 +1321,20 @@ class TAQData(Dictable):
         return risk_factors
 
 class ConsultSetupData(Dictable):
-    def __init__(self, 
+    def __init__(self,
                  client="",
-                 date="", 
+                 date="",
                  **kwargs):
         self.client = client
         self.date = date
-    
+
 
 def get_scan_by_ser(ser, all_scan_data: list[ScanData]):
 
     for scan in all_scan_data:
         if scan.serial == ser:
             return scan
-    
+
     return ScanData()
 
 
@@ -1348,7 +1348,7 @@ def update_scan_by_ser(new_scan: ScanData, all_scan_data: list[ScanData]):
         if scan.serial == new_scan.serial:
             all_scan_data[i] = new_scan
             return all_scan_data
-    
+
     all_scan_data.append(new_scan)
     return all_scan_data
 
@@ -1387,10 +1387,11 @@ def load_json_data(datatype: ConsultDataTypes):
 
     fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
     if not os.path.exists(fname):
-        if datatype in [ConsultDataTypes.TAQ, ConsultDataTypes.SETUP] :
-            return dict()
-        else: 
-            return []
+        return dict()
+        # if datatype in [ConsultDataTypes.TAQ, ConsultDataTypes.SETUP] :
+        #     return dict()
+        # else:
+        #     return dict()
 
     with open(fname, 'r') as openfile:
         json_object = json.load(openfile)
