@@ -6,6 +6,7 @@ from datetime import datetime
 from enum import Enum
 from operator import itemgetter
 from pprint import pprint
+from time import sleep
 
 from flask import (
     flash,
@@ -18,11 +19,11 @@ from flask import (
     url_for,
 )
 from flask_bootstrap import Bootstrap
+from wtforms import ValidationError
 
 import config
 from evidence_collection import (  # create_account_summary,; create_app_summary,
     CONTEXT_PKL_FNAME,
-    FAKE_APP_DATA,
     AccountCompromiseForm,
     AccountInvestigation,
     AppInfo,
@@ -48,6 +49,7 @@ from evidence_collection import (  # create_account_summary,; create_app_summary
     get_scan_data,
     get_screenshots,
     load_json_data,
+    load_object_from_json,
     reformat_verbose_apps,
     remove_unwanted_data,
     save_data_as_json,
@@ -69,7 +71,8 @@ def evidence_setup():
     if request.method == 'GET':
 
         # Load any data we already have
-        setup_data = ConsultSetupData(**load_json_data(ConsultDataTypes.SETUP.value))
+        setup_data = load_object_from_json(ConsultDataTypes.SETUP.value)
+        pprint(setup_data)
 
         if setup_data.date.strip() == "":
             setup_data.date = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -134,10 +137,9 @@ def evidence_taq():
     if request.method == 'GET':
 
         # Load any data we already have
-        taq_data = TAQData(**load_json_data(ConsultDataTypes.TAQ.value))
-        
+        taq_data = load_object_from_json(ConsultDataTypes.TAQ.value)
+    
         form.process(data=taq_data.to_dict())
-
 
         context = dict(
             task = "evidence-taq",
@@ -151,7 +153,9 @@ def evidence_taq():
 
     # Submit the form
     if request.method == 'POST':
+        pprint("FORM DATA START")
         pprint(form.data)
+        pprint("FORM DATA END")
         if form.is_submitted() and form.validate():
 
             # clean up data
@@ -166,8 +170,7 @@ def evidence_taq():
             return redirect(url_for('evidence_home'))
         
         elif not form.validate():
-            print(traceback.format_exc())
-            flash(form.errors, "error")
+            flash("Form validation error - are you missing required fields?", 'error')
             return redirect(url_for('evidence_taq'))
         
     return redirect(url_for('evidence_taq'))
@@ -178,8 +181,7 @@ def evidence_taq():
 def evidence_scan_start():
 
     # always assume we are starting with a fresh scan
-    all_scan_data = [ScanData(**scan) for scan in 
-                     load_json_data(ConsultDataTypes.SCANS.value)]
+    all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
     current_scan = ScanData()
     form = StartForm()
 
@@ -226,10 +228,11 @@ def evidence_scan_start():
                 current_scan = ScanData(scan_id=len(all_scan_data), 
                                         **clean_data, 
                                         **scan_data,
-                                        all_apps=all_apps,
-                                        selected_apps=suspicious_apps_dict)
+                                        all_apps=all_apps)
                 
                 pprint(current_scan.__dict__)
+                for app in current_scan.all_apps:
+                    pprint(app.permission_info.__dict__)
                 
                 current_scan.id = len(all_scan_data)
                 all_scan_data.append(current_scan)
@@ -243,8 +246,7 @@ def evidence_scan_start():
                 return redirect(url_for('evidence_scan_start'))
             
         elif not form.validate():
-            flash("Missing required fields")
-            return redirect(url_for('evidence_scan_start'))
+            flash("Form validation error - are you missing required fields?", 'error')
 
     return redirect(url_for('evidence_scan_start'))
 
@@ -254,11 +256,13 @@ def evidence_scan_start():
 def evidence_scan_select(ser):
 
     # load all scans
-    all_scan_data = [ScanData(**scan) for scan in 
-                     load_json_data(ConsultDataTypes.SCANS.value)]
+    all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
+
     # get the right scan by serial number
     current_scan = get_scan_by_ser(ser, all_scan_data)
     assert current_scan.serial == ser
+
+    pprint(current_scan.all_apps[0].permission_info.__dict__)
 
     # fill form
     form = AppSelectPageForm(apps=[app.to_dict() for app in current_scan.all_apps])
@@ -283,21 +287,34 @@ def evidence_scan_select(ser):
         if form.is_submitted() and form.validate():
 
             # clean up the submitted data
-            clean_data = remove_unwanted_data(form.data)
+            #clean_data = remove_unwanted_data(form.data)
 
             # get selected apps from the form data
-            selected_apps = [app for app in clean_data['apps'] if app['investigate']]
+            to_investigate_titles = [app["title"] for app in form.data['apps'] if app['investigate']]
+            
+            selected_apps = []
+            for app in current_scan.all_apps:
+                if app.title in to_investigate_titles:
+                    selected_apps.append(app)
+
             pprint(selected_apps)
             pprint("SELECTED APPS")
 
+            current_scan.selected_apps = selected_apps
+
             # update the current scan data and save it as the most recent scan
-            current_scan.selected_apps = [AppInfo(**app) for app in selected_apps]
+            #current_scan.selected_apps = [AppInfo(**app) for app in selected_apps]
             all_scan_data = update_scan_by_ser(current_scan, all_scan_data)
 
             # save this updated data
             save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
         
             return redirect(url_for('evidence_scan_investigate', ser=ser))
+        
+        if not form.validate():
+            flash("Form validation error - are you missing required fields?", 'error')
+
+        return redirect(url_for('evidence_scan_select'), ser=ser)
         
 @app.route("/evidence/scan/manualadd/<string:device_nickname>", methods={'GET', 'POST'})
 def evidence_scan_manualadd(device_nickname):
@@ -358,8 +375,7 @@ def evidence_scan_manualadd(device_nickname):
 
 
                 # load all scans
-                all_scan_data = [ScanData(**scan) for scan in 
-                                load_json_data(ConsultDataTypes.SCANS.value)]
+                all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
                 
                 # add manual scan
                 all_scan_data = update_scan_by_ser(manual_scan, all_scan_data)
@@ -373,7 +389,12 @@ def evidence_scan_manualadd(device_nickname):
                     pprint(app.__dict__)
 
                 return redirect(url_for('evidence_scan_investigate', ser=manual_scan.serial))
+            
+            if not form.validate():
+                flash("Form validation error - are you missing required fields?", 'error')
                 
+            return redirect(url_for('evidence_scan_manualadd', device_nickname=device_nickname))
+
 
 
 
@@ -382,8 +403,7 @@ def evidence_scan_manualadd(device_nickname):
 def evidence_scan_investigate(ser):
 
     # load all scans
-    all_scan_data = [ScanData(**scan) for scan in 
-                     load_json_data(ConsultDataTypes.SCANS.value)]
+    all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
 
     # get the right scan by serial number
     current_scan = get_scan_by_ser(ser, all_scan_data)
@@ -426,7 +446,7 @@ def evidence_scan_investigate(ser):
             return redirect(url_for('evidence_home'))
     
         elif not form.validate():
-            flash("Missing required fields")
+            flash("Form validation error - are you missing required fields?", 'error')
             return redirect(url_for('evidence_scan_investigate', ser=ser))
 
     return redirect(url_for('evidence_scan_investigate', ser=ser))
@@ -445,9 +465,7 @@ def evidence_account_default():
 @app.route("/evidence/account/<int:id>", methods={'GET', 'POST'})
 def evidence_account(id):
 
-    all_account_data_json = load_json_data(ConsultDataTypes.ACCOUNTS.value)
-    all_account_data = [AccountInvestigation(**account) for account in all_account_data_json]
-
+    all_account_data = load_object_from_json(ConsultDataTypes.ACCOUNTS.value)
     current_account = AccountInvestigation(account_id=id)
 
     if len(all_account_data) > id:
@@ -470,7 +488,9 @@ def evidence_account(id):
 
     # Submit the form if it's a POST
     if request.method == 'POST':
+        pprint("FORM DATA START")
         pprint(form.data)
+        pprint("FORM DATA END")
         if form.is_submitted() and form.validate():
 
             # save data in class
@@ -486,7 +506,9 @@ def evidence_account(id):
 
             return redirect(url_for('evidence_home'))
         
-        return redirect(url_for('evidence_account', id=id))
+        if not form.validate():
+            flash("Form validation error - are you missing required fields?", 'error')
+            pprint(form.errors)
 
 
 @app.route("/evidence/printout", methods=["GET"])

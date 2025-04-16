@@ -1,5 +1,7 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% from "_formhelpers.html" import render_select, render_multiselect, render_text_field %}
+
 
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
@@ -59,7 +61,6 @@
                 {{ wtf.form_errors(form) }}
 
                 <details open>
-
                     <summary>
                     <span class="icon">▼</span>
                     <b>{{ form.devices.title }}</b>
@@ -69,26 +70,8 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.devices.live_together.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.accounts.id}}>
-                                        {% for option in form.devices.live_together %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.devices.physical_access.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.accounts.id}}>
-                                        {% for option in form.devices.physical_access %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(form.devices.live_together) }}
+                                    {{ render_select(form.devices.physical_access) }}
                                 </tbody>
                             </table>
                         </div>
@@ -105,18 +88,9 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th><label>{{ form.accounts.pwd_mgmt.label }}</label></th><td> {{ form.accounts.pwd_mgmt }}</td></tr>
-                                    <tr><th>{{form.accounts.pwd_comp.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.accounts.id}}>
-                                        {% for option in form.accounts.pwd_comp %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th><label>{{ form.accounts.pwd_comp_which.label }}</label></th><td> {{ form.accounts.pwd_comp_which }}</td></tr>
+                                    {{ render_text_field(form.accounts.pwd_mgmt) }}
+                                    {{ render_select(form.accounts.pwd_comp) }}
+                                    {{ render_text_field(form.accounts.pwd_comp_which) }}
                                 </tbody>
                             </table>
                         </div>
@@ -134,36 +108,9 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.sharing.share_phone_plan.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.sharing.id}}>
-                                        {% for option in form.sharing.share_phone_plan %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.sharing.phone_plan_admin.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.sharing.id}}>
-                                        {% for option in form.sharing.phone_plan_admin %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.sharing.share_accounts.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.sharing.id}}>
-                                        {% for option in form.sharing.share_accounts %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(form.sharing.share_phone_plan) }}
+                                    {{ render_multiselect(form.sharing.phone_plan_admin) }}
+                                    {{ render_select(form.sharing.share_accounts) }}
                                 </tbody>
                             </table>
                         </div>
@@ -181,47 +128,10 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.smarthome.smart_home.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.smarthome.id}}>
-                                        {% for option in form.smarthome.smart_home %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.smarthome.smart_home_setup.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.smarthome.id}}>
-                                        {% for option in form.smarthome.smart_home_setup %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.smarthome.smart_home_access.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.smarthome.id}}>
-                                        {% for option in form.smarthome.smart_home_access %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.smarthome.smart_home_account.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.smarthome.id}}>
-                                        {% for option in form.smarthome.smart_home_account %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-
+                                    {{ render_select(form.smarthome.smart_home) }}
+                                    {{ render_multiselect(form.smarthome.smart_home_setup) }}
+                                    {{ render_select(form.smarthome.smart_home_access) }}
+                                    {{ render_select(form.smarthome.smart_home_account) }}
                                 </tbody>
                             </table>
                         </div>
@@ -239,37 +149,9 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.kids.custody.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.kids.id}}>
-                                        {% for option in form.kids.custody %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.kids.child_phys_access.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.kids.id}}>
-                                        {% for option in form.kids.child_phys_access %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.kids.child_phone_plan.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.kids.id}}>
-                                        {% for option in form.kids.child_phone_plan %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-
+                                    {{ render_select(form.kids.custody) }}
+                                    {{ render_select(form.kids.child_phys_access) }}
+                                    {{ render_select(form.kids.child_phone_plan) }}
                                 </tbody>
                             </table>
                         </div>
@@ -287,17 +169,7 @@
                         <div class="subform">
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.legal.legal.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.legal.id}}>
-                                        {% for option in form.legal.custody %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-
+                                    {{ render_multiselect(form.legal.legal) }}
                                 </tbody>
                             </table>
                         </div>

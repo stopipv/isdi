@@ -558,7 +558,7 @@ class IosDump(PhoneDump):
                 map(
                     lambda x: (
                         self.permissions_map[x],
-                        app.get(x, default="permission granted by system"),
+                        app.get(x, default="Permission granted by system"),
                     ),
                     list(
                         set(system_permissions)
