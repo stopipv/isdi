@@ -1,5 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% from "_formhelpers.html" import render_select, render_text_field %}
 
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
@@ -61,18 +62,8 @@
 
                 <table id="scan-form">
                     <tbody>
-                        <tr><th><label>{{ form.device_nickname.label }}</label></th><td> {{ form.device_nickname }}</td> </tr>
-                        <tr><th><label>{{form.device_type.label}}</label></th><td>
-                            <div class="btn-group" data-toggle="buttons" id={{form.device_type.id}}>
-                            {% for option in form.device_type %}
-                            <label class="btn btn-secondary" for="{{option.id}}">
-                                {{option.label.text}}
-                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                <span class="glyphicon glyphicon-ok"></span>
-                            </label>
-                            {% endfor %}
-                            </div>
-                        </td></tr>
+                        {{ render_text_field(form.device_nickname) }}
+                        {{ render_select(form.device_type) }}
                     </tbody>
                 </table>
                 <br>
@@ -85,7 +76,8 @@
                     {% for nested in form.apps %}
                     {{ nested.hidden_tag() }}
                     <tr>
-                        <th><p>{{all_apps[loop.index0].app_name}}</p></th>
+                        <th><p><a href={{all_apps[loop.index0].app_website}}>{{all_apps[loop.index0].app_name}}</a></p></th>
+                        <td>Flags: {{all_apps[loop.index0].flags}}</td>
                         <td><p>{{nested.investigate.label}}</p></td>
                         <td><p>{{nested.investigate}}</p></td>
                     </tr>
@@ -141,8 +133,17 @@
                                 <tr><th>App ID</th><td>{{app.appId}}</td></tr>
                                 <tr><th>Flags</th><td>{{app.flags}}</td></tr>
                                 <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
-                                <tr><th valign="top">Permissions used</th><td>{{app.permissions}}
-                                </td></tr>
+                                <tr><th valign="top">Permissions used</th>
+                                    <td>
+                                        <ul>
+                                            {% for p in app.permission_info.permissions %}
+                                            <li>
+                                                <b>{{p[0]}}:</b> {{p[1]}}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
                                 <tr><th valign="top">Description</th><td>
                                     {% if app.descriptionHTML %}
                                     {{app.descriptionHTML}}
@@ -162,16 +163,7 @@
                             <table>
                                 <tbody>
                                     {% for subform in [nested.install_info.knew_installed, nested.install_info.installed, nested.install_info.coerced] %}
-                                    <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                        {% for option in subform %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endfor %}
 
                                 </tbody>
@@ -179,28 +171,17 @@
                             <button id="selected_apps_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
                         </div>
 
-                        {% for perm in nested.permissions %}
-                        <h5>Permission check: {{scan_data.selected_apps[outer_loop.index0].permissions[loop.index0].permission_name}}</h5>
+                        <h5>Permission check</h5>
                         <div class="subform">
-                            {{ perm.hidden_tag() }}
+                            {{ nested.permission_info.hidden_tag() }}
                             <table>
                                 <tbody>
-                                    <tr><th>{{perm.access.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{perm.access.id}}>
-                                        {% for option in perm.access %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
+                                    {{ render_select(nested.permission_info.access) }}
+                                    {{ render_text_field(nested.permission_info.describe) }}
                                 </tbody>
                             </table>
-                            <button id="selected_appsperm_{{scan_data.selected_apps[outer_loop.index0].title}}_{{scan_data.selected_apps[outer_loop.index0].permissions[loop.index0]}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
+                            <button id="selected_appsperm_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
                         </div>
-                        {% endfor %}
 
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>
@@ -213,7 +194,9 @@
 
                 <br>
                 <br>
+                {% if step==1 %}
                 <div><span class="secondarybutton"><a href="{{ url_for('evidence_home') }}" class="btn btn-default">Abort Scan</a></span></div>
+                {% endif %}
                 {% if form.manualadd %}
                 <div><span class="secondarybutton">{{form.manualadd}}</div>
                 {% endif %}

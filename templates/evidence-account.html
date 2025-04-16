@@ -1,5 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% from "_formhelpers.html" import render_select, render_text_field %}
 
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
@@ -66,30 +67,12 @@
                             {{form.suspicious_logins.hidden_tag()}}
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.suspicious_logins.recognize.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.suspicious_logins.recognize.id}}>
-                                        {% for option in form.suspicious_logins.recognize %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.suspicious_logins.describe_logins.label}}</th><td>{{form.suspicious_logins.describe_logins}}</td></tr>
+                                    {{ render_select(form.suspicious_logins.recognize) }}
+                                    {{ render_text_field(form.suspicious_logins.describe_logins) }}
                                     <button id="accountnameFIXME" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
 
-                                    <tr><th>{{form.suspicious_logins.activity_log.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.suspicious_logins.activity_log.id}}>
-                                        {% for option in form.suspicious_logins.activity_log %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.suspicious_logins.describe_activity.label}}</th><td>{{form.suspicious_logins.describe_activity}}</td></tr>
+                                    {{ render_select(form.suspicious_logins.activity_log) }}
+                                    {{ render_text_field(form.suspicious_logins.describe_activity) }}
                                     <button id="loginactivityFIXME" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
                                 </tbody>
                             </table>
@@ -100,16 +83,7 @@
                             <table>
                                 <tbody>
                                     {% for subform in [form.password_check.know, form.password_check.guess] %}
-                                    <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                        {% for option in subform %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -120,33 +94,14 @@
                             <table>
                                 <tbody>
                                     {% for subform in [form.recovery_settings.phone_present, form.recovery_settings.phone_access] %}
-                                    <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                        {% for option in subform %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endfor %}
-                                    <tr><th>{{form.recovery_settings.phone.label}}</th><td>{{form.recovery_settings.phone}}</td></tr>
-
+                                    {{ render_text_field(form.recovery_settings.phone) }}
                                     <button id="recovery_FIXME" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
                                     {% for subform in [form.recovery_settings.email_present, form.recovery_settings.email_access] %}
-                                    <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                        {% for option in subform %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endfor %}
-                                    <tr><th>{{form.recovery_settings.email.label}}</th><td>{{form.recovery_settings.email}}</td></tr>
+                                    {{ render_text_field(form.recovery_settings.email) }}
                                 </tbody>
                             </table>
                             <button id="recoveryemailFIXME" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
@@ -157,29 +112,11 @@
                             <table>
                                 <tbody>
                                     {% for subform in [form.two_factor_settings.enabled, form.two_factor_settings.second_factor_type] %}
-                                        <tr><th>{{subform.label}}</th><td>
-                                            <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                            {% for option in subform %}
-                                            <label class="btn btn-light" for="{{option.id}}">
-                                                {{option.label.text}}
-                                                <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                                <span class="glyphicon glyphicon-ok"></span>
-                                            </label>
-                                            {% endfor %}
-                                        </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endfor %}
-                                    <tr><th>{{form.two_factor_settings.describe.label}}</th><td>{{form.two_factor_settings.describe}}</td></tr>
+                                    {{ render_text_field(form.two_factor_settings.describe) }}
                                     {% with subform = form.two_factor_settings.second_factor_access %}
-                                    <tr><th>{{subform.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
-                                        {% for option in subform %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(subform) }}
                                     {% endwith %}
 
                                 </tbody>
@@ -191,27 +128,9 @@
                             {{ form.security_questions.hidden_tag() }}
                             <table>
                                 <tbody>
-                                    <tr><th>{{form.security_questions.present.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.security_questions.present.id}}>
-                                        {% for option in form.security_questions.present %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
-                                    <tr><th>{{form.security_questions.questions.label}}</th><td>{{form.security_questions.questions}}</td></tr>
-                                    <tr><th>{{form.security_questions.know.label}}</th><td>
-                                        <div class="btn-group" data-toggle="buttons" id={{form.security_questions.know.id}}>
-                                        {% for option in form.security_questions.know %}
-                                        <label class="btn btn-light" for="{{option.id}}">
-                                            {{option.label.text}}
-                                            <input type="radio" name={{option.name}} id={{option.id}} autocomplete="off" value={{option.label.text.lower()}}>
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </label>
-                                        {% endfor %}
-                                    </div></td></tr>
+                                    {{ render_select(form.security_questions.present) }}
+                                    {{ render_text_field(form.security_questions.questions) }}
+                                    {{ render_select(form.security_questions.know) }}
                                 </tbody>
                             </table>
                             <button id="securityq_FIXME" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>

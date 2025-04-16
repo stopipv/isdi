@@ -8,6 +8,8 @@ import sqlite3
 import sys
 from collections import defaultdict
 from datetime import datetime
+from pprint import pprint
+from time import sleep
 
 import pandas as pd
 
@@ -96,6 +98,7 @@ class AppScan(object):
             if not isinstance(d.get("permissions", ""), list):
                 d["permissions"] = d.get("permissions", pd.Series([]))
                 d["permissions"] = d["permissions"].fillna("").str.split(", ")
+
             if "descriptionHTML" not in d:
                 d["descriptionHTML"] = d["description"]
             dfname = self.dump_path(serialno)
@@ -112,16 +115,23 @@ class AppScan(object):
             config.logging.info("BEGIN APP INFO")
             config.logging.info("info={}".format(info))
             config.logging.info("END APP INFO")
+
             # FIXME: sloppy iOS hack but should fix later, just add these to DF
             # directly.
             if self.device_type == "ios":
                 # TODO: add extra info about iOS? Like idevicediagnostics
                 # ioregentry AppleARMPMUCharger or IOPMPowerSource or
                 # AppleSmartBattery.
-                d["permissions"] = pd.Series(info.get("permissions", ""), dtype=object)
+                d["permissions"] = pd.Series(info.get("permissions", []), dtype=object)
                 d["title"] = pd.Series(info.get("title", ""))
-                del info["permissions"]
+                #del info["permissions"]
+
             d = d.fillna("").to_dict(orient="index").get(0, {})
+            if self.device_type == "ios":
+                d["permissions"] = info.get("permissions", [])
+                d["title"] = info.get("title", "")
+            pprint(type(d["permissions"]))
+            pprint(d["permissions"])
             return d, info
         except KeyError as ex:
             print(">>> Exception:::", ex, file=sys.stderr)
