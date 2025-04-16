@@ -58,7 +58,7 @@ ANDROID_PERMISSIONS_CSV = "static_data/android_permissions.csv"
 IOS_DUMPFILES = {
     "Jailbroken-FS": "ios_jailbroken.log",
     "Jailbroken-SSH": "ios_jailbreak_ssh.retcode",
-    "Apps": "ios_apps.plist",
+    "Apps": "ios_apps.json",
     "Info": "ios_info.xml",
 }
 
