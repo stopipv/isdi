@@ -21,6 +21,11 @@ def setup_logger():
     handler = handlers.RotatingFileHandler(
         "logs/app.log", maxBytes=100000, backupCount=30
     )
+
+    logging.basicConfig(
+        format='%(filename)s:%(lineno)d - %(message)s', 
+        level=logging.INFO
+    )
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
@@ -164,7 +169,7 @@ def hmac_serial(ser: str) -> str:
     it returns the same value."""
     if ser.startswith("HSN_"):
         return ser
-    hser = hmac.new(PII_KEY, ser.encode("utf8"), digestmod=hashlib.sha256).hexdigest()
+    hser = hmac.new(PII_KEY, ser.encode("utf8"), digestmod=hashlib.sha256).hexdigest()[:8]
     return f"HSN_{hser}"
 
 

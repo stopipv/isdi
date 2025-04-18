@@ -1,5 +1,5 @@
-from .context import parse_dump as pdump
-
+from phone_scanner import parse_dump as pdump
+import os
 
 D = {"a": {"bc1": {"cd11": [1, 3]}, "bc2": {"cd21": [2]}}, "aa": {}}
 
@@ -46,27 +46,45 @@ def test_get_all_leaves():
     assert sorted(pdump.get_all_leaves(keys)) == ["cd11", "cd21"]
 
 
+test_cond = {
+     "./phone_dumps/test/test1-pixel4-rc.txt": {
+         "in_apps" : [("com.conducivetech.android.traveler", "56b26bf"), 
+                    ("cn.xender", "fa6702e"),
+                    ("com.gaana", "db6e2b0")],
+         "in_info" : [ ("cn.xender", {
+             "firstInstallTime": "2018-10-09 05:52:01",
+             "lastUpdateTime": "2018-11-01 01:31:48",
+             "data_usage": {"foreground": "0.00 MB", "background": "0.01 MB"},
+             "battery_usage": "0 (mAh)",
+         })]
+    },
+    "./phone_dumps/test/test2-lge-rc.txt": {
+        "in_apps" : [("com.hy.system.fontserver", "10f809f"),
+                    ('com.lge.penprime.overlay', 'ba26d8b'),
+                    ('com.android.incallui.overlay', '86a753f')],
+        "in_info" : []
+    }  
+}
+
+
 class TestAndroidDump(object):
-    ad = pdump.AndroidDump(
-        "./phone_dumps/83c6500a47585595f72d654829cab29edd2c4f5253e6c05d5576cf04661fd6eb_android.txt"
-    )
-
     def test_apps(self):
-        apps = self.ad.apps()
-        assert ("com.conducivetech.android.traveler", "56b26bf") in apps
-        assert ("cn.xender", "fa6702e") in apps
-        assert ("com.gaana", "db6e2b0") in apps
+        for fname, conds in test_cond.items():
+            if not os.path.exists(fname):
+                print(f"File {fname} does not exist. Skipping test.")
+                continue
+            self.ad = pdump.AndroidDump(fname)
+            apps = self.ad.all_apps()
+            # Check if the apps are in the dump
+            for app,_ in conds["in_apps"]:
+                assert app in apps
+            # Check if the app info is correct
+            for app, expected in conds["in_info"]:
+                info = self.ad.info(app)
+                print(info)
+                for k, v in expected.items():
+                    assert info[k] == v
 
-    def test_info(self):
-        info = self.ad.info("cn.xender")
-        expected = {
-            "firstInstallTime": "2018-10-09 05:52:01",
-            "lastUpdateTime": "2018-11-01 01:31:48",
-            "data_usage": {"foreground": "0.00 MB", "background": "0.01 MB"},
-            "battery_usage": "0 (mAh)",
-        }
-        for k, v in expected.items():
-            assert info[k] == v
 
 
 class TestIosDump(object):

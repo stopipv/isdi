@@ -1,8 +1,9 @@
 from phone_scanner import AndroidScan, IosScan
+import pytest
 
 """Fake Tests!!"""
 
-
+@pytest.mark.skip(reason="Fake test")
 def test_android():
     a = AndroidScan()
     d = a.devices()
@@ -11,7 +12,7 @@ def test_android():
         return
     print(a.find_spyapps(d[0]))
 
-
+@pytest.mark.skip(reason="Fake test")
 def test_ios():
     a = IosScan()
     d = a.devices()

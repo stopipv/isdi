@@ -8,6 +8,7 @@ import json
 import shlex
 import sqlite3
 import config
+from config import logging
 import pandas as pd
 from collections import defaultdict
 from datetime import datetime
@@ -31,7 +32,7 @@ class AppScan(object):
         )
         self.device_type = dev_type
         self.cli = cli  # The cli of the device, e.g., adb or mobiledevice
-        self.parse_dump = None  # Only here to please the linter
+        self.ddump = None  # The dump of the device
 
     def setup(self):
         """If the device needs some setup to work."""
@@ -49,44 +50,22 @@ class AppScan(object):
     def get_offstore_apps(self, serialno: str, from_dump: bool) -> list:
         return []
 
-    def get_app_titles(self, serialno):
+    def get_app_titles(self, serialno) -> list:
         return []
 
-    def dump_path(self, serial, fkind="json"):
+    def dump_path(self, serial, fkind="json") -> str:
         hmac_serial = config.hmac_serial(serial)
         if self.device_type == "ios":
             devicedumpsdir = os.path.join(
                 config.DUMP_DIR, "{}_{}".format(hmac_serial, "ios")
             )
-            if fkind == "Jailbroken-FS":
-                return os.path.join(
-                    devicedumpsdir, config.IOS_DUMPFILES.get("Jailbroken-FS", "")
-                )
-            elif fkind == "Jailbroken-SSH":
-                return os.path.join(
-                    devicedumpsdir, config.IOS_DUMPFILES.get("Jailbroken-SSH", "")
-                )
-            elif fkind == "Device_Info":
-                return os.path.join(
-                    devicedumpsdir, config.IOS_DUMPFILES.get("Info", "")
-                )
-            elif fkind == "Apps":
-                return os.path.join(
-                    devicedumpsdir, config.IOS_DUMPFILES.get("Apps", "")
-                )
-            elif fkind == "Dir":
-                return devicedumpsdir
-            else:
-                # returns apps dumpfile if fkind isn't explicitly specified.
-                return os.path.join(
-                    devicedumpsdir, config.IOS_DUMPFILES.get("Apps", "")
-                )
-
         return os.path.join(
             config.DUMP_DIR, "{}_{}.{}".format(hmac_serial, self.device_type, fkind)
         )
 
     def app_details(self, serialno, appid) -> tuple[dict, dict]:
+        if not self.ddump:
+            self._load_dump(serialno)
         try:
             d = pd.read_sql(
                 "select * from apps where appid=?", self.app_info_conn, params=(appid,)
@@ -96,16 +75,7 @@ class AppScan(object):
                 d["permissions"] = d["permissions"].fillna("").str.split(", ")
             if "descriptionHTML" not in d:
                 d["descriptionHTML"] = d["description"]
-            dfname = self.dump_path(serialno)
-
-            if self.device_type == "ios":
-                ddump = self.parse_dump
-                if not ddump:
-                    ddump = parse_dump.IosDump(dfname)
-            else:
-                ddump = parse_dump.AndroidDump(dfname)
-
-            info = ddump.info(appid)
+            info = self.ddump.info(appid)
 
             config.logging.info("BEGIN APP INFO")
             config.logging.info("info={}".format(info))
@@ -122,15 +92,15 @@ class AppScan(object):
             d = d.fillna("").to_dict(orient="index").get(0, {})
             return d, info
         except KeyError as ex:
-            print(">>> Exception:::", ex, file=sys.stderr)
+            logging.error(">>> Exception:::", ex)
             return dict(), dict()
 
-    def find_spyapps(self, serialno, from_dump=True):
+    def find_spyapps(self, serialno: str, from_dump: bool=True):
         """Finds the apps in the phone and add flags to them based on @blocklist.py
         Return the sorted dataframe
         This is the **main** function that is called from the views in web/view/scan.py
         """
-        installed_apps = self.get_apps(serialno, from_dump=from_dump)
+        installed_apps = self.get_apps(serialno)
 
         if len(installed_apps) <= 0:
             return pd.DataFrame(
@@ -241,21 +211,47 @@ class AndroidScan(AppScan):
         super(AndroidScan, self).__init__("android", config.ADB_PATH)
         self.serialno = None
         self.installed_apps = None
-        self.dump_d = None
+        self.ddump = None
         # self.setup()
 
     def setup(self):
         p = run_command("{cli} kill-server; {cli} start-server", cli=self.cli)
         if p != 0:
-            print(
+            logging.error(
                 ">> Setup failed with returncode={}. ~~ ex={!r}".format(
                     p.returncode, p.stderr.read() + p.stdout.read()
                 ),
                 file=sys.stderr,
             )
+    def _load_dump(self, serialno: str) -> parse_dump.AndroidDump:
+        """Load the dump file"""
+        if isinstance(self.ddump, parse_dump.AndroidDump): 
+            return self.ddump
+
+        hmac_serial = config.hmac_serial(serialno)
+        dump_file = self.dump_path(serialno)
+        if not os.path.exists(dump_file):
+            q = run_command(
+                "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
+                cli=self.cli,
+                ser=serialno,
+                hmac_serial=hmac_serial,
+                nowait=False,
+            )
+            if q.returncode is not None and q.returncode > 0:
+                logging.error(
+                    ">> Android dump failed with returncode={}. ~~ ex={!r}".format(
+                        q, q.stderr.read() + q.stdout.read()
+                    )
+                )
+        try:
+            self.ddump = parse_dump.AndroidDump(dump_file)
+        except FileNotFoundError as e:
+            logging.error(f"Error opening dump file: {e}")
 
     def _get_apps_from_device(self, serialno, flag) -> list:
         """get apps from the device"""
+        logging.info("DO NOT USE THIS FUNCTION! Please")
         cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/^package://g' | sort"
         s = catch_err(
             run_command(cmd, cli=self.cli, serial=serialno, flag=flag),
@@ -269,31 +265,15 @@ class AndroidScan(AppScan):
             installed_apps = [x for x in s.splitlines() if x]
             return installed_apps
 
-    def _get_apps_from_dump(self, serialno):
-        # hmac_serial = config.hmac_serial(serialno)
-        # Try to read from the dump
-        dump_file = self.dump_path(serialno)
-        self.dump_d = parse_dump.AndroidDump(dump_file)
-        app_and_codes = self.dump_d.apps()
-        return [a for a, c in app_and_codes]
+    def _get_apps_from_dump(self, serialno:str) -> list:
+        self._load_dump(serialno)
+        return self.ddump.all_apps()
 
-    def get_apps(self, serialno: str, from_dump: bool = True) -> list:
-        print(f"Getting Android apps: {serialno} from_dump={from_dump}")
-        hmac_serial = config.hmac_serial(serialno)
-        if not from_dump:
-            installed_apps = self._get_apps_from_device(serialno, "-u")
-            if installed_apps:
-                q = run_command(
-                    "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
-                    cli=self.cli,
-                    ser=serialno,
-                    hmac_serial=hmac_serial,
-                    nowait=True,
-                )
-                pass
-        else:
-            # Try loading from the dump
-            installed_apps = self._get_apps_from_dump(hmac_serial)
+    def get_apps(self, serialno: str) -> list:
+        """Get apps from the Android file dump"""
+        logging.info(f"Getting Android apps from serialno={serialno} from dump.")
+        #   installed_apps = self._get_apps_from_device(serialno, "-u")
+        installed_apps = self._get_apps_from_dump(serialno=serialno)
         self.installed_apps = installed_apps
         return installed_apps
 
@@ -319,7 +299,7 @@ class AndroidScan(AppScan):
                     if installer not in approved and installer != "null":
                         # if system is rooted, won't make any difference spoofing wise
                         approved.add(installer)
-        print(f"Approved Installers:{approved}")
+        logging.info(f"Approved Installers:{approved}")
         for line in self._get_apps_from_device(serialno, "-i -u -3"):
             line = line.split()
             if len(line) == 2:
@@ -328,7 +308,7 @@ class AndroidScan(AppScan):
                 if installer not in approved:
                     offstore.append(apps)
             else:
-                print(">>>>>> ERROR: {}".format(line), file=sys.stderr)
+                logging.error(">>>>>> ERROR: {}".format(line))
         return offstore
 
     def get_device_owner_apps(self, serialno: str) -> set:
@@ -547,7 +527,7 @@ class IosScan(AppScan):
         except json.JSONDecodeError as e:
             print(f">>> ERROR: {e!r}", file=sys.stderr)
             d = []
-        config.logging.info("Devices found:", d)
+        logging.info(f"Devices found: {d}")
         return d
 
     def device_info(self, serial):

@@ -154,7 +154,7 @@ def do_privacy_check(ser, command):
             "<em>account email address</em> at the top."
         )
     elif command == "backup":  # 2. Backup & reset
-        open_activity(ser, "com.android.settings/.Settings\$PrivacySettingsActivity")
+        open_activity(ser, "com.android.settings/.Settings\\$PrivacySettingsActivity")
         # wait(2)
         # keycode(ser, 'home')
         # take_screenshot(ser, 'account.png')
@@ -183,7 +183,7 @@ def do_privacy_check(ser, command):
         )
     elif command == "sync":
         if not open_activity(
-            ser, "com.android.settings/.Settings\$AccountsGroupSettingsActivity"
+            ser, "com.android.settings/.Settings\\$AccountsGroupSettingsActivity"
         ):
             return (
                 "I could not find syncing functionality in your Android. This most likely mean this is not available, "

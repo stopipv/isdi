@@ -1,5 +1,5 @@
-# import config
 import re
+from config import logging
 
 # import shlex
 import subprocess
@@ -77,27 +77,36 @@ def catch_err(
                 "insufficient permissions for device: user in plugdev group; are your udev rules wrong?"
                 in s
             ):
-                print("Need USB for Charging.")
+                logging.error("Need USB for Charging.")
                 return ""
             else:
-                print(s)
+                logging.error(s)
                 return s
     except Exception as ex:
         # config.add_to_error(ex)
-        print("Exception>>>", ex)
+        logging.error("Exception>>>", ex)
         return ""
 
 
-def run_command(cmd, **kwargs):
+def run_command(cmd: str, **kwargs) -> subprocess.Popen[bytes]:
+    """
+    Run a command in a subprocess.
+    Args:
+        cmd (str): The command to run.
+        **kwargs: Additional keyword arguments to format the command.
+    Returns:
+        subprocess.Popen: The process object.
+    """
     _cmd = cmd.format(**kwargs)
-    print(_cmd)
-    if kwargs.get("nowait", False) or kwargs.get("NOWAIT", False):
-        pid = subprocess.Popen(
-            _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        ).pid
-        return pid
-    else:
-        p = subprocess.Popen(
-            _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        return p
+    logging.debug(_cmd)
+    p = subprocess.Popen(
+        _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
+    if not (kwargs.get("nowait", False) or kwargs.get("NOWAIT", False)):
+        p.wait()
+        if p.returncode != 0:
+            logging.error("Error running command: {_cmd}. p.returncode: {p.returncode}\n"
+                         "p.stderr = {p.stderr.read().decode()}")
+        else:
+            print("Command executed successfully.")
+    return p

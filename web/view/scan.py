@@ -38,7 +38,7 @@ def scan():
     device_owner = get_param("device_owner")
     ser = get_param("devid")
     t_from_dump = get_param("from_dump")
-    from_dump = False
+    from_dump = True
     if t_from_dump:
         try:
             from_dump = int(t_from_dump)

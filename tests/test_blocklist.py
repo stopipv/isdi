@@ -1,5 +1,5 @@
 import re
-from blocklist import _regex_blocklist, app_title_and_flag
+from phone_scanner.blocklist import _regex_blocklist, app_title_and_flag
 import pandas as pd
 import sys
 
