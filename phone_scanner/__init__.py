@@ -57,10 +57,11 @@ class AppScan(object):
         hmac_serial = config.hmac_serial(serial)
         if self.device_type == "ios":
             devicedumpsdir = os.path.join(
-                config.DUMP_DIR, "{}_{}".format(hmac_serial, "ios")
+                config.DUMP_DIR, f"{hmac_serial}_ios"
             )
+        raise Exception("Fix this function!!")
         return os.path.join(
-            config.DUMP_DIR, "{}_{}.{}".format(hmac_serial, self.device_type, fkind)
+            config.DUMP_DIR, "{hmac_serial}_{self.device_type}.{fkind}"
         )
 
     def app_details(self, serialno, appid) -> tuple[dict, dict]:
@@ -100,7 +101,7 @@ class AppScan(object):
         Return the sorted dataframe
         This is the **main** function that is called from the views in web/view/scan.py
         """
-        installed_apps = self.get_apps(serialno)
+        installed_apps = self.get_apps(serialno, from_dump=from_dump)
 
         if len(installed_apps) <= 0:
             return pd.DataFrame(

@@ -731,7 +731,7 @@ class IosDump(PhoneDump):
         # return self.df.index
         if self.df is None:
             return []
-        logging.info("parse_dump (installed_apps): >>", self.df.columns, len(self.df))
+        logging.info(f"parse_dump (installed_apps): >> {self.df.columns}, {len(self.df)}")
         return self.df["appId"].to_list()
 
 
