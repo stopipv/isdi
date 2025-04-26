@@ -12,10 +12,21 @@ else
 fi
 export adb=$adb
 
-serial="-s $2"
-hmac_serial="-s $3"
-dump_dir="./phone_dumps/"
-ofname=$dump_dir/${hmac_serial:3}_android.txt
+function usage {
+    echo "$ bash $0 scan <serial_no>"
+    echo "Or"
+    echo "$ bash $0 info <dump_file> <appId>"
+    echo "scan: Scan the phone and dump the information"
+    echo "info: Retrieve information about a specific app"
+    echo "serial_no: Serial number of the device. Use adb devices to find the serial number"
+    echo "appId: Package name of the app (only for info)"
+    echo "dump_file: File to dump the information into"
+}
+# If number of arguments is less than 2, print usage
+if [[ $# -lt 2 ]]; then
+    usage
+    exit 1
+fi
 
 function scan {
     act=$1
@@ -71,28 +82,38 @@ function dump {
         echo; echo "DUMP OF SERVICE $a"
         scan "$a"
     done
+
     echo; echo "DUMP OF SERVICE net_stats"
     $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
+
     for namespace in secure system global; do
-	echo; echo "DUMP OF SETTINGS $namespace"
-	$adb shell settings list "$namespace"
+        echo; echo "DUMP OF SETTINGS $namespace"
+	    $adb shell settings list "$namespace"
     done
 }
 
 function full_scan {
     # If file older than 20 min then receate
     if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
-        echo "File is still pretty fresh"
-        echo "Not re-dumping"
+        (>&2 echo "File is still pretty fresh. Not re-dumping")
     else
-	    dump  > "$ofname"
+	    dump  | sed -e 's/^\( *\)lastDisabledCaller: /\1lastDisabledCaller:\1  /g;' \
+         -e 's/^\( *\)User 0: ceDataInode\(.*\)/\1User 0:\n\1  ceDataInode\2/g' > "$ofname"
     fi
-    echo "Pulling apks. (Runs in background). Logs are in ./logs/android_scan.logs"
-    # bash ./scripts/pull_apks.sh "$serial" &
+    (>&2 echo "Pulling apks. (Runs in background). Logs are in ./logs/android_scan.logs")
+    bash ./scripts/pull_apks.sh "$serial" &
 }
 
 if [[ "$1" == "scan" ]]; then 
     (>&2 echo "------ Running full scan ------- $2")
+    serial="-s $2"
+    # If third argument is passed, use it as the output file name
+    if [[ -z "$3" ]]; then
+        ofname="./phone_dumps/tmp-dumps.txt"
+    else
+        ofname="$3"
+    fi
+    # hmac_serial="-s $3"
     $adb devices
     full_scan >> ./logs/android_scan.logs 
     echo "Finished scanning. Pulling apks in background"
@@ -102,8 +123,9 @@ if [[ "$1" == "scan" ]]; then
     exit 0
 elif [[ "$1" == "info" ]]; then
     (>&2 echo "------ Running app info ------- $2 $3")
-    retrieve "$3"
+    ofname="$2"
+    appId="$3"
+    retrieve "$appId"
 else
-    echo "$ bash $0 <scan|info> <serial_no> [appId]"
-    exit 1;
+    usage
 fi

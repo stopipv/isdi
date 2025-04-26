@@ -233,10 +233,10 @@ class AndroidScan(AppScan):
         dump_file = self.dump_path(serialno)
         if not os.path.exists(dump_file):
             q = run_command(
-                "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
+                "bash scripts/android_scan.sh scan {ser} {dump_file}",
                 cli=self.cli,
                 ser=serialno,
-                hmac_serial=hmac_serial,
+                dump_file=dump_file,
                 nowait=False,
             )
             if q.returncode is not None and q.returncode > 0:

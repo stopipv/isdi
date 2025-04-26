@@ -256,7 +256,9 @@ class AndroidDump(PhoneDump):
             if l.startswith("DUMP OF SERVICE") or l.startswith("DUMP OF SETTINGS"):
                 if service:
                     d[service] = _parse(join_lines)
-                service = l.strip().rsplit(" ", 1)[1]
+                service = re.sub(r'DUMP OF SERVICE |DUMP OF SETTINGS ', '', l).strip()
+                if service == "netstats detail":
+                    service = "net_stats"
                 join_lines = []
             else:
                 join_lines.append(l)
@@ -365,32 +367,42 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def get_data_usage(d, appid, process_uid):
+        """Get the data usage for the appid and process_uid"""
+        res = {"data_used": "unknown", "background_data_allowed": "unknown"}
         if "net_stats" not in d or not d['net_stats']:
-            return {"foreground": "unknown", "background": "unknown"}
-        # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
-        # parser error (tested on SM-G965U,Samsung,8.0.0)
-        logging.debug(f"Printing net_stats >>>>>>>>> {d['net_stats']}")
-        try:
-            net_stats = pd.read_csv(
-                io.StringIO("\n".join(d["net_stats"])), on_bad_lines="warn"
-            )
-        except pd.errors.EmptyDataError:
-            config.logging.warning(
-                f"No net_stats for {appid} is empty and has been skipped."
-            )
-            net_stats = pd.DataFrame()
+            return res
+        print(f"get_data_usage: {d['net_stats']}")
+        if isinstance(d['net_stats'], list):
+            d['net_stats'] = d['net_stats'][0]
+        dn = d['net_stats']
+        if process_uid.startswith("u0a"):
+            process_uid = "10" + process_uid[3:]
+        
+        # Backgroud data allowed?
+        bgdata = dn.get("BPF map content", {}).get("mUidCounterSetMap", [])
+        allowed = False
+        for l in bgdata:
+            if l.values()[0].startswith(process_uid):
+                allowed = True
+                break
+        # Get the data usage
+        rxstats = dn.get("BPF map content", {}).get("mAppUidStatsMap", [])
 
-        d = net_stats.query('uid_tag_int == "{}"'.format(process_uid))[
-            ["uid_tag_int", "cnt_set", "rx_bytes", "tx_bytes"]
-        ].astype(int)
+        for l in rxstats:
+            if l.startswith(process_uid):
+                s = l.split(" ")
+                if len(s) != 4:
+                    logging.error(
+                        f"Error parsing net_stats for {appid} with uid {process_uid}: {s}"
+                    )
+                    return {"foreground": "unknown", "background": "unknown"}
+                else:
+                    uid, rxBytes, rxPackets, txBytes, txPackets = s
+                    res['data_used'] = "{:.2f} MB".format((int(rxBytes) + int(txBytes)) / (1024 * 1024))
+                    res['background_data_allowed'] = "yes" if allowed else "not allowed"
+                    return res
+        return res
 
-        def s(c):
-            return d[d["cnt_set"] == c].eval("rx_bytes+tx_bytes").sum() / (1024 * 1024)
-
-        return {
-            "foreground": "{:.2f} MB".format(s(1)),
-            "background": "{:.2f} MB".format(s(0)),
-        }
 
     @staticmethod
     def get_battery_stat(d, appid, uidu):
@@ -427,6 +439,11 @@ class AndroidDump(PhoneDump):
                 continue
                 # k is a valid appId
             appId, h = m.groups()
+            if 'firstInstallTime' not in v:
+                t = v.get("User 0", {})
+                if isinstance(t, list):
+                    print(">>>", appId, t)
+                v['firstInstallTime'] = t.get("firstInstallTime", "")
             packages[appId] = {
                     "packageKey": k,
                     "flags": v.get("flags", ""),
@@ -736,6 +753,9 @@ class IosDump(PhoneDump):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python parse_dump.py <dump_file> <android|ios>")
+        sys.exit(1)
     fname = sys.argv[1]
     # data = [l.strip() for l in open(fname)]
     ddump: PhoneDump
@@ -747,7 +767,7 @@ if __name__ == "__main__":
             indent=2,
         )
         # print(json.dumps(ddump.info("ru.kidcontrol.gpstracker"), indent=2))
-        print(ddump.all_apps())
+        print(ddump.get_data_usage(ddump.df, "com.amazon.mShop.android.shopping", "10241"))
         # print(ddump.info("com.isharing.isharing"))
     elif sys.argv[2] == "ios":
         ddump = IosDump(fname)

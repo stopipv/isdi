@@ -1,5 +1,6 @@
 from phone_scanner import parse_dump as pdump
 import os
+import pytest
 
 D = {"a": {"bc1": {"cd11": [1, 3]}, "bc2": {"cd21": [2]}}, "aa": {}}
 
@@ -46,44 +47,53 @@ def test_get_all_leaves():
     assert sorted(pdump.get_all_leaves(keys)) == ["cd11", "cd21"]
 
 
-test_cond = {
-     "./phone_dumps/test/test1-pixel4-rc.txt": {
-         "in_apps" : [("com.conducivetech.android.traveler", "56b26bf"), 
-                    ("cn.xender", "fa6702e"),
-                    ("com.gaana", "db6e2b0")],
-         "in_info" : [ ("cn.xender", {
-             "firstInstallTime": "2018-10-09 05:52:01",
-             "lastUpdateTime": "2018-11-01 01:31:48",
-             "data_usage": {"foreground": "0.00 MB", "background": "0.01 MB"},
+
+@pytest.mark.parametrize("fname, conds", [
+     ("./phone_dumps/test/test1-rc-pixel4_android.txt", {
+         "in_apps" : [("com.amazon.mShop.android.shopping", "56b26bf"), 
+                    ("com.aljazeera.mobile", "fa6702e"),
+                    ("com.android.sdm.plugins.usccdm", "db6e2b0")],
+         "in_info" : [ 
+             ("com.google.android.uwb.resources", {
+             "firstInstallTime": "1969-12-31 18:00:00",
+             "lastUpdateTime": "1969-12-31 18:00:00",
+             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
              "battery_usage": "0 (mAh)",
-         })]
-    },
-    "./phone_dumps/test/test2-lge-rc.txt": {
+         }),
+         ("com.Slack", {
+             "firstInstallTime": "2023-09-22 15:22:45",
+             "lastUpdateTime": "2025-04-06 01:03:03",
+             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
+             "battery_usage": "0 (mAh)",
+         }),
+         ("com.android.providers.downloads", {
+             "firstInstallTime": "2008-12-31 18:00:00",
+             "lastUpdateTime": "2008-12-31 18:00:00",
+             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
+             "battery_usage": "0 (mAh)",
+         })
+         ]
+    }),
+    ("./phone_dumps/test/test2-lge-rc.txt", {
         "in_apps" : [("com.hy.system.fontserver", "10f809f"),
                     ('com.lge.penprime.overlay', 'ba26d8b'),
                     ('com.android.incallui.overlay', '86a753f')],
         "in_info" : []
-    }  
-}
-
-
-class TestAndroidDump(object):
-    def test_apps(self):
-        for fname, conds in test_cond.items():
-            if not os.path.exists(fname):
-                print(f"File {fname} does not exist. Skipping test.")
-                continue
-            self.ad = pdump.AndroidDump(fname)
-            apps = self.ad.all_apps()
-            # Check if the apps are in the dump
-            for app,_ in conds["in_apps"]:
-                assert app in apps
-            # Check if the app info is correct
-            for app, expected in conds["in_info"]:
-                info = self.ad.info(app)
-                print(info)
-                for k, v in expected.items():
-                    assert info[k] == v
+    })])
+def test_apps(fname, conds):
+    assert os.path.exists(fname), f"File {fname} does not exist. Skipping test."
+    ad = pdump.AndroidDump(fname)
+    apps = ad.all_apps()
+    print(fname, apps[:5])
+    # Check if the apps are in the dump
+    for app,_ in conds["in_apps"]:
+        assert app in apps
+    # Check if the app info is correct
+    for app, expected in conds["in_info"]:
+        info = ad.info(app)
+        # print(info)
+        for k, v in expected.items():
+            assert info[k] == v
 
 
 

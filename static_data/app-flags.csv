@@ -1,5 +1,4 @@
 appId,store,flag,title
-wifi.manager,offstore,spyware,"Spy99|LiveScreenApp, WiFi Manager"
 com.appscottage.automaticcallrecorderprohd,playstore,dual-use,Automatic Call Recorder - Record Any Phone Call
 com.recorder.automaticcallrecorder,playstore,dual-use,Record Phone Call Automatic Conversation Recorder
 com.betaapp.myfamilylocator,playstore,dual-use,GPS Live Tracker
@@ -5038,7 +5037,6 @@ com.qzogle.xndroid.jacfut,playstore,spyware,"Kurulum,Bakuf,Clues,IZSpy,IzKid,ESp
 com.qzogle.android.jacfut,playstore,spyware,"Kurulum,Bakuf,Clues,IZSpy,IzKid,ESpy"
 com.protect,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
 com.aixlunro.uqfhkagb,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
-com.aixlunro.uqfhkagb,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
 com.bzbqbkya.hgozttiu,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
 com.gzomoyig.qwgawtaz,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
 com.android.inputmethod.latinmy,playstore,spyware,"KidLogger,MonitorMinor,SelfSpy,SpyTrac,TelcadoAndroid,TiFamily,TiSpy,TracerSpy,Triada,VipTelefonProgrami"
@@ -5158,7 +5156,6 @@ com.camhart.netcountable,playstore,spyware,
 com.contentwatch.ghoti.cp2.child,playstore,spyware,
 com.timeon.litclient,playstore,spyware,
 com.android.core.mntah,playstore,spyware,"Hoverwatch,SpyBubble,Refog"
-com.lsdroid.cerberus.persona2,playstore,spyware,Cerberus
 com.surebrec,playstore,spyware,Cerberus
 com.ssurebrec,playstore,spyware,Cerberus
 com.tutorial.instalao,playstore,spyware,MeuSpy
@@ -5178,14 +5175,601 @@ com.eytewqrm.wvdkgmrl,playstore,spyware,
 com.epbzrqcg.syzzkuqx,playstore,spyware,
 com.laucass.phonecontrolenabler,playstore,spyware,
 com.laucass.phonecontroltarget,playstore,spyware,
-com.surebrec,playstore,spyware,Cerberus
-com.ssurebrec,playstore,spyware,Cerberus
-com.tutorial.instalao,playstore,spyware,MeuSpy
-com.aisistem.instalao,playstore,spyware,MeuSpy
-br.com.appfornecedor.legal,playstore,spyware,MeuSpy
 com.mtf.download,playstore,spyware,MobileTrackerFree / MonitorLoverman / MTrack / CellTracker / TrackMobil
 iiw.orqjtwbkx,playstore,spyware,MonitorChecker / AndrMonitor / AndroidMon / Dromon
 efexmsz.mzuooelftl,playstore,spyware,MonitorChecker / AndrMonitor / AndroidMon / Dromon
-com.wisemo.wsmguest.v18,playstore,spyware,
-
-org.findmykids.child,playstore,spyware,
+com.hecyazilim.locationmanager,playstore,dual-use,Location Tracking App
+phonetracker.location.geotracker.gps.gpstracker.phonelocator,playstore,dual-use,Phone Tracker and GPS Locatior
+com.number.locator.callerlocation,playstore,dual-use,Phone Number Locator
+com.mobilenumbertracker.locator,playstore,dual-use,Mobile Number Tracker
+onelocator.numbertracker,playstore,dual-use,Mobile Number Tracker
+com.familytracker.familylocator_mhk,playstore,dual-use,Family Locator - GPS Tracking
+com.teamcruise.gps.phonelocation.tracker.locatorsharing.maps,playstore,dual-use,locate 360 : GPS Live Locator
+com.mobile.phone.number.locator.caller.location,playstore,dual-use,Mobile Number Locator Location
+co.za.actifinder,playstore,dual-use,"ActiFinder: Ride, Hike, run"
+com.gpscamera.gpsmapcamera.gpspicture,playstore,dual-use,GPS Map Camera: Geotag Photos
+net.kayisoft.familyquest,playstore,dual-use,Family Quest: Family Tracker
+no.abax.admin,playstore,dual-use,ABAX Admin
+com.webcontentor.gosee,playstore,dual-use,GoSee Place-Travel Food Attire
+com.clickride.user,playstore,dual-use,Click Taxi | Book ride now
+com.amygoapps.driver,playstore,dual-use,Amygo Driver
+transportsmendes.luxembourg.taxi.passenger,playstore,dual-use,"Mendes: Order Taxi, Luxembourg"
+com.uffizio.petzee,playstore,dual-use,Petzee
+com.uffizio.logytrak.dvir,playstore,dual-use,LogyDrive
+com.uffizio.employeetransportation,playstore,dual-use,Rosterz Employee
+com.uffizio.manager,playstore,dual-use,Manager
+com.uffizio.elexee,playstore,dual-use,Elexee Mini
+com.uffizio.minitrakzee,playstore,dual-use,Trakzee Mini
+com.uffizio.tracride,playstore,dual-use,TrakRide
+com.uffizio.mobigps,playstore,dual-use,MobiGPS
+com.cartrack.delivery,playstore,dual-use,Cartrack Delivery
+com.westernfrontway.app,playstore,dual-use,Waytrails
+com.sanren.streetscape.google,playstore,dual-use,Live Earth Map- Street View 3D
+com.findlostphone.phonetracker,playstore,dual-use,Find My Phone: Mobile Tracker
+mobile.number.trackerapp,playstore,dual-use,Phone Tracker Number Location
+com.tomtom.remotedisplay,playstore,dual-use,TomTom Hub Remote Display
+com.live.earth.gps.map.navigationstreet.livestreetview,playstore,dual-use,GPS Maps and GPS Directions
+com.guidewithme.south.africa,playstore,dual-use,✈ South Africa Travel Guide Of
+com.guidewithme.croatia,playstore,dual-use,✈ Croatia Travel Guide Offline
+com.phonetracker.numberfinder.mobilenumberlocator,playstore,dual-use,Phone Tracker and GPS Location
+evgoing.passenger,playstore,dual-use,EVGOING - Chauffeur Service
+com.gurtam.local_logistics,playstore,dual-use,Logistics Local
+com.mapfactor.navigator_lite,playstore,dual-use,Navigator Lite - SDK Showcase
+com.whistlephonefinder.clapfindmyphone,playstore,dual-use,Track Lost Phone
+com.family.task.manager,playstore,dual-use,Family Task Manager
+com.moovit.driver,playstore,dual-use,Moovit Transit On Demand
+com.cs.sightseeing.laspalmas,playstore,dual-use,Sightseeing Las Palmas
+com.cs.sightseeing.lugano,playstore,dual-use,Sightseeing Lugano
+com.cs.sightseeing.stgallen,playstore,dual-use,Sightseeing St. Gallen
+com.cs.sightseeing.lucerne,playstore,dual-use,Sightseeing Lucerne
+com.cs.sightseeing.winterthur,playstore,dual-use,Sightseeing Winterthur
+com.cs.sightseeing.lausanne,playstore,dual-use,Sightseeing Lausanne
+com.cs.sightseeing.bern,playstore,dual-use,Sightseeing Bern
+com.cs.sightseeing.basel,playstore,dual-use,Sightseeing Basel
+com.cs.sightseeing.geneva,playstore,dual-use,Sightseeing Geneva
+com.cs.sightseeing.villach,playstore,dual-use,Sightseeing Villach
+com.cs.sightseeing.klagenfurt,playstore,dual-use,Sightseeing Klagenfurt
+com.cs.sightseeing.salzburg,playstore,dual-use,Sightseeing Salzburg
+com.cs.sightseeing.linz,playstore,dual-use,Sightseeing Linz
+com.cs.sightseeing.nottingham,playstore,dual-use,Sightseeing Nottingham
+com.cs.sightseeing.belfast,playstore,dual-use,Sightseeing Belfast
+com.cs.sightseeing.cardiff,playstore,dual-use,Sightseeing Cardiff
+com.cs.sightseeing.bradford,playstore,dual-use,Sightseeing Bradford
+com.cs.sightseeing.coventry,playstore,dual-use,Sightseeing Coventry
+com.cs.sightseeing.leicester,playstore,dual-use,Sightseeing Leicester
+com.cs.sightseeing.edinburgh,playstore,dual-use,Sightseeing Edinburgh
+com.cs.sightseeing.leeds,playstore,dual-use,Sightseeing Leeds
+com.cs.sightseeing.sheffield,playstore,dual-use,Sightseeing Sheffield
+com.cs.sightseeing.bristol,playstore,dual-use,Sightseeing Bristol
+com.cs.sightseeing.liverpool,playstore,dual-use,Sightseeing Liverpool
+com.cs.sightseeing.glasgow,playstore,dual-use,Sightseeing Glasgow
+com.cs.sightseeing.birmingham,playstore,dual-use,Sightseeing Birmingham
+com.cs.sightseeing.waterford,playstore,dual-use,Sightseeing Waterford
+com.cs.sightseeing.limerick,playstore,dual-use,Sightseeing Limerick
+com.cs.sightseeing.galway,playstore,dual-use,Sightseeing Galway
+com.cs.sightseeing.hongkong,playstore,dual-use,Sightseeing Hong Kong
+com.cs.sightseeing.sosnowiec,playstore,dual-use,Sightseeing Sosnowiec
+com.cs.sightseeing.radom,playstore,dual-use,Sightseeing Radom
+com.cs.sightseeing.gdynia,playstore,dual-use,Sightseeing Gdynia
+com.cs.sightseeing.katowice,playstore,dual-use,Sightseeing Katowice
+com.cs.sightseeing.lublin,playstore,dual-use,Sightseeing Lublin
+com.cs.sightseeing.bydgoszcz,playstore,dual-use,Sightseeing Bydgoszcz
+com.cs.sightseeing.szczecin,playstore,dual-use,Sightseeing Szczecin
+com.cs.sightseeing.gdansk,playstore,dual-use,Sightseeing Gdańsk
+com.cs.sightseeing.pozna,playstore,dual-use,Sightseeing Poznań
+com.cs.sightseeing.wrocaw,playstore,dual-use,Sightseeing Wrocław
+com.cs.sightseeing.krakw,playstore,dual-use,Sightseeing Kraków
+com.cs.sightseeing.coimbra,playstore,dual-use,Sightseeing Coimbra
+com.cs.sightseeing.funchal,playstore,dual-use,Sightseeing Funchal
+com.cs.sightseeing.vilanovadegaia,playstore,dual-use,Sightseeing Vila Nova de Gaia
+com.cs.sightseeing.braga,playstore,dual-use,Sightseeing Braga
+com.cs.sightseeing.porto,playstore,dual-use,Sightseeing Porto
+com.cs.sightseeing.lisbon,playstore,dual-use,Sightseeing Lisbon
+com.cs.sightseeing.acorua,playstore,dual-use,Sightseeing A Coruña
+com.cs.sightseeing.granada,playstore,dual-use,Sightseeing Granada
+com.cs.sightseeing.vitoriagasteiz,playstore,dual-use,Sightseeing Vitoria-Gasteiz
+ru.yandex.taximeter.beta,playstore,dual-use,Яндекс Про (Бета)
+com.arhiled.altimeter,playstore,dual-use,Altimeter
+com.arhiled.gpsfamily,playstore,dual-use,GPS Family
+com.bikeparkmanager.app,playstore,dual-use,Mountain Manager
+com.horseware.horsepalTraining,playstore,dual-use,Horsepal 2.0
+com.etips.austin.travel.guide,playstore,dual-use,Austin Travel Guide
+com.flyjets.flyjetsmobile,playstore,dual-use,FLYJETS
+com.farmnet365.pflanzenbau,playstore,dual-use,365Crop
+com.etips.tallinn.travel.guide,playstore,dual-use,Tallinn Travel Guide
+com.etips.hakone.travel.guide,playstore,dual-use,Hakone Travel Guide
+no.bobilguiden.android,playstore,dual-use,Camperstop Norway
+net.triphub.transport.rome,playstore,dual-use,Rome public transport routes
+com.eurosofttech.first_choice_taxis,playstore,dual-use,1st Choice Taxis
+com.dgcarsunicab.nottingham,playstore,dual-use,Unicab
+com.perucabs.ordersapp,playstore,dual-use,Peru Cabs
+codematics.auto.car.autosharing.carpooling,playstore,dual-use,TERE: Let's Travel Together
+com.kingcabuser.user,playstore,dual-use,King Cabs
+com.deere.aglogictender,playstore,dual-use,Operations Center PRO Tender
+fit.uptivo.strafitapp,playstore,dual-use,Strafit
+com.eurosoft.cabtreasurevoteDriver,playstore,dual-use,Cab Treasure - R2V Driver
+com.eurosofttech.nicolas_taxi,playstore,dual-use,Nicolas Taxi
+com.eurosofttech.penmans_rideshare,playstore,dual-use,Penman's Rideshare
+com.eurosofttech.shahara_taxi,playstore,dual-use,Shahara Taxi
+com.eurosofttech.local_ts_ltd,playstore,dual-use,Local TS Ltd
+com.eurosofttech.zenith_cars,playstore,dual-use,Zenith Cars
+com.eurosofttech.one_two_one_taxis,playstore,dual-use,121 Taxis
+com.eurosofttech.triple_six_triple_eight_cars,playstore,dual-use,Triple Six Triple Eight Cars
+com.eurosofttech.ryde_llp,playstore,dual-use,RYDE LLP
+com.eurosofttech.cannon_cars,playstore,dual-use,Cannon Cars
+com.eurosofttech.xpress_ride_cabs,playstore,dual-use,Xpress Ride Cab
+com.eurosofttech.hello_taxi_au,playstore,dual-use,Hello Taxi
+com.eurosofttech.port_city_airport_transit,playstore,dual-use,Port City Airport Transit
+com.eurosofttech.sky_cars,playstore,dual-use,Sky Cars
+com.eurosofttech.drive_trans_poarttion_service_llc,playstore,dual-use,I DRIVE TRANSPORTATION SERVICE
+com.eurosofttech.prime_taxis,playstore,dual-use,Prime Taxis
+com.eurosofttech.river_holme_cars,playstore,dual-use,River Holme Cars
+com.eurosofttech.north_star_taxi,playstore,dual-use,NORTH STAR TAXI
+com.eurosofttech.abramson_taxi,playstore,dual-use,Abramson Taxi
+com.eurosofttech.nyk_cars,playstore,dual-use,NYK Cars
+com.eurosofttech.metro_cars_hudds,playstore,dual-use,METRO CARS HUDDS
+com.eurosofttech.road_star_taxi,playstore,dual-use,Road Star Taxi
+com.eurosofttech.bargnryde_transportation,playstore,dual-use,Bargn Ryde Transportation
+com.eurosofttech.gc_golden_cars,playstore,dual-use,GC Golden Cars
+com.eurosofttech.fosei_transports,playstore,dual-use,Fosei Transports
+com.eurosofttech.uk_car_service,playstore,dual-use,UK Car Service
+com.eurosofttech.a_cabs,playstore,dual-use,A Cabs
+com.eurosofttech.abu_transportation,playstore,dual-use,Abu Transportation
+com.eurosofttech.taxi_man,playstore,dual-use,Taxi-Man
+com.eurosofttech.helping_hands_transportation,playstore,dual-use,Helping hands transportation
+com.eurosofttech.independent_taxi,playstore,dual-use,Independent Taxi
+com.eurosofttech.town_trip,playstore,dual-use,Town Trip
+com.eurosofttech.nion,playstore,dual-use,NION
+com.eurosofttech.all_time_cars,playstore,dual-use,All Time Cars
+com.eurosofttech.get_around,playstore,dual-use,I GET AROUND
+com.eurosofttech.apex_taxi,playstore,dual-use,APEX TAXI
+com.eurosofttech.a_class_travels,playstore,dual-use,A class travels
+com.eurosofttech.vitalsen_limited,playstore,dual-use,Vitalsen Limited
+com.eurosofttech.connection_taxis,playstore,dual-use,Connection Taxis
+com.eurosofttech.london_express_cars,playstore,dual-use,London Express Cars
+com.eurosofttech.strada_taxi,playstore,dual-use,Strada Taxi
+com.eurosofttech.wentworth_cars,playstore,dual-use,Wentworth Cars
+com.eurosofttech.r_and_r_transport,playstore,dual-use,R&R Transport
+com.eurosofttech.arrow_transport,playstore,dual-use,Arrow Taxis High Wycombe
+com.eurosofttech.guarded_interest_transport,playstore,dual-use,Guarded Interest Transport
+com.eurosofttech.a1_international,playstore,dual-use,Orion Transportation
+com.eurosoft.cargodriverapp,playstore,dual-use,DTS Cargo
+com.eurosoft.cabtreasuredriverada,playstore,dual-use,CabTreasure - PA
+com.flashlight.ultra.gps.broadcast,playstore,dual-use,UGL Broadcast Plug-in
+com.flashlight.ultra.gps.l_plugin,playstore,dual-use,UGL Locale Plug-in
+com.visitwidget.boomorbustbyway,playstore,dual-use,Boom or Bust Byway
+org.cityofchino.seeclickfix,playstore,dual-use,My Chino
+gov.carrollcountymd.seeclickfix,playstore,dual-use,SEE CLICK REPORT
+gov.sjcindiana.seeclickfix,playstore,dual-use,SJC311
+gov.nantucket.ma.seeclickfix.com,playstore,dual-use,Click & Fix Nantucket
+gov.horseshoebaytx.seeclickfix,playstore,dual-use,City of HSB Connect
+gov.deperewi.seeclickfix,playstore,dual-use,De Pere Report It
+org.murphytx.seeclickfix,playstore,dual-use,Murphy Connect
+org.cityofhutchins.seeclickfix,playstore,dual-use,City of Hutchins
+gov.libertyhilltx.seeclickfix,playstore,dual-use,LHTX Connect
+gov.florenceaz.seeclickfix,playstore,dual-use,Florence Works4U
+gov.montesereno.seeclickfix,playstore,dual-use,Fix It Monte Sereno
+gov.yumaaz.seeclickfix,playstore,dual-use,Yuma Click & Fix
+com.cityofmilford.seeclickfix,playstore,dual-use,MyMilford
+gov.danvilleky.seeclickfix,playstore,dual-use,Danville KY
+com.milu.offlinesatellitemap,playstore,dual-use,Offline Satellite Map GPS Nav
+com.milu.spdsmrttools,playstore,dual-use,Speedometer 22S GPS Dash Cam
+com.milu.waypointgpsofflinecamera,playstore,dual-use,Waypoint Offline GPS Camera
+io.jucr.apps.charging.production,playstore,dual-use,JUCR – Effortless EV charging
+com.bosch.intrack.driver2,playstore,dual-use,InTrack Driver 2.0
+com.bosch.trackandtrace,playstore,dual-use,Bosch Track and Trace
+com.skype.insiders,playstore,dual-use,Skype Insider
+com.clickapoint,playstore,dual-use,clickApoint
+com.teesta,playstore,dual-use,Teesta
+com.st.glaciernp,playstore,dual-use,Glacier National Park GPS Tour
+com.actiontouguide.rocky,playstore,dual-use,Rocky Mountain GPS Audio Tour
+com.atg.gardenofgods,playstore,dual-use,Garden of the Gods GPS Tour
+com.actiontourguide.rainier,playstore,dual-use,Mount Rainier GPS Tour Guide
+com.actiontourguide.olympic,playstore,dual-use,Olympic National Park GPS Tour
+com.actiontourguide.banff,playstore,dual-use,Banff National Park Audio Tour
+com.actiontourguide.iceland,playstore,dual-use,Iceland Golden Circle GPS Tour
+com.mddt.mtrm,playstore,dual-use,Mount Rushmore GPS Audio Tour
+com.atg.storyteller,playstore,dual-use,Storyteller Audio Guide Tour
+com.actiontourguide.utah,playstore,dual-use,Utah Mighty 5 National Parks
+com.atg.lakelouis,playstore,dual-use,Lake Louise Audio Tour Guide
+com.atg.seatosky,playstore,dual-use,Sea to Sky Highway Audio Tour
+com.actiontourguide.saltlake,playstore,dual-use,Salt Lake City Walking Tour
+com.actiontourguide.pointreyes,playstore,dual-use,Point Reyes National Seashore
+com.atg.faithful,playstore,dual-use,Beartooth Highway Audio Guide
+com.atg.portland,playstore,dual-use,Portland Maine GPS Audio Tour
+com.actiontourguide.california,playstore,dual-use,California Self-Guided Tour
+com.atg.yorktown,playstore,dual-use,Yorktown Battlefield GPS Guide
+com.atg.lakemead,playstore,dual-use,Lake Mead Driving Tour App
+com.actiontourguide.vancouver,playstore,dual-use,Vancouver Audio Guided Tour
+com.actiontourguide.saguaro,playstore,dual-use,Saguaro National Park Guide
+com.atg.hooverdam,playstore,dual-use,Hoover Dam Driving Tour Guide
+com.actiontourguide.brp,playstore,dual-use,Blue Ridge Parkway Tour Guide
+com.atg.littleindia,playstore,dual-use,Little India Guide: Singapore
+com.actioncharts.smartmansions.gpstour.usbike,playstore,dual-use,US Bike Travel
+com.actioncharts.smartmansions.ekbalam,playstore,dual-use,Ek Balam Audio Tour Guide
+com.actioncharts.smartmansions.recliningbuddha,playstore,dual-use,Wat Pho Reclining Buddha Guide
+com.fourkites.nicplace.tourdriver,playstore,dual-use,Tourdriver
+org.smart_guide.smartguide.des_moines,playstore,dual-use,Des Moines SmartGuide
+org.smart_guide.smartguide.delphi,playstore,dual-use,Delphi Tour Guide:SmartGuide
+org.smart_guide.smartguide.darmstadt,playstore,dual-use,Darmstadt SmartGuide
+org.smart_guide.smartguide.cricova,playstore,dual-use,Cricova Tour Guide:SmartGuide
+org.smart_guide.smartguide.cork,playstore,dual-use,Cork Audio Guide by SmartGuide
+org.smart_guide.smartguide.chur,playstore,dual-use,Chur Audio Guide by SmartGuide
+org.smart_guide.smartguide.chirpan,playstore,dual-use,Chirpan Tour Guide:SmartGuide
+org.smart_guide.smartguide.malaga,playstore,dual-use,Malaga Tour Guide:SmartGuide
+org.smart_guide.smartguide.cantemir,playstore,dual-use,Cantemir Tour Guide:SmartGuide
+org.smart_guide.smartguide.catania,playstore,dual-use,Catania Tour Guide:SmartGuide
+org.smart_guide.smartguide.castelobranco,playstore,dual-use,Castelo Branco SmartGuide
+org.smart_guide.smartguide.cape_coast,playstore,dual-use,Cape Coast SmartGuide
+org.smart_guide.smartguide.brezovo,playstore,dual-use,Brezovo Tour Guide:SmartGuide
+org.smart_guide.smartguide.bregenz,playstore,dual-use,Bregenz Tour Guide:SmartGuide
+org.smart_guide.smartguide.berchtesgaden,playstore,dual-use,Berchtesgaden SmartGuide
+org.smart_guide.smartguide.banskastiavnica,playstore,dual-use,Banska Stiavnica SmartGuide
+org.smart_guide.smartguide.bali,playstore,dual-use,Bali Audio Guide by SmartGuide
+org.smart_guide.smartguide.baden_bei_wien,playstore,dual-use,Baden bei Wien SmartGuide
+org.smart_guide.smartguide.armamar,playstore,dual-use,Armamar Tour Guide:SmartGuide
+org.smart_guide.smartguide.anhui,playstore,dual-use,Anhui Tour Guide:SmartGuide
+org.smart_guide.smartguide.alba_iulua,playstore,dual-use,Alba Iulia SmartGuide
+org.smart_guide.smartguide.accra,playstore,dual-use,Accra Tour Guide:SmartGuide
+org.smart_guide.smartguide.aberdeen,playstore,dual-use,Aberdeen Tour Guide:SmartGuide
+org.smart_guide.smartguide.st_gallen,playstore,dual-use,St. Gallen SmartGuide
+org.smart_guide.smartguide.portlandme,playstore,dual-use,Portland Maine SmartGuide
+org.smart_guide.smartguide.new_zealand_south_island,playstore,dual-use,New Zealand - South Island
+org.smart_guide.smartguide.new_zealand_north_island,playstore,dual-use,New Zealand - North Island
+org.smart_guide.smartguide.graz,playstore,dual-use,Graz Audio Guide by SmartGuide
+org.smart_guide.smartguide.chisinau,playstore,dual-use,Chișinău Tour Guide:SmartGuide
+org.smart_guide.smartguide.freixo_de_espada_a_cinta,playstore,dual-use,Freixo de Espada à Cinta Guide
+org.smart_guide.smartguide.carrazeda_de_ansiaes,playstore,dual-use,Carrazeda de Ansiães Guide
+org.smart_guide.smartguide.zug,playstore,dual-use,Zug Audio Guide by SmartGuide
+org.smart_guide.smartguide.wurzburg,playstore,dual-use,Würzburg Tour Guide:SmartGuide
+org.smart_guide.smartguide.zadar,playstore,dual-use,Zadar Tour Guide:SmartGuide
+org.smart_guide.smartguide.vila_vicosa,playstore,dual-use,Vila Viçosa SmartGuide
+org.smart_guide.smartguide.uppsala,playstore,dual-use,Uppsala Tour Guide:SmartGuide
+org.smart_guide.smartguide.toledo,playstore,dual-use,Toledo Tour Guide:SmartGuide
+org.smart_guide.smartguide.trujillo,playstore,dual-use,Trujillo Tour Guide:SmartGuide
+org.smart_guide.smartguide.tenerife,playstore,dual-use,Tenerife Tour Guide:SmartGuide
+org.smart_guide.smartguide.thessaloniki,playstore,dual-use,Thessaloniki SmartGuide
+org.smart_guide.smartguide.tashkent,playstore,dual-use,Tashkent Tour Guide:SmartGuide
+org.smart_guide.smartguide.tallinn,playstore,dual-use,Tallinn Tour Guide:SmartGuide
+org.smart_guide.smartguide.santorini,playstore,dual-use,Santorini SmartGuide
+org.smart_guide.smartguide.sintra,playstore,dual-use,Sintra Tour Guide:SmartGuide
+org.smart_guide.smartguide.salamanca,playstore,dual-use,Salamanca SmartGuide
+org.smart_guide.smartguide.rostock,playstore,dual-use,Rostock Tour Guide:SmartGuide
+org.smart_guide.smartguide.rimini,playstore,dual-use,Rimini Tour Guide:SmartGuide
+org.smart_guide.smartguide.ronda,playstore,dual-use,Ronda Tour Guide:SmartGuide
+org.smart_guide.smartguide.rhodos,playstore,dual-use,Rhodos Tour Guide:SmartGuide
+de.th.carradarpremium,playstore,dual-use,Car Radar Premium CarFinder
+com.etips.bago.travel.guide,playstore,dual-use,Bago Travel Guide
+com.sikey.veryfit,playstore,dual-use,VeryFit Kids
+com.tinyrocket.surrey,playstore,dual-use,Surrey Walks
+kw.edu.ku.ssuc.ssuccampus,playstore,dual-use,SSUC Campus
+net.staffconnect.mobile.ceastaffing,playstore,dual-use,CEA Staffing
+net.medyatech,playstore,dual-use,Medya Tech
+com.planetpompeiiapp,playstore,dual-use,Planet Pompeii  Audioguide Pro
+us.nc4.rcmobile2,playstore,dual-use,ActivPoint™
+eu.infobus.bussystem,playstore,dual-use,BusSystem Driver
+com.guestu.sbithotelgroup,playstore,dual-use,Sbit Hotels
+com.itfox.nainitalcityguide,playstore,dual-use,Nainital City Guide
+hr.shape.maistra,playstore,dual-use,Maistra
+guide.unitedarabemirates.dubai.prod,playstore,dual-use,DUBAI Guide Tickets & Hotels
+guide.poland.krakow.prod,playstore,dual-use,KRAKOW Guide Tickets & Hotels
+guide.italy.turin.prod,playstore,dual-use,TURIN Guide Tickets & Hotels
+com.lumiplan.montagne.SanBernardo,playstore,dual-use,Espace San Bernardo
+com.navitime.local.delivery,playstore,dual-use,配達NAVITIME ゼンリン住宅地図/荷物管理/カーナビ
+com.navitime.local.trafficmap,playstore,dual-use,"渋滞情報マップ（交通情報,規制,通行止,高速,料金検索）"
+com.navitime.local.sharecycle,playstore,dual-use,どこでもサイクル by NAVITIME(ナビタイム)
+net.triphub.transport.athens,playstore,dual-use,City transport Athens
+net.triphub.transport.milan,playstore,dual-use,Public transport map Milan
+net.triphub.transport.mexico,playstore,dual-use,City transport Mexico City
+net.triphub.transport.munich,playstore,dual-use,City transport map Munich
+net.triphub.transport.porto,playstore,dual-use,City transport map Porto
+net.triphub.transport.guangzhou,playstore,dual-use,City transport Guangzhou
+net.triphub.transport.boston,playstore,dual-use,City transport Boston
+net.triphub.transport.valencia,playstore,dual-use,City transport map Valencia
+net.triphub.transport.florence,playstore,dual-use,City transport map Florence
+net.triphub.transport.humburg,playstore,dual-use,Public transport map Hamburg
+net.triphub.transport.warsaw,playstore,dual-use,Public transport map Warsaw
+net.triphub.transport.berlin,playstore,dual-use,Public transport map Berlin
+net.triphub.transport.wroclaw,playstore,dual-use,City Transport Map Wroclaw
+net.triphub.transport.madrid,playstore,dual-use,Public transport map Madrid
+net.triphub.transport.vienna,playstore,dual-use,Public transport map Vienna
+net.triphub.transport.london,playstore,dual-use,Public transport map London
+net.triphub.transport.praha,playstore,dual-use,Public transport map Prague
+net.triphub.transport.budapest,playstore,dual-use,Public transport map Budapest
+uk.co.salisburyreds,playstore,dual-use,Salisbury Reds
+uk.co.pulhams,playstore,dual-use,Pulhams
+uk.co.konectbus,playstore,dual-use,konectbus
+uk.co.hedinghamandchambers,playstore,dual-use,hedingham and chambers
+uk.co.plymouthbus,playstore,dual-use,Plymouth Citybus
+com.flytomap.marineapp.worldviewer.bhangkok,playstore,dual-use,Gulf of Thailand Bangkok maps
+com.flytomap.marineapp.worldviewer.canadawest,playstore,dual-use,Canada West GPS Map Navigator
+com.flytomap.marineapp.worldviewer.mecklenburg,playstore,dual-use,Mecklenburg Vorpommern Charts
+com.flytomap.marineapp.worldviewer.germanyeast,playstore,dual-use,Germany East GPS Map Navigator
+com.flytomap.marineapp.worldviewer.camanchereservoir,playstore,dual-use,Camanche RSVR Offline GPS Maps
+com.flytomap.marineapp.worldviewer.folsom,playstore,dual-use,Folsom lake California Charts
+com.flytomap.marineapp.worldviewer.taupo,playstore,dual-use,Lake Taupo Offline GPS Charts
+com.flytomap.marineapp.worldviewer.parkacadia,playstore,dual-use,Acadia National Park GPS Chart
+com.flytomap.marineapp.worldviewer.franceatlantic,playstore,dual-use,France Atlantic Nautical Chart
+com.flytomap.marineapp.worldviewer.argentina,playstore,dual-use,Argentina  GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakewyli,playstore,dual-use,Lake Wylie GPS Offline Charts
+com.flytomap.marineapp.worldviewer.flaminggorgereservoir,playstore,dual-use,Flaming Gorge Lake Offline Map
+com.flytomap.marineapp.worldviewer.greenriverlake,playstore,dual-use,Green River Lake GPS Charts
+com.flytomap.marineapp.worldviewer.smithmountain,playstore,dual-use,Smith Mountain Lake GPS Charts
+com.flytomap.marineapp.worldviewer.sebagolake,playstore,dual-use,Sebago Lake GPS Offline Charts
+com.flytomap.marineapp.worldviewer.lakependoreille,playstore,dual-use,Lake Pend Oreille GPS Charts
+com.flytomap.marineapp.worldviewer.choke,playstore,dual-use,Choke Canyon Lake Offline Maps
+com.flytomap.marineapp.worldviewer.stlawrenceriver,playstore,dual-use,Saint Lawrence River GPS Maps
+com.flytomap.marineapp.worldviewer.lake_sammamish_washington,playstore,dual-use,Sammamish Lake WA GPS Charts
+com.flytomap.marineapp.worldviewer.arkansas_river,playstore,dual-use,Arkansas River GPS Charts
+com.flytomap.marineapp.worldviewer.floridaeverglades,playstore,dual-use,Florida Everglades GPS Charts
+com.flytomap.marineapp.worldviewer.wilsonlakealabama,playstore,dual-use,Wilson Lake Alabama GPS Charts
+com.flytomap.marineapp.worldviewer.lake_oh_texas,playstore,dual-use,Lake O.H. Ivie Texas GPS Chart
+com.flytomap.marineapp.worldviewer.saintvincentandthegrenadinesislands,playstore,dual-use,Saint Vincent GPS Charts
+com.flytomap.marineapp.worldviewer.saintbarthelemyislands,playstore,dual-use,Saint Barthelemy GPS Charts
+com.flytomap.marineapp.worldviewer.montserratislands,playstore,dual-use,Montserrat GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.lagoiseo,playstore,dual-use,Lake Iseo GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.haitiislands,playstore,dual-use,Haiti GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.anguillaislands,playstore,dual-use,Anguilla GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.bonaireislands,playstore,dual-use,Bonaire Island GPS Charts
+com.flytomap.marineapp.worldviewer.turksandcaicosislands,playstore,dual-use,Turks and Caicos Islands Chart
+com.flytomap.marineapp.worldviewer.phoenixislands,playstore,dual-use,Phoenix Islands GPS Charts
+com.flytomap.marineapp.worldviewer.arubaislands,playstore,dual-use,Aruba Island GPS Charts
+com.flytomap.marineapp.worldviewer.boraboraislands,playstore,dual-use,Bora Bora Islands GPS Charts
+com.flytomap.marineapp.worldviewer.coralsea,playstore,dual-use,Coral Sea GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.adelaide,playstore,dual-use,Boating Adelaide GPS Charts
+com.flytomap.marineapp.worldviewer.perth,playstore,dual-use,Boating Perth GPS Charts
+com.flytomap.marineapp.worldviewer.sydney,playstore,dual-use,Boating Sydney Nautical Charts
+com.flytomap.marineapp.worldviewer.melbourne,playstore,dual-use,Melbourne GPS Nautical Charts
+com.flytomap.marineapp.worldviewer.australia,playstore,dual-use,Boating Australia GPS Charts
+com.flytomap.marineapp.worldviewer.yosemitepark,playstore,dual-use,Yosemite National Park GPS Map
+com.flytomap.marineapp.worldviewer.yellowstonepark,playstore,dual-use,Yellowstone NP GPS Charts
+com.flytomap.marineapp.worldviewer.bluehillspark,playstore,dual-use,The Blue Hills Reservation Map
+com.flytomap.marineapp.worldviewer.blackhillspark,playstore,dual-use,Black Hills NF Map Navigator
+com.flytomap.marineapp.worldviewer.balaton,playstore,dual-use,Balaton Lake GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakenorthdakota,playstore,dual-use,North Dakota Lakes GPS Charts
+com.flytomap.marineapp.worldviewer.lakemurray,playstore,dual-use,Lake Murray SC Offline Charts
+com.flytomap.marineapp.worldviewer.southafrica,playstore,dual-use,South Africa Gps Map Navigator
+com.flytomap.marineapp.worldviewer.tarponlake,playstore,dual-use,Lake Tarpon Florida GPS Charts
+com.flytomap.marineapp.worldviewer.sarcmentodelta,playstore,dual-use,Sacramento - San Joaquin chart
+com.flytomap.marineapp.worldviewer.redriver,playstore,dual-use,Red River Louisiana GPS Charts
+com.flytomap.marineapp.worldviewer.pickwicklake,playstore,dual-use,Pickwick Lake Al GPS Charts
+com.flytomap.marineapp.worldviewer.perrislake,playstore,dual-use,Lake Perris CA Offline Charts
+com.flytomap.marineapp.worldviewer.istokpogalake,playstore,dual-use,Lake Istokpoga Florida Charts
+com.flytomap.marineapp.worldviewer.havasulake,playstore,dual-use,Lake Havasu AZ Offline Charts
+com.flytomap.marineapp.worldviewer.austinlake,playstore,dual-use,Lake Austin Texas GPS Charts
+com.flytomap.marineapp.worldviewer.vermilionlake,playstore,dual-use,Lake Vermilion MN GPS Charts
+com.flytomap.marineapp.worldviewer.kissimmeechainlakes,playstore,dual-use,Kissimmee lakes Florida charts
+com.flytomap.marineapp.worldviewer.lakescongamond,playstore,dual-use,Congamond Lakes Mass. GPS Maps
+com.flytomap.marineapp.worldviewer.seminolelake,playstore,dual-use,Lake Seminole GA Offline Chart
+com.flytomap.marineapp.worldviewer.diamondvalleylake,playstore,dual-use,Lake Diamond Valley CA Offline
+com.flytomap.marineapp.worldviewer.lakecharlevoix,playstore,dual-use,Lake Charlevoix MI GPS Charts
+com.flytomap.marineapp.worldviewer.atlanticislandsgalicia,playstore,dual-use,Atlantic Islands Galicia Maps
+com.flytomap.marineapp.worldviewer.bergen,playstore,dual-use,Bergen Gps Nautical Charts
+com.flytomap.marineapp.worldviewer.calabria,playstore,dual-use,Calabria GPS Map Navigator
+com.flytomap.marineapp.worldviewer.marthasvineandnantuketisland,playstore,dual-use,Martha's Vine & Nantuket chart
+com.flytomap.marineapp.worldviewer.riversgerman,playstore,dual-use,German Rivers GPS Charts
+com.flytomap.marineapp.worldviewer.boatingusa,playstore,dual-use,Boating USA GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakemarble,playstore,dual-use,Marble Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakelowerpine,playstore,dual-use,Lower Pine Lake IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakelowergar,playstore,dual-use,Lower Gar Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.reservoirlowercity,playstore,dual-use,Lower City Reservoir IOWA GPS
+com.flytomap.marineapp.worldviewer.lakelostisland,playstore,dual-use,Lost Island Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakelizard,playstore,dual-use,Lizard Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakelittlewall,playstore,dual-use,Little Wall Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakelittlespirit,playstore,dual-use,Little Spirit Lake IA Offline
+com.flytomap.marineapp.worldviewer.lakelittleriver,playstore,dual-use,Little River Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakeyenruogis,playstore,dual-use,Lake Yenruogis - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakewapello,playstore,dual-use,Lake Wapello IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakepahoja,playstore,dual-use,Lake Pahoja IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakeofthreefires,playstore,dual-use,Lake of Three Fires IOWA Chart
+com.flytomap.marineapp.worldviewer.lakeofthehills,playstore,dual-use,Lake of the Hills - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakemorris,playstore,dual-use,Lake Morris - IOWA Gps Map
+com.flytomap.marineapp.worldviewer.lakemiami,playstore,dual-use,Lake Miami - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakemanawa,playstore,dual-use,Lake Manawa IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakelcaria,playstore,dual-use,Lake lcaria - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakekeomah,playstore,dual-use,Lake Keomah - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakeiowa,playstore,dual-use,Lake Iowa GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakeanita,playstore,dual-use,Lake Anita - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakeahquabi,playstore,dual-use,Lake Ahquabi - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakekentpark,playstore,dual-use,Kent Park Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakekenwolfe,playstore,dual-use,Ken Wolfe Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakeingham,playstore,dual-use,Ingham Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakehooperareapond,playstore,dual-use,Hooper Area Pond - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakehickorygrove,playstore,dual-use,Hickory Grove Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakehawthorne,playstore,dual-use,Hawthorne Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakehannen,playstore,dual-use,Hannen Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakegreenfield,playstore,dual-use,Greenfield Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakegreenvalley,playstore,dual-use,Green Valley Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakegreencastle,playstore,dual-use,Green Castle Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakegrays,playstore,dual-use,Grays Lake - IOWA GPS Map
+com.flytomap.marineapp.worldviewer.lakegeorgewyth,playstore,dual-use,George Wyth Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakegeode,playstore,dual-use,Geode Lake IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakefiveisland,playstore,dual-use,Five Island Lake - IOWA GPS
+com.flytomap.marineapp.worldviewer.lakeelm,playstore,dual-use,Elm Lake IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakeelk,playstore,dual-use,Elk Lake IOWA GPS Charts
+com.flytomap.marineapp.worldviewer.lakeeldredsherwood,playstore,dual-use,Eldred Sherwood Lake IOWA Maps
+com.flytomap.marineapp.worldviewer.lakeeastokoboji,playstore,dual-use,Okoboji Lake IOWA Offline Maps
+com.flytomap.marineapp.worldviewer.pantelleria,playstore,dual-use,Pantelleria GPS Map Navigator
+com.flytomap.marineapp.worldviewer.newcaledonia,playstore,dual-use,New Caledonia GPS Charts
+com.flytomap.marineapp.worldviewer.mauritius,playstore,dual-use,Mauritius GPS Map Navigator
+com.flytomap.marineapp.worldviewer.martinique,playstore,dual-use,Martinique GPS Map Navigator
+com.flytomap.marineapp.worldviewer.malta,playstore,dual-use,Malta GPS Map Navigator
+com.flytomap.marineapp.worldviewer.maldives,playstore,dual-use,Maldives Offline GPS Charts
+com.flytomap.marineapp.worldviewer.madagaskar,playstore,dual-use,Madagaskar GPS Map Navigator
+com.flytomap.marineapp.worldviewer.isoladelgiglio,playstore,dual-use,Isola del Giglio GPS Navigator
+com.flytomap.marineapp.worldviewer.hongkong,playstore,dual-use,Hong Kong GPS Map Navigator
+com.flytomap.marineapp.worldviewer.grenadines,playstore,dual-use,Grenadines & Grenada GPS Map
+com.flytomap.marineapp.worldviewer.grancayman,playstore,dual-use,Grand Cayman GPS Map Navigator
+com.flytomap.marineapp.worldviewer.gaudalupe,playstore,dual-use,Guadeloupe GPS Map Navigator
+com.flytomap.marineapp.worldviewer.eolieislands,playstore,dual-use,Eolie Islands GPS Charts
+com.flytomap.marineapp.worldviewer.dubai,playstore,dual-use,Dubai GPS Map Navigator
+com.flytomap.marineapp.worldviewer.dominicarepublic,playstore,dual-use,Dominican Republic GPS Charts
+com.flytomap.marineapp.worldviewer.dominica,playstore,dual-use,Dominica GPS Map Navigator
+com.flytomap.marineapp.worldviewer.djerba,playstore,dual-use,Djerba (Tunis) GPS Navigator
+com.flytomap.marineapp.worldviewer.cyprus,playstore,dual-use,Cyprus GPS Map Navigator
+com.flytomap.marineapp.worldviewer.cyclades,playstore,dual-use,Cyclades GPS Map Navigator
+com.flytomap.marineapp.worldviewer.cuba,playstore,dual-use,Cuba GPS Map Navigator
+com.flytomap.marineapp.worldviewer.cretegreece,playstore,dual-use,Crete (Greece) GPS Navigator
+com.flytomap.marineapp.worldviewer.costabrava,playstore,dual-use,Costa Brava GPS Map Navigator
+com.flytomap.marineapp.worldviewer.cancun,playstore,dual-use,Cancun GPS Map Navigator
+com.flytomap.marineapp.worldviewer.bocchedibonifacio,playstore,dual-use,Bocche di Bonifacio GPS Charts
+com.flytomap.marineapp.worldviewer.barbados,playstore,dual-use,Barbados GPS Map Navigator
+com.flytomap.marineapp.worldviewer.bali,playstore,dual-use,Bali GPS Map Navigator
+com.flytomap.marineapp.worldviewer.antigua,playstore,dual-use,Antigua GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakesuperior,playstore,dual-use,Lake Superior Gps Navigator
+com.flytomap.marineapp.worldviewer.lakeontario,playstore,dual-use,Lake Ontario GPS Map Navigator
+com.flytomap.marineapp.worldviewer.lakeislandreservoir,playstore,dual-use,Island Lake RSVR MN GPS Charts
+com.flytomap.marineapp.worldviewer.lakepokegama,playstore,dual-use,Pokegama Lake - MN GPS Map
+com.karwatechnologies.kdriver,playstore,dual-use,Karwa Driver
+com.karwatechnologies.rihla,playstore,dual-use,Rihla
+com.qvota.client,playstore,dual-use,Taxi QVOTA 840
+ua.lime.jet.taxi.driver,playstore,dual-use,LimeJet Driver
+com.grepix.driverapp,playstore,dual-use,Bid n Ride
+com.driver.uberappsua,playstore,dual-use,UA Driver
+com.rider.uberapps,playstore,dual-use,UA Rider
+com.grepix.hireme_partner,playstore,dual-use,OnDemand Partner App
+com.grepix.hireme_services,playstore,dual-use,OnDemand Services App
+com.grepix.portable.taximeter,playstore,dual-use,Portable - Taxi/Auto Meter App
+com.driver.hire_me,playstore,dual-use,HireMe - Taxi app for Drivers
+com.bishoppeaktech.android.CATSBus,playstore,dual-use,UVM CATS Bus
+ridewithvia.syg.sartacantonmicrotransit,playstore,dual-use,SARTA Connect
+com.ridewithvia.glv.gltcflex,playstore,dual-use,GLTC Flex
+ridewithvia.newyork.university,playstore,dual-use,NYU Safe Ride
+greenbay.new,playstore,dual-use,GBM Paratransit
+com.webkulprestashop.deliveryboy.android,playstore,dual-use,Mobikul Deliveryboy Prestashop
+com.deliveryboycs.android,playstore,dual-use,Mobikul Delivery Boy CS-Cart
+ai.actionfigure.actionfigureandroidtv,playstore,dual-use,Actionfigure Screen
+spark.ride.saudi.arabia.passenger,playstore,dual-use,Spark Clients
+com.beeeyescales.advancedweighingbtnoad,playstore,dual-use,Bluetooth Weight Terminal 2.0
+de.hafas.android.translink,playstore,dual-use,Translink
+com.routematch.au.drt,playstore,dual-use,MyDRTLogan
+com.tplink.kidshield,playstore,dual-use,KidShield
+com.district.txt,playstore,dual-use,TRIP Mobile
+com.dashride.clients.hspersonalcarservice,playstore,dual-use,H&S Personal Car Service
+com.dashride.clients.scsondemand,playstore,dual-use,BESPOKEV
+com.dashride.clients.ecoelitelimo,playstore,dual-use,Eco Elite Limo
+com.dashride.clients.myelitedriver,playstore,dual-use,My Elite Driver
+com.nisa.app,playstore,dual-use,"Nisa Scan, Pay, Go"
+com.zoho.riq.ltagent,playstore,dual-use,RIQ LT Agent
+app.com.automobility.mycar.control2.ltx,playstore,dual-use,Linkr LTX
+com.tatabo3driver,playstore,dual-use,Tatabo3 Driver
+com.thegpstrace,playstore,dual-use,Flotilla LITE
+com.tatabo3,playstore,dual-use,Tatabo3
+com.leadtime.flotillatracker,playstore,dual-use,FX Tracker
+com.leadtime.flotilla,playstore,dual-use,Flotilla IoT
+de.gpsoverip.gpsaugemobile,playstore,dual-use,GPSauge mobile
+de.gpsauge.zubehoer,playstore,dual-use,GPSauge Zubehör - App
+me.kyleyan.gpsexplorer,playstore,dual-use,GPS-Explorer mobile
+ru.rarus.uatdriver,playstore,dual-use,Водитель УАТ
+com.wisepilgrim.podiensis,playstore,dual-use,Vía Podiensis
+mobi.byss.gpstimecamera,playstore,dual-use,GPS & Time Camera
+app.fitmap.app,playstore,dual-use,Fitmap: Events & Challenges
+com.pathranger.oxfordshire,playstore,dual-use,Oxfordshire Walks
+com.tinyrocket.gloucestershire,playstore,dual-use,Gloucestershire Walks
+com.tinyrocket.derbyshire,playstore,dual-use,Derbyshire Walks
+com.tinyrocket.staffordshire,playstore,dual-use,Staffordshire Walks
+com.tinyrocket.sussex,playstore,dual-use,Sussex Walks
+com.tinyrocket.essex,playstore,dual-use,Essex Walks
+com.step.tracker.schrittie,playstore,dual-use,Power Saving Step Counter
+com.eventmapbymoon.app,playstore,dual-use,Your Map - Custom Map Planner
+net.staffconnect.mobile.stafftacular,playstore,dual-use,Stafftacular
+net.staffconnect.mobile.blackhauscreative,playstore,dual-use,Black Haus Creative
+net.staffconnect.mobile.mktgnz,playstore,dual-use,Dentsu
+net.staffconnect.mobile.goviral,playstore,dual-use,Go Viral
+net.staffconnect.mobile.nortonnational,playstore,dual-use,Norton National
+net.staffconnect.mobile.newbridgemarketinggroup,playstore,dual-use,NMG | Campus Collaborative
+net.staffconnect.mobile.goinspo,playstore,dual-use,GoInspo
+net.staffconnect.mobile.getthempromo,playstore,dual-use,Get Them
+net.staffconnect.mobile.elevatemodelmanagement,playstore,dual-use,Elevate Model Management
+net.staffconnect.mobile.pyramidcg,playstore,dual-use,Pyramid Consulting Group
+net.staffconnect.mobile.tier1models,playstore,dual-use,Tier1Models
+net.staffconnect.mobile.unitedonecleaning,playstore,dual-use,United One Cleaning Service
+net.staffconnect.mobile.pricelessonemanagement,playstore,dual-use,Priceless One Management
+net.staffconnect.mobile.astartecreative,playstore,dual-use,Astarte Creative
+net.staffconnect.mobile.scoozievents,playstore,dual-use,Scoozi Events NYC
+net.staffconnect.mobile.skutopia,playstore,dual-use,SKUTOPIA Go
+net.staffconnect.mobile.bphealthcare,playstore,dual-use,BP Healthcare Staffing Agency
+net.staffconnect.mobile.itapromotions,playstore,dual-use,ITA Promotions
+net.staffconnect.mobile.kreate,playstore,dual-use,Kreate EXP
+net.staffconnect.mobile.orbitmarketing,playstore,dual-use,Orbit Marketing
+net.staffconnect.mobile.btl,playstore,dual-use,BTL Staff Connect
+net.staffconnect.mobile.sarasimplysampling,playstore,dual-use,Sara Simply Sampling
+net.staffconnect.mobile.engagenz,playstore,dual-use,EngageNZ
+net.staffconnect.mobile.alivebx,playstore,dual-use,ALIVE BX
+net.staffconnect.mobile.theingroup,playstore,dual-use,Mars United
+net.staffconnect.mobile.smilespromotions,playstore,dual-use,Smiles Promotions
+net.staffconnect.mobile.themagicbrush,playstore,dual-use,Create Agency
+net.staffconnect.mobile.rentertainment,playstore,dual-use,Rentertainment
+net.staffconnect.mobile.neonichestrategies,playstore,dual-use,NeoNiche Strategies
+net.staffconnect.mobile.birdieproductions,playstore,dual-use,Imagine Entertainment
+net.staffconnect.mobile.thrivemgmt,playstore,dual-use,Thrive Management
+net.staffconnect.mobile.brandspanking,playstore,dual-use,Brand Spanking
+net.staffconnect.mobile.cbdmodels,playstore,dual-use,CBD Promotions
+net.staffconnect.mobile.functionstaff,playstore,dual-use,Function Staff
+com.quick18.fairways,playstore,dual-use,Fairways of Woodside
+com.app.deliveryboyfeedmezw,playstore,dual-use,FeedmeZW Delivery Boy
+org.leanportal.lahitapiola,playstore,dual-use,LT Fleet
+org.leanportal.enerfyglobal,playstore,dual-use,Enerfy Global
+org.leanportal.delgro,playstore,dual-use,ComfortDelGro Eye
+org.leanportal.tryggdkjunior,playstore,dual-use,Tryg Drive
+com.mytravelry.travelry,playstore,dual-use,Travelry Путеводитель Аудиогид
+com.discoverukraine.metro.buenosaires,playstore,dual-use,Buenos Aires Subway Guide
+com.modeshift.focsani,playstore,dual-use,Transport Public Focsani
+com.modeshift.buzau,playstore,dual-use,Transport Public Buzau
+com.modeshift.kazanlak,playstore,dual-use,Public transport Kazanlak
+com.modeshift.bistrita,playstore,dual-use,TMX Transport Bistrita
+com.xtourmaker.almalusahotels,playstore,dual-use,AlmaLusa Hotels
+com.itfox.texi_rider,playstore,dual-use,Taxi Rider
+ch.sbb.inclusive,playstore,dual-use,SBB Inclusive
+com.kidshandprint.sunriseandsunsettimespro,playstore,dual-use,Sunrise Sunset Calculator Pro
+com.Kidshandprint.compasspositiontrackerpro,playstore,dual-use,Compass Position Tracker Pro
+com.Kidshandprint.gpsqiblapro,playstore,dual-use,Gps Qibla Pro
+com.Kidshandprint.gpspostosmspro,playstore,dual-use,GPS position to sms Pro
+com.counter.pedometer.step.tracker.walk.map.brisk,playstore,dual-use,Step Pedometer: GPS Tracker
+com.curatedplanet.client.indibleu.release,playstore,dual-use,Indibleu Experiences
+com.curatedplanet.client.tourmappers.release,playstore,dual-use,TourMappers
+com.curatedplanet.client.grasshopper.release,playstore,dual-use,Grasshopper Adventures Tours
+com.curatedplanet.client.freewheeling.release,playstore,dual-use,Freewheeling Adventures
+com.curatedplanet.client.israelrail.release,playstore,dual-use,Israel Rail
+com.bishoppeaktech.android.MWDCShuttleTracker,playstore,dual-use,MedStar Washington Shuttle
+com.lokasi.lokasiapp,playstore,dual-use,mapnow - moments on a map
+nl.bam.bambouwapp,playstore,dual-use,BAM BouwApp
+com.signalmonitoring.gpsmonitoringpro,playstore,dual-use,GPS Monitor Pro: GNSS data
+com.birdzi.harvestmarket,playstore,dual-use,goHarvestMarket
+com.spottydog.tt,playstore,dual-use,TruckerTimer
+com.huronkinloss.seeclickfix,playstore,dual-use,Huron-Kinloss Connects
+com.eandenterprise.svtMobile,playstore,dual-use,IoT Fleet Mgmt
+com.artarmin.speedometer,playstore,dual-use,Luminous Drive
+com.fifa.fifadrive,playstore,dual-use,FIFA Drive
+com.thewebaddicts.driverapp,playstore,dual-use,TWA Driver's app
+com.thewebaddicts.usa_cab_ads_app,playstore,dual-use,USA Cab Ads
+net.staffconnect.mobile.brandingstar,playstore,dual-use,Branding Star
+com.quick18.orangetree,playstore,dual-use,Orange Tree Golf Club
+com.quick18.falconhead,playstore,dual-use,Falconhead Golf Club
+com.quick18.pearland,playstore,dual-use,Pearland Golf Club
+com.quick18.sagamorehampton,playstore,dual-use,Sagamore-Hampton Golf Club
+com.quick18.foggbrook,playstore,dual-use,Fogg Brook Resort
+com.quick18.arrowheadgolfcourse,playstore,dual-use,Arrowhead Golf Course
+com.quick18.mainlands,playstore,dual-use,Mainlands Golf Club
+com.quick18.camasmeadows,playstore,dual-use,Camas Meadows Golf Club
+com.quick18.woodwind,playstore,dual-use,Wood Wind Golf Club
+com.quick18.fairlawn,playstore,dual-use,Fairlawn Golf Club
+com.quick18.sagamorespring,playstore,dual-use,Sagamore Spring Golf Club
+com.quick18.elwood,playstore,dual-use,Elwood Golf Links
+com.quick18.marysvillegc,playstore,dual-use,Marysville Golf Club
+com.quick18.inshalla,playstore,dual-use,Inshalla Country Club
+com.quick18.maderas,playstore,dual-use,Maderas Golf Club Tee Times
+com.quick18.hartranch,playstore,dual-use,Hart Ranch Golf Club
+com.quick18.bearcreekgc,playstore,dual-use,Bear Creek Golf Complex
+com.timestamp.cam,playstore,dual-use,Timestamp Cam
+com.daily.runtracker,playstore,dual-use,Daily Run Tracker
+com.lguplus.tracking,playstore,dual-use,U+차량관제
+com.symc.ccs,playstore,dual-use,KG 인포콘
+com.specialistapps.coffs_harbour,playstore,dual-use,Coffs Coast Explorer
+com.specialistapps.enchanted,playstore,dual-use,Enchanted Adventure
+com.specialistapps.old_onslow,playstore,dual-use,Visit Ashburton
+com.specialistapps.oreillys,playstore,dual-use,O'Reilly's
+io.birota.evai,playstore,dual-use,E-VAI Bike2Share
+io.birota.zoov.leasing,playstore,dual-use,Zoov Life
+com.choosit.velopop,playstore,dual-use,Vélopop'
+>>>>>>> 9be7305 (Cleaning parsing on ISDi)

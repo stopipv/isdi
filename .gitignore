@@ -124,6 +124,7 @@ MobileDevice/
 
 ## Sensitive folder don't add to Git
 phone_dumps/
+dumps/
 static_data/android_apps_crawl.csv.gz
 # static_data/app-flags.csv
 # static_data/app-info.db
