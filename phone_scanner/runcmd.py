@@ -108,5 +108,5 @@ def run_command(cmd: str, **kwargs) -> subprocess.Popen[bytes]:
             logging.error("Error running command: {_cmd}. p.returncode: {p.returncode}\n"
                          "p.stderr = {p.stderr.read().decode()}")
         else:
-            print("Command executed successfully.")
+            print(f"Command {_cmd!r} executed successfully.")
     return p

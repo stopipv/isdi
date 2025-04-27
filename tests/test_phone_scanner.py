@@ -1,11 +1,11 @@
-from phone_scanner import AndroidScan, IosScan
+from phone_scanner import AndroidScanner IosScan
 import pytest
 
 """Fake Tests!!"""
 
 @pytest.mark.skip(reason="Fake test")
 def test_android():
-    a = AndroidScan()
+    a = AndroidScanner)
     d = a.devices()
     if not d:
         print("No Android phone connected")

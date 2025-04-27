@@ -95,7 +95,7 @@ def package_info(ddump, appid):
         print(f"No package info found for appid: {appid}")
         return [], {}
     permission_keys = ["install permissions", "declared permissions", "runtime permissions"]
-    all_perms = itertools.chain(*[a[k] for k in permission_keys])
+    all_perms = list(itertools.chain(*[a[k] for k in permission_keys]))
     pkg_info = {
         k: a.get(k, []) for k in ["versionCode", "versionName", "firstInstallTime", "lastUpdateTime"]
     }

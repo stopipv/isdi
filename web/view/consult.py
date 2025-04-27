@@ -4,7 +4,6 @@ from web import app, sa
 from web.model import Client
 from web.forms import ClientForm
 from flask import render_template, request, session, redirect, url_for
-from phone_scanner import AndroidScan, IosScan, TestScan
 from phone_scanner.db import get_client_devices_from_db, new_client_id
 
 

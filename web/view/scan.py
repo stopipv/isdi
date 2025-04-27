@@ -37,13 +37,7 @@ def scan():
     action = get_param("action")
     device_owner = get_param("device_owner")
     ser = get_param("devid")
-    t_from_dump = get_param("from_dump")
-    from_dump = True
-    if t_from_dump:
-        try:
-            from_dump = int(t_from_dump)
-        except:
-            from_dump = False
+
 
     currently_scanned = get_client_devices_from_db(session["clientid"])
     template_d = dict(
@@ -62,7 +56,6 @@ def scan():
     print("DEVICE OWNER IS: {}".format(device_owner))
     print("PRIMARY USER IS: {}".format(device_primary_user))
     print("SERIAL NO: {}".format(ser))
-    print("FROM DUMP: {}".format(from_dump))
     print("-" * 80)
     print("CLIENT ID IS: {}".format(session["clientid"]))
     print("-" * 80)
@@ -121,22 +114,11 @@ def scan():
 
     # TODO: model for 'devices scanned so far:' device_name_map['model']
     # and save it to scan_res along with device_primary_user.
-    device_name_print, device_name_map = "<NOT FOUND>", {}
-    if from_dump:
-        d = db.get_device_info(ser)
-        if d:
-            print(d)
-            device_name_print = f"{d['device_model']} ({d['device_primary_user']})"
-            device_name_map = d
-        else:
-            print("ERROR: Could not find device info:", d)
-    else:
-        device_name_print, device_name_map = sc.device_info(serial=ser)
-
+    device_name_print, device_name_map = sc.device_info(serial=ser)
     # Finds all the apps in the device
     # @apps have appid, title, flags, TODO: add icon
     apps = (
-        sc.find_spyapps(serialno=ser, from_dump=from_dump)
+        sc.find_spyapps(serialno=ser)
         .fillna("")
         .to_dict(orient="index")
     )
@@ -172,7 +154,7 @@ def scan():
             "last_full_charge", "<Unknown>"
         )
 
-    print(f"Getting from dump: {from_dump}")
+    from_dump = True
     if from_dump:
         rooted, rooted_reason = db.get_is_rooted(ser)
     else:
@@ -191,14 +173,6 @@ def scan():
             return render_template("main.html", **template_d), 201
     else:
         scanid = create_scan(scan_d)
-
-    if device == "ios":
-        pii_fpath = sc.dump_path(ser, "Device_Info")
-        print("Revelant info saved to db. Deleting {} now.".format(pii_fpath))
-        if os.path.exists(pii_fpath):
-            cmd = os.unlink(pii_fpath)
-        # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
-        print("iOS PII deleted.")
 
     print("Creating appinfo...")
     create_mult_appinfo(

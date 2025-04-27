@@ -97,23 +97,26 @@ function full_scan {
     if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
         (>&2 echo "File is still pretty fresh. Not re-dumping")
     else
-	    dump  | sed -e 's/^\( *\)lastDisabledCaller: /\1lastDisabledCaller:\1  /g;' \
-         -e 's/^\( *\)User 0: ceDataInode\(.*\)/\1User 0:\n\1  ceDataInode\2/g' > "$ofname"
+	    dump  | sed \
+         -e 's/^\(\s*\)lastDisabledCaller: /\1lastDisabledCaller:\1  /g;' \
+         -e 's/^\(\s*\)User 0: ceDataInode\(.*\)/\1User 0:\n\1  ceDataInode\2/g' \
+         -e 's/^\(\s*\)\(Excluded packages:\)/  \1\2/g' \
+         -e 's/^\(\s*\)#\(.*\)$/\1\2/g' > "$ofname"
     fi
     (>&2 echo "Pulling apks. (Runs in background). Logs are in ./logs/android_scan.logs")
     bash ./scripts/pull_apks.sh "$serial" &
 }
 
-if [[ "$1" == "scan" ]]; then 
-    (>&2 echo "------ Running full scan ------- $2")
-    serial="-s $2"
-    # If third argument is passed, use it as the output file name
-    if [[ -z "$3" ]]; then
-        ofname="./phone_dumps/tmp-dumps.txt"
-    else
-        ofname="$3"
-    fi
-    # hmac_serial="-s $3"
+info="$3"
+if [ ! -z "$info" ]; then
+    (>&2 echo "------ Running app info ------- $1 $2")
+    ofname="$2"
+    appId="$3"
+    retrieve "$appId"
+else 
+    (>&2 echo "------ Running full scan ------- $1")
+    serial="-s $1"
+    ofname="$2"
     $adb devices
     full_scan >> ./logs/android_scan.logs 
     echo "Finished scanning. Pulling apks in background"
@@ -121,11 +124,4 @@ if [[ "$1" == "scan" ]]; then
     # Clear the settings to remove developer options
     $adb $serial shell pm clear com.android.settings
     exit 0
-elif [[ "$1" == "info" ]]; then
-    (>&2 echo "------ Running app info ------- $2 $3")
-    ofname="$2"
-    appId="$3"
-    retrieve "$appId"
-else
-    usage
 fi

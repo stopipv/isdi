@@ -1,13 +1,13 @@
 import config
 from web import app
 from flask import render_template, request, session
-from phone_scanner import AndroidScan, IosScan, TestScan
+from phone_scanner import AndroidScanner, IosScanner, TestScanner
 from phone_scanner.db import get_client_devices_from_db, new_client_id
 
 # FIXME: why are we scanning devices before people clicked on scan now?
-android = AndroidScan()
-ios = IosScan()
-test = TestScan()
+android = AndroidScanner()
+ios = IosScanner()
+test = TestScanner()
 
 
 # all in all, this particular section has a terrible code smell...
