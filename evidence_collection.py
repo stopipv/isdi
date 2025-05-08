@@ -486,7 +486,7 @@ def reformat_verbose_apps(verbose_apps):
     spyware = []
     dualuse = []
 
-    for verbose_app in verbose_apps:
+    for verbose_app, info in verbose_apps:
         minimal_app = dict()
 
         minimal_app['description'] = verbose_app['description']
