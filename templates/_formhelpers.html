@@ -34,10 +34,12 @@
 <div>
     {{field.label}}
     {% for option in field %}
+    {% if option.label.text != "Nothing selected" %}
     <label class="btn btn-light">
         {{ option.label.text }}
         {{ option }}
     </label>
+    {% endif %}
     {% endfor %}
 </div>
 {% endmacro %}
