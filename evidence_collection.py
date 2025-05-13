@@ -659,7 +659,7 @@ def get_scan_data(device, device_owner):
     ))
 
     # new stuff from Sophie
-    pprint(apps)
+    
 
     suspicious_apps = []
     other_apps = []
@@ -676,7 +676,7 @@ def get_scan_data(device, device_owner):
     detailed_suspicious_apps = get_multiple_app_details(device, ser, suspicious_apps)
     detailed_other_apps = get_multiple_app_details(device, ser, other_apps)
 
-    pprint(detailed_suspicious_apps)
+ 
 
     return scan_d, detailed_suspicious_apps, detailed_other_apps
 
