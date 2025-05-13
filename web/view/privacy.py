@@ -22,9 +22,6 @@ from datetime import datetime
 import subprocess
 import time
 import random
-from flask import url_for, session
-from privacy_scan_android import add_image
-
 
 @app.route("/privacy", methods=["GET"])
 def privacy():
@@ -84,3 +81,7 @@ def iosScreenshot(serialNumber, context, nocache = False):
     command = "pymobiledevice3 developer dvt screenshot " + tempFname + " --rsd " + rsdAddress + " " + rsdPort
     subprocess.run(shlex.split(command))
     return add_image(fname, nocache=True)
+def add_image(img, nocache=False):
+        rand = random.randint(0, 10000)
+        return "<img height='400px' src='" + \
+            url_for('static', filename=img) + "?{}'/>".format(rand if nocache else '')
