@@ -456,9 +456,12 @@ def evidence_scan_investigate(ser):
 @app.route("/evidence/account", methods={'GET'})
 def evidence_account_default():
 
-    # place to save the num scans later if it becomes a pain to load it
+    # consider adding a place to save the num scans later if it becomes a pain to load it
     accounts = load_json_data(ConsultDataTypes.ACCOUNTS.value)
-    new_id = len(accounts)
+    if type(accounts) == list:
+        new_id = len(accounts)
+    else:
+        new_id = 0
 
     return redirect(url_for('evidence_account', id=new_id))
 
