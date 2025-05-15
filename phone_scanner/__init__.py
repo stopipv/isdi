@@ -475,36 +475,36 @@ class IosScan(AppScan):
 
     def setup(self, attempt_remount=False):
         """FIXME: iOS setup."""
-        if config.PLATFORM == "linux" and attempt_remount:
-            # should show GUI prompt for password. sudo apt install policykit-1 if not there.
-            cmd = "pkexec '" + config.SCRIPT_DIR + "/ios_mount_linux.sh' mount"
-            # mountmsg = run_command(cmd).stderr.read().decode('utf-8')
-            if catch_err(run_command(cmd)) == -1:
-                return (
-                    False,
-                    "Couldn't detect device. See {}/ios_mount_linux.sh.".format(
-                        config.SCRIPT_DIR
-                    ),
-                )
-        cmd = "{}idevicepair pair".format(self.cli)
-        pairmsg = run_command(cmd).stdout.read().decode("utf-8")
-        if "No device found, is it plugged in?" in pairmsg:
-            return (False, pairmsg)
-        elif "Please enter the passcode on the device and retry." in pairmsg:
-            return (
-                False,
-                "Please unlock your device and follow the trust dialog"
-                " (you will need to enter your passcode). Then try to scan again.",
-            )
-        elif "SUCCESS: Paired with device" in pairmsg:
-            return (True, "Device successfully paired. Setup complete.")
-        elif "said that the user denied the trust dialog." in pairmsg:
-            return (
-                False,
-                "The trust dialog was denied. Please unplug the device"
-                ", reconnect it, and scan again -- accept the trust dialog to proceed.",
-            )
-        return (True, "Follow trust dialog on iOS device to continue.")
+        # if config.PLATFORM == "linux" and attempt_remount:
+        #     # should show GUI prompt for password. sudo apt install policykit-1 if not there.
+        #     cmd = "pkexec '" + config.SCRIPT_DIR + "/ios_mount_linux.sh' mount"
+        #     # mountmsg = run_command(cmd).stderr.read().decode('utf-8')
+        #     if catch_err(run_command(cmd)) == -1:
+        #         return (
+        #             False,
+        #             "Couldn't detect device. See {}/ios_mount_linux.sh.".format(
+        #                 config.SCRIPT_DIR
+        #             ),
+        #         )
+        # cmd = "{}idevicepair pair".format(self.cli)
+        # pairmsg = run_command(cmd).stdout.read().decode("utf-8")
+        # if "No device found, is it plugged in?" in pairmsg:
+        #     return (False, pairmsg)
+        # elif "Please enter the passcode on the device and retry." in pairmsg:
+        #     return (
+        #         False,
+        #         "Please unlock your device and follow the trust dialog"
+        #         " (you will need to enter your passcode). Then try to scan again.",
+        #     )
+        # elif "SUCCESS: Paired with device" in pairmsg:
+        #     return (True, "Device successfully paired. Setup complete.")
+        # elif "said that the user denied the trust dialog." in pairmsg:
+        #     return (
+        #         False,
+        #         "The trust dialog was denied. Please unplug the device"
+        #         ", reconnect it, and scan again -- accept the trust dialog to proceed.",
+        #     )
+        # return (True, "Follow trust dialog on iOS device to continue.")
 
     # TODO: This might send titles out of order. Fix this to send both appid and
     # titles.
