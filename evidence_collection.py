@@ -684,7 +684,9 @@ def get_scan_by_ser(ser, all_scan_data: list[ScanData]):
 
 
 
+
 def update_scan_by_ser(new_scan: ScanData, all_scan_data: list[ScanData]):
+
 
     for i in range(len(all_scan_data)):
         scan = all_scan_data[i]
@@ -806,7 +808,7 @@ class SecurityQForm(FlaskForm):
     questions = TextAreaField("Which questions are set?")
     know = RadioField("Do you believe your [ex-]partner knows the answer to any of these questions?", choices=YES_NO_UNSURE_CHOICES, default=YES_NO_DEFAULT)
     screenshot = MultipleFileField('Add screenshot(s)')
-
+    
 class AccountInfoForm(FlaskForm):
     account_nickname = TextAreaField("Account Nickname")
     account_platform = TextAreaField("Platform")
@@ -886,7 +888,7 @@ class AccountCompromiseForm(FlaskForm):
     security_questions = FormField(SecurityQForm)
     notes = FormField(NotesForm)
     submit = SubmitField("Save")
-
+    
 class SetupForm(FlaskForm):
     title = "Consultation Information"
     client = StringField('Client Name', validators=[InputRequired()])
@@ -982,7 +984,6 @@ class TAQForm(FlaskForm):
     legal = FormField(TAQLegalForm)
     submit = SubmitField("Save TAQ")
 
-
 def unpack_evidence_context(session, task="evidence"):
     """Takes session data and turns it into less confusing context to feed to template"""
 
@@ -1048,7 +1049,6 @@ def create_printout(context):
     template_env = jinja2.Environment(loader=template_loader)
     template = template_env.get_template(template)
     output_text = template.render(context)
-
 
     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
     options = {'enable-local-file-access': None,
@@ -1148,7 +1148,6 @@ def account_is_concerning(account):
 
     return login_concern or pwd_concern or recovery_concern or twofactor_concern or security_concern
 
-
 def get_multiple_app_details(device, ser, apps):
     filled_in_apps = []
     for app in apps:
@@ -1156,7 +1155,6 @@ def get_multiple_app_details(device, ser, apps):
         d["flags"] = app["flags"]
         filled_in_apps.append(d)    
     return filled_in_apps
-
 
 def get_app_details(device, ser, appid):
     sc = get_device(device)
@@ -1381,11 +1379,11 @@ def load_json_data(datatype: ConsultDataTypes):
 
     fname = os.path.join(TMP_CONSULT_DATA_DIR, get_data_filename(datatype))
     if not os.path.exists(fname):
-        return None
-        #if datatype in [ConsultDataTypes.TAQ, ConsultDataTypes.SETUP] :
-        #    return dict()
-        #else: 
-        #    return []
+        return dict()
+        # if datatype in [ConsultDataTypes.TAQ, ConsultDataTypes.SETUP] :
+        #     return dict()
+        # else:
+        #     return dict()
 
     with open(fname, 'r') as openfile:
         json_object = json.load(openfile)

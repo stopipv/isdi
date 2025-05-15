@@ -82,7 +82,7 @@ def get_all_leaves(d):
 
 def extract(d, lkeys_dict):
     """This is super inefficient"""
-    if isinstance(d, list):
+    if isinstance(d, list) and len(d) > 0:
         d = d[0]
     if isinstance(lkeys_dict, list):
         return [d[k] for k in lkeys_dict if k in d]

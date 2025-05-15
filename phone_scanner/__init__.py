@@ -137,7 +137,7 @@ class AppScan(object):
             print(">>> Exception:::", ex, file=sys.stderr)
             return dict(), dict()
 
-    def find_spyapps(self, serialno, from_dump=True):
+    def find_spyapps(self, serialno, from_dump=False):
         """Finds the apps in the phone and add flags to them based on @blocklist.py
         Return the sorted dataframe
         This is the **main** function that is called from the views in web/view/scan.py
@@ -260,7 +260,7 @@ class AndroidScan(AppScan):
         app_and_codes = self.dump_d.apps()
         return [a for a, c in app_and_codes]
 
-    def get_apps(self, serialno: str, from_dump: bool = True) -> list:
+    def get_apps(self, serialno: str, from_dump: bool = False) -> list:
         print(f"Getting Android apps: {serialno} from_dump={from_dump}")
         hmac_serial = config.hmac_serial(serialno)
         if not from_dump:
