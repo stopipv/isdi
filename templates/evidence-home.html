@@ -52,7 +52,6 @@
             <br>
             <div>
                 <a href="{{ url_for('evidence_taq') }}" class="btn btn-default">TAQ Page</a>
-                {% set new_id = consultdata.scans|length %}
                 <a href="{{ url_for('evidence_scan_start') }}" class="btn btn-default">Scan a device</a>
                 <a href="{{ url_for('evidence_account_default') }}" class="btn btn-default">Add an account</a>
 
@@ -64,7 +63,8 @@
                 <b>TAQ Data</b>
                 <details><p>{{consultdata.taq}}</p></details>
                 <br/>
-                <b>Scans: {{consultdata.scans|length}}</b>
+                {% if consultdata.scans %}
+                <p><b>Scans</b>: {{consultdata.scans|length}}</p>
                 <details>
                     <table>
                         {% for scan in consultdata.scans %}
@@ -82,8 +82,12 @@
                         {% endfor %}
                     </table>
                 </details>
+                {% else %}
+                <p><b>Scans</b>: None</p>
+                {% endif %}
                 <br/>
-                <b>Accounts: {{consultdata.accounts|length}}</b>
+                {% if consultdata.accounts %}
+                <p><b>Accounts</b>: {{consultdata.accounts|length}}</p>
                 <details>
                     <table>
                         {% for account in consultdata.accounts %}
@@ -98,6 +102,9 @@
                         {% endfor %}
                     </table>
                 </details>
+                {% else %}
+                <p><b>Accounts</b>: None</p>
+                {% endif %}
             </div>
             <br/>
             <br/>
