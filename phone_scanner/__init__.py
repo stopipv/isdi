@@ -504,7 +504,7 @@ class IosScan(AppScan):
         #         "The trust dialog was denied. Please unplug the device"
         #         ", reconnect it, and scan again -- accept the trust dialog to proceed.",
         #     )
-        # return (True, "Follow trust dialog on iOS device to continue.")
+        return (True, "Follow trust dialog on iOS device to continue.")
 
     # TODO: This might send titles out of order. Fix this to send both appid and
     # titles.
@@ -537,7 +537,8 @@ class IosScan(AppScan):
             return re.match(r"[a-f0-9]+", x) is not None
 
         # cmd = '{cli} --detect -t1 | tail -n 1'
-        cmd = "{}idevice_id -l | tail -n 1".format(self.cli)
+        cmd = "pymobiledevice3 usbmux list | awk -F'\"' '/Identifier/ {{print $4}}'"
+
         self.serialno = None
         s = catch_err(run_command(cmd), cmd=cmd, msg="")
 
