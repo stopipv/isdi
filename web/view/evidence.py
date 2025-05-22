@@ -86,7 +86,7 @@ def evidence_setup():
         )
 
         return render_template('main.html', **context)
-    
+
     if request.method == 'POST':
         pprint(form.data)
         if form.is_submitted() and form.validate():
@@ -99,11 +99,11 @@ def evidence_setup():
 
 
             return redirect(url_for('evidence_home'))
-        
+
         elif not form.validate():
             flash("Missing required fields")
             return redirect(url_for('evidence_setup'))
-        
+
 
     return redirect(url_for('evidence_setup'))
 
@@ -138,7 +138,7 @@ def evidence_taq():
 
         # Load any data we already have
         taq_data = load_object_from_json(ConsultDataTypes.TAQ.value)
-    
+
         form.process(data=taq_data.to_dict())
 
         context = dict(
@@ -168,11 +168,11 @@ def evidence_taq():
             save_data_as_json(taq_data, ConsultDataTypes.TAQ.value)
 
             return redirect(url_for('evidence_home'))
-        
+
         elif not form.validate():
             flash("Form validation error - are you missing required fields?", 'error')
             return redirect(url_for('evidence_taq'))
-        
+
     return redirect(url_for('evidence_taq'))
 
 
@@ -204,7 +204,7 @@ def evidence_scan_start(device_type, device_nickname):
         if form.is_submitted() and form.validate():
 
             if form.manualadd.data:
-                return redirect(url_for('evidence_scan_manualadd', 
+                return redirect(url_for('evidence_scan_manualadd',
                                         device_nickname=form.data["device_nickname"]))
 
             # clean up the submitted data
@@ -231,31 +231,31 @@ def evidence_scan_start(device_type, device_nickname):
                     suspicious_apps_dict[i]["investigate"] = True
 
                 all_apps = suspicious_apps_dict + other_apps_dict
-                
+
                 # Create current scan object with this info
-                current_scan = ScanData(scan_id=len(all_scan_data), 
-                                        **clean_data, 
+                current_scan = ScanData(scan_id=len(all_scan_data),
+                                        **clean_data,
                                         **scan_data,
                                         all_apps=all_apps)
 
-    
+
                 pprint(current_scan.__dict__)
                 for app in current_scan.all_apps:
                     pprint(app.permission_info.__dict__)
-                
+
                 current_scan.id = len(all_scan_data)
                 all_scan_data.append(current_scan)
-            
+
                 save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
                 return redirect(url_for('evidence_scan_select', ser=current_scan.serial))
 
             except Exception as e:
                 print(traceback.format_exc())
                 flash("Scan error: " + str(e))
-                return redirect(url_for('evidence_scan_start',  
+                return redirect(url_for('evidence_scan_start',
                                         device_type=form.data["device_type"],
                                         device_nickname=form.data["device_nickname"]))
-            
+
         elif not form.validate():
             flash("Form validation error - are you missing required fields?", 'error')
 
@@ -285,10 +285,14 @@ def evidence_scan_select(ser):
         context = dict(
             task = "evidence-scan",
             form = form,
+            device = current_scan.device_type,
             title=config.TITLE,
             all_apps = [app.to_dict() for app in current_scan.all_apps],
             step = 2
         )
+        print("-"*80)
+        print(context['device'])
+        print("-"*80)
 
         return render_template('main.html', **context)
 
@@ -302,7 +306,7 @@ def evidence_scan_select(ser):
 
             # get selected apps from the form data
             to_investigate_titles = [app["title"] for app in form.data['apps'] if app['investigate']]
-            
+
             selected_apps = []
             for app in current_scan.all_apps:
                 if app.title in to_investigate_titles:
@@ -319,14 +323,14 @@ def evidence_scan_select(ser):
 
             # save this updated data
             save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
-        
+
             return redirect(url_for('evidence_scan_investigate', ser=ser))
-        
+
         if not form.validate():
             flash("Form validation error - are you missing required fields?", 'error')
 
         return redirect(url_for('evidence_scan_select'), ser=ser)
-        
+
 @app.route("/evidence/scan/manualadd/<string:device_nickname>", methods={'GET', 'POST'})
 def evidence_scan_manualadd(device_nickname):
 
@@ -342,7 +346,7 @@ def evidence_scan_manualadd(device_nickname):
         )
 
         return render_template('main.html', **context)
-    
+
     ### IF IT'S A POST:
     if request.method == 'POST':
 
@@ -387,7 +391,7 @@ def evidence_scan_manualadd(device_nickname):
 
                 # load all scans
                 all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
-                
+
                 # add manual scan
                 all_scan_data = update_scan_by_ser(manual_scan, all_scan_data)
 
@@ -400,10 +404,10 @@ def evidence_scan_manualadd(device_nickname):
                     pprint(app.__dict__)
 
                 return redirect(url_for('evidence_scan_investigate', ser=manual_scan.serial))
-            
+
             if not form.validate():
                 flash("Form validation error - are you missing required fields?", 'error')
-                
+
             return redirect(url_for('evidence_scan_manualadd', device_nickname=device_nickname))
 
 
@@ -433,6 +437,7 @@ def evidence_scan_investigate(ser):
             form = form,
             title=config.TITLE,
             scan_data = current_scan.to_dict(),
+            device = current_scan.device_type,
             step = 3
         )
 
@@ -455,7 +460,7 @@ def evidence_scan_investigate(ser):
             save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
 
             return redirect(url_for('evidence_home'))
-    
+
         elif not form.validate():
             flash("Form validation error - are you missing required fields?", 'error')
             return redirect(url_for('evidence_scan_investigate', ser=ser))
@@ -484,7 +489,7 @@ def evidence_account(id):
 
     if len(all_account_data) > id:
         current_account = all_account_data[id]
-    
+
     form = AccountCompromiseForm()
 
     if request.method == 'GET':
@@ -494,6 +499,7 @@ def evidence_account(id):
             task = "evidence-account",
             form = form,
             title=config.TITLE,
+            device = current_scan.device_type,
             sessiondata = current_account.to_dict()
             # for now, don't load anything
         )
@@ -519,7 +525,7 @@ def evidence_account(id):
             save_data_as_json(all_account_data, ConsultDataTypes.ACCOUNTS.value)
 
             return redirect(url_for('evidence_home'))
-        
+
         if not form.validate():
             flash("Form validation error - are you missing required fields?", 'error')
             pprint(form.errors)

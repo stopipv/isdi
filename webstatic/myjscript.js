@@ -27,41 +27,22 @@ function delete_app(appid, e) {
     })
 }
 
-function getScreenshot(buttonId) { // ButtonId is the context which the screenshot was taken
+function getScreenshot(buttonId, device) { // ButtonId is the context which the screenshot was taken
     var imageDiv = document.createElement('div');
     imageDiv.classList.add("form-screenshot");
     var loading = document.createElement('img')
     loading.src = "../../../webstatic/images/waiting.gif";
-    console.log("1");
     imageDiv.innerHTML = loading.outerHTML;
-    console.log("2");
     document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
-    console.log("3");
-    console.log(device);
-    if (device === 'ios') {
-        console.log("4");
-        console.log(buttonId);
-        fetch('/privacy/ios/screenshot/' + buttonId)
-        .then(response => response.text())
-        .then(data => {
-            imageDiv.innerHTML = data;
-            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
-        })
-        .catch(error => {
-            imageDiv.innerHTML = "Error loading screenshot: " + error;
-        });
-        console.log("5");
-    } else if (device === 'android') {
-        console.log("very bad")
-        fetch('/privacy/android/screenshot/' + buttonId)
-        .then(response => response.text())
-        .then(data => {
-            //loading.remove();
-            imageDiv.innerHTML = data;
-            document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
-        });
-
-    }
+      fetch('/privacy/' + device + '/screenshot/' + buttonId)
+      .then(response => response.text())
+      .then(data => {
+          imageDiv.innerHTML = data;
+          document.getElementById(buttonId).parentNode.insertBefore(imageDiv, document.getElementById(buttonId).nextSibling);
+      })
+      .catch(error => {
+          imageDiv.innerHTML = "Error loading screenshot: " + error;
+      });
     console.log("done")
 }
 

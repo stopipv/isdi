@@ -163,7 +163,7 @@
                             </table>
                         </div>
                         <div>
-                          <button id="spyware_{{ spyware[loop.index0].app_name.replace(' ','') }}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                          <button id="spyware_{{ spyware[loop.index0].app_name.replace(' ','') }}" type="button" onclick="getScreenshot(this.id, '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>
@@ -254,7 +254,7 @@
 
                                 </tbody>
                             </table>
-                            <button id="dualuse_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                            <button id="dualuse_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id, '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
 
                         {% for perm in nested.permissions %}
@@ -276,7 +276,7 @@
                                     <tr><th>{{perm.describe.label}}</th><td>{{perm.describe}}</td></tr>
                                 </tbody>
                             </table>
-                            <button id="dualuseperm_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}_{{dualuse[outer_loop.index0].permissions[loop.index0].permission_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
+                            <button id="dualuseperm_{{dualuse[outer_loop.index0].app_name.replace(' ', '')}}_{{dualuse[outer_loop.index0].permissions[loop.index0].permission_name.replace(' ', '')}}" type="button" onclick="getScreenshot(this.id, '{{device}}')">Screenshot</button>
                         </div>
                         {% endfor %}
 
@@ -298,7 +298,7 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                
+
                 {% if form.accounts|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -348,7 +348,7 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_logins.label}}</th><td>{{nested.suspicious_logins.describe_logins}}</td></tr>
-                                    <button id="accounts_{{accounts[loop.index0].account_name.replace(' ','')}}" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
+                                    <button id="accounts_{{accounts[loop.index0].account_name.replace(' ','')}}" type="button" onclick="getScreenshot('login', '{{device}}')" value="screenshot">Screenshot</button>
 
                                     <tr><th>{{nested.suspicious_logins.activity_log.label}}</th><td>
                                         <div class="btn-group" data-toggle="buttons" id={{nested.suspicious_logins.activity_log.id}}>
@@ -361,7 +361,7 @@
                                         {% endfor %}
                                     </div></td></tr>
                                     <tr><th>{{nested.suspicious_logins.describe_activity.label}}</th><td>{{nested.suspicious_logins.describe_activity}}</td></tr>
-                                    <button id="loginactivity_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
+                                    <button id="loginactivity_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('loginactivity', '{{device}}')" value="screenshot">Screenshot</button>
                                 </tbody>
                             </table>
                         </div>
@@ -404,7 +404,7 @@
                                     {% endfor %}
                                     <tr><th>{{nested.recovery_settings.phone.label}}</th><td>{{nested.recovery_settings.phone}}</td></tr>
 
-                                    <button id="recovery_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
+                                    <button id="recovery_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recovery', '{{device}}')" value="screenshot">Screenshot</button>
                                     {% for subform in [nested.recovery_settings.email_present, nested.recovery_settings.email_access] %}
                                     <tr><th>{{subform.label}}</th><td>
                                         <div class="btn-group" data-toggle="buttons" id={{subform.id}}>
@@ -420,7 +420,7 @@
                                     <tr><th>{{nested.recovery_settings.email.label}}</th><td>{{nested.recovery_settings.email}}</td></tr>
                                 </tbody>
                             </table>
-                            <button id="recoveryemail_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
+                            <button id="recoveryemail_{{accounts[loop.index0].account_name.replace(' ', '')}}" type="button" onclick="getScreenshot('recoveryemail', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.two_factor_settings.label }}</h5>
                         <div class="subform">
@@ -455,7 +455,7 @@
 
                                 </tbody>
                             </table>
-                            <button id="twofactor_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('twofactor')" value="screenshot">Screenshot</button>
+                            <button id="twofactor_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('twofactor', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ nested.security_questions.label }}</h5>
                         <div class="subform">
@@ -485,7 +485,7 @@
                                     </div></td></tr>
                                 </tbody>
                             </table>
-                            <button id="securityq_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>
+                            <button id="securityq_{{accounts[loop.index0].account_name}}" type="button" onclick="getScreenshot('securityq', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{nested.notes.label}}</h5>
                         <div class="subform notes">{{ nested.notes }}</div>
