@@ -1,5 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% from "_formhelpers.html" import render_select, render_text_field %}
 
 <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
@@ -25,7 +26,8 @@
             <hr>
             <form action method="post" class="form" role="form">
                 {{ form.hidden_tag() }}
-                <b>{{form.device_nickname.label}}:</b> {{form.device_nickname}}
+                {{ render_text_field(form.device_nickname) }}
+                {{ render_select(form.device_type) }}
                 <br>
                 <br>
                 <p>List app names below:</p>

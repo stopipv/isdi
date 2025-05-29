@@ -13,7 +13,6 @@ from phone_scanner.db import (
     first_element_or_none,
 )
 
-
 def get_param(key):
     return request.form.get(key, request.args.get(key))
 

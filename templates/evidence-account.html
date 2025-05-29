@@ -26,7 +26,7 @@
                 {{ wtf.form_errors(form) }}
 
             <h2>{{ form.title }}</h2>
-            <br>                    
+            <br>
                     <tr><th><h4>{{form.platform.label}}</h4></th><td>{{form.platform}}</td></tr>
                     <tr><th><h4>{{form.account_nickname.label}}</h4></th><td>{{form.account_nickname}}</td></tr>
                     <br/><br/>
@@ -39,11 +39,11 @@
                                 <tbody>
                                     {{ render_select(form.suspicious_logins.recognize) }}
                                     {{ render_text_field(form.suspicious_logins.describe_logins) }}
-                                    <button id="accountnameFIXME" type="button" onclick="getScreenshot('login')" value="screenshot">Screenshot</button>
+                                    <button id="accountnameFIXME" type="button" onclick="getScreenshot('login', '{{device}}')" value="screenshot">Screenshot</button>
 
                                     {{ render_select(form.suspicious_logins.activity_log) }}
                                     {{ render_text_field(form.suspicious_logins.describe_activity) }}
-                                    <button id="loginactivityFIXME" type="button" onclick="getScreenshot('loginactivity')" value="screenshot">Screenshot</button>
+                                    <button id="loginactivityFIXME" type="button" onclick="getScreenshot('loginactivity', '{{device}}')" value="screenshot">Screenshot</button>
                                 </tbody>
                             </table>
                         </div>
@@ -67,14 +67,14 @@
                                     {{ render_select(subform) }}
                                     {% endfor %}
                                     {{ render_text_field(form.recovery_settings.phone) }}
-                                    <button id="recovery_FIXME" type="button" onclick="getScreenshot('recovery')" value="screenshot">Screenshot</button>
+                                    <button id="recovery_FIXME" type="button" onclick="getScreenshot('recovery', '{{device}}')" value="screenshot">Screenshot</button>
                                     {% for subform in [form.recovery_settings.email_present, form.recovery_settings.email_access] %}
                                     {{ render_select(subform) }}
                                     {% endfor %}
                                     {{ render_text_field(form.recovery_settings.email) }}
                                 </tbody>
                             </table>
-                            <button id="recoveryemailFIXME" type="button" onclick="getScreenshot('recoveryemail')" value="screenshot">Screenshot</button>
+                            <button id="recoveryemailFIXME" type="button" onclick="getScreenshot('recoveryemail', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ form.two_factor_settings.label }}</h5>
                         <div class="subform">
@@ -91,7 +91,7 @@
 
                                 </tbody>
                             </table>
-                            <button id="twofactor_FIXME" type="button" onclick="getScreenshot('twofactor')" value="screenshot">Screenshot</button>
+                            <button id="twofactor_FIXME" type="button" onclick="getScreenshot('twofactor', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{ form.security_questions.label }}</h5>
                         <div class="subform">
@@ -103,7 +103,7 @@
                                     {{ render_select(form.security_questions.know) }}
                                 </tbody>
                             </table>
-                            <button id="securityq_FIXME" type="button" onclick="getScreenshot('securityq')" value="screenshot">Screenshot</button>
+                            <button id="securityq_FIXME" type="button" onclick="getScreenshot('securityq', '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
                         <h5>{{form.notes.label}}</h5>
                         <div class="subform notes">{{ form.notes }}</div>

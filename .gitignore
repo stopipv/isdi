@@ -153,6 +153,7 @@ static_data/kevins_approach.csv
 static_data/app-flags.with-sources.csv
 notes_rahul/
 __MACOSX
+webstatic/images/*
 
 *~test
 *.apk

@@ -79,7 +79,7 @@
                 {% endif %}
 
                 <br>
-                
+
                 {% for nested in form.selected_apps %}
                 {% set outer_loop = loop %}
                 <details>
@@ -138,7 +138,7 @@
 
                                 </tbody>
                             </table>
-                            <button id="selected_apps_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id)" value="screenshot">Screenshot</button>
+                            <button id="selected_apps_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id, '{{device}}')" value="screenshot">Screenshot</button>
                         </div>
 
                         <h5>Permission check</h5>
@@ -150,7 +150,7 @@
                                     {{ render_text_field(nested.permission_info.describe) }}
                                 </tbody>
                             </table>
-                            <button id="selected_appsperm_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id)">Screenshot</button>
+                            <button id="selected_appsperm_{{scan_data.selected_apps[outer_loop.index0].title}}" type="button" onclick="getScreenshot(this.id, '{{device}}')">Screenshot</button>
                         </div>
 
                         <h5>{{nested.notes.label}}</h5>

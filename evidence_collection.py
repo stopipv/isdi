@@ -907,6 +907,7 @@ class ManualAppSelectForm(FlaskForm):
 class ManualAddPageForm(FlaskForm):
     title = "Manual App Investigation: Select Apps"
     device_nickname = StringField("Device Nickname", validators=[InputRequired()])
+    device_type = RadioField('Device type', choices=DEVICE_TYPE_CHOICES, validators=[InputRequired()])
     apps = FieldList(FormField(ManualAppSelectForm))
     addline = SubmitField("Add a new app")
     submit = SubmitField("Submit")

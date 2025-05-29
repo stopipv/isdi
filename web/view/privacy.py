@@ -1,14 +1,11 @@
 from flask import render_template, request
 
 import config
-import web.view.evidence
 
 #from phone_scanner import iosScreenshot
 from phone_scanner.privacy_scan_android import do_privacy_check, take_screenshot
 from web import app
-from web.view import get_device
-
-from phone_scanner.privacy_scan_android import do_privacy_check
+from web.view.index import get_device
 
 import hashlib
 import hmac
@@ -41,6 +38,7 @@ def privacy():
 @app.route("/privacy/<device>/<cmd>/<context>", methods=["GET"])
 def privacy_scan(device, cmd, context):
     print(cmd)
+    print(device)
     sc = get_device(device)
     if(device == "ios"):
         print("Taking a IOS screenhsot")
@@ -49,8 +47,6 @@ def privacy_scan(device, cmd, context):
         res = do_privacy_check(sc.serialno, cmd, context)
     print("Screenshot Taken")
     return res
-
-
 
 def iosScreenshot(serialNumber, context, nocache = False):
     curr_time = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
