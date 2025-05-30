@@ -1169,6 +1169,35 @@ def get_app_details(device, ser, appid):
 
     return d
 
+def get_scan_obj(device, nickname):
+    """Create the scan object."""
+    print(f"DEVICE TYPE IS: {device}")
+    sc = get_device(device)
+    if not sc:
+        raise Exception("Please choose one device to scan.")
+    if not nickname:
+        raise Exception("Please give the device a nickname.")
+    return sc
+
+def get_ser_from_scan_obj(sc):
+    """Get the serial number of the device, if it exists."""
+    ser = sc.devices()
+
+    print("Devices: {}".format(ser))
+    if not ser:
+        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
+        # needed.
+        raise Exception("A device wasn't detected.")
+
+    ser = first_element_or_none(ser)
+    return ser
+
+def get_serial(device, nickname):
+    sc = get_scan_obj(device, nickname)
+    ser = get_ser_from_scan_obj(sc)
+    return ser
+
+
 def get_scan_data(device, device_owner):
 
     # The following code is adapted from web/view/scan.py
@@ -1182,137 +1211,122 @@ def get_scan_data(device, device_owner):
     )
 
     print(f"DEVICE TYPE IS: {device}")
-    sc = get_device(device)
-    if not sc:
-        raise Exception("Please choose one device to scan.")
-    if not device_owner:
-        raise Exception("Please give the device a nickname.")
-    ser = sc.devices()
 
-    print("Devices: {}".format(ser))
-    if not ser:
-        # FIXME: add pkexec scripts/ios_mount_linux.sh workflow for iOS if
-        # needed.
-        error = "A device wasn't detected."
-        template_d["error"] = error
-        raise Exception(error)
+    try:
+        sc = get_scan_obj(device, device_owner)
+        ser = get_ser_from_scan_obj(sc)
+        
+        print(">>>scanning_device", device, ser, "<<<<<")
 
-    ser = first_element_or_none(ser)
-    print(">>>scanning_device", device, ser, "<<<<<")
+        if device == 'ios':
+            # go through pairing process and do not scan until it is successful.
+            isconnected, reason = sc.setup()
+            if not isconnected:
+                error = "If an iPhone is connected, open iTunes, click through the "\
+                        "connection dialog and wait for the \"Trust this computer\" "\
+                        "prompt to pop up in the iPhone, and then scan again."
+                template_d["error"] = error.format(reason)
+                raise Exception(error)
 
-    if device == "ios":
-        error = "If an iPhone is connected, open iTunes, click through the "\
-                "connection dialog and wait for the \"Trust this computer\" "\
-                "prompt to pop up in the iPhone, and then scan again."
-    else:
-        error = "If an Android device is connected, disconnect and reconnect "\
-                "the device, make sure developer options is activated and USB "\
-                "debugging is turned on on the device, and then scan again."
-    error += "{} <b>Please follow the <a href='/instruction' target='_blank'"\
-             " rel='noopener'>setup instructions here,</a> if needed.</b>"
-    if device == 'ios':
-        # go through pairing process and do not scan until it is successful.
-        isconnected, reason = sc.setup()
-        template_d["error"] = error.format(reason)
-        if not isconnected:
+        # TODO: model for 'devices scanned so far:' device_name_map['model']
+        # and save it to scan_res along with device_primary_user.
+        device_name_print, device_name_map = sc.device_info(serial=ser)
+
+        # Finds all the apps in the device
+        # @apps have appid, title, flags, TODO: add icon
+        apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+        if len(apps) <= 0:
+            print("The scanning failed for some reason.")
+            error = "The scanning failed. This could be due to many reasons. Try"\
+                " rerunning the scan from the beginning. If the problem persists,"\
+                " please report it in the file. Check the phone manually. Sorry for"\
+                " the inconvenience."
+            template_d["error"] = error
             raise Exception(error)
 
-    # TODO: model for 'devices scanned so far:' device_name_map['model']
-    # and save it to scan_res along with device_primary_user.
-    device_name_print, device_name_map = sc.device_info(serial=ser)
+        clientid = "1"
+        if 'clientid' in session.keys():
+            clientid = session['clientid']
 
-    # Finds all the apps in the device
-    # @apps have appid, title, flags, TODO: add icon
-    apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
-    if len(apps) <= 0:
-        print("The scanning failed for some reason.")
-        error = "The scanning failed. This could be due to many reasons. Try"\
-            " rerunning the scan from the beginning. If the problem persists,"\
-            " please report it in the file. <code>report_failed.md</code> in the<code>"\
-            "phone_scanner/</code> directory. Checn the phone manually. Sorry for"\
-            " the inconvenience."
-        template_d["error"] = error
-        raise Exception(error)
+        scan_d = {
+            'clientid': clientid,
+            'serial': config.hmac_serial(ser),
+            'device': device,
+            'device_model': device_name_map.get('model', '<Unknown>').strip(),
+            'device_version': device_name_map.get('version', '<Unknown>').strip(),
+            'device_primary_user': device_owner,
+        }
 
-    clientid = "1"
-    if 'clientid' in session.keys():
-        clientid = session['clientid']
-
-    scan_d = {
-        'clientid': clientid,
-        'serial': config.hmac_serial(ser),
-        'device': device,
-        'device_model': device_name_map.get('model', '<Unknown>').strip(),
-        'device_version': device_name_map.get('version', '<Unknown>').strip(),
-        'device_primary_user': device_owner,
-    }
-
-    if device == 'ios':
-        scan_d['device_manufacturer'] = 'Apple'
-        scan_d['last_full_charge'] = 'unknown'
-    else:
-        scan_d['device_manufacturer'] = device_name_map.get(
-            'brand', "<Unknown>").strip()
-        scan_d['last_full_charge'] = device_name_map.get(
-            'last_full_charge', "<Unknown>")
-
-    rooted, rooted_reason = sc.isrooted(ser)
-    scan_d['is_rooted'] = rooted
-    scan_d['rooted_reasons'] = json.dumps(rooted_reason)
-
-    scanid = create_scan(scan_d)
-
-    if device == 'ios':
-        pii_fpath = sc.dump_path(ser, 'Device_Info')
-        print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
-        cmd = os.unlink(pii_fpath)
-        # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
-        print('iOS PII deleted.')
-
-    print("Creating appinfo...")
-    create_mult_appinfo([(scanid, appid, json.dumps(
-        info['flags']), '', '<new>') for appid, info in apps.items()])
-
-    template_d.update(dict(
-        isrooted=(
-            "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
-            .format(rooted_reason) if rooted
-            else "Don't know" if rooted is None
-            else "No"
-        ),
-        device_name=device_name_print,
-        apps=apps,
-        scanid=scanid,
-        sysapps=set(),  # sc.get_system_apps(serialno=ser)),
-        serial=ser,
-        # TODO: make this a map of model:link to display scan results for that
-        # scan.
-        error=config.error()
-    ))
-
-    # new stuff from Sophie
-    pprint(apps)
-
-    suspicious_apps = []
-    other_apps = []
-
-    for k in apps.keys():
-        app = apps[k]
-        app["id"] = k
-        app["app_name"] = app["title"]
-        if app["app_name"].strip() == "":
-            app["app_name"] = k
-        if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
-            suspicious_apps.append(app)
+        if device == 'ios':
+            scan_d['device_manufacturer'] = 'Apple'
+            scan_d['last_full_charge'] = 'unknown'
         else:
-            other_apps.append(app)
+            scan_d['device_manufacturer'] = device_name_map.get(
+                'brand', "<Unknown>").strip()
+            scan_d['last_full_charge'] = device_name_map.get(
+                'last_full_charge', "<Unknown>")
 
-    detailed_suspicious_apps = get_multiple_app_details(device, ser, suspicious_apps)
-    detailed_other_apps = get_multiple_app_details(device, ser, other_apps)
+        rooted, rooted_reason = sc.isrooted(ser)
+        scan_d['is_rooted'] = rooted
+        scan_d['rooted_reasons'] = json.dumps(rooted_reason)
 
-    pprint(detailed_suspicious_apps)
+        scanid = create_scan(scan_d)
 
-    return scan_d, detailed_suspicious_apps, detailed_other_apps
+        if device == 'ios':
+            pii_fpath = sc.dump_path(ser, 'Device_Info')
+            print('Revelant info saved to db. Deleting {} now.'.format(pii_fpath))
+            cmd = os.unlink(pii_fpath)
+            # s = catch_err(run_command(cmd), msg="Delete pii failed", cmd=cmd)
+            print('iOS PII deleted.')
+
+        print("Creating appinfo...")
+        create_mult_appinfo([(scanid, appid, json.dumps(
+            info['flags']), '', '<new>') for appid, info in apps.items()])
+
+        template_d.update(dict(
+            isrooted=(
+                "Maybe (this is possibly just a bug with our scanning tool). Reason(s): {}"
+                .format(rooted_reason) if rooted
+                else "Don't know" if rooted is None
+                else "No"
+            ),
+            device_name=device_name_print,
+            apps=apps,
+            scanid=scanid,
+            sysapps=set(),  # sc.get_system_apps(serialno=ser)),
+            serial=ser,
+            # TODO: make this a map of model:link to display scan results for that
+            # scan.
+            error=config.error()
+        ))
+
+        # new stuff from Sophie
+        pprint(apps)
+
+        suspicious_apps = []
+        other_apps = []
+
+        for k in apps.keys():
+            app = apps[k]
+            app["id"] = k
+            app["app_name"] = app["title"]
+            if app["app_name"].strip() == "":
+                app["app_name"] = k
+            if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
+                suspicious_apps.append(app)
+            else:
+                other_apps.append(app)
+
+        detailed_suspicious_apps = get_multiple_app_details(device, ser, suspicious_apps)
+        detailed_other_apps = get_multiple_app_details(device, ser, other_apps)
+
+        pprint(detailed_suspicious_apps)
+
+        return scan_d, detailed_suspicious_apps, detailed_other_apps
+
+    except Exception as e:
+        template_d["error"] = str(e)
+        raise e
 
 class ConsultDataTypes(Enum):
     TAQ = 1
