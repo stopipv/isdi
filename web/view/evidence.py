@@ -503,7 +503,6 @@ def evidence_account(id):
             task = "evidence-account",
             form = form,
             title=config.TITLE,
-            device = current_scan.device_type,
             sessiondata = current_account.to_dict()
             # for now, don't load anything
         )
