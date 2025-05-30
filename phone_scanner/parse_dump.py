@@ -266,7 +266,8 @@ class AndroidDump(PhoneDump):
     # @staticmethod
     def parse_dump_file(self, fname) -> dict:
         if not Path(fname).exists():
-            print("File: {!r} does not exists".format(fname))
+            #print("File: {!r} does not exists".format(fname))
+            raise FileNotFoundError(fname)
         fp = open(fname)
         d = {}
         service = ""

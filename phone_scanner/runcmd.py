@@ -3,6 +3,7 @@ import re
 
 # import shlex
 import subprocess
+import sys
 
 """
 def add_to_error(*args):
@@ -91,13 +92,11 @@ def catch_err(
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(cli="adb", **kwargs)
     print(_cmd)
+    p = subprocess.Popen(
+            _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
+    # ric recommends later we use stdout=sys.stdout, stderr=sys.stderr, and subprocess.run instead
     if kwargs.get("nowait", False) or kwargs.get("NOWAIT", False):
-        pid = subprocess.Popen(
-            _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        ).pid
-        return pid
+        return p.pid
     else:
-        p = subprocess.Popen(
-            _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
         return p

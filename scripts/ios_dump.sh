@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 platform='unknown'
 unamestr=`uname`
@@ -10,7 +12,7 @@ elif [[ "$unamestr" == 'FreeBSD' ]]; then
    platform='freebsd'
 fi
 
-echo "$platform" "$adb"
+#echo "$platform" "$adb"
 
 serial=$(pymobiledevice3 usbmux list | awk -F'"' '/Identifier/ {print $4}')
 mkdir -p phone_dumps/"$1"_ios

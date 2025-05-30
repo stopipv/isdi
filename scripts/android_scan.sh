@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 ## For scanning the phone and downloading some specific information of the phone
 ## Input: serial number 
@@ -39,8 +40,7 @@ export adb=$adb
 
 serial="-s $2"
 hmac_serial="-s $3"
-dump_dir="./phone_dumps"
-ofname=$dump_dir/${hmac_serial:3}_android.txt
+ofname="./phone_dumps/${3}_android.txt"
 
 email="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 function scan {

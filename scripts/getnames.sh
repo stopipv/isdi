@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+
 aaptversion='3.2.1-4818971'
 #wget https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/$aaptversion/aapt2-$aaptversion-osx.jar
 wget https://dl.google.com/dl/android/maven2/com/android/tools/build/aapt2/$aaptversion/aapt2-$aaptversion-linux.jar --no-check-certificate

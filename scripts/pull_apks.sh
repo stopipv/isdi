@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 # Pulls all third party apks that are not present in pkg folder 
 
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"

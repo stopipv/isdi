@@ -170,7 +170,9 @@ class AppInfo(Dictable):
         if self.app_name.strip() == "":
             self.app_name = title
         if self.app_name.strip() == "":
+            # both are empty, so use appId
             self.app_name = appId
+            self.title = appId
         self.appId = appId
         self.flags = flags
         self.application_icon = application_icon
@@ -1154,6 +1156,7 @@ def get_multiple_app_details(device, ser, apps):
     for app in apps:
         d = get_app_details(device, ser, app["id"])
         d["flags"] = app["flags"]
+        d["appId"] = app["id"]
         filled_in_apps.append(d)
     return filled_in_apps
 
@@ -1295,8 +1298,10 @@ def get_scan_data(device, device_owner):
 
     for k in apps.keys():
         app = apps[k]
-        app["id"] =k
+        app["id"] = k
         app["app_name"] = app["title"]
+        if app["app_name"].strip() == "":
+            app["app_name"] = k
         if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
             suspicious_apps.append(app)
         else:
