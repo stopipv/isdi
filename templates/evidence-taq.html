@@ -30,6 +30,19 @@
                 {{ form.hidden_tag() }}
                 {{ wtf.form_errors(form) }}
 
+                <div>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th>{{form.marked_done.label}}</th>
+                                <td>{{form.marked_done}} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <br/>
+
                 <details open>
                     <summary>
                     <span class="icon">▼</span>

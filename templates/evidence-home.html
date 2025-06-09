@@ -33,7 +33,11 @@
                 <details>
                     <summary>
                     <span class="icon">▼</span>
-                    TAQ Risk Factors</summary>
+                    TAQ
+                    {% if consultdata.taq.marked_done %}
+                    <span style="margin-left: 5px">✅</span>
+                    {% endif %}
+                    </summary>
                     <div class="content">
                         <div class="risks">
                             <ul>

@@ -535,6 +535,7 @@ class ScanData(Dictable):
 class TAQData(Dictable):
 
     def __init__(self,
+                 marked_done=False,
                  devices=dict(),
                  accounts=dict(),
                  sharing=dict(),
@@ -542,6 +543,7 @@ class TAQData(Dictable):
                  kids=dict(),
                  legal=dict(),
                  **kwargs):
+        self.marked_done = marked_done
         self.devices = TAQDevices(devices)
         self.accounts = TAQAccounts(accounts)
         #if self.accounts.pwd_comp_which.strip() == "":
@@ -979,6 +981,7 @@ class TAQLegalForm(FlaskForm):
 
 class TAQForm(FlaskForm):
     title = "Technology Assessment Questionnaire (TAQ)"
+    marked_done = BooleanField("Mark as complete")
     devices = FormField(TAQDeviceCompForm)
     accounts = FormField(TAQAccountsForm)
     sharing = FormField(TAQSharingForm)

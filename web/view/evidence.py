@@ -160,11 +160,8 @@ def evidence_taq():
         pprint("FORM DATA END")
         if form.is_submitted() and form.validate():
 
-            # clean up data
-            clean_data = remove_unwanted_data(form.data)
-
             # load data as class
-            taq_data = TAQData(**clean_data)
+            taq_data = TAQData(**form.data)
 
             # save clean data
             save_data_as_json(taq_data, ConsultDataTypes.TAQ.value)
