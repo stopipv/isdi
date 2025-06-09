@@ -38,30 +38,48 @@ details {
     user-select: none;
   }
 
-  details>summary span.icon {
+  details:not(.appselect) >summary {
+    margin-bottom: 20px;
+  }
+
+  details:not(.appselect)[open] >summary {
+    margin-bottom: 0px;
+  }
+
+  details >summary span.icon {
     width: 24px;
     height: 24px;
     transition: all 0.3s;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
     margin-top: 2px;
     float: left;
   }
 
-  details>summary img {
+  details.appselect > summary span.icon {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+
+  details >summary img {
     float: right;
     align-self: center;
     width: 24px;
     margin: 2px 10px;
   }
 
-  details[open] {
+  details[open]:not(.appselect)  {
     background-color: rgb(208, 206, 206);
     border-radius: 20px;
+    margin-bottom: 20px;
   }
 
   details[open] summary span.icon {
     transform: rotate(180deg) translate(7px, 0px);
+  }
+
+  details[open].appselect summary span.icon {
+    transform: rotate(180deg) translate(10px, 7px);
   }
 
   details[open] div.content {
@@ -74,7 +92,7 @@ details {
     margin-bottom: 5px;
   }
 
-  summary {
+  details:not(.appselect) > summary {
     display: flex;
     cursor: pointer;
     background-color: rgb(180, 142, 207);
@@ -82,6 +100,11 @@ details {
     padding: 10px;
     border-radius: 20px;
     font-size: 14pt;
+  }
+
+  table.appselect > tbody > tr > td > details {
+    overflow-wrap: anywhere;
+    padding-right: 10px;
   }
 
   summary::-webkit-details-marker {
@@ -382,4 +405,40 @@ table.appinfo th {
     max-width: 200px;
     height: auto;
     border: 1px solid black;
+}
+
+
+table.appselect > tbody > tr > td > p {
+    color: purple;
+    overflow-wrap: break-word;
+}
+
+table.appselect > tbody > tr > td.infocolumn {
+    width: 700px;
+}
+
+table.appselect > tbody > tr > th {
+    vertical-align: top;
+}
+
+
+table.appselect > tbody > tr > td {
+    vertical-align: top;
+}
+
+div.scrollapps {
+    overflow-y: scroll;
+    height: 500px;
+    width: 100%;
+    border: black 1px solid;
+    padding: 10px;
+}
+
+.badge .badge-warning {
+    background-color: orange;
+}
+
+div.header > h3 > a {
+    color: white;
+    text-decoration: none;
 }

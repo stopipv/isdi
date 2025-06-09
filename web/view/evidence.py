@@ -295,7 +295,8 @@ def evidence_scan_select(ser):
             device = current_scan.device_type,
             title=config.TITLE,
             all_apps = [app.to_dict() for app in current_scan.all_apps],
-            step = 2
+            step = 2,
+            num_sys_apps = len([app for app in current_scan.all_apps if 'system-app' in app.flags]),
         )
         print("-"*80)
         print(context['device'])

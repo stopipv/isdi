@@ -39,25 +39,57 @@
                 <br>
 
             {% elif step == 2 %}
+            <p>Apps found: <b>{{ form.apps|length - num_sys_apps }} installed apps</b>, {{ num_sys_apps }} system apps</p>
+            <div class="scrollapps">
+                <table class="appselect">
+                    <tbody>
+                        {% for nested in form.apps %}
+                        {{ nested.hidden_tag() }}
 
-            <h4>App List</h4>
-            <table>
-                <tbody>
-                    {% for nested in form.apps %}
-                    {{ nested.hidden_tag() }}
-                    <tr>
-                        <th><p><a href={{all_apps[loop.index0].app_website}}>{{all_apps[loop.index0].app_name}}</a></p></th>
-                        <td>Flags: {{all_apps[loop.index0].flags}}</td>
-                        <td><p>{{nested.investigate.label}}</p></td>
-                        <td><p>{{nested.investigate}}</p></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        {% with app = all_apps[loop.index0] %}
+                        <tr>
+                            <td class="infocolumn">
+                                <details class="appselect">
+                                <summary>
+                                    <span class="icon">▼</span>
+                                    <span><b>{{app.app_name}}</b>
+                                        {% for flag in app.flags %}
+                                            {% if flag == 'system-app' %}
+                                            <span class="badge badge-secondary">{{flag}}</span>
+                                            {% else %}
+                                            <span class="badge badge-warning">{{flag}}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </summary>
+                                <div>
+                                <ul>
+                                    <li><b>ID:</b><a href="https://www.google.com/search?q={{ app.appId }}" target="_blank">{{app.appId}}</a></li>
+                                    <li><b>Link:</b> <a href={{app.app_website}}>{{app.app_website}}</a></li>
+                                    <li><b>Permissions:</b>
+                                        {% for p in app.permission_info.permissions %}
+                                        {{p[0]}}, 
+                                        {% endfor %}
+                                    </li>
+                                    <li><b>Description:</b> {{app.description}}</li>
+                                </ul>
+                                </div>
+                                </details>
+                            </td>
+                            <td><p>{{nested.investigate}}</p></td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            
             <br>
 
 
             {% else %}
+
                 {% if form.selected_apps|length > 1 %}
                 <div class="result-overview">
                     <img src="/webstatic/images/some-concerns.png">
@@ -82,7 +114,7 @@
 
                 {% for nested in form.selected_apps %}
                 {% set outer_loop = loop %}
-                <details>
+                <details class="investigate">
                     <summary>
                     <span class="icon">▼</span>
                     <b>{{ scan_data.selected_apps[outer_loop.index0].title }}</b>
@@ -100,8 +132,15 @@
                                     {{app.title}}
                                 {% endif %}
                                 </td></tr>
-                                <tr><th>App ID</th><td>{{app.appId}}</td></tr>
-                                <tr><th>Flags</th><td>{{app.flags}}</td></tr>
+                                <tr><th>App ID</th><td><a href="https://www.google.com/search?q={{ app.appId }}" target="_blank">{{app.appId}}</a></td></tr>
+                                <tr><th>Flags</th><td>
+                                        {% for flag in app.flags %}
+                                            {% if flag == 'system-app' %}
+                                            <span class="badge badge-secondary">{{flag}}</span>
+                                            {% else %}
+                                            <span class="badge badge-warning">{{flag}}</span>
+                                            {% endif %}
+                                        {% endfor %}</td></tr>
                                 <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
                                 <tr><th valign="top">Permissions used</th>
                                     <td>
