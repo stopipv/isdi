@@ -442,3 +442,8 @@ div.header > h3 > a {
     color: white;
     text-decoration: none;
 }
+
+table.summarytable > tbody > tr > th,
+table.summarytable > tbody > tr > td  {
+    padding: 5px 10px;
+}

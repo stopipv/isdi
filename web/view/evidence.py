@@ -206,9 +206,20 @@ def evidence_scan_start(device_type, device_nickname):
         if form.is_submitted() and form.validate():
 
             if form.manualadd.data:
+
+                # if it's a manual add, create a new scan object and redirect to the manual add page
+                current_scan = ScanData(
+                    device_type=form.data["device_type"],
+                    device_nickname=form.data["device_nickname"],
+                    serial="MANADD-" + str(hash(form.data["device_nickname"])),
+                    manual=True
+                )
+                current_scan.id = len(all_scan_data)
+                all_scan_data.append(current_scan)
+                save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
+
                 return redirect(url_for('evidence_scan_manualadd',
-                                        device_nickname=form.data["device_nickname"], 
-                                        device_type=form.data["device_type"]))
+                                        ser=current_scan.serial))
 
             # clean up the submitted data
             clean_data = remove_unwanted_data(form.data)
@@ -339,10 +350,19 @@ def evidence_scan_select(ser):
 
         return redirect(url_for('evidence_scan_select'), ser=ser)
 
-@app.route("/evidence/scan/manualadd/<string:device_type>/<string:device_nickname>", methods={'GET', 'POST'})
-def evidence_scan_manualadd(device_type, device_nickname):
+@app.route("/evidence/scan/manualadd/<string:ser>", methods={'GET', 'POST'})
+def evidence_scan_manualadd(ser):
 
-    form = ManualAddPageForm(apps = [""], device_nickname=device_nickname, device_type=device_type)
+    all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
+    current_scan = get_scan_by_ser(ser, all_scan_data)
+    assert current_scan.serial == ser
+
+    manual_add_apps = [{"app_name": app.title, "spyware": "spyware" in app.flags} 
+                        for app in current_scan.selected_apps]
+
+    form = ManualAddPageForm(apps = manual_add_apps, 
+                             device_nickname=current_scan.device_nickname, 
+                             device_type=current_scan.device_type)
 
     ### IF IT'S A GET:
     if request.method == 'GET':
@@ -387,37 +407,24 @@ def evidence_scan_manualadd(device_type, device_nickname):
                             "flags": flags
                         })
 
-
-                manual_scan = ScanData(
-                    manual=True,
-                    device_nickname=device_nickname,
-                    device_type=device_type,
-                    serial=device_nickname,
-                    all_apps=[],
-                    selected_apps=selected_apps
-                )
-
-
+                current_scan.all_apps = selected_apps
+                current_scan.selected_apps = selected_apps
+        
                 # load all scans
                 all_scan_data = load_object_from_json(ConsultDataTypes.SCANS.value)
 
                 # add manual scan
-                all_scan_data = update_scan_by_ser(manual_scan, all_scan_data)
+                all_scan_data = update_scan_by_ser(current_scan, all_scan_data)
 
                 # save
                 save_data_as_json(all_scan_data, ConsultDataTypes.SCANS.value)
 
-                pprint(manual_scan.__dict__)
-
-                for app in manual_scan.selected_apps:
-                    pprint(app.__dict__)
-
-                return redirect(url_for('evidence_scan_investigate', ser=manual_scan.serial))
+                return redirect(url_for('evidence_scan_investigate', ser=current_scan.serial))
 
             if not form.validate():
                 flash("Form validation error - are you missing required fields?", 'error')
 
-            return redirect(url_for('evidence_scan_manualadd', device_nickname=device_nickname))
+            return redirect(url_for('evidence_scan_manualadd', ser=ser))
 
 
 

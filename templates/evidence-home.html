@@ -26,51 +26,114 @@
                 <a href="{{ url_for('evidence_account_default') }}" class="btn btn-default">Add an account</a>
 
                 <br><br>
-                <b>Consultation Info:</b>
-                <p>{{consultdata.setup.client}}</p>
-                <p>{{consultdata.setup.date}}</p>
+                <h3>Consultation Summary</h3>
+                <p><b>Client Name:</b> {{consultdata.setup.client}}</p>
+                <p><b>Consultation Date:</b> {{consultdata.setup.date}}</p>
                 <br/>
-                <b>TAQ Data</b>
-                <details><p>{{consultdata.taq}}</p></details>
+                <details>
+                    <summary>
+                    <span class="icon">▼</span>
+                    TAQ Risk Factors</summary>
+                    <div class="content">
+                        <div class="risks">
+                            <ul>
+                            {% for risk in consultdata.taq.risk_factors %}
+                            <li>
+                                <div class="riskbox">
+                                <b>{{risk.risk}}</b>: {{risk.description}}
+                                </div>
+                            </li>
+                            {% endfor %}
+                                
+                            </ul>
+                        </div>
+                    </div>
+                </details>
                 <br/>
                 {% if consultdata.scans %}
-                <p><b>Scans</b>: {{consultdata.scans|length}}</p>
                 <details>
-                    <table>
+                    <summary>
+                    <span class="icon">▼</span>
+                        Scans ({{consultdata.scans|length}})
+                    </summary>
+                    <div class="content">
+                    <table class="summarytable">
+                        <tbody>
+                        <tr><th>Nickname</th>
+                            <th>Type</th>
+                            <th>Manual?</th>
+                            <th>Apps Found</th>
+                            <th>Apps Checked</th>
+                        </tr>
+
                         {% for scan in consultdata.scans %}
                         <tr>
-                            <th>
+                            <td>
                                 <p>{{scan.device_nickname}}</p>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <p>{{scan.device_type}}</p>
-                            </th>
-                            <th>
-                                <p>{{scan.check_apps|length}} apps checked</p>
-                            </th>
+                            </td>
+                            <td>
+                                <p>{{scan.manual}}</p>
+                            </td>
+                            <td>
+                                <p>{{scan.all_apps|length}}</p>
+                            </td>
+                            <td>
+                                <p>{{scan.selected_apps|length}}</p>
+                            </td>
+                            {% if scan.manual %}
+                            <td>
+                                <a href="{{ url_for('evidence_scan_manualadd', ser=scan.serial) }}" class="btn btn-default">Select apps</a>
+                            </td>
+                            {% else %} 
+                            <td>
+                                <a href="{{ url_for('evidence_scan_select', ser=scan.serial) }}" class="btn btn-default">Select apps</a>
+                            </td>
+                            {% endif %}
+                            <td>
+                                <a href="{{ url_for('evidence_scan_investigate', ser=scan.serial) }}" class="btn btn-default">Edit investigation</a>
+                            </td>
                         </tr> 
                         {% endfor %}
-                    </table>
+                        </tbody>
+                    </table></div>
                 </details>
                 {% else %}
                 <p><b>Scans</b>: None</p>
                 {% endif %}
                 <br/>
                 {% if consultdata.accounts %}
-                <p><b>Accounts</b>: {{consultdata.accounts|length}}</p>
                 <details>
-                    <table>
+                    <summary>
+                    <span class="icon">▼</span>
+                    Account Checks ({{consultdata.accounts|length}})
+                    </summary>
+
+                    <div class="content">
+                    <table class="summarytable">
+                        <tbody>
+                        <tr><th>Nickname</th>
+                            <th>Platform</th>
+                        </tr>
+
                         {% for account in consultdata.accounts %}
                         <tr>
-                            <th>
+                            <td>
                                 <p>{{account.account_nickname}}</p>
-                            </th>
+                            </td>
+                            <td>
+                                <p>{{account.platform}}</p>
+                            </td>
                             <td>
                                 <a href="{{ url_for('evidence_account', id=loop.index0) }}" class="btn btn-default">Edit Account</a>
                             </td>
                         </tr> 
                         {% endfor %}
+                    </tbody>
                     </table>
+                    </div>
                 </details>
                 {% else %}
                 <p><b>Accounts</b>: None</p>
