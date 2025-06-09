@@ -55,16 +55,18 @@
                                     <span><b>{{app.app_name}}</b>
                                         {% for flag in app.flags %}
                                             {% if flag == 'system-app' %}
-                                            <span class="badge badge-secondary">{{flag}}</span>
-                                            {% else %}
-                                            <span class="badge badge-warning">{{flag}}</span>
+                                            <span class="flag">{{flag}}</span>
+                                            {% elif flag == 'spyware' or flag == 'regex-spy' %}
+                                            <span class="flag flag-danger">{{flag}}</span>
+                                            {% elif flag != '' %}
+                                            <span class="flag flag-warning">{{flag}}</span>
                                             {% endif %}
                                         {% endfor %}
                                     </span>
                                 </summary>
                                 <div>
                                 <ul>
-                                    <li><b>ID:</b><a href="https://www.google.com/search?q={{ app.appId }}" target="_blank">{{app.appId}}</a></li>
+                                    <li><b>ID:</b> <a href="https://www.google.com/search?q={{ app.appId }}" target="_blank">{{app.appId}}</a></li>
                                     <li><b>Link:</b> <a href={{app.app_website}}>{{app.app_website}}</a></li>
                                     <li><b>Permissions:</b>
                                         {% for p in app.permission_info.permissions %}
@@ -136,9 +138,9 @@
                                 <tr><th>Flags</th><td>
                                         {% for flag in app.flags %}
                                             {% if flag == 'system-app' %}
-                                            <span class="badge badge-secondary">{{flag}}</span>
+                                            <span class="flag flag-secondary">{{flag}}</span>
                                             {% else %}
-                                            <span class="badge badge-warning">{{flag}}</span>
+                                            <span class="flag flag-warning">{{flag}}</span>
                                             {% endif %}
                                         {% endfor %}</td></tr>
                                 <tr><th valign="top">Install time</th><td>January 1, 1970 00:00:00</td></tr>
