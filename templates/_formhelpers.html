@@ -13,44 +13,32 @@
   </dd>
 {% endmacro %}
 
-{% macro render_select_old(field) %}
-<tr><th>{{field.label}}</th>
-    <td>
-    <div class="btn-group" data-toggle="buttons" id={{field.id}}>
-    {% for key, value, checked, attrs in field.iter_choices() %}
-    {% if key != '' %} 
-        <label class="btn btn-light" for="{{key}}">
-            {{value}}
-            <input type="radio" name="{{value}}" id="{{key}}" autocomplete="true" value="{{value.lower()}}">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-    {% endif %}
-    {% endfor %}
-</div>
-</td></tr>
-{% endmacro %}
-
 {% macro render_select(field) %}
-<div>
-    {{field.label}}
-    {% for option in field %}
-    {% if option.label.text != "Nothing selected" %}
-    <label class="btn btn-light">
-        {{ option.label.text }}
-        {{ option }}
-    </label>
-    {% endif %}
-    {% endfor %}
-</div>
+<tr class="form-question">
+    <th>{{field.label}}</th>
+    <td>
+        {% for option in field %}
+        {% if option.label.text != "Nothing selected" %}
+        <label class="btn btn-light">
+            {{ option.label.text }}
+            {{ option }}
+        </label>
+        {% endif %}
+        {% endfor %}
+    </td>
+</tr>
 {% endmacro %}
 
 {% macro render_multiselect(field) %}
-<div>
-    {{field.label}}
-    {{field}}
-</div>
+<tr class="form-question">
+    <th>{{field.label}}</th>
+    <td class="multiselect-box">{{field}}</td>
+</tr>
 {% endmacro %}
 
 {% macro render_text_field(field) %}
-<tr><th><label>{{ field.label }}</label></th><td> {{ field }}</td></tr>
+<tr class="form-question">
+    <th>{{ field.label }}</th>
+    <td> {{ field }}</td>
+</tr>
 {% endmacro %}

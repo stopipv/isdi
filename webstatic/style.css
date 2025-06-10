@@ -480,3 +480,23 @@ span .badge .badge-danger {
 .flag[empty] {
     display: none;
 }
+
+tr.form-question > th {
+    width: 50%;
+    vertical-align: top;
+    padding-top: 5px;
+}
+
+tr.form-question > td > select {
+    width: 200px;
+    height: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-color: #fff;
+}
+
+td > label {
+    margin-bottom: 5px;
+    margin-top: 5px;
+    vertical-align: top;
+}
