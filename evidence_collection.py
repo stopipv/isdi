@@ -174,17 +174,26 @@ class AppInfo(Dictable):
             self.app_name = appId
             self.title = appId
         self.appId = appId
-        self.flags = flags
+
+        # Fill in flags, removing any flags == ""
+        self.flags = list(filter(None, flags))
+        
         self.application_icon = application_icon
         self.app_website = app_website
         self.description = description
         self.developerwebsite = developerwebsite
         self.investigate = investigate
 
+        # I DON"T REALLY KNOW WHY THE BELOW LOGIC IS NECESSARY
+
+        # If permission_info is empty, then we need to create
+        # a new PermissionInfo object with the permissions
         if len(permission_info) == 0:
             self.permission_info = PermissionInfo({
                 'permissions': permissions
             })
+
+        # Otherwise, create a PermissionInfo object with the provided data
         else:
             self.permission_info = PermissionInfo(permission_info)
 
@@ -990,59 +999,6 @@ class TAQForm(FlaskForm):
     legal = FormField(TAQLegalForm)
     submit = SubmitField("Save TAQ")
 
-def unpack_evidence_context(session, task="evidence"):
-    """Takes session data and turns it into less confusing context to feed to template"""
-
-    context = dict(
-        task = task,
-        device_primary_user=config.DEVICE_PRIMARY_USER,
-        title=config.TITLE,
-        device_owner = "",
-        device = "",
-        consultant = "",
-        spyware = [],
-        dualuse = [],
-        accounts = [],
-    )
-
-    if 'step{}'.format(Pages.START.value) in session.keys():
-        context['device_owner'] = session['step1']['name']
-        context['consultant'] = session['step1']['consultant_name']
-        context['device'] = session['step1']['device_type']
-
-    if 'step{}'.format(Pages.SPYWARE.value) in session.keys():
-        context['spyware'] = session['step3']['spyware_apps']
-
-    if 'step{}'.format(Pages.DUALUSE.value) in session.keys():
-        context['dualuse'] = session['step4']['dual_use_apps']
-
-    if 'step{}'.format(Pages.ACCOUNT_COMP.value) in session.keys():
-        context['accounts'] = session['step6']['accounts']
-
-    if "apps" in session.keys():
-
-        # remove permissions from the orig list because it merges weird
-        permissionless_apps = []
-        for app in session['apps']['dualuse']:
-            newapp = dict()
-            for k, v in app.items():
-                if k != "permissions":
-                    newapp[k] = v
-            permissionless_apps.append(newapp)
-
-        # combine the information in both dicts
-        spyware = defaultdict(dict)
-        for item in session['step{}'.format(Pages.SPYWARE.value)]['spyware_apps'] + session['apps']['spyware']:
-            spyware[item['app_name']].update(item)
-        dualuse = defaultdict(dict)
-        for item in session['step{}'.format(Pages.DUALUSE.value)]['dual_use_apps'] + permissionless_apps:
-            dualuse[item['app_name']].update(item)
-
-        context['dualuse'] = list(dualuse.values())
-        context['spyware'] = list(spyware.values())
-
-    return context
-
 def create_printout(context):
 
     pprint(context)
@@ -1114,36 +1070,6 @@ def remove_unwanted_data(data):
 
     else:
         return data
-
-def reformat_verbose_apps(verbose_apps):
-    """Minimize data we're storing in the session about these apps"""
-    pprint(verbose_apps)
-    spyware = []
-    dualuse = []
-
-    for verbose_app in verbose_apps:
-        minimal_app = dict()
-
-        minimal_app['description'] = verbose_app['description']
-        minimal_app['appId'] = verbose_app['appId']
-        minimal_app['icon'] = verbose_app['application_icon']
-        minimal_app['url'] = verbose_app['developerwebsite']
-        minimal_app['genres'] = []
-        if verbose_app['genres'] != "":
-            minimal_app['genres'] = verbose_app['genres'].split(", ")
-        minimal_app['store'] = verbose_app['store']
-
-        # the way ISDi does permissions is messed up rn, have to fix on the backend
-        minimal_app['permissions'] = [{"permission_name": x.capitalize()} for x in verbose_app['permissions']]
-
-        # add app to correct list
-        minimal_app['app_name'] = verbose_app['title']
-        if "spyware" in verbose_app["flags"]:
-            spyware.append(minimal_app)
-        if "dual-use" in verbose_app["flags"]:
-            dualuse.append(minimal_app)
-
-    return spyware, dualuse
 
 def account_is_concerning(account):
     login_concern = account['suspicous_logins']['recognize'] != 'y' or account['suspicous_logins']['activity_log'] != 'n'
@@ -1315,7 +1241,16 @@ def get_scan_data(device, device_owner):
             app["app_name"] = app["title"]
             if app["app_name"].strip() == "":
                 app["app_name"] = k
-            if 'dual-use' in app["flags"] or 'spyware' in app["flags"]:
+
+            # Check if any suspicious flags are present and add to the suspicious list
+            suspicious_flags = ['spyware', 
+                                'dual-use', 
+                                'regex-spy', 
+                                'offstore-spyware', 
+                                'co-occurrence', 
+                                'onstore-dual-use', 
+                                'offstore-app']
+            if len([x for x in app["flags"] if x in suspicious_flags]) > 0:
                 suspicious_apps.append(app)
             else:
                 other_apps.append(app)

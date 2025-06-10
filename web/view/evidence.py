@@ -52,10 +52,8 @@ from evidence_collection import (  # create_account_summary,; create_app_summary
     get_serial,
     load_json_data,
     load_object_from_json,
-    reformat_verbose_apps,
     remove_unwanted_data,
     save_data_as_json,
-    unpack_evidence_context,
     update_scan_by_ser,
 )
 from web import app

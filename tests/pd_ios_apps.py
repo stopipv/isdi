@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from plistlib import readPlist
-from functools import reduce
-import operator
 import json
+import operator
+from functools import reduce
+from plistlib import readPlist
+
 import pandas as pd
 
 path = "serial/"
@@ -15,21 +16,6 @@ with open(path + "ios_jailbroken.log", "r") as fh:
     JAILBROKEN_LOG = fh.readlines()
 APPS_PLIST = readPlist(path + "ios_apps.plist")
 DEVICE_INFO = readPlist(path + "ios_info.xml")
-
-
-def _retrieve(dict_, nest):
-    """
-    Navigates dictionaries like dict_[nest0][nest1][nest2]...
-    gracefully.
-    """
-    dict_ = dict_.to_dict()  # for pandas
-    try:
-        return reduce(operator.getitem, nest, dict_)
-    except KeyError as e:
-        return ""
-    except TypeError as e:
-        return ""
-
 
 def _check_unseen_permissions(permissions):
     for permission in permissions:
@@ -51,10 +37,9 @@ def get_permissions(app):
     Could modify this function to include whether or not the permission can be adjusted
     in Settings.
     """
-    system_permissions = _retrieve(app, ["Entitlements", "com.apple.private.tcc.allow"])
-    adjustable_system_permissions = _retrieve(
-        app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
-    )
+    system_permissions = app["Entitlements"].get("com.apple.private.tcc.allow", [])
+    adjustable_system_permissions = app["Entitlements"].get("com.apple.private.tcc.allow.overridable", [])
+    
     third_party_permissions = list(set(app.keys()) & set(PERMISSIONS_MAP))
     _check_unseen_permissions(
         list(system_permissions) + list(adjustable_system_permissions)
@@ -76,9 +61,8 @@ def get_permissions(app):
             )
         )
     )
-    pii = _retrieve(
-        app, ["Entitlements", "com.apple.private.MobileGestalt.AllowedProtectedKeys"]
-    )
+    pii = app["Entitlements"].get("com.apple.private.MobileGestalt.AllowedProtectedKeys", [])
+    
     # print("\tPII: "+str(pii))
 
     return all_permissions

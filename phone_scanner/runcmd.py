@@ -41,13 +41,13 @@ def catch_err(
         print("Returncode: ", p.returncode)
         if p.returncode != 0:
 
-            if p.stderr:
-                err_msg = p.stderr.read().decode("utf-8")
-            else:
-                err_msg = (
+            err_msg = (
                     "stderr was none. This may indicate large issues with process."
                 )
 
+            if p.stderr:
+                err_msg = p.stderr.read().decode("utf-8")
+                
             m = "[{}]: Error running {!r}. Error ({}): {}\n{}".format(
                 "android", cmd, p.returncode, err_msg, msg
             )

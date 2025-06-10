@@ -132,6 +132,23 @@ class AppScan(object):
                 d["title"] = info.get("title", "")
             pprint(type(d["permissions"]))
             pprint(d["permissions"])
+
+            # TEMP FIX: mask InfoPlist.strings references
+            old_permissions = d["permissions"]
+            new_permissions = []
+
+            for perm, reason in old_permissions:
+                if "permission granted by system" in reason.lower():
+                    reason = "[system permission]"
+                elif "infoplist.strings" in reason.lower():
+                    reason = "[description not available]"
+                elif "NSLocationWhenInUseUsageDescriptionUndefined".lower() in reason.lower():
+                    reason = "[description not available]"
+                    
+                new_permissions.append((perm, reason))
+
+            d["permissions"] = new_permissions
+
             return d, info
         except KeyError as ex:
             print(">>> Exception:::", ex, file=sys.stderr)

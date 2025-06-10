@@ -118,22 +118,6 @@ def prune_empty_keys(d):
     return d
 
 
-def retrieve(dict_: pd.DataFrame, nest: list) -> str:
-    """
-    Navigates dictionaries like dict_[nest0][nest1][nest2]...
-    gracefully.
-    """
-    dict_ = dict_.to_dict()  # for pandas
-    try:
-        return reduce(operator.getitem, nest, dict_)
-    except KeyError as e:
-        print(f"KeyError: {e} for dict_={dict_} and nest={nest}")
-        return ""
-    except TypeError as e:
-        print(f"TypeError: {e} for dict_={dict_} and nest={nest}")
-        return ""
-
-
 class PhoneDump(object):
     def __init__(self, dev_type, fname):
         self.device_type = dev_type
@@ -522,21 +506,21 @@ class IosDump(PhoneDump):
         Could modify this function to include whether or not the permission can be adjusted
         in Settings.
         """
-        system_permissions = retrieve(
-            app, ["Entitlements", "com.apple.private.tcc.allow"]
-        )
+        system_permissions = app["Entitlements"].get("com.apple.private.tcc.allow", [])
 
-        def flatten(matrix):
-            return [item for row in matrix for item in row]
-        def check_nested_list(data):
-            return any(isinstance(item, list) for item in data)
+        # Need to clean up some permissions that are nested lists
+        if any(isinstance(item, list) for item in system_permissions):
+            # Flatten the list of lists
+            new_sys_perms = []
+            for perm in system_permissions:
+                if isinstance(perm, list):
+                    for p in perm:
+                        new_sys_perms.append(p)
+                else:
+                    new_sys_perms.append(perm)
 
-        if check_nested_list(system_permissions):
-            system_permissions = flatten(system_permissions)
-
-        adjustable_system_permissions = retrieve(
-            app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
-        )
+        adjustable_system_permissions = app["Entitlements"].get("com.apple.private.tcc.allow.overridable", [])
+        
         third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
 
         # unpack
