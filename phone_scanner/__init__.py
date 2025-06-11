@@ -137,13 +137,14 @@ class AppScan(object):
             old_permissions = d["permissions"]
             new_permissions = []
 
-            for perm, reason in old_permissions:
-                if "permission granted by system" in reason.lower():
-                    reason = "[system permission]"
-                elif "infoplist.strings" in reason.lower():
-                    reason = "[description not available]"
-                elif "NSLocationWhenInUseUsageDescriptionUndefined".lower() in reason.lower():
-                    reason = "[description not available]"
+            if self.device_type == "ios":
+                for perm, reason in old_permissions:
+                    if "permission granted by system" in reason.lower():
+                        reason = "[system permission]"
+                    elif "infoplist.strings" in reason.lower():
+                        reason = "[description not available]"
+                    elif "NSLocationWhenInUseUsageDescriptionUndefined".lower() in reason.lower():
+                        reason = "[description not available]"
                     
                 new_permissions.append((perm, reason))
 
