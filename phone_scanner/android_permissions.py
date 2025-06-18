@@ -103,15 +103,12 @@ def package_info(dumpf, appid):
     cmd = "sed -n -e '/Package \\[{appid}\]/,/Package \\[/p' '{dumpf}'".format(
         appid=appid, dumpf=dumpf.replace(".json", ".txt")
     )
-    print(cmd)
     # TODO: Need to udpate it once the catch_err function is fixed.
     package_dump = run_command(cmd).stdout.read().decode()
 
     # Edge case: Where "Hidden system packages" comes right after a package
     # We need to remove it, otherwise the parsing will fail.
     package_dump = package_dump.split("Hidden system packages")[0]
-
-    pprint(package_dump)
 
     # cmd = '{cli} shell dumpsys usagestats {app} | grep "App Standby States:" -A 1'\
     #     .format(cli=config.ADB_PATH, app=appid)
