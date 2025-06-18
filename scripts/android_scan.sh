@@ -38,14 +38,17 @@ echo "$platform" "$adb"
 export adb=$adb
 
 
-serial="-s $2"
-hmac_serial="-s $3"
+serial="-s ${2}"
+hmac_serial="-s ${3}"
 ofname="./phone_dumps/${3}_android.txt"
+echo "Serial: $serial"
+echo "HMAC Serial: $hmac_serial"
+echo "Output file: $ofname"
 
 email="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
 function scan {
     act=$1
-    $adb "$serial" shell dumpsys "$act" | \
+    $adb $serial shell dumpsys "$act" | \
         sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
 }
 
@@ -88,18 +91,18 @@ function retrieve {
 }
 
 
-services=(package location media.camera netpolicy mount 
-          cpuinfo dbinfo meminfo
-          procstats batterystats "netstats detail" usagestats
-          activity appops)
+# "netstats detail" is being split into two strings, figure this out later
+services=("package" "location" "media.camera" "netpolicy" "mount" "cpuinfo" "dbinfo" "meminfo" "procstats" "batterystats" "netstats\ detail" "usagestats" "activity" "appops")
 
 function dump {
-    for a in ${services[*]}; do
+    for a in ${services[@]}; do
         echo "DUMP OF SERVICE $a"
         scan "$a"
     done
-    echo "DUMP OF SERVICE net_stats"
-    $adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g'
+    # Permission denied, commenting out
+    #echo "DUMP OF SERVICE net_stats"
+    #$adb shell cat /proc/net/xt_qtaguid/stats | sed 's/ /,/g' 
+
     for namespace in secure system global; do
 	echo "DUMP OF SETTINGS $namespace"
 	$adb shell settings list "$namespace"
@@ -107,12 +110,12 @@ function dump {
 }
 
 function full_scan {
-    # If file older than 20 min then receate
-    if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
+    # If file older than 20 min then recreate, or if file does not exist, create it
+    if [[ -e "$ofname" && $(find "$ofname" -mmin +20 -print) ]]; then 
         echo "File is still pretty fresh"
         echo "Not re-dumping"
     else
-	dump > "$ofname" 2> error.txt
+        dump > "$ofname" 2> error.txt
     fi
     echo "Pulling apks."
     bash ./scripts/pull_apks.sh "$serial"

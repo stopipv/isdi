@@ -33,7 +33,9 @@ ${adb_cmd} shell "mkdir -p /sdcard/apps/"
 function pull {
     echo "Clearing the folder"
     ${adb_cmd} pull "/sdcard/apps/" $PKG_DIR
-    mv "$PKG_DIR"/apps/* "$PKG_DIR"
+    if [[ -e "$PKG_DIR/apps/* " ]]; then
+        mv "$PKG_DIR"/apps/* "$PKG_DIR"
+    fi
     ${adb_cmd} shell "rm -rf /sdcard/apps/"
     ${adb_cmd} shell "mkdir -p /sdcard/apps/"
 }

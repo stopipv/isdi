@@ -92,29 +92,41 @@ class AppScan(object):
 
     def app_details(self, serialno, appid) -> tuple[dict, dict]:
         try:
+            # Read the database and get info about this app
+            # TODO: Stop using the database
             d = pd.read_sql(
                 "select * from apps where appid=?", self.app_info_conn, params=(appid,)
             )
+
+            # Ensure the permissions attribute is a list
             if not isinstance(d.get("permissions", ""), list):
                 d["permissions"] = d.get("permissions", pd.Series([]))
                 d["permissions"] = d["permissions"].fillna("").str.split(", ")
 
+            # Update descriptionHTML
             if "descriptionHTML" not in d:
                 d["descriptionHTML"] = d["description"]
-            dfname = self.dump_path(serialno)
 
+            # Parse the dump to get dump info (which includes..?)
+            dfname = self.dump_path(serialno)
             if self.device_type == "ios":
                 ddump = self.parse_dump
                 if not ddump:
                     ddump = parse_dump.IosDump(dfname)
             else:
                 ddump = parse_dump.AndroidDump(dfname)
-
             info = ddump.info(appid)
 
             config.logging.info("BEGIN APP INFO")
             config.logging.info("info={}".format(info))
             config.logging.info("END APP INFO")
+
+            # For Android, combine permissions together
+            # We start with three types: runtime, declared, install
+            if self.device_type == "android":
+                # declared and install are regular
+                # runtime is nested under "User ...."
+                pass
 
             # FIXME: sloppy iOS hack but should fix later, just add these to DF
             # directly.
@@ -126,24 +138,24 @@ class AppScan(object):
                 d["title"] = pd.Series(info.get("title", ""))
                 #del info["permissions"]
 
-            d = d.fillna("").to_dict(orient="index").get(0, {})
+            d = d.fillna("").to_dict(orient="index").get(0, {}) # what does this do?
+
             if self.device_type == "ios":
                 d["permissions"] = info.get("permissions", [])
                 d["title"] = info.get("title", "")
-            pprint(type(d["permissions"]))
-            pprint(d["permissions"])
 
             # TEMP FIX: mask InfoPlist.strings references
-            old_permissions = d["permissions"]
+            old_permissions = d.get("permissions", []) 
             new_permissions = []
 
-            for perm, reason in old_permissions:
-                if "permission granted by system" in reason.lower():
-                    reason = "[system permission]"
-                elif "infoplist.strings" in reason.lower():
-                    reason = "[description not available]"
-                elif "NSLocationWhenInUseUsageDescriptionUndefined".lower() in reason.lower():
-                    reason = "[description not available]"
+            if self.device_type == "ios":
+                for perm, reason in old_permissions:
+                    if "permission granted by system" in reason.lower():
+                        reason = "[system permission]"
+                    elif "infoplist.strings" in reason.lower():
+                        reason = "[description not available]"
+                    elif "NSLocationWhenInUseUsageDescriptionUndefined".lower() in reason.lower():
+                        reason = "[description not available]"
                     
                 new_permissions.append((perm, reason))
 
@@ -255,7 +267,11 @@ class AndroidScan(AppScan):
             )
 
     def _get_apps_from_device(self, serialno, flag) -> list:
-        """get apps from the device"""
+        """
+        Uses adb to list packages on the device. 
+        Returns the list of installed packages.
+        """
+
         cmd = "{cli} -s {serial} shell pm list packages {flag} | sed 's/^package://g' | sort"
         s = catch_err(
             run_command(cmd, serial=serialno, flag=flag),
@@ -269,19 +285,30 @@ class AndroidScan(AppScan):
             installed_apps = [x for x in s.splitlines() if x]
             return installed_apps
 
-    def _get_apps_from_dump(self, serialno):
-        # hmac_serial = config.hmac_serial(serialno)
-        # Try to read from the dump
-        dump_file = self.dump_path(serialno)
+    def _get_apps_from_dump(self, hmac_serial):
+        """Parses the dump file to get the list of installed apps."""
+
+        # Read from dump and put the data in self.dump_d
+        dump_file = self.dump_path(hmac_serial)
         self.dump_d = parse_dump.AndroidDump(dump_file)
+
+        # Uses dump_d (the AndroidDump obj) to get the app information
         app_and_codes = self.dump_d.apps()
+
+        # Return just the list of app names
         return [a for a, c in app_and_codes]
 
     def get_apps(self, serialno: str, from_dump: bool = False) -> list:
+        """Returns the list of installed apps on the device."""
+
         print(f"Getting Android apps: {serialno} from_dump={from_dump}")
         hmac_serial = config.hmac_serial(serialno)
         if not from_dump:
+            # Get list of installed packages using adb
             installed_apps = self._get_apps_from_device(serialno, "-u")
+
+            # If the list is non-empty, run a full scan 
+            # (TODO: When would this be empty?)
             if installed_apps:
                 q = run_command(
                     "bash scripts/android_scan.sh scan {ser} {hmac_serial}",
@@ -397,23 +424,28 @@ class AndroidScan(AppScan):
         return s != -1
 
     def app_details(self, serialno, appid) -> tuple[dict, dict]:
+
+        # First, get basic app details using the Super class
         d, info = super(AndroidScan, self).app_details(serialno, appid)
-        # part that requires android to be connected / store this somehow.
+
+        # runtime/install/declared permissions
+
+        # Then, get more details about permissions
+        # This requires the phone to be connected
         hf_recent, non_hf_recent, non_hf, stats = all_permissions(
             self.dump_path(serialno), appid
         )
         # FIXME: some appopps in non_hf_recent are not included in the
         # output.  maybe concat hf_recent with them?
-        info["Date of Scan"] = datetime.now().strftime(config.DATE_STR)
-        info["Installation Date"] = stats.get("firstInstallTime", "")
-        info["Last Updated"] = stats.get("lastUpdateTime", "")
+        info["install_time"] = stats.get("firstInstallTime", "")
+        info["last_updated"] = stats.get("lastUpdateTime", "")
         # info['Last Used'] = stats['used']
 
         # TODO: what is the difference between usedScr and used?  Does a
         # background process count as used? Probably not since appOps
         # permissions have been more recent than 'used' on some scans.
         # info['Last Used Screen'] = stats['usedScr']
-        info["App Version"] = stats.get("versionName", "")
+        info["app_version"] = stats.get("versionName", "")
         # info['App Version Code'] = stats['versionCode']
 
         # FIXME: if Unknown, use 'permission_abbrv' instead.
@@ -426,17 +458,25 @@ class AndroidScan(AppScan):
 
         if len(hf_recent.get("label", "")) > 0:
             hf_recent["label"] = hf_recent.apply(
-                lambda x: "{} (last used: {})".format(
+                lambda x: "{} (Last used: {})".format(
                     x["label"],
                     "never" if "unknown" in x["timestamp"].lower() else x["timestamp"],
                 ),
                 axis=1,
             )
+
+        permissions = hf_recent["label"].tolist()
+        d["permissions"] = [ ]
+        for p in permissions:
+            name = p.split(" (")[0]
+            last_used = p.split(" (")[1].replace(")", "")
+            d["permissions"].append((name, last_used))
+ 
         # print("hf_recent['label']=", hf_recent['label'].tolist())
         # print(~hf_recent['timestamp'].str.contains('unknown'))
         non_hf_recent.drop("appId", axis=1, inplace=True)
         print(d)
-        d["permissions"] = hf_recent["label"].tolist()
+        #d["permissions"] = hf_recent["label"].tolist()
         d["non_hf_permissions_html"] = non_hf_recent.to_html()
         print("App info dict:", d)
 
@@ -464,7 +504,6 @@ class AndroidScan(AppScan):
                 "com.ramdroid.appquarantine",
             ]
         )
-        print(root_pkgs_check_str)
         root_checks = {
             "su binary": ("command -v su", "0"),
             "oem unlock": ("getprop ro.boot.flash.locked", "0"),

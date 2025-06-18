@@ -2,12 +2,17 @@
 Must work completely from the dumps, no interaction with the device is required.
 """
 
-from rsonlite import simpleparse
-import pandas as pd
 import datetime
-import config
 import re
-from .runcmd import run_command, catch_err
+from pprint import pprint
+from time import sleep
+
+import pandas as pd
+from rsonlite import simpleparse
+
+import config
+
+from .runcmd import catch_err, run_command
 
 # MAP = config.ANDROID_PERMISSIONS
 DUMPPKG = "dumppkg"
@@ -85,17 +90,28 @@ def recent_permissions_used(appid):
 
 
 def package_info(dumpf, appid):
+    """
+    For a specified app, captures lots of package info using sed.
+    """
+
     # FIXME: add check on all permissions, too.
     # need to get
     # requested permissions:
     # install permissions:
     # runtime permissions:
+    # This just uses bash to parse something we already have in the dump?
     cmd = "sed -n -e '/Package \\[{appid}\]/,/Package \\[/p' '{dumpf}'".format(
         appid=appid, dumpf=dumpf.replace(".json", ".txt")
     )
     print(cmd)
     # TODO: Need to udpate it once the catch_err function is fixed.
     package_dump = run_command(cmd).stdout.read().decode()
+
+    # Edge case: Where "Hidden system packages" comes right after a package
+    # We need to remove it, otherwise the parsing will fail.
+    package_dump = package_dump.split("Hidden system packages")[0]
+
+    pprint(package_dump)
 
     # cmd = '{cli} shell dumpsys usagestats {app} | grep "App Standby States:" -A 1'\
     #     .format(cli=config.ADB_PATH, app=appid)
@@ -117,11 +133,16 @@ def package_info(dumpf, appid):
     #print(package_dump)
     """
     try:
+        # Parse the package dump (TODO: Look into)
         sp = simpleparse(package_dump)
+
     except AttributeError as e:
         print(package_dump)
         return []
+    
     try:
+        # I have no idea what this does.
+        #
         # FIXME: TypeError: list indices must be integers or slices, not str
         # FIXME: don't rely on rsonlite to parse correctly? Seems to miss the
         # Packages:.  for now, using sed to filter out potential hazards in
@@ -131,11 +152,12 @@ def package_info(dumpf, appid):
         _, pkg = sp.popitem()
         if isinstance(pkg, list):
             pkg = pkg[0]
+
     except (IndexError, AttributeError) as e:
         print(e)
         print(f"Didn't parse correctly. Not sure why.\nsp={sp}")
         return [], {}
-    # print("pkg={}".format(json.dumps(pkg, indent=2)))
+
     install_perms = [
         k.split(":")[0] for k, v in pkg.get("install permissions:", {}).items()
     ]
@@ -209,8 +231,9 @@ def all_permissions(dumpf, appid):
     Returns a tuple of human-friendly permissions (including recently used), non human-friendly app ops,
     non human-friendly permissions, and summary stats.
     """
+
+    # Get app permissions and package info
     app_perms, pkg_info = package_info(dumpf, appid)
-    # print("--->>> all_permissions\n", app_perms)
     recent_permissions = recent_permissions_used(appid)
 
     permissions = pd.read_csv(config.ANDROID_PERMISSIONS_CSV)

@@ -95,7 +95,7 @@ def run_command(cmd, **kwargs):
     p = subprocess.Popen(
             _cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
-    # ric recommends later we use stdout=sys.stdout, stderr=sys.stderr, and subprocess.run instead
+    # ric recommends later we use stdout=sys.stdout, stderr=sys.stderr, and check=True with subprocess.run instead
     if kwargs.get("nowait", False) or kwargs.get("NOWAIT", False):
         return p.pid
     else:

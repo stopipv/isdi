@@ -67,13 +67,18 @@
                                 <div>
                                 <ul>
                                     <li><b>ID:</b> <a href="https://www.google.com/search?q={{ app.appId }}" target="_blank">{{app.appId}}</a></li>
-                                    <li><b>Link:</b> <a href={{app.app_website}}>{{app.app_website}}</a></li>
+                                    {% if app.app_version %}<li><b>Version:</b> {{app.app_version}}</li>{% endif %}
+                                    {% if app.install_time %}<li><b>Installed:</b> {{app.install_time}}</li>{% endif %}
+                                    {% if app.last_updated %}<li><b>Updated:</b> {{app.last_updated}}</li>{% endif %}
+                                    {% if app.app_website %}<li><b>Link:</b> <a href={{app.app_website}}>{{app.app_website}}</a></li>{% endif %}
+                                   {% if app.permission_info.permissions|length > 0 %}
                                     <li><b>Permissions:</b>
                                         {% for p in app.permission_info.permissions %}
                                         {{p[0]}}, 
                                         {% endfor %}
                                     </li>
-                                    <li><b>Description:</b> {{app.description}}</li>
+                                    {% endif %}
+                                    {% if app.description %}<li><b>Description:</b> {{app.description}}</li>{% endif %}
                                 </ul>
                                 </div>
                                 </details>
@@ -143,6 +148,13 @@
                                             <span class="flag flag-warning">{{flag}}</span>
                                             {% endif %}
                                         {% endfor %}</td></tr>
+                               {% if app.app_version %} <tr><th>App version</th>
+                                    <td>{{app.app_version}}</td></tr>{% endif %}
+                               {% if app.install_time %} <tr><th>Install time</th>
+                                    <td>{{app.install_time}}</td></tr>{% endif %}
+                                {% if app.last_updated %}<tr><th>Last updated</th>
+                                    <td>{{app.last_updated}}</td></tr>{% endif %}
+                                {% if app.permission_info.permissions|length > 0 %}
                                 <tr><th valign="top">Permissions used</th>
                                     <td>
                                         <ul>
@@ -153,7 +165,7 @@
                                             {% endfor %}
                                         </ul>
                                     </td>
-                                </tr>
+                                </tr>{% endif %}
                                 <tr><th valign="top">Description</th><td>
                                     {% if app.descriptionHTML %}
                                     {{app.descriptionHTML}}

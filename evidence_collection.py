@@ -153,6 +153,9 @@ class AppInfo(Dictable):
                  title="",
                  app_name="",
                  appId="",
+                 install_time="",
+                 app_version="",
+                 last_updated="",
                  flags=[],
                  application_icon="",
                  app_website="",
@@ -174,6 +177,10 @@ class AppInfo(Dictable):
             self.app_name = appId
             self.title = appId
         self.appId = appId
+
+        self.install_time = install_time
+        self.app_version = app_version
+        self.last_updated = last_updated
 
         # Fill in flags, removing any flags == ""
         self.flags = list(filter(None, flags))
@@ -1092,6 +1099,15 @@ def get_multiple_app_details(device, ser, apps):
 def get_app_details(device, ser, appid):
     sc = get_device(device)
     d, info = sc.app_details(ser, appid)
+
+    # Copy some info over from the info dict
+    # TODO: Just return this all in one clean dictionary from app_details()...
+    info_things = ["install_time", "last_updated", "app_version"]
+    for item in info_things:
+        d[item] = info[item]
+        if d[item].strip() == "":
+            d[item] = "Unknown"
+
     #d = d.fillna('')
     #d = d.to_dict(orient='index').get(0, {})
     #d['appId'] = appid

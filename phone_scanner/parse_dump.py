@@ -1,14 +1,9 @@
 import io
-import itertools
 import json
-import operator
 import os
 import re
 import sys
-from collections import OrderedDict
-from functools import reduce
 from pathlib import Path
-from plistlib import load
 from pprint import pprint
 from typing import Dict, List
 
@@ -30,81 +25,6 @@ def get_d_at_level(d, lvl):
         d = d[level]
     return d
 
-
-def clean_json(d):
-    if not any(d.values()):
-        return list(d.keys())
-    else:
-        for k, v in d.items():
-            d[k] = clean_json(v)
-
-
-def _match_keys_w_one(d, key, only_last=False):
-    """Returns a list of keys that matches @key"""
-    sk = re.compile(key)
-    if not d:
-        return []
-    if isinstance(d, list):
-        d = d[0]
-    ret = [k for k in d if sk.match(k) is not None]
-    if only_last:
-        return ret[-1:]
-    else:
-        return ret
-
-
-def match_keys(d, keys):
-    """d is a dictionary, and finds all keys that matches @keys
-    Returns a list of lists
-    """
-    if isinstance(keys, str):
-        keys = keys.split("//")
-    ret = _match_keys_w_one(d, keys[0])
-    if len(keys) == 1:
-        return ret
-    return OrderedDict((k, match_keys(d[k], keys[1:])) for k in ret)
-
-
-def prune_empty_leaves(dkeys):
-    """Remove the entries from dkeys all the paths that lead to empty keys"""
-    if isinstance(dkeys, list):
-        return dkeys
-    for k, v in dkeys.items():
-        dkeys[k] = prune_empty_leaves(v)
-    return {k: v for k, v in dkeys.items() if v}
-
-
-def get_all_leaves(d):
-    if not isinstance(d, dict):
-        return d
-    return itertools.chain(*(get_all_leaves(v) for v in d.values()))
-
-
-def extract(d, lkeys_dict):
-    """This is super inefficient"""
-    if isinstance(d, list) and len(d) > 0:
-        d = d[0]
-    if isinstance(lkeys_dict, list):
-        return [d[k] for k in lkeys_dict if k in d]
-    r = []
-    for k, v in lkeys_dict.items():
-        if k in d:
-            r.extend(extract(d[k], v))
-    return r
-
-
-def _extract_one(d, lkeys):
-    for k in lkeys:
-        if isinstance(d, list):
-            d = d[0]
-        d = d.get(k, {})
-    return d
-
-
-def split_equalto_delim(k):
-    return k.split("=", 1)
-
-
 def prune_empty_keys(d):
     """d is an multi-layer dictionary. The function
     converts a sequence of keys into
@@ -123,7 +43,7 @@ class PhoneDump(object):
         self.device_type = dev_type
         self.fname = fname
         # df must be a dictionary
-        self.df = self.load_file()
+        # self.df = self.load_file()
 
     def load_file(self):
         raise Exception("Not Implemented")
@@ -305,6 +225,9 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def get_data_usage(d, process_uid):
+        # TODO: Fix this!
+        # Currently, net_stats is not in d (for what I'm testing)
+
         if "net_stats" not in d:
             return {"foreground": "unknown", "background": "unknown"}
         # FIXME: pandas.errors.ParserError: Error tokenizing data. C error: Expected 21 fields in line 556, saw 22
@@ -333,78 +256,146 @@ class AndroidDump(PhoneDump):
 
     @staticmethod
     def get_battery_stat(d, uidu):
-        b = list(
-            get_all_leaves(
-                match_keys(
-                    d,
-                    "batterystats//Statistics since last charge//Estimated power use .*"
-                    "//^Uid {}:.*".format(uidu),
-                )
-            )
-        )
-        if not b:
-            return "0 (mAh)"
-        else:
-            t = b[0].split(":")
-            return t[1]
-        return b
+        # Apparently this is where batterystats info is located:
+        #   'batterystats'
+        #       'Statistics since last charge'
+        #           'Estimated power use <something>'
+        #               'Uid {UIDU}: <something>'
+
+        # TODO: Fix this.
+
+        return "Unavailable"
 
     def apps(self):
-        d = self.df
-        if not d:
+        """
+        Uses the JSON dump information to get all apps installed on the device.
+        Returns: A list of tuples (appid, human-readable name).
+        If JSON dump is not loaded, it will return an empty dict.
+
+        TODO: Would be great to return a list of dicts {name=x, id=y}
+        """
+        if not self.df:
+            pprint("JSON dump not loaded. Cannot get list of apps.")
             return {}
+        
+        # Structure of the dump:
+        # package
+        #   Packages
+        #       Package [<appid1>] (<name1>)
+        #       Package [<appid2>] (<name2>)
+        #       ...
+        all_package_keys = []
+        for key in list(self.df["package"]["Packages"].keys()):
+            appid = ""
+            app_name = ""
 
-        def get_appid_h(txt):
-            m = re.match(r"Package \[(?P<appId>.*)\] \((?P<h>.*)\)", txt)
-            if m:
-                return m.groups()
+            try:
+                appid = key.split("[", 1)[1].split("]", 1)[0] # Extract appid
+                app_name = key.split("(", 1)[1].split(")", 1)[0] # Extract name
+                all_package_keys.append( (appid, app_name) )
 
-        packages = map(
-            get_appid_h,
-            get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*")),
-        )
-        return [c for c in packages if c]
+            except IndexError as e:
+                # Weren't able to extract appid or name correctly
+                # Insert appid if it was collected though
+                pprint(f"IndexError: {e}")
+                all_package_keys.append( (appid, "Unavailable") )
+
+        # Remove duplicates and sort
+        all_package_keys = list(set(all_package_keys))
+        all_package_keys.sort()
+        
+        return all_package_keys
+    
 
     def info(self, appid):
-        d = self.df
-        if not d:
-            return {}
-        package = extract(
-            d, match_keys(d, "^package$//^Packages//^Package [{}].*".format(appid))
-        )
+        """
+        Uses the JSON dump information to get info about a specific app (appid).
+        If JSON dump is not loaded, it will return an empty dict.
+        """
 
-        other_info = [
-            get_all_leaves(match_keys(package, v))
-            for v in ["userId", "firstInstallTime", "lastUpdateTime"]
-        ]
-        res = dict(map(split_equalto_delim, [x[0] for x in other_info if x]))
-
-        if "userId" not in res:
-            print("UserID not found in res={}".format(res))
+        if not self.df:
+            pprint("JSON dump not loaded. Cannot get info for appid={}".format(appid))
             return {}
-        process_uid = res["userId"]
-        del res["userId"]
-        # memory = match_keys(d, "meminfo//Total PSS by process//.*: {}.*".format(appid))
-        uidu_match = list(
-            get_all_leaves(
-                match_keys(d, "procstats//CURRENT STATS//* {} / .*".format(appid))
-            )
-        )
-        print(uidu_match)
-        if uidu_match:
-            uidu = uidu_match[-1].split(" / ")
-        else:
-            uidu = "Not Found"
-        if len(uidu) > 1:
-            uidu = uidu[1]
-        else:
-            uidu = uidu[0]
-        res["data_usage"] = self.get_data_usage(d, process_uid)
-        res["battery_usage"] = self.get_battery_stat(d, uidu)  # (mAh)
-        # print('RESULTS')
-        # print(res)
-        # print('END RESULTS')
-        return res
+
+        # Get the package information for the appid.
+        # It's found under the key 'package' -> 'Packages'.
+        try:
+            # This should return a dictionary with keys of the form 
+            #     'Package [<appid>] (<name>)'.
+            package_list = self.df["package"]["Packages"]
+            
+            # Find the right key for this appid.
+            key_matches = [k for k in list(package_list.keys()) if "[{}]".format(appid) in k]
+            if len(key_matches) != 1:
+                raise KeyError("{} keys found for appid: {}".format(len(key_matches), appid))
+
+            # Get the package info using this key.
+            all_package_info = package_list[key_matches[0]]
+
+            # all_package_info looks like one of two things:
+            #   1. A list of ["key1=value1", "key2=value2", ...]
+            #   2. A dict, where the keys are "key1=value1", "key2=value2", ...
+            # So, simplify it by transforming #2 into #1 when applicable.
+            if type(all_package_info) is dict:
+                all_package_info = list(all_package_info.keys())
+            # TODO: See if there are any desired infos that actually do map to something
+            #       If so, this won't work!
+
+            # Now, create a dictionary of the desired package information
+            desired_info = ["userId", "firstInstallTime", "lastUpdateTime"]
+            relevant_package_info = {}
+            for item in all_package_info:
+                item_pieces = item.split("=", 1) # "key1=value1" -> ["key1", "value1"]
+                if len(item_pieces) > 1:
+                    key, value = item_pieces 
+                    if key in desired_info:
+                        relevant_package_info[key] = value
+
+            # Get permissions information
+            # ALL KINDS
+
+            # Get data usage using the process UID 
+            # TODO: Check get_data_usage function
+            try:
+                process_uid = relevant_package_info["userId"]
+                del relevant_package_info["userId"]
+                relevant_package_info["data_usage"] = self.get_data_usage(self.df, process_uid)
+
+            except KeyError as e:
+                relevant_package_info["data_usage"] = "Unavailable"
+
+            # Get the battery usage using the UID
+            # TODO: Check this whole logic + get_battery_stat function
+            try: 
+                uidu = "Not found"
+                uidu_matches = [
+                item for item in list(self.df["procstats"]["CURRENT STATS"].keys())
+                    if appid in item
+                ]
+                if len(uidu_matches) > 0:
+                    uidu = uidu_matches[-1].split(" / ") # ?
+                    if len(uidu) > 1:
+                        uidu = uidu[1]
+                    else:
+                        uidu = uidu[0]
+                relevant_package_info["battery_usage"] = self.get_battery_stat(self.df, uidu)
+
+            except KeyError as e:
+                relevant_package_info["battery_usage"] = "Unavailable"
+
+            # Get memory information - was commented out. 
+            # TODO: Look into this. Revive?
+            #memory_matches = [
+            #    item for item in list(self.df["meminfo"]["Total PSS by process"].keys())
+            #    if appid in item
+            #]
+
+            return relevant_package_info
+
+        except KeyError as e:
+            print(f"KeyError: {e}.")
+            return {}
+
 
 
 class IosDump(PhoneDump):
