@@ -1,4 +1,5 @@
 appId,store,flag,title
+wifi.manager,offstore,spyware,"Spy99|LiveScreenApp, WiFi Manager"
 com.appscottage.automaticcallrecorderprohd,playstore,dual-use,Automatic Call Recorder - Record Any Phone Call
 com.recorder.automaticcallrecorder,playstore,dual-use,Record Phone Call Automatic Conversation Recorder
 com.betaapp.myfamilylocator,playstore,dual-use,GPS Live Tracker
@@ -4639,4 +4640,5 @@ com.jksol.ShareLocation,appstore,dual-use,FindNow : Share Location
 com.mr.digital.familyLocator,appstore,dual-use,Family Locator & GPS Tracker
 ifind.maps.gps.find.friends.family,appstore,dual-use,"Find My Phone, Friends&Family"
 com.phonelocator.numbertracker,appstore,dual-use,Phone Locator & Number Tracker
+
 com.appie.familylocator,appstore,dual-use,Find Family & Friends Locator
