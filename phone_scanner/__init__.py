@@ -156,6 +156,7 @@ class AppScan(object):
             td = self.get_app_titles(serialno)
 
         r.set_index("appId", inplace=True)
+        td = td.loc[:, ~td.columns.duplicated()]
         r.loc[td.index, "title"] = td.get("title", "")
         r.reset_index(inplace=True)
 
