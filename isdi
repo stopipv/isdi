@@ -16,7 +16,7 @@ def open_browser():
     """Opens a browser to make it easy to navigate to ISDi
     """
     if not config.TEST:
-        webbrowser.open('http://127.0.0.1:' + str(PORT), new=0, autoraise=True)
+        webbrowser.open(f"{HOST}:{PORT}", new=0, autoraise=True)
 
 if __name__ == "__main__":
     import sys

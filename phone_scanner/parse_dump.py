@@ -82,10 +82,21 @@ def match_keys(d, keys: str|list) -> OrderedDict:
     """
     if isinstance(keys, str):
         keys = keys.split("//")
+    # Handle non-dictionary input
+    if not isinstance(d, (dict, list)):
+        return OrderedDict() if len(keys) > 1 else []
     ret = _match_keys_w_one(d, keys[0])
     if len(keys) == 1:
         return ret
-    return OrderedDict((k, match_keys(d[k], keys[1:])) for k in ret)
+    result = OrderedDict()
+    for k in ret:
+        # Only recurse if d[k] is a dictionary or list
+        if isinstance(d[k], (dict, list)):
+            result[k] = match_keys(d[k], keys[1:])
+        else:
+            # If we've reached a leaf node but still have keys to match, skip it
+            result[k] = OrderedDict() if len(keys) > 1 else d[k]
+    return result
 
 
 def prune_empty_leaves(dkeys: list|dict) -> dict|list:

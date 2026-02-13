@@ -503,9 +503,9 @@ class IosScanner(AppScanner):
         logging.info(f"Devices found: {d}")
         return d
 
-    def device_info(self, serialno):
-        dumped = self._dump_phone(serialno)
-        self._load_dump(serialno)
+    def device_info(self, serial):
+        dumped = self._dump_phone(serial)
+        self._load_dump(serial)
         if dumped:
             device_info_print, device_info_map = self.ddump.device_info()
             return (device_info_print, device_info_map)
