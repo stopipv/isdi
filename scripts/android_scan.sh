@@ -93,18 +93,24 @@ function dump {
 }
 
 function full_scan {
-    # If file older than 20 min then receate
-    if [[ $(find "$ofname" -mmin +20 -print) ]]; then 
-        (>&2 echo "File is still pretty fresh. Not re-dumping")
-    else
-	    dump  | sed \
+    # Create dump output with error redirection
+	dump  | sed \
          -e 's/^\(\s*\)lastDisabledCaller: /\1lastDisabledCaller:\1  /g;' \
          -e 's/^\(\s*\)User 0: ceDataInode\(.*\)/\1User 0:\n\1  ceDataInode\2/g' \
          -e 's/^\(\s*\)\(Excluded packages:\)/  \1\2/g' \
          -e 's/^\(\s*\)#\(.*\)$/\1\2/g' > "$ofname"
+    
+    # Verify dump was written
+    if [[ ! -s "$ofname" ]]; then
+        (>&2 echo "ERROR: Dump file is empty: $ofname")
+        return 1
     fi
-    (>&2 echo "Pulling apks. (Runs in background). Logs are in ./logs/android_scan.logs")
-    bash ./scripts/pull_apks.sh "$serial" &
+    
+    (>&2 echo "Dump written to: $ofname")
+    ## The apks can be huge and wasting space. 
+    # (>&2 echo "Pulling apks in background...")
+    # mkdir -p ./logs
+    # bash ./scripts/pull_apks.sh "$serial" >> ./logs/android_scan.logs 2>&1 &
 }
 
 info="$3"
@@ -117,11 +123,12 @@ else
     (>&2 echo "------ Running full scan ------- $1")
     serial="-s $1"
     ofname="$2"
+    (>&2 echo "Device serial: $serial")
+    (>&2 echo "Output file: $ofname")
     $adb devices
-    full_scan >> ./logs/android_scan.logs 
+    full_scan
     echo "Finished scanning. Pulling apks in background"
-    # sleep 30;  # sleep for 0.5 minutes
     # Clear the settings to remove developer options
-    $adb $serial shell pm clear com.android.settings
+    $adb $serial shell pm clear com.android.settings 2>/dev/null || true
     exit 0
 fi

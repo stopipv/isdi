@@ -1,21 +1,9 @@
-logs/app.log.1
-logs/android_scan.logs
-notes/
-static_data/pii.key
-static_data/flask.secret
-static_data/*.old
-*.swp
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -32,127 +20,38 @@ wheels/
 .installed.cfg
 *.egg
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# dotenv
-.env
-
-# virtualenv
-.venv
+# Virtual environments
 venv/
 ENV/
+env/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-tmp/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 *~
 
-# Ignore 'brew bundle' lock file
-Brewfile.lock.json
-
-## App data -- Do not add to public github repo
-android_apps_crawl.csv.gz
-test_android_apps_crawl.csv.gz
-
-## Submodules
-MobileDevice/
+# Testing
 .pytest_cache/
-.idea/
+.coverage
+htmlcov/
+.tox/
 
-
-## Sensitive folder don't add to Git
-phone_dumps/
+# User data (DO NOT COMMIT!)
+data/
 dumps/
-static_data/android_apps_crawl.csv.gz
-# static_data/app-flags.csv
-# static_data/app-info.db
-static_data/com.symantec.mobilesecurity.apk
-# static_data/ios_apps_crawl.csv.gz
-# static_data/offstore_apks.csv
-# static_data/spyware.csv
-backup.tar
-.DS_Store
-error.txt
-
-## To be removed
-toremove/
-
-reports/*.csv
-apps/
+reports/
+logs/
+phone_dumps/
 *.db
-static_data/app-info.db.gz
-static_data/all_android_apps_5k_*.csv
-webstatic/images/tmp.png
-scripts/ios_deps/*
-tests/serial/*
-tests/*/
-static_data/kevins_approach.csv
-static_data/app-flags.with-sources.csv
-notes_rahul/
-__MACOSX
+*.log
+*.key
+*.secret
 
-*~test
-*.apk
-phone_dumps/dumps/android_scan.logs
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.backup/

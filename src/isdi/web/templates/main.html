@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel=stylesheet type=text/css
+              href="{{ url_for('static', filename='bootstrap.min.css') }}">
+        <link rel=stylesheet type=text/css
+              href="{{ url_for('static', filename='style.css') }}?234">
+        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+	<title>{{ title }}</title>
+        <script>
+
+         var device = "{{ device }}";
+         var serial = "{{ serial }}";
+         var scanid = "{{ scanid }}";
+	
+         function close_window(msg) {
+		 if (confirm(msg)) {
+			 open('','_parent','');
+			 close();
+		 }
+	 }
+
+         function close_app(msg) {
+		 if (confirm(msg)) {
+			 close();
+		 }
+	 }
+         
+         function report_success(m) {
+             $('#msg').html(m);
+             $('#msg').prop('class', 'alert alert-success')
+         }
+
+         function report_failure(m) {
+             $('#msg').html(m);
+             $('#msg').prop('class', 'alert alert-warning')
+         }
+
+         function postform(form1) {
+             // $(form1).prop('disabled', true);
+             d1 = $('#form-metainfo').serialize();
+             d2 = $('#form-applist').serialize();
+             $.post('/saveapps/' + scanid, data=d2);
+             $.post('/savescan/' + scanid, data = d1).done(function (r) {
+                 report_success(r)
+                 $('#btn-submit').prop('disabled', false);
+             }).fail(function (r) {
+                 report_failure(r.responseText)
+             });
+             return false;
+         }
+
+         function new_client(form) {
+             if (confirm("Did you finish scanning ALL devices of the current client? Do you want to scan devices for a new client?")) {
+                 window.location.href = "/?newid=y";
+             }
+        }
+
+         function consult_form(form) {
+             if (confirm("Did you finish the form? If you leave, your changes may not be saved.")) {
+                 window.location.href = "/";
+             }
+         }
+
+         $(document).ready(function () {
+             $('[data-toggle="tooltip"]').tooltip();
+             $('input[type="text"]').on('keyup keypress', function (e) {
+                 var keyCode = e.keyCode || e.which;
+                 if (keyCode === 13) {
+                     e.preventDefault();
+                     return false;
+                 }
+             });
+             $('#btn-submit').prop('disabled', true);
+             $('#applist > tr > td > input').focusout(function (e) {
+                 data = {'appId': e.target.name, 'serial': serial, 'note': e.target.value}
+                 $.post('/save/appnote/' + device, data = data).done(success = function (r) {
+                     report_success("Note saved.")
+                 });
+             })
+         });
+        </script>
+    </head>
+
+    <body class="container-fluid">
+      {% block content %}
+        {% if task == 'home' %}
+          {% include 'home.html' %}
+        {% endif %}
+        {% if task == 'instruction' %}
+          {% include "instruction.html" %}
+        {% endif %}
+        {% if task == 'privacy' %}
+          {% include "privacy.html" %}
+        {% endif %}
+        {% if task == 'evidence' %}
+          {% include "evidence.html" %}
+        {% endif %}
+        {% if task == 'evidencesummary' %}
+          {% include "summary.html" %}
+        {% endif %}
+        {% if task == 'app' %}
+          {% include "app.html" %}
+        {% endif %}
+        {% if task == 'form' %}
+          {% include "form.html" %}
+        {% endif %}
+        {% if task == 'formedit' %}
+          {% include "formedit.html" %}
+        {% endif %}
+      {% endblock %}
+  </body>
+</html>
