@@ -1,7 +1,7 @@
 #!/bin/bash
 idb=pymobiledevice3
 if [ -n "${PREFIX:-}" ]; then
-    idb="python3 -m isdi.scanner.pdm3_wrapper"
+    idb="python3 -m isdi.scanner.pmd3_wrapper"
     if command -v termux-usb >/dev/null 2>&1; then
         termux-usb -r -E -e "usbmuxd -f -v" $(termux-usb -l | python -c "import sys, json; a=json.load(sys.stdin); print(a[0] if len(a)>0 else '');")
     fi
@@ -25,8 +25,8 @@ outf="$2"
 
 printf "Serial: %s\n" "$serial"
 
-# dump only if the file doesn't exist or is empty or older than 1 day
-if [ -s "$outf" ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
+# dump only if the file is at least 20 bytes and was modified within the last day
+if [ -f "$outf" ] && [ $(wc -c < "$outf") -ge 20 ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
     echo "Dump file already exists and is recent: $outf"
     exit 0
 fi
