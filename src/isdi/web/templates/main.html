@@ -11,7 +11,7 @@
         <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
         <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
-	<title>{{ title }}</title>
+	<title>{{ title }} {% if platform %}({{ platform }}){% endif %}</title>
         <script>
 
          var device = "{{ device }}";

@@ -3,6 +3,7 @@ from isdi.web import app
 from flask import render_template, request, session
 from isdi.scanner import AndroidScanner, IosScanner, TestScanner
 from isdi.scanner.db import get_client_devices_from_db, new_client_id
+import os
 
 config = get_config()
 
@@ -32,6 +33,8 @@ def index():
     return render_template(
         "main.html",
         title=config.TITLE,
+        platform=config.PLATFORM,
+        is_termux=bool(os.environ.get('PREFIX')),
         device_primary_user=config.DEVICE_PRIMARY_USER,
         task="home",
         devices={

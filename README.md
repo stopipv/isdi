@@ -15,66 +15,89 @@ For more information about contributing to ISDi, see the [contribution guideline
 
 ## Installing ISDi :computer:
 
-Right now, ISDi currently only natively supports **macOS and Linux**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
+ISDi currently supports **macOS, Linux, and Termux/Android**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
 (WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
-follow the remaining instructions as a Linux user would, cloning/running 
-ISDi inside the Linux container of your choice. 
+follow the remaining instructions as a Linux user would.
 
-### Python dependencies
-- You will need Python 3.8 or higher (check by running `python3` in your
-Terminal and see what happens).  On macOS, you can get this by running the
-following commands in your Terminal application: `xcode-select --install`
-(installs developer tools); followed by `/usr/bin/ruby -e "$(curl -fsSL
-https://raw.githubusercontent.com/Homebrew/install/master/install)"` to get
-Brew (a software package manager); finally, `brew install python` to get Python
-3.8+.
+### Option 1: Install via pip (Recommended)
 
-- Run `pip3 install -r
-requirements.txt` in the base directory of this repository to get the required
-Python modules.
+The easiest way to install ISDi is via pip:
 
-* [pymobiledevice3](https://pypi.org/project/pymobiledevice3/) is used for scanning iOS devices. It will be automatically installed with the above command.
- 
-### Operating system dependencies
-
-#### Generic
-* [adb](https://developer.android.com/studio/releases/platform-tools.html)
-
-
-#### macOS
-On macOS you can quickly install project dependencies with Homebrew by running `brew bundle`.
-
-You can also fulfill the requirements by doing:
+```bash
+pip install isdi
 ```
+
+Then run ISDi with:
+```bash
+isdi run
+```
+
+### Option 2: Install from Source (Development)
+
+Clone the repository and install in development mode:
+
+```bash
+git clone https://github.com/stopipv/isdi.git
+cd isdi
+pip install -e .
+```
+
+Then run ISDi with:
+```bash
+isdi run
+```
+
+### System Requirements
+
+#### Python
+- Python 3.8 or higher is required
+- Check your version: `python3 --version`
+- On macOS, install via: `brew install python`
+- On Linux (Debian/Ubuntu): `sudo apt install python3 python3-pip`
+
+#### Operating System Dependencies
+
+**macOS:**
+```bash
+brew bundle
+# Or manually:
 brew install --cask android-platform-tools
 ```
 
-#### Debian family
-
+**Linux (Debian/Ubuntu):**
+```bash
+sudo apt install adb
 ```
-sudo apt install adb expect libimobiledevice-utils
-```
 
-#### Windows Subsystem Linux (v2)
-Install `adb` in Windows and make sure `adb.exe` is in the Windows PATH variable. Similarly also install `pymobiledevice3.exe` on Windows using `pip install pymobiledevice3`, and make sure it is in the path. To check if a command is in the path, you can open a command prompt window, type the command, and press enter. 
+**Windows Subsystem Linux (v2):**
+- Install `adb` in Windows and ensure it's in PATH
+- Install `pymobiledevice3` via pip (done automatically with `pip install isdi`)
+
+**Termux/Android:**
+See [TERMUX_INSTALL.md](TERMUX_INSTALL.md) for Android device setup. 
 
 ## Running ISDi
 
-After ISDi is installed, with an Android or iOS
-device plugged in and unlocked, run the following command in the terminal (in
-the base directory of this repository)
+After ISDi is installed, with an Android or iOS device plugged in and unlocked, run:
 
-```$ ./isdi ```
+```bash
+isdi run
+```
 
-ISDi defaults to normal (non-debug) mode. To run ISDi in `test` mode, set the `TEST` flag to 1: 
+ISDi will start a local web server on port 6200. Open your browser to `http://localhost:6200` for the ISDi UI.
 
-```$ TEST=1 ./isdi```
+**Note:** On first run, ISDi will download the app information database (~47MB) from GitHub. This may take a minute depending on your internet connection. An internet connection is required for the first run.
 
-Run in debug mode: `$  DEBUG=1 ./isdi`
+### Command Options
 
-Then navigate to `http://localhost:6200` in the browser of your choice (or `http://localhost:6202` if
-in test mode). You will see ISDi running as a web app. Click on `"Scan Instructions"` and follow 
-the instructions to prepare your device for the scan.
+```bash
+isdi run              # Normal mode
+isdi run --debug      # Debug mode (verbose logging)
+DEBUG=1 isdi run      # Alternative debug flag
+isdi --help           # Show all options
+```
+
+Then navigate to the URL shown in the terminal. Click on `"Scan Instructions"` and follow the instructions to prepare your device for the scan.
 
 It should look something like this:
 
@@ -108,32 +131,27 @@ for your needs. One can do this by modifying the `Client` class in
 the Flask app) to obtain the new
 schema. Then place the new schema in `schema.sql` by updating the `clients_notes` table.
 
-## Debugging tips 
-If you encounter errors, please file a [GitHub issue](../../issues/) with the server error output. 
-Pull requests are welcome. 
+## Debugging Tips
 
-#### Android tips 
-In the terminal of the computer, run `adb devices` to see if
-the device is connected properly.
+### Android
+Check device connection:
+```bash
+adb devices
+```
 
+### iOS  
+Check device connection:
+```bash
+pymobiledevice3 usbmux list
+```
 
-#### iOS tips 
-In the terminal of the computer (in the base directory of this repository), 
-run `./static_data/libimobiledevice-darwin/idevice_id -l` to see if
-the device is connected properly (replace `darwin` with `linux` if your system is Linux.)
+### General
+- Run ISDi with `--debug` flag for verbose logging
+- Check logs in `~/.local/share/isdi/logs/`
+- File issues on [GitHub](../../issues/) with error messages
 
-#### Cast iOS Screens or Mirror Android Screens 
-It is possible to view your
-device screen(s) in real time on the macOS computer in a new window. This may
-be useful to have while you are running the scan (and especially if you use the
-privacy checkup feature), as it will be easy for you to see the mobile device
-screen(s) in real time on the Mac side-by-side with the scanner.
-
-**How to do it:** 
-You can mirror Android device screens in a new window using
-[scrcpy](https://github.com/Genymobile/scrcpy), and cast iOS device screens on
-macOS with QuickTime 10 (launch it and click File --> New Movie Recording -->
-(on dropdown by red button) the iPhone/iPad name).
+### Termux/Android
+See [TERMUX_INSTALL.md](TERMUX_INSTALL.md) for Termux-specific troubleshooting.
 
 ## Downloaded data ## 
 The data downloaded and stored in the study are the
@@ -159,18 +177,34 @@ to the application. I don't know how to get install date, resource usage, etc.
 (Any help will be greatly welcomed.)
 
 
-## Code structure  
-* `phone_scanner.py` has all the logic required to communicate with Android and
-  iOS devices.
-* `parse_dump.py` has all of the logic required to extract dumped info from the
- devices. After the initial scan, the server will rely on this parser rather
- than needing an active connection to the device (work in progress). For now,
- please keep your device plugged in when looking at scan results.  
-* `isdi` is the Flask web server and the application's main entry point.
-* `templates/` folder contains the html templates rendering in the UI 
-* `webstatic/` folder contains the `.css` and `.js` files
-* `phone_dumps/` folder will contain the data recorded from the phone (as well as in 
-`data/fieldstudy.db`.
+## Code Structure  
+
+- **`src/isdi/scanner/`** - Core scanning logic
+  - `parse_dump.py` - Parses device dumps (Android/iOS)
+  - `android_permissions.py` - Android permission analysis
+  - `privacy_scan_android.py` - Android privacy scanning
+  - `blocklist.py` - Stalkerware/spyware blocklist management
+  - `lightweight_df.py` - CSV/data processing (pandas-free)
+  - `db.py` - SQLite database operations
+  - `pmd3_wrapper.py` - Termux-compatible pymobiledevice3 wrapper
+
+- **`src/isdi/web/`** - Flask web application
+  - `templates/` - HTML templates for the web UI
+  - `static/` - CSS, JavaScript, and images
+  - `schema.sql` - Database schema (embedded in code)
+  - `forms/` - WTForms for consultation forms
+  - `model/` - SQLAlchemy models
+  - `view/` - Flask route handlers
+
+- **`src/isdi/scripts/`** - Shell scripts for device interaction
+  - `android_scan.sh` - Android device scanning
+  - `ios_scan.sh` - iOS device scanning
+
+- **`src/isdi/data/`** - Static data and reference files
+  - `app-flags.csv` - App classification metadata
+  - `app-info.db` - Cached app information
+  - `android_permissions.csv` - Android permission database
+  - `ios_permissions.json` - iOS permission database
 
 
 

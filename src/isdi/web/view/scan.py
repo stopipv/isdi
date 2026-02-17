@@ -45,6 +45,8 @@ def scan():
     template_d = dict(
         task="home",
         title=config.TITLE,
+        platform=config.PLATFORM,
+        is_termux=bool(os.environ.get('PREFIX')),
         device=device,
         device_primary_user=config.DEVICE_PRIMARY_USER,  # TODO: Why is this sent
         device_primary_user_sel=device_primary_user,

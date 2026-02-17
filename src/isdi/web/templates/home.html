@@ -1,5 +1,5 @@
 <div class="">
-  <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title }}</b> <!-- ({{ title.version_current }}) --></span>
+  <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title }}</b>{% if platform %} <span style="color: #666; font-size: 0.8em;">({{ platform }})</span>{% endif %} <!-- ({{ title.version_current }}) --></span>
 	<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
         <span style="float: center; font-size: 15px">
             <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
@@ -40,6 +40,53 @@
 		<br>
                 <button class="btn btn-primary mx-2">Scan now</button>
             </form>
+            {% if is_termux %}
+            <br/>
+            <div id="termux-usb-section">
+                <button id="btn-termux-usb" class="btn btn-warning btn-sm" onclick="requestTermuxUSBPermission(); return false;">
+                    📱 Request iOS USB Access
+                </button>
+                <div id="termux-usb-msg" class="small mt-2" style="display:none;"></div>
+            </div>
+            <script>
+                function requestTermuxUSBPermission() {
+                    const btn = document.getElementById('btn-termux-usb');
+                    const msgDiv = document.getElementById('termux-usb-msg');
+                    
+                    btn.disabled = true;
+                    btn.textContent = 'Requesting...';
+                    msgDiv.style.display = 'none';
+                    
+                    fetch('/termux-usb-permission', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        btn.textContent = '📱 Request iOS USB Access';
+                        msgDiv.style.display = 'block';
+                        
+                        if (data.success) {
+                            msgDiv.className = 'small mt-2 text-success';
+                            msgDiv.textContent = '✓ ' + data.message;
+                        } else {
+                            msgDiv.className = 'small mt-2 text-danger';
+                            msgDiv.textContent = '✗ ' + (data.error || 'Failed to request USB permission');
+                        }
+                    })
+                    .catch(error => {
+                        btn.disabled = false;
+                        btn.textContent = '📱 Request iOS USB Access';
+                        msgDiv.style.display = 'block';
+                        msgDiv.className = 'small mt-2 text-danger';
+                        msgDiv.textContent = '✗ Error: ' + error.message;
+                    });
+                }
+            </script>
+            {% endif %}
 	    <!-- {% for t in ["Android", "iOS", "test"] %} -->
             <!-- button onclick="fetch('/scan/{{ t.lower() }}', '{{ t.lower() }}')" id="btn-android"
                  class="btn btn-primary mx-2">{{ t }}</button -->

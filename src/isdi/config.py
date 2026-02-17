@@ -2,6 +2,7 @@
 import os
 import sys
 import shutil
+import shlex
 from pathlib import Path
 from typing import Optional
 import secrets
@@ -76,9 +77,31 @@ class Config:
         
         # iOS tools
         if os.environ.get("PREFIX"):
-            # Termux: use module-based wrapper with current Python interpreter
-            # This ensures the .pyz archive is in the Python path
-            self.LIBIMOBILEDEVICE_PATH = f"{sys.executable} -m isdi.scanner.pmd3_wrapper"
+            py_exec = shlex.quote(sys.executable)
+
+            pyz_path = None
+            argv_path = Path(sys.argv[0]).resolve()
+            if argv_path.suffix == ".pyz" and argv_path.exists():
+                pyz_path = argv_path
+            else:
+                for entry in sys.path:
+                    if entry.endswith(".pyz"):
+                        candidate = Path(entry)
+                        if candidate.exists():
+                            pyz_path = candidate
+                            break
+
+            if pyz_path is not None:
+                # Shiv bundles packages under site-packages inside the .pyz
+                pyz_site = f"{pyz_path}/site-packages"
+                pyz_quoted = shlex.quote(str(pyz_site))
+                self.LIBIMOBILEDEVICE_PATH = (
+                    f"PYTHONPATH={pyz_quoted} {py_exec} -m isdi.scanner.pmd3_wrapper"
+                )
+            else:
+                self.LIBIMOBILEDEVICE_PATH = (
+                    f"{py_exec} -m isdi.scanner.pmd3_wrapper"
+                )
         else:
             self.LIBIMOBILEDEVICE_PATH = "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
         
@@ -173,17 +196,48 @@ class Config:
                 self.APP_FLAGS_FILE = old_location
 
     def _ensure_app_info_db(self) -> None:
-        """Copy bundled app-info.db into cache if missing or empty."""
+        """Download app-info.db from GitHub releases if missing or empty."""
         try:
-            src_db = self.package_data / 'app-info.db'
             dst_db = Path(self.dirs['cache']) / 'app-info.db'
-            if not src_db.exists():
+            
+            # If database exists and has content, skip download
+            if dst_db.exists() and dst_db.stat().st_size > 0:
                 return
-            if not dst_db.exists() or dst_db.stat().st_size == 0:
-                dst_db.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src_db, dst_db)
-        except Exception:
-            # Avoid failing config init if copy fails
+            
+            # Try to download from GitHub releases
+            import urllib.request
+            import urllib.error
+            
+            github_url = 'https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db'
+            
+            print(f"Downloading app-info.db from GitHub...")
+            dst_db.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Download with timeout
+            try:
+                with urllib.request.urlopen(github_url, timeout=30) as response:
+                    if response.status == 200:
+                        with open(dst_db, 'wb') as f:
+                            f.write(response.read())
+                        print(f"✓ Downloaded app-info.db ({dst_db.stat().st_size} bytes)")
+                        return
+            except urllib.error.HTTPError as e:
+                if e.code == 404:
+                    print(f"Warning: app-info.db not found in GitHub releases.")
+                else:
+                    print(f"Warning: Failed to download app-info.db: HTTP {e.code}")
+            except Exception as e:
+                print(f"Error: Failed to download app-info.db: {e}")
+                print("App information database is required for ISDi to function.")
+                print("Please check your internet connection and try again.")
+                print(f"If the problem persists, manually download from:")
+                print(f"  {github_url}")
+                print(f"And place it at: {dst_db}")
+                
+        except Exception as e:
+            # Avoid failing config init if download fails
+            print(f"Error: Could not download app-info.db: {e}")
+            print("App information database is required for full functionality.")
             return
     
     def setup_secrets(self):

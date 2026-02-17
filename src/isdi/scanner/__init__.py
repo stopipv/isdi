@@ -380,7 +380,7 @@ class IosScanner(AppScanner):
             data = json.loads(output)
             return [d.get("Identifier", "") for d in data if "Identifier" in d]
         except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse device list: {e}")
+            logging.error(f"Failed to parse device list: {e}. output={output}")
             return []
 
     def get_apps(self, serialno: str) -> List[str]:

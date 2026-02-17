@@ -5,6 +5,7 @@ include requirements.txt
 include pyproject.toml
 
 recursive-include src/isdi/data *
+recursive-exclude src/isdi/data app-info.db
 recursive-include src/isdi/scripts *.sh
 recursive-include src/isdi/web/templates *
 recursive-include src/isdi/web/static *
