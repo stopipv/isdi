@@ -44,12 +44,13 @@
             <br/>
             <div id="termux-usb-section">
                 <button id="btn-termux-usb" class="btn btn-warning btn-sm" onclick="requestTermuxUSBPermission(); return false;">
-                    📱 Request iOS USB Access
+                    📱 Request USB Access
                 </button>
                 <div id="termux-usb-msg" class="small mt-2" style="display:none;"></div>
             </div>
             <script>
                 function requestTermuxUSBPermission() {
+                    console.log('requestTermuxUSBPermission called');
                     const btn = document.getElementById('btn-termux-usb');
                     const msgDiv = document.getElementById('termux-usb-msg');
                     
@@ -57,29 +58,40 @@
                     btn.textContent = 'Requesting...';
                     msgDiv.style.display = 'none';
                     
+                    console.log('Sending POST request to /termux-usb-permission');
                     fetch('/termux-usb-permission', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
+                    .then(response => {
+                        console.log('Response received:', response.status, response.statusText);
+                        // Parse JSON regardless of status code
+                        return response.json().then(data => ({
+                            ok: response.ok,
+                            status: response.status,
+                            data: data
+                        }));
+                    })
+                    .then(result => {
+                        console.log('Parsed response:', result);
                         btn.disabled = false;
-                        btn.textContent = '📱 Request iOS USB Access';
+                        btn.textContent = '📱 Request USB Access';
                         msgDiv.style.display = 'block';
                         
-                        if (data.success) {
+                        if (result.ok && result.data.success) {
                             msgDiv.className = 'small mt-2 text-success';
-                            msgDiv.textContent = '✓ ' + data.message;
+                            msgDiv.textContent = '✓ ' + result.data.message;
                         } else {
                             msgDiv.className = 'small mt-2 text-danger';
-                            msgDiv.textContent = '✗ ' + (data.error || 'Failed to request USB permission');
+                            msgDiv.textContent = '✗ ' + (result.data.error || 'Failed to request USB permission');
                         }
                     })
                     .catch(error => {
+                        console.error('Error requesting USB permission:', error);
                         btn.disabled = false;
-                        btn.textContent = '📱 Request iOS USB Access';
+                        btn.textContent = '📱 Request USB Access';
                         msgDiv.style.display = 'block';
                         msgDiv.className = 'small mt-2 text-danger';
                         msgDiv.textContent = '✗ Error: ' + error.message;
