@@ -43,7 +43,7 @@
             {% if is_termux %}
             <br/>
             <div id="termux-usb-section">
-                <button id="btn-termux-usb" class="btn btn-warning btn-sm" onclick="requestTermuxUSBPermission(); return false;">
+                <button type="button" id="btn-termux-usb" class="btn btn-warning btn-sm" onclick="requestTermuxUSBPermission(); return false;">
                     📱 Request USB Access
                 </button>
                 <div id="termux-usb-msg" class="small mt-2" style="display:none;"></div>
