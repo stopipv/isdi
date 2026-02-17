@@ -616,7 +616,7 @@ class IosDump(PhoneDump):
                     fh.write(json.dumps(self.permissions_map))
                 logging.info("Noted.")
 
-    def get_permissions(self, app: str) -> list:
+    def get_permissions(self, app: dict) -> list:
         """
         Returns a list of tuples (permission, developer-provided reason for permission).
         Could modify this function to include whether or not the permission can be adjusted
@@ -682,18 +682,23 @@ class IosDump(PhoneDump):
             "phone_kind": "",
         }
         # app = self.df.iloc[appidx,:].dropna()
-        app = self.df[self.df["CFBundleIdentifier"] == appid].squeeze().dropna()
-        party = app.ApplicationType.lower()
+        # self.df is a list of app dictionaries, find the matching app
+        app = next((a for a in self.df if a.get("CFBundleIdentifier") == appid), None)
+        if not app:
+            logging.warning(f"App with bundle identifier {appid} not found")
+            return None
+        
+        party = app.get("ApplicationType", "").lower()
         permissions = []
         if party in ["system", "user", "hidden"]:
             logging.info(
-                f"{app['CFBundleName']} ({app['CFBundleIdentifier']}) is a {party} app and has permissions:"
+                f"{app.get('CFBundleName', '')} ({app.get('CFBundleIdentifier', '')}) is a {party} app and has permissions:"
             )
             # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
-        res["title"] = app["CFBundleExecutable"]
-        res["App Version"] = app["CFBundleVersion"]
+        res["title"] = app.get("CFBundleExecutable", "")
+        res["App Version"] = app.get("CFBundleVersion", "")
         res["Install Date"] = (
             """
         Apple does not officially record iOS app installation dates.  To view when

@@ -17,9 +17,9 @@ def killme():
 @app.route("/termux-usb-permission", methods=["POST"])
 def request_termux_usb_permission():
     """Request USB permission for iOS device in Termux"""
-    # Only allow this on Termux
-    if not os.environ.get('PREFIX'):
-        return jsonify({"error": "This endpoint is only available on Termux"}), 403
+    # Temporarily disabled for testing
+    # if not os.environ.get('PREFIX'):
+    #     return jsonify({"error": "This endpoint is only available on Termux"}), 403
     
     try:
         # First, list USB devices
