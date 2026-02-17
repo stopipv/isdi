@@ -236,6 +236,8 @@ class PhoneDump(object):
     def info(self, appid):
         raise Exception("Not Implemented")
 
+    def offstore_apps(self):
+        return []
 
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
@@ -348,37 +350,6 @@ class AndroidDump(PhoneDump):
             lvls[curr_lvl] = k  # '{} --> {}'.format(curr_lvl, k)
             curr[lvls[curr_lvl]] = {}
         return prune_empty_keys(res)
-
-    # @staticmethod
-    def parse_dump_file(self, fname) -> dict:
-        raise Exception("Do not use this function. Use new_parse_dump_file instead.")
-        if not Path(fname).exists():
-            logging.error("File: {!r} does not exists".format(fname))
-        fp = open(fname)
-        d = {}
-        service = ""
-        # curr_spcnt, curr_lvl = 0, 0
-        while True:
-            line = fp.readline().rstrip()
-            if line.startswith("----"):
-                continue
-
-            if line.startswith("DUMP OF SERVICE"):  # Service
-                service = line.strip().rsplit(" ", 1)[1]
-                content = self._extract_info_lines(fp)
-                logging.info(f"Content: {service!r}", content[:10])
-                d[service] = self._parse_dump_service_info_lines(content)
-
-            elif line.startswith("DUMP OF SETTINGS"):  # Setting
-                setting = "settings_" + line.strip().rsplit(" ", 1)[1]
-                content = self._extract_info_lines(fp)
-                settings_d = dict(line.split("=", 1) for line in content if "=" in line)
-                d[setting] = settings_d
-            else:
-                if not line:
-                    break
-                logging.error(f"Something wrong! --> {line!r}")
-        return d
 
     def load_file(self, failed_before: str=False) -> dict:
         fname = self.dumpf.rsplit(".", 1)[0] + ".txt"

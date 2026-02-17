@@ -1,8 +1,7 @@
 #!/bin/bash
 idb=pymobiledevice3
 if [ -n "${PREFIX:-}" ]; then
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
-    idb="python3 ${script_dir}/pmd3_termux.py"
+    idb="python3 -m isdi.scanner.pdm3_wrapper"
     if command -v termux-usb >/dev/null 2>&1; then
         termux-usb -r -E -e "usbmuxd -f -v" $(termux-usb -l | python -c "import sys, json; a=json.load(sys.stdin); print(a[0] if len(a)>0 else '');")
     fi
@@ -32,8 +31,8 @@ if [ -s "$outf" ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
     exit 0
 fi
 echo "{
-    \"apps\": $("${idb}" apps list $serial),
-    \"devinfo\": $("${idb}" lockdown info $serial)
+    \"apps\": $(${idb} apps list $serial),
+    \"devinfo\": $(${idb} lockdown info $serial)
 }" > "$outf"
 
 if [ -s "$outf" ]; then
