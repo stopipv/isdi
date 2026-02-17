@@ -1,4 +1,4 @@
-from phone_scanner import parse_dump as pdump
+from isdi.scanner import parse_dump as pdump
 import os
 import pytest
 
@@ -81,7 +81,8 @@ def test_get_all_leaves():
         "in_info" : []
     })])
 def test_apps(fname, conds):
-    assert os.path.exists(fname), f"File {fname} does not exist. Skipping test."
+    if not os.path.exists(fname):
+        pytest.skip(f"File {fname} does not exist. Skipping test.")
     ad = pdump.AndroidDump(fname)
     apps = ad.all_apps()
     print(fname, apps[:5])

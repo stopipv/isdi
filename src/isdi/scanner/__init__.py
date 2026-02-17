@@ -18,7 +18,6 @@ from collections import defaultdict
 from typing import Optional, List, Tuple, Dict, Any
 
 from isdi.config import get_config
-import pandas as pd
 
 from . import blocklist
 from . import parse_dump
@@ -71,19 +70,19 @@ class AppScanner:
 
     def get_system_apps(self, serialno: str) -> List[str]:
         """Return list of system app package IDs (Android only)."""
-        if self.device_type != "android" or not self.ddump:
+        if not self.ddump:
             return []
         return self.ddump.system_apps()
 
     def get_offstore_apps(self, serialno: str) -> List[str]:
         """Return list of offstore/sideloaded app package IDs (Android only)."""
-        if self.device_type != "android" or not self.ddump:
+        if not self.ddump:
             return []
         return self.ddump.offstore_apps()
 
-    def get_app_titles(self, serialno: str) -> pd.DataFrame:
-        """Return DataFrame of app package IDs and titles."""
-        return pd.DataFrame()
+    def get_app_titles(self, serialno: str) -> Dict[str, str]:
+        """Return dict of app package IDs and titles: {appId: title}."""
+        return {}
 
     def dump_path(self, serial: str) -> str:
         """Get the file path for a device's dump."""
@@ -195,60 +194,74 @@ class AppScanner:
 
         return d, info
 
-    def find_spyapps(self, serialno: str) -> pd.DataFrame:
-        """Find spyware apps using blocklist."""
+    def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Find spyware apps using blocklist.
+        Returns dict with appId as keys and app info as values: {appId: {title, flags, score, class_, html_flags}}
+        """
         installed_apps = self.get_apps(serialno)
         if not installed_apps:
-            return pd.DataFrame(columns=["title", "flags", "score", "class_", "html_flags"])
+            return {}
         
         # Get offstore and system apps (Android only - iOS returns empty)
         offstore = self.get_offstore_apps(serialno)
         system = self.get_system_apps(serialno)
         
-        # Get app flags
-        r = blocklist.app_title_and_flag(
-            pd.DataFrame({"appId": installed_apps}),
+        # Get app flags from blocklist
+        flagged_apps = blocklist.app_title_and_flag(
+            [{"appId": appid} for appid in installed_apps],
             offstore_apps=offstore,
             system_apps=system,
         )
         
-        r["title"] = r.title.fillna("")
+        # Convert to dict with appId as key
+        result = {}
+        for app in flagged_apps:
+            appid = app.get('appId', '')
+            if not appid:
+                continue
+            title = app.get('title', '') or ''
+            flags = app.get('flags', [])
+            
+            # Get app titles from database (Android)
+            if self.device_type == "android" and AppScanner.app_info_conn and not title:
+                try:
+                    cursor = AppScanner.app_info_conn.cursor()
+                    cursor.execute("SELECT title FROM apps WHERE appid = ?", (appid,))
+                    row = cursor.fetchone()
+                    if row:
+                        title = row[0] or ''
+                except Exception as e:
+                    logging.error(f"Error getting title for {appid}: {e}")
+            elif self.device_type == "ios":
+                # Get titles from iOS dump
+                td = self.get_app_titles(serialno)
+                title = td.get(appid, '') or title
+            
+            # ASCII encode/decode to handle special characters
+            title = title.encode('ascii', errors='ignore').decode('ascii')
+            
+            # Classify and score
+            score_val = blocklist.score(flags)
+            class_val = blocklist.assign_class(flags)
+            html_flags = blocklist.flag_str(flags)
+            
+            result[appid] = {
+                'title': title,
+                'flags': flags,
+                'score': score_val,
+                'class_': class_val,
+                'html_flags': html_flags,
+            }
         
-        # Get app titles from database
-        if self.device_type == "android" and AppScanner.app_info_conn:
-            try:
-                td = pd.read_sql(
-                    "SELECT appid AS appId, title FROM apps WHERE appid IN ({})".format(
-                        ",".join("?" * len(installed_apps))
-                    ),
-                    AppScanner.app_info_conn,
-                    params=installed_apps,
-                    index_col="appId",
-                )
-                r.set_index("appId", inplace=True)
-                r.loc[td.index, "title"] = td["title"]
-                r.reset_index(inplace=True)
-            except Exception as e:
-                logging.error(f"Error getting titles: {e}")
-        elif self.device_type == "ios":
-            td = self.get_app_titles(serialno)
-            if not td.empty:
-                r.set_index("appId", inplace=True)
-                r.loc[td.index, "title"] = td["title"]
-                r.reset_index(inplace=True)
+        # Sort by risk score descending, then by appId ascending
+        sorted_apps = sorted(
+            result.items(),
+            key=lambda x: (-x[1]['score'], x[0])
+        )
         
-        # Classify apps
-        r["class_"] = r["flags"].apply(blocklist.assign_class)
-        r["score"] = r["flags"].apply(blocklist.score)
-        r["title"] = r.title.str.encode("ascii", errors="ignore").str.decode("ascii")
-        r["title"] = r.title.fillna("")
-        r["html_flags"] = r["flags"].apply(blocklist.flag_str)
-        
-        # Sort by risk score
-        r.sort_values(by=["score", "appId"], ascending=[False, True], na_position="last", inplace=True)
-        r.set_index("appId", inplace=True)
-        
-        return r[["title", "flags", "score", "class_", "html_flags"]]
+        # Return as dict keyed by appId (maintains compatibility with .to_dict(orient='index'))
+        return {appid: app_info for appid, app_info in sorted_apps}
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
         """Get human-readable device info string and dict."""
@@ -383,11 +396,27 @@ class IosScanner(AppScanner):
         
         return self.ddump.installed_apps()
 
-    def get_app_titles(self, serialno: str) -> pd.DataFrame:
-        """Get iOS app titles."""
+    def get_app_titles(self, serialno: str) -> Dict[str, str]:
+        """Get iOS app titles as dict: {appId: title}."""
         if not self.ddump:
-            return pd.DataFrame()
-        return self.ddump.installed_apps_titles()
+            return {}
+        titles_df = self.ddump.installed_apps_titles()
+        # If it returns a DataFrame-like object, convert to dict
+        # if hasattr(titles_df, 'to_dict'):
+        #     # It's a DataFrame, convert to our dict format
+        #     result = {}
+        #     for appid, title in zip(titles_df.get('appId', []), titles_df.get('title', [])):
+        #         result[appid] = title
+        #     return result
+        if isinstance(titles_df, dict):
+            # Already a dict
+            return titles_df
+        else:
+            # Try to iterate
+            try:
+                return {item.get('appId'): item.get('title') for item in titles_df if item}
+            except:
+                return {}
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
         """Get iOS device info."""

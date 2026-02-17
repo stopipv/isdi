@@ -1,6 +1,6 @@
 import re
-from phone_scanner.blocklist import _regex_blocklist, app_title_and_flag
-import pandas as pd
+from isdi.scanner.blocklist import _regex_blocklist, app_title_and_flag
+from isdi.scanner.lightweight_df import LightDataFrame
 import sys
 
 test_list = [
@@ -31,24 +31,16 @@ def test_blocklist():
 
 
 def test_app_title_and_flags():
-    d = pd.DataFrame(
-        {
-            "appId": [
-                "core.framework",
-                "com.android.system",
-                "LEM.TrackMe",
-                "com.spy2mobile.light",
-            ]
-        }
+    d = LightDataFrame(
+        [
+            {"appId": "core.framework"},
+            {"appId": "com.android.system"},
+            {"appId": "LEM.TrackMe"},
+            {"appId": "com.spy2mobile.light"},
+        ]
     )
     ret = app_title_and_flag(d, ["core.framework", "com.android.system"])
-    assert len(ret) == len(ret.appId)
-    # assert ret.flags ==
-    ret.to_csv(
-        index=None
-    ) == """appId,title,flags
-LEM.TrackMe,TrackMe - GPS Tracker,"['dual-use', 'regex-spy']"
-com.android.system, System Service,"['spyware', 'co-occurrence', 'offstore-app']"
-com.spy2mobile.light, Data Backup,"['spyware', 'co-occurrence', 'regex-spy']"
-core.framework,mSpy,"['spyware', 'offstore-app', 'regex-spy']"
-"""
+    assert len(ret) == len({app.get("appId") for app in ret})
+    appids = {app.get("appId") for app in ret}
+    assert "core.framework" in appids
+    assert "com.android.system" in appids

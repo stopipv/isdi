@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Intimate Surveillance Detection Instrument - Phone privacy scanner"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "GPL-3.0"}
+license = "GPL-3.0-only"
 authors = [
     {name = "ISDI Contributors"}
 ]
@@ -17,7 +17,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
     "Topic :: Security",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -29,14 +28,10 @@ classifiers = [
 dependencies = [
     "flask>=3.0",
     "flask-sqlalchemy>=3.0",
-    "flask-migrate>=4.0",
     "flask-wtf>=1.2",
-    "wtforms-alchemy>=0.19",
     "pymobiledevice3>=4.0",
-    "pandas>=2.0",
     "click>=8.0",
     "pyyaml>=6.0",
-    "cryptography>=40.0",
 ]
 
 [project.optional-dependencies]

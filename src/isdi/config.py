@@ -72,10 +72,15 @@ class Config:
         self.ADB_PATH = "adb" + (".exe" if self.PLATFORM in ("wsl", "win32") else "")
         self.DUMP_DIR = str(self.phone_dumps_dir)  # Phone dumps directory
         self.DEV_SUPPORTED = ["android", "ios"]  # Supported device types
-        self.SCRIPT_DIR = Path(__file__).parent.parent.parent / "scripts"
+        self.SCRIPT_DIR = Path(__file__).parent / "scripts"  # Shell scripts in package
         
         # iOS tools
-        self.LIBIMOBILEDEVICE_PATH = "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
+        if os.environ.get("PREFIX"):
+            # Termux: use module-based wrapper with current Python interpreter
+            # This ensures the .pyz archive is in the Python path
+            self.LIBIMOBILEDEVICE_PATH = f"{sys.executable} -m isdi.scanner.pmd3_wrapper"
+        else:
+            self.LIBIMOBILEDEVICE_PATH = "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
         
         # Approved app installers
         self.APPROVED_INSTALLERS = {"com.android.vending", "com.sec.android.preloadinstaller"}

@@ -1,99 +1,228 @@
 #!/bin/bash
-# Build a self-contained executable for Termux/Android using Shiv
+# Build ISDI as a single self-contained .pyz executable for Termux/Android
+# Uses shiv + pre-built wheels to avoid compilation on weak Android hardware
+#
+# Usage: ./build-termux-pex.sh
+# Output: dist/isdi.pyz (~100-150 MB - single file, no installation needed)
+#
 # Run this on your Linux machine, then transfer to Android
 
 set -e
 
-echo "Building isdi for Termux/Android..."
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}=== ISDI Shiv .pyz Builder for Termux ===${NC}"
+echo "Building self-contained executable with pre-built wheels..."
+echo ""
 
 # Save original directory
 ORIG_DIR="$(pwd)"
 
-# Install buildtools
-pip install --break-system-packages -q shiv 2>/dev/null || pip install -q shiv 2>/dev/null || echo "shiv may already be installed"
+# =============================================================================
+# Step 1: Install shiv builder
+# =============================================================================
+echo -e "${BLUE}[1/5]${NC} Installing shiv..."
+pip install --break-system-packages -q shiv 2>/dev/null || \
+    pip install -q shiv 2>/dev/null || \
+    echo "Warning: shiv may already be installed"
 
-# Clean previous builds
-rm -rf build/ dist/ isdi.pyz
-mkdir -p dist
+# =============================================================================
+# Step 2: Clean previous builds (but preserve wheels cache)
+# =============================================================================
+echo -e "${BLUE}[2/5]${NC} Cleaning previous builds..."
+rm -rf build/ dist/ *.pyz
+# Note: wheels/ and .wheel-cache/ are preserved for speed
+mkdir -p dist wheels
 
-# Copy our patched config
+# =============================================================================
+# Step 3: Collect pre-built wheels (NO COMPILATION)
+# =============================================================================
+echo -e "${BLUE}[3/5]${NC} Collecting pre-built wheels..."
+
+WHEEL_DIR="$ORIG_DIR/wheels"
+WHEEL_CACHE="$ORIG_DIR/.wheel-cache"
+
+# If wheels already downloaded, skip (they're cached)
+if [ -d "$WHEEL_DIR" ] && [ "$(ls -1 $WHEEL_DIR 2>/dev/null | wc -l)" -gt 0 ]; then
+    echo "  ✓ Wheels already cached ($(ls $WHEEL_DIR | wc -l) files)"
+else
+    echo "  Downloading wheels with --prefer-binary flag..."
+    mkdir -p "$WHEEL_DIR"
+    
+    pip wheel \
+        --prefer-binary \
+        --no-build-isolation \
+        --no-cache-dir \
+        --wheel-dir "$WHEEL_DIR" \
+        --quiet \
+        flask \
+        flask-sqlalchemy \
+        flask-migrate \
+        flask-wtf \
+        wtforms-alchemy \
+        pymobiledevice3 \
+        click \
+        pyyaml \
+        rsonlite \
+        2>&1 | grep -E "(Successfully|Downloading|Collecting)" | head -20 || true
+    
+    echo "  ✓ Downloaded: $(ls $WHEEL_DIR | wc -l) files"
+    
+    # Also cache for fast-build script
+    mkdir -p "$WHEEL_CACHE"
+    cp "$WHEEL_DIR"/* "$WHEEL_CACHE/" 2>/dev/null || true
+fi
+
+# =============================================================================
+# Step 4: Prepare source code
+# =============================================================================
+echo -e "${BLUE}[4/5]${NC} Preparing source code..."
+
 BUILD_DIR="$(mktemp -d)"
-trap "rm -rf $BUILD_DIR" EXIT
+trap "rm -rf $BUILD_DIR $WHEEL_DIR" EXIT
 
-# Copy files to temp
-cp -r phone_scanner web templates webstatic static_data scripts "$BUILD_DIR/"
-cp isdi config.py "$BUILD_DIR/"
-cp -r data stalkerware-indicators "$BUILD_DIR/" 2>/dev/null || true
+# Copy modern src-layout structure (shiv only packages Python packages)
+mkdir -p "$BUILD_DIR/src"
+cp -r "$ORIG_DIR/src/isdi" "$BUILD_DIR/src/"
+cp "$ORIG_DIR/pyproject.toml" "$BUILD_DIR/" 2>/dev/null || true
+cp "$ORIG_DIR/MANIFEST.in" "$BUILD_DIR/" 2>/dev/null || true
+cp "$ORIG_DIR/README.md" "$BUILD_DIR/" 2>/dev/null || true
+cp "$ORIG_DIR/LICENSE" "$BUILD_DIR/" 2>/dev/null || true
 
-# Patch config
-echo "Patching config.py for zipapp mode..."
-python3 patch_config.py "$BUILD_DIR/config.py"
+# Copy wheels into package for offline installation
+cp -r "$WHEEL_DIR" "$BUILD_DIR/wheels"
 
-# Create a proper __main__.py entry point
-cat > "$BUILD_DIR/__main__.py" << 'EOF'
+# Create bootstrap module inside the package so shiv includes it
+cat > "$BUILD_DIR/src/isdi/termux_bootstrap.py" << 'MAIN_EOF'
 #!/usr/bin/env python3
-"""Main entry point for ISDI"""
-import sys
+"""
+ISDI - Bootstrap entry point for .pyz executable
+
+Optimized for Termux/Android with pre-built wheels.
+No external dependencies required after extraction.
+"""
+
 import os
-from pathlib import Path
+import sys
 
-# Ensure package is in path
-sys.path.insert(0, os.path.dirname(__file__))
+def main():
+    """Entry point for ISDI CLI"""
+    try:
+        from isdi.cli import main as cli_main
+        return cli_main()
+    except ImportError as exc:
+        print(f"Error: Failed to import ISDI CLI: {exc}", file=sys.stderr)
+        print(
+            "This may happen on first run. Trying to install dependencies...",
+            file=sys.stderr,
+        )
 
-if __name__ == '__main__':
-    import webbrowser
-    from threading import Timer
-    
-    import config
-    from phone_scanner import db
-    from web import app, sa
-    
-    PORT = 6200 if not (config.TEST or config.DEBUG) else 6202
-    HOST = "127.0.0.1" if config.DEBUG else "0.0.0.0"
-    
-    def open_browser():
-        """Opens a browser to make it easy to navigate to ISDi"""
-        if not config.TEST:
-            webbrowser.open(f"http://{HOST}:{PORT}", new=0, autoraise=True)
-    
-    # Check for test mode
-    if 'TEST' in sys.argv[1:] or 'test' in sys.argv[1:]:
-        print("Running in test mode.")
-        config.set_test_mode(True)
-    
-    print(f"TEST={config.TEST}")
-    if hasattr(config, 'DATA_DIR'):
-        print(f"Data directory: {config.DATA_DIR}")
-    
-    db.init_db(app, sa, force=config.TEST)
-    config.setup_logger()
-    Timer(1, open_browser).start()
-    app.run(host=HOST, port=PORT, debug=config.DEBUG, use_reloader=config.DEBUG)
-EOF
+        # Try installing wheels if they're bundled
+        import subprocess
 
-# Build with shiv (it extracts binary deps automatically)
-echo "Building with shiv (this will take a few minutes)..."
+        wheel_dir = os.path.join(os.path.dirname(__file__), "wheels")
+        if os.path.isdir(wheel_dir):
+            print("Installing bundled wheels...", file=sys.stderr)
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "--no-index",
+                    "--find-links",
+                    wheel_dir,
+                    "--upgrade",
+                    "pip",
+                ],
+                check=False,
+            )
+
+            # Retry import
+            from isdi.cli import main as cli_main
+            return cli_main()
+
+        print(
+            "Wheels directory not found. Please reinstall isdi.pyz",
+            file=sys.stderr,
+        )
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+MAIN_EOF
+
+# =============================================================================
+# Step 5: Build with shiv
+# =============================================================================
+echo -e "${BLUE}[5/5]${NC} Building .pyz archive with shiv..."
+echo "  This will package everything into a single executable file..."
+
 cd "$BUILD_DIR"
+
+# Build with shiv, including pre-built wheels directory
 shiv \
-    --site-packages . \
     --compressed \
-    --entry-point __main__ \
-    --output-file "$ORIG_DIR/dist/isdi.pyz" \
     --reproducible \
-    $(grep -v '^#' "$ORIG_DIR/requirements.txt" | tr '\n' ' ')
+    --entry-point isdi.termux_bootstrap:main \
+    --output-file "$ORIG_DIR/dist/isdi.pyz" \
+    --python=/usr/bin/python3 \
+    .
 
 cd "$ORIG_DIR"
 
-echo ""
-echo "✓ Build complete: dist/isdi.pyz"
-echo ""
-echo "Transfer to Termux:"
-echo "  adb push dist/isdi.pyz /sdcard/"
-echo ""
-echo "On Termux:"
-echo "  pkg install python"
-echo "  mv /sdcard/isdi.pyz ~/"
-echo "  chmod +x ~/isdi.pyz"
-echo "  ~/isdi.pyz"
-echo ""
-echo "Size: $(du -h dist/isdi.pyz 2>/dev/null | cut -f1 || echo 'N/A')"
+# =============================================================================
+# Verify and report
+# =============================================================================
+if [ -f "dist/isdi.pyz" ]; then
+    PYZ_SIZE=$(du -h dist/isdi.pyz | cut -f1)
+    
+    echo ""
+    echo -e "${GREEN}✓ Build Complete!${NC}"
+    echo ""
+    echo "Archive Details:"
+    echo "  File:     dist/isdi.pyz"
+    echo "  Size:     $PYZ_SIZE"
+    echo "  Type:     Self-contained Python executable"
+    echo "  Platform: Python 3.8+ (Termux compatible)"
+    echo ""
+    echo -e "${BLUE}Installation on Android/Termux:${NC}"
+    echo "  1. Transfer file:"
+    echo "     adb push dist/isdi.pyz /sdcard/"
+    echo ""
+    echo "  2. Install Python (if not already installed):"
+    echo "     pkg install python"
+    echo ""
+    echo "  3. Setup:"
+    echo "     mv /sdcard/isdi.pyz ~/"
+    echo "     chmod +x ~/isdi.pyz"
+    echo ""
+    echo "  4. Run:"
+    echo "     python3 ~/isdi.pyz run"
+    echo ""
+    echo -e "${BLUE}Or create a symlink:${NC}"
+    echo "     ln -s ~/isdi.pyz ~/.local/bin/isdi"
+    echo "     isdi run"
+    echo ""
+    echo -e "${BLUE}Benefits:${NC}"
+    echo "  ✓ Single file (no installation needed)"
+    echo "  ✓ Pre-built wheels (no compilation on Android)"
+    echo "  ✓ Fast startup"
+    echo "  ✓ All dependencies included"
+    echo ""
+else
+    echo -e "${RED}✗ Build failed!${NC}"
+    exit 1
+fi
+
+# =============================================================================
+# Cleanup
+# =============================================================================
+rm -rf "$WHEEL_DIR" 2>/dev/null || true
+
+echo -e "${GREEN}Done!${NC}"
+

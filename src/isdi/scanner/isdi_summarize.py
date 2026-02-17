@@ -1,5 +1,4 @@
 from collections import defaultdict
-import pandas as pd
 from isdi.config import get_config
 import sqlite3
 import json
@@ -16,14 +15,15 @@ class ISDiSummary:
             db_path
         )
         self.app_info_conn = sqlite3.connect(db_path, check_same_thread=False)
-        self.df = pd.read_sql(
-            "select * from clients_notes", self.app_info_conn
-        )  # , params=(,))
+        self.app_info_conn.row_factory = sqlite3.Row
+        cursor = self.app_info_conn.cursor()
+        cursor.execute("select * from clients_notes")
+        self.rows = [dict(row) for row in cursor.fetchall()]
 
     def hist_checkbox(self, cbox_col, hreadable=None):
         hist = defaultdict(int)
         multibox_counts = defaultdict(int)
-        for idx, client in self.df.iterrows():
+        for client in self.rows:
             checkboxes = json.loads("".join(client[cbox_col]))
             multibox_counts[len(checkboxes)] += 1
             for cbox in checkboxes:

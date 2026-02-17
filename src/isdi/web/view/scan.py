@@ -119,10 +119,10 @@ def scan():
     device_name_print, device_name_map = sc.device_info(serial=ser)
     # Finds all the apps in the device
     # @apps have appid, title, flags, TODO: add icon
-    apps = (
-        sc.find_spyapps(serialno=ser)
-        .fillna("")
-        .to_dict(orient="index")
+    apps = sc.find_spyapps(serialno=ser)
+    apps_sorted = sorted(
+        apps.items(),
+        key=lambda item: (-item[1].get("score", 0.0), item[0]),
     )
     if len(apps) <= 0:
         print("The scanning failed for some reason.")
@@ -196,6 +196,7 @@ def scan():
             ),
             device_name=device_name_print,
             apps=apps,
+            apps_sorted=apps_sorted,
             scanid=scanid,
             sysapps=set(),  # sc.get_system_apps(serialno=ser)),
             serial=ser,

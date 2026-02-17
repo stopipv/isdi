@@ -4,11 +4,135 @@ from isdi.config import get_config
 from flask import g
 from datetime import datetime as dt
 import os
-import pandas as pd
+import csv
+import threading
 
 config = get_config()
 DATABASE = config.SQL_DB_PATH.replace("sqlite:///", "").strip()
 # CONSULTS_DATABASE = config.SQL_DB_CONSULT_PATH.replace('sqlite:///', '')
+_thread_local = threading.local()
+
+# Database schema embedded as string for .pyz compatibility
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS clients_notes (
+	id INTEGER NOT NULL,
+	created_at DATETIME,
+	clientid VARCHAR(100) DEFAULT '' NOT NULL,
+	consultant_initials VARCHAR(100) DEFAULT '' NOT NULL,
+	fjc VARCHAR(13) DEFAULT '' NOT NULL,
+	preferred_language VARCHAR(100) DEFAULT 'English' NOT NULL,
+	referring_professional VARCHAR(100) DEFAULT '' NOT NULL,
+	referring_professional_email VARCHAR(255),
+	referring_professional_phone VARCHAR(50),
+	caseworker_present VARCHAR(23) DEFAULT '' NOT NULL,
+	caseworker_present_safety_planning VARCHAR(3) DEFAULT '' NOT NULL,
+	caseworker_recorded VARCHAR(3) DEFAULT '' NOT NULL,
+	recorded VARCHAR(3) DEFAULT '' NOT NULL,
+	chief_concerns VARCHAR(400) DEFAULT '' NOT NULL,
+	chief_concerns_other TEXT DEFAULT '' NOT NULL,
+	android_phones INTEGER DEFAULT '0' NOT NULL,
+	android_tablets INTEGER DEFAULT '0' NOT NULL,
+	iphone_devices INTEGER DEFAULT '0' NOT NULL,
+	ipad_devices INTEGER DEFAULT '0' NOT NULL,
+	macbook_devices INTEGER DEFAULT '0' NOT NULL,
+	windows_devices INTEGER DEFAULT '0' NOT NULL,
+	echo_devices INTEGER DEFAULT '0' NOT NULL,
+	other_devices VARCHAR(400) DEFAULT '',
+	checkups VARCHAR(400) DEFAULT '',
+	checkups_other VARCHAR(400) DEFAULT '',
+	vulnerabilities VARCHAR(600) DEFAULT '' NOT NULL,
+	vulnerabilities_trusted_devices TEXT DEFAULT '',
+	vulnerabilities_other TEXT DEFAULT '',
+	safety_planning_onsite VARCHAR(14) DEFAULT '' NOT NULL,
+	changes_made_onsite TEXT DEFAULT '',
+	unresolved_issues TEXT DEFAULT '',
+	follow_ups_todo TEXT DEFAULT '',
+	general_notes TEXT DEFAULT '',
+	case_summary TEXT DEFAULT '',
+	PRIMARY KEY (id),
+	CHECK (fjc IN ('', 'Brooklyn', 'Queens', 'The Bronx', 'Manhattan', 'Staten Island')),
+	CHECK (caseworker_present IN ('', 'For entire consult', 'For part of the consult', 'No')),
+	CHECK (caseworker_present_safety_planning IN ('', 'Yes', 'No')),
+	CHECK (caseworker_recorded IN ('', 'Yes', 'No')),
+	CHECK (recorded IN ('', 'Yes', 'No')),
+	CHECK (safety_planning_onsite IN ('', 'Yes', 'No', 'Not applicable'))
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  clientid TEXT,
+  location TEXT,
+  issues TEXT,
+  assessment TEXT,
+  plan TEXT,
+  the_rest TEXT,
+  time DATETIME DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE IF NOT EXISTS scan_res (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  clientid TEXT,
+  serial TEXT,
+  note TEXT,
+  device TEXT,
+  device_model TEXT,
+  device_manufacturer TEXT,
+  device_version TEXT,
+  is_rooted INTEGER,
+  rooted_reasons TEXT,
+  last_full_charge DATETIME,
+  device_primary_user TEXT,
+  device_access TEXT,
+  how_obtained TEXT,
+  time DATETIME DEFAULT (datetime('now', 'localtime')),
+  FOREIGN KEY(clientid) REFERENCES clients_notes(clientid)
+);
+
+CREATE TABLE IF NOT EXISTS app_info (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  scanid INTEGER,
+  appid TEXT,
+  flags TEXT,
+  remark TEXT,
+  action_taken TEXT,
+  apk_path TEXT,
+  install_date DATETIME,
+  last_updated DATETIME,
+  app_version TEXT,
+  permissions TEXT,
+  permissions_reason TEXT,
+  permissions_used DATETIME,
+  data_usage INTEGER,
+  battery_usage INTEGER,
+  time DATETIME DEFAULT (datetime('now', 'localtime')),
+  FOREIGN KEY(scanid) REFERENCES scan_res(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_clients_notes_clientid on clients_notes (clientid);
+CREATE INDEX IF NOT EXISTS idx_scan_res_clientid on scan_res (clientid);
+CREATE INDEX IF NOT EXISTS idx_app_info_scanid on app_info (scanid);
+"""
+
+
+def _schema_needs_init(db) -> bool:
+    cur = db.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='clients_notes'"
+    )
+    return cur.fetchone() is None
+
+
+def _load_schema_sql() -> str:
+    """Return embedded schema SQL for .pyz compatibility."""
+    return SCHEMA_SQL
+
+
+def _init_schema(db) -> None:
+    try:
+        schema_sql = _load_schema_sql()
+    except Exception as exc:
+        raise RuntimeError(f"Failed to load schema.sql: {exc}") from exc
+    db.executescript(schema_sql)
+    db.commit()
 
 
 def today():
@@ -38,12 +162,23 @@ def make_dicts(cursor, row):
 
 
 def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        print("Creating new db connection {}".format(DATABASE))
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = make_dicts
-    return db
+    try:
+        db = getattr(g, "_database", None)
+        if db is None:
+            print("Creating new db connection {}".format(DATABASE))
+            db = g._database = sqlite3.connect(DATABASE)
+            db.row_factory = make_dicts
+            if _schema_needs_init(db):
+                _init_schema(db)
+        return db
+    except RuntimeError:
+        if not hasattr(_thread_local, 'db') or _thread_local.db is None:
+            print("Creating fallback db connection {}".format(DATABASE))
+            _thread_local.db = sqlite3.connect(DATABASE)
+            _thread_local.db.row_factory = make_dicts
+            if _schema_needs_init(_thread_local.db):
+                _init_schema(_thread_local.db)
+        return _thread_local.db
 
 
 def init_db(app, sa, force=False):
@@ -250,12 +385,19 @@ def create_report(clientid):
     Creates a report for a clientid
     """
     reportf = os.path.join(config.REPORT_PATH, clientid + ".csv")
-    d = pd.DataFrame(
-        query_db(
-            "select * from scan_res inner join app_info on "
-            "scan_res.id=app_info.scanid where scan_res.clientid=?",
-            args=(clientid,),
-        )
+    rows = query_db(
+        "select * from scan_res inner join app_info on "
+        "scan_res.id=app_info.scanid where scan_res.clientid=?",
+        args=(clientid,),
     )
-    d.to_csv(reportf, index=None)
+    if not rows:
+        with open(reportf, "w", encoding="utf-8") as fh:
+            fh.write("")
+        return
+    fieldnames = list(rows[0].keys())
+    with open(reportf, "w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({k: row.get(k, "") for k in fieldnames})
     return d

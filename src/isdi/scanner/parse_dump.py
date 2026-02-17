@@ -10,8 +10,7 @@ from isdi.config import get_config
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path
-from typing import List, Dict
-import pandas as pd
+from typing import List, Dict, Any
 from rsonlite import simpleparse
 
 config = get_config()
@@ -174,8 +173,6 @@ def retrieve(dict_: dict, nest: list) -> str | dict:
     Navigates dictionaries like dict_[nest0][nest1][nest2]...
     gracefully.
     """
-    if isinstance(dict_, pd.DataFrame):
-        dict_ = dict_.to_dict()  # for pandas
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
@@ -505,7 +502,16 @@ class AndroidDump(PhoneDump):
     def system_apps(self) -> list:
         """Return system apps: flags=[ SYSTEM ]"""
         a = self._get_apps()
-        return [k for k, v in a.items() if "SYSTEM " in v["flags"]]
+        system_apps = []
+        for appid, meta in a.items():
+            flags = meta.get("flags", "")
+            if isinstance(flags, list):
+                if any("SYSTEM" in str(flag) for flag in flags):
+                    system_apps.append(appid)
+            else:
+                if "SYSTEM" in str(flags):
+                    system_apps.append(appid)
+        return system_apps
     
     def offstore_apps(self) -> list:
         approved_installers = {
@@ -605,10 +611,12 @@ class IosDump(PhoneDump):
                 d = json.load(app_data)
         except Exception as ex:
             logging.error(f"Could not load the json file: {self.dumpf}. Exception={ex}")
-            return pd.DataFrame([], columns=["appId"]), {}
+            return [], {}
 
-        apps = pd.DataFrame(d['apps'].values())
-        apps["appId"] = apps["CFBundleIdentifier"]
+        apps = list(d.get("apps", {}).values())
+        for app in apps:
+            if "appId" not in app:
+                app["appId"] = app.get("CFBundleIdentifier", "")
         self.appinfo = apps
 
         self.deviceinfo = {
@@ -740,21 +748,29 @@ class IosDump(PhoneDump):
         return res
 
     def system_apps(self):
-        # return self.df.query('ApplicationType=="System"')['CFBundleIdentifier'].tolist()
-        return self.df.query('ApplicationType=="System"')["CFBundleIdentifier"]
+        if not self.df:
+            return []
+        return [
+            app.get("CFBundleIdentifier", "")
+            for app in self.df
+            if app.get("ApplicationType") == "System" and app.get("CFBundleIdentifier")
+        ]
 
-    def installed_apps_titles(self) -> pd.DataFrame:
-        if self:
-            return self.df.rename(
-                index=str, columns={"CFBundleExecutable": "title"}
-            ).set_index("appId")
+    def installed_apps_titles(self) -> Dict[str, str]:
+        if not self.df:
+            return {}
+        return {
+            app.get("appId", ""): app.get("CFBundleExecutable", "")
+            for app in self.df
+            if app.get("appId")
+        }
 
     def installed_apps(self):
         # return self.df.index
         if self.df is None:
             return []
-        logging.info(f"parse_dump (installed_apps): >> {self.df.columns}, {len(self.df)}")
-        return self.df["appId"].to_list()
+        logging.info(f"parse_dump (installed_apps): >> {len(self.df)}")
+        return [app.get("appId", "") for app in self.df if app.get("appId")]
 
 
 if __name__ == "__main__":
@@ -777,4 +793,4 @@ if __name__ == "__main__":
     elif sys.argv[2] == "ios":
         ddump = IosDump(fname)
         print(ddump.installed_apps())
-        print(ddump.installed_apps_titles().to_csv())
+        print(ddump.installed_apps_titles())

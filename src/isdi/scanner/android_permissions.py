@@ -3,12 +3,13 @@ Must work completely from the dumps, no interaction with the device is required.
 Extract permission usage from the dumps for an appid
 """
 
+import csv
 import itertools
 from rsonlite import simpleparse
-import pandas as pd
 import datetime
 from isdi.config import get_config
 import re
+from collections import defaultdict
 from .runcmd import run_command, catch_err
 from . import parse_dump
 
@@ -56,9 +57,17 @@ def get_uid_to_username_map(uid: int) -> str:
     else:
         return str(uid)
 
-def recent_permissions_used(ddump: parse_dump.AndroidDump, appid: str) -> pd.DataFrame:
-    cols = ["appId", "op", "mode", "timestamp", "time_ago", "duration"]
-    df = pd.DataFrame([], columns=cols)
+def _read_csv_rows(file_path: str) -> list[dict]:
+    with open(file_path, "r", encoding="utf-8") as fh:
+        return list(csv.DictReader(fh))
+
+
+def _fill_unknowns(row: dict, value: str = "Unknown permission") -> dict:
+    return {k: (value if v in (None, "") else v) for k, v in row.items()}
+
+
+def recent_permissions_used(ddump: parse_dump.AndroidDump, appid: str) -> list[dict]:
+    rows = []
     ## TODO: Fix this with new Android appops formatting style! 
     # cmd = "{cli} shell appops get {app}"
     # recently_used = catch_err(run_command(cmd, app=appid))
@@ -74,21 +83,24 @@ def recent_permissions_used(ddump: parse_dump.AndroidDump, appid: str) -> pd.Dat
             recently_used = v
             break
     if not recently_used or "No operations." in recently_used:
-        return df
+        return []
 
-    record = {"appId": appid}
     now = datetime.datetime.now()
     # print(recently_used)
     for permission in recently_used:
         match = re.match(r"^(.*?):\s*mode=(\d+);?\s*time=(.*)\s*ago;?", permission)
         if not match:
             continue
-        record["op"] = match.group(1).strip()
-        record["mode"] = match.group(2).strip()
-        record["timestamp"] = (now - _parse_time(match.group(3).strip())).strftime(config.DATE_STR)
-        record["time_ago"] = match.group(3).strip()
-        df.loc[df.shape[0]] = record
-    return df.sort_values(by=["time_ago"]).reset_index(drop=True)
+        record = {
+            "appId": appid,
+            "op": match.group(1).strip(),
+            "mode": match.group(2).strip(),
+            "timestamp": (now - _parse_time(match.group(3).strip())).strftime(config.DATE_STR),
+            "time_ago": match.group(3).strip(),
+        }
+        rows.append(record)
+    rows.sort(key=lambda row: _parse_time(row.get("time_ago", "+0s")))
+    return rows
 
 
 def package_info(ddump, appid):
@@ -108,7 +120,7 @@ def permissions_map():
     groupcols = ["group", "group_package", "group_label", "group_description"]
     pcols = ["permission", "package", "label", "description", "protectionLevel"]
     sp = simpleparse(open("Pixel2.permissions", "r").read())
-    df = pd.DataFrame(columns=groupcols + pcols)
+    rows = []
     record = {}
     ungrouped_d = dict.fromkeys(groupcols, "ungrouped")
     for group in sp[1]:
@@ -119,7 +131,7 @@ def permissions_map():
                 for permission_attr in sp[1][group][permission]:
                     label, val = permission_attr.split(":")
                     record[label.replace("+ ", "")] = val
-                df.loc[df.shape[0]] = {**record, **ungrouped_d}
+                rows.append({**record, **ungrouped_d})
         else:
             for group_attr in sp[1][group]:
                 if isinstance(group_attr, str):
@@ -131,9 +143,13 @@ def permissions_map():
                         for permission_attr in group_attr[permission]:
                             label, val = permission_attr.split(":")
                             record[label.replace("+ ", "")] = val
-                        df.loc[df.shape[0]] = record
-    df.to_csv("static_data/android_permissions.csv")
-    return df
+                        rows.append(dict(record))
+    with open("static_data/android_permissions.csv", "w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=groupcols + pcols)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+    return rows
 
 
 def all_permissions(dumpf, appid):
@@ -146,39 +162,50 @@ def all_permissions(dumpf, appid):
     # print("--->>> all_permissions\n", app_perms)
     recent_permissions = recent_permissions_used(ddump, appid)
 
-    permissions = pd.read_csv(config.ANDROID_PERMISSIONS_CSV)
-    permissions["label"] = permissions.apply(
-        lambda x: (
-            x["permission"].rsplit(".", n=1)[-1] if x["label"] == "null" else x["label"]
-        ),
-        axis=1,
-    )
-    app_permissions_tbl = permissions[
-        permissions["permission"].isin(app_perms)
-    ].reset_index(drop=True)
-    app_permissions_tbl["permission_abbrv"] = app_permissions_tbl.permission.str.rsplit(
-        ".", n=1
-    ).str[-1]
+    permissions = _read_csv_rows(config.ANDROID_PERMISSIONS_CSV)
+    for row in permissions:
+        label = row.get("label", "")
+        permission = row.get("permission", "")
+        if label == "null":
+            row["label"] = permission.rsplit(".", 1)[-1] if permission else label
 
-    # TODO: really 'unknown'?
-    hf_recent_permissions = pd.merge(
-        recent_permissions,
-        app_permissions_tbl,
-        left_on="op",
-        right_on="permission_abbrv",
-        how="right",
-    ).fillna("Unknown permission")
-
-    no_hf_recent_permissions = recent_permissions[
-        ~recent_permissions["op"].isin(app_permissions_tbl["permission_abbrv"])
+    app_permissions_tbl = [
+        row for row in permissions if row.get("permission") in app_perms
     ]
-    no_hf = set(app_perms) - set(app_permissions_tbl["permission"].tolist())
+    for row in app_permissions_tbl:
+        permission = row.get("permission", "")
+        row["permission_abbrv"] = permission.rsplit(".", 1)[-1] if permission else ""
+
+    recent_by_op = defaultdict(list)
+    for row in recent_permissions:
+        recent_by_op[row.get("op", "")].append(row)
+
+    hf_recent_permissions = []
+    for app_row in app_permissions_tbl:
+        op = app_row.get("permission_abbrv", "")
+        matches = recent_by_op.get(op, [])
+        if matches:
+            for match in matches:
+                merged = dict(app_row)
+                merged.update(match)
+                hf_recent_permissions.append(_fill_unknowns(merged))
+        else:
+            merged = dict(app_row)
+            for key in ["appId", "op", "mode", "timestamp", "time_ago", "duration"]:
+                merged.setdefault(key, None)
+            hf_recent_permissions.append(_fill_unknowns(merged))
+
+    app_perm_abbrvs = {row.get("permission_abbrv", "") for row in app_permissions_tbl}
+    no_hf_recent_permissions = [
+        row for row in recent_permissions if row.get("op", "") not in app_perm_abbrvs
+    ]
+    no_hf = {perm for perm in app_perms if perm not in {row.get("permission") for row in app_permissions_tbl}}
 
     stats = {
         "total_permissions": len(app_perms),
-        "hf_permissions": app_permissions_tbl.shape[0],
-        "recent_permissions": recent_permissions.shape[0],
-        "not_hf_ops": no_hf_recent_permissions.shape[0],
+        "hf_permissions": len(app_permissions_tbl),
+        "recent_permissions": len(recent_permissions),
+        "not_hf_ops": len(no_hf_recent_permissions),
         "not_hf_permissions": len(no_hf),
     }
     return hf_recent_permissions, no_hf_recent_permissions, no_hf, {**stats, **pkg_info}
@@ -201,62 +228,80 @@ if __name__ == "__main__":
     exit()
 
     appid = sys.argv[1]
-    app_perms, pkg_info = package_info(appid)
+    app_perms, pkg_info = package_info(ddump, appid)
 
     print(app_perms, pkg_info)
     exit()
-    recent_permissions = recent_permissions_used(appid)
+    recent_permissions = recent_permissions_used(ddump, appid)
 
-    # permissions = permissions_map()
-    permissions = pd.read_csv(config.ANDROID_PERMISSIONS)
-    app_permissions_tbl = permissions[
-        permissions["permission"].isin(app_perms)
-    ].reset_index(drop=True)
-    hf_app_permissions = list(
-        zip(app_permissions_tbl.permission, app_permissions_tbl.label)
-    )
+    permissions = _read_csv_rows(config.ANDROID_PERMISSIONS)
+    for row in permissions:
+        label = row.get("label", "")
+        permission = row.get("permission", "")
+        if label == "null":
+            row["label"] = permission.rsplit(".", 1)[-1] if permission else label
+    app_permissions_tbl = [
+        row for row in permissions if row.get("permission") in app_perms
+    ]
+    hf_app_permissions = [
+        (row.get("permission"), row.get("label")) for row in app_permissions_tbl
+    ]
 
     # FIXME: delete 'null' labels from counting as human readable.
     print("'{}' uses {} app permissions:".format(appid, len(app_perms)))
     print(
         "{} have human-readable names, and {} were recently used:".format(
-            app_permissions_tbl.shape[0], recent_permissions.shape[0]
+            len(app_permissions_tbl), len(recent_permissions)
         )
     )
-    # for permission in hf_app_permissions:
-    #    print(permission)
 
-    app_permissions_tbl["permission_abbrv"] = app_permissions_tbl["permission"].apply(
-        lambda x: x.rsplit(".", n=1)[-1]
-    )
+    for row in app_permissions_tbl:
+        permission = row.get("permission", "")
+        row["permission_abbrv"] = permission.rsplit(".", 1)[-1] if permission else ""
 
-    # TODO: really 'unknown'?
-    hf_recent_permissions = pd.merge(
-        recent_permissions,
-        app_permissions_tbl,
-        left_on="op",
-        right_on="permission_abbrv",
-        how="right",
-    ).fillna("unknown")
-    # print(hf_recent_permissions.columns)
-    # print(hf_recent_permissions.shape)
-    # print(hf_recent_permissions.op == hf_recent_permissions.permission_abbrv)
-    # print(hf_recent_permissions[['label','op','permission']])
-    # print(hf_recent_permissions[['label','timestamp','time_ago','permission']])
+    recent_by_op = defaultdict(list)
+    for row in recent_permissions:
+        recent_by_op[row.get("op", "")].append(row)
+    hf_recent_permissions = []
+    for app_row in app_permissions_tbl:
+        op = app_row.get("permission_abbrv", "")
+        matches = recent_by_op.get(op, [])
+        if matches:
+            for match in matches:
+                merged = dict(app_row)
+                merged.update(match)
+                hf_recent_permissions.append(_fill_unknowns(merged, value="unknown"))
+        else:
+            merged = dict(app_row)
+            for key in ["appId", "op", "mode", "timestamp", "time_ago", "duration"]:
+                merged.setdefault(key, None)
+            hf_recent_permissions.append(_fill_unknowns(merged, value="unknown"))
 
-    # print(hf_recent_permissions[['label','description','timestamp','time_ago', 'duration']])
-    print(hf_recent_permissions[["label", "permission_abbrv", "timestamp"]])
+    print([{
+        "label": row.get("label"),
+        "permission_abbrv": row.get("permission_abbrv"),
+        "timestamp": row.get("timestamp"),
+    } for row in hf_recent_permissions])
 
-    no_hf_recent_permissions = recent_permissions[
-        ~recent_permissions["op"].isin(app_permissions_tbl["permission_abbrv"])
+    app_perm_abbrvs = {row.get("permission_abbrv", "") for row in app_permissions_tbl}
+    no_hf_recent_permissions = [
+        row for row in recent_permissions if row.get("op", "") not in app_perm_abbrvs
     ]
     print(
         "\nCouldn't find human-friendly descriptions for {} recently used app operations:".format(
-            no_hf_recent_permissions.shape[0]
+            len(no_hf_recent_permissions)
         )
     )
 
-    print(no_hf_recent_permissions[["op", "timestamp", "time_ago", "duration"]])
+    print([
+        {
+            "op": row.get("op"),
+            "timestamp": row.get("timestamp"),
+            "time_ago": row.get("time_ago"),
+            "duration": row.get("duration"),
+        }
+        for row in no_hf_recent_permissions
+    ])
 
     no_hf = set(app_perms) - set(app_permissions_tbl["permission"].tolist())
     print(

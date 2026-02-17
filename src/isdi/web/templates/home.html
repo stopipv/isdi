@@ -80,38 +80,80 @@
             <label>Scanned: <b>{{ device_name }}</b></label>
   	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
             {% endif %}
-            <table class="table table-bordered w-100">
+            <style>
+                @media (max-width: 768px) {
+                    .applist-table thead {
+                        display: none;
+                    }
+                    .applist-table,
+                    .applist-table tbody,
+                    .applist-table tr,
+                    .applist-table td {
+                        display: block;
+                        width: 100%;
+                    }
+                    .applist-table tr {
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        margin-bottom: 12px;
+                        padding: 6px 10px;
+                        background: #fff;
+                    }
+                    .applist-table td {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 6px 0;
+                        border: none;
+                    }
+                    .applist-table td::before {
+                        content: attr(data-label);
+                        font-weight: 600;
+                        color: #555;
+                        padding-right: 12px;
+                        flex: 0 0 40%;
+                    }
+                    .applist-table td > * {
+                        flex: 1 1 60%;
+                        text-align: right;
+                    }
+                }
+            </style>
+            <table class="table table-bordered w-100 applist-table">
                 <thead>
                     <tr class="something">
                         <th class="col-md-1" style="width: 3%">Uninstall?</th>
                         <th class="col-md-2" style="width: 23%">App Name</th>
                         <th class="col-md-2" style="width: 23%">App ID</th>
                         <th class="col-md-2" style="width: 20%">Flags</th>
-                        <th class="col-md-3" style="width: 30%">Remarks</th>
+                        <th class="col-md-1" style="width: 8%">Score</th>
+                        <th class="col-md-1" style="width: 8%">Class</th>
                     </tr>
                 </thead>
                 <form style="font-size: 76px;" id="form-applist" onsubmit="" method="post" name="form-applist" >
                     <tbody id="applist" class="h-100">
-                        {% for appId, info in apps.items() %}
+                        {% set app_items = apps_sorted if apps_sorted is defined else apps.items() %}
+                        {% for appId, info in app_items %}
                         <tr id="{{ appId.replace('.', '-') }}">
                             {% if appId in sysapps %}
-                            <td align="center" ><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
+                            <td align="center" data-label="Uninstall"><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
                                                    title="System App! Cannot delete">&otimes;</a></td>
                             {%  else %}
-                            <td align="center"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
+                            <td align="center" data-label="Uninstall"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
                                                   title="Delete app">&otimes;</a></td>
                             {% endif %}
                             {% if info['title'] %}
-                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
+                            <td data-label="App Name"><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
 		                   class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
-                            <td><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
+                            <td data-label="App Name"><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
                                    class="text text-dark"> &lt;Unknown&gt;</a></td>
                             {% endif %}
-                            <td><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
+                            <td data-label="App ID"><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
                                    target="_blank" rel="noopener"><code>{{ appId }}</code></a></td>
-                            <td>{{ info['html_flags'] | safe }}</td>
-                            <td><input type="text" placeholder="Remarks" class='form-control appnotes' name="{{ appId }}" /></td>
+                            <td data-label="Flags">{{ info['html_flags'] | safe }}</td>
+                            <td data-label="Score">{{ '%.2f'|format(info['score']) if info['score'] is not none else '' }}</td>
+                            <td data-label="Class">{{ info['class_'] }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

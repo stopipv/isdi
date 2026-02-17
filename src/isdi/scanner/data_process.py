@@ -1,72 +1,149 @@
-import pandas as pd
+import csv
+import gzip
+import sqlite3
 from isdi.config import get_config
-import dataset
 import sys
 
 config = get_config()
 
 
 def join_csv_files(flist, ofname):
-    pd.concat([pd.read_csv(f) for f in flist]).to_csv(
-        ofname, index=None, compression="gzip"
-    )
+    rows = []
+    fieldnames = []
+    for fpath in flist:
+        with open(fpath, "r", encoding="utf-8") as fh:
+            reader = csv.DictReader(fh)
+            if reader.fieldnames:
+                for name in reader.fieldnames:
+                    if name not in fieldnames:
+                        fieldnames.append(name)
+            for row in reader:
+                rows.append(row)
+    if not fieldnames and rows:
+        fieldnames = list(rows[0].keys())
+
+    with gzip.open(ofname, "wt", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({k: row.get(k, "") for k in fieldnames})
+
+
+def _read_csv_rows(file_path: str) -> list[dict]:
+    with open(file_path, "r", encoding="utf-8") as fh:
+        return list(csv.DictReader(fh))
+
+
+def _normalize_key(key: str) -> str:
+    return key.lower().replace(" ", "_").replace("-", "_")
+
+
+def _score_is_relevant(score: str) -> bool:
+    try:
+        return float(score) > 0.4
+    except (TypeError, ValueError):
+        return False
 
 
 def create_app_flags_file():
     dlist = []
     for k, v in config.source_files.items():
-        d = pd.read_csv(v, index_col="appId")
+        d = _read_csv_rows(v)
+        columns = set(d[0].keys()) if d else set()
+        has_relevant = "relevant" in columns
+        has_ml_score = "ml_score" in columns
         if k == "offstore":
-            d["relevant"] = "y"
-        elif ("relevant" not in d.columns) and ("ml_score" in d.columns):
-            d["relevant"] = (d["ml_score"] > 0.4).apply(lambda x: "y" if x else "n")
+            for row in d:
+                row["relevant"] = "y"
+        elif (not has_relevant) and has_ml_score:
+            for row in d:
+                row["relevant"] = "y" if _score_is_relevant(row.get("ml_score")) else "n"
             print("---->  'relevant' column is missing... recreating", k, v)
 
             ## TODO: Remove this or set 0.5 to 0.2 or something
-        elif (d.relevant.count() < len(d) * 0.5) and ("ml_score" in d.columns):
-            print(
-                "---->  'relevant' column is underpopulated={}... recreating: k={}\tv={}".format(
-                    d.relevant.count(), k, v
+        elif has_ml_score:
+            relevant_count = len([row for row in d if row.get("relevant") not in (None, "")])
+            if relevant_count >= len(d) * 0.5:
+                pass
+            else:
+                print(
+                    "---->  'relevant' column is underpopulated={}... recreating: k={}\tv={}".format(
+                        relevant_count, k, v
+                    )
                 )
-            )
-            d["relevant"].fillna("", inplace=True)
-            e = d.relevant == ""
-            d.loc[e, "relevant"] = (d.loc[e, "ml_score"] > 0.4).apply(
-                lambda x: "y" if x else "n"
-            )
+                for row in d:
+                    if row.get("relevant") in (None, ""):
+                        row["relevant"] = "y" if _score_is_relevant(row.get("ml_score")) else "n"
 
         print("done reading: {} (l={})".format(k, len(d)))
-        d = d.query('relevant == "y"')
-        r = pd.DataFrame(columns=["store", "flag", "title"], index=d.index)
-        r["title"] = d["title"]
-        r["store"] = k
-        r["flag"] = "dual-use" if k != "offstore" else "spyware"
-        dlist.append(r)
+        for row in d:
+            if row.get("relevant") != "y":
+                continue
+            app_id = row.get("appId", "")
+            dlist.append(
+                {
+                    "appId": app_id,
+                    "title": row.get("title", ""),
+                    "store": k,
+                    "flag": "dual-use" if k != "offstore" else "spyware",
+                }
+            )
     sys.stderr.write("Concatenating...")
-    fulld = pd.concat(dlist)
+    fulld = list(dlist)
     sys.stderr.write("done\n")
-    spyware = pd.read_csv(config.SPYWARE_LIST_FILE, index_col="appId")
-    fulld.loc[spyware.index, "flag"] = "spyware"
+    spyware_rows = _read_csv_rows(config.SPYWARE_LIST_FILE)
+    spyware_set = {row.get("appId", "") for row in spyware_rows if row.get("appId")}
+    for row in fulld:
+        if row.get("appId") in spyware_set:
+            row["flag"] = "spyware"
     print("Writing to the file: {config.APP_FLAGS_FILE}")
-    fulld.to_csv(config.APP_FLAGS_FILE)
+    with open(config.APP_FLAGS_FILE, "w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=["appId", "store", "flag", "title"])
+        writer.writeheader()
+        for row in fulld:
+            writer.writerow({
+                "appId": row.get("appId", ""),
+                "store": row.get("store", ""),
+                "flag": row.get("flag", ""),
+                "title": row.get("title", ""),
+            })
 
 
 def create_app_info_dict():
     dlist = []
-    conn = dataset.connect(config.APP_INFO_SQLITE_FILE)
+    db_path = config.APP_INFO_SQLITE_FILE.replace("sqlite:///", "")
+    conn = sqlite3.connect(db_path)
     print("Creating app-info dict")
     for k, v in config.source_files.items():
-        d = pd.read_csv(v, index_col="appId")
+        rows = _read_csv_rows(v)
+        for row in rows:
+            row["store"] = k
+            if "permissions" not in row:
+                row["permissions"] = "<not recorded>"
+            normalized = {}
+            for key, value in row.items():
+                normalized[_normalize_key(key)] = value
+            dlist.append(normalized)
 
-        d["store"] = k
+    if not dlist:
+        return
 
-        if "permissions" not in d.columns:
-            print(k, v, d.columns)
-            d.assign(permissions=["<not recorded>"] * len(d))
-        d.columns = d.columns.str.lower().str.replace(" ", "-").str.replace("-", "_")
-        dlist.append(d)
-    pd.concat(dlist).to_sql("apps", conn.engine, if_exists="replace")
-    conn.engine.execute("create index idx_appId on apps(appId)")
+    columns = sorted({key for row in dlist for key in row.keys()})
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE IF EXISTS apps")
+    col_defs = ", ".join([f"{col} TEXT" for col in columns])
+    cursor.execute(f"CREATE TABLE apps ({col_defs})")
+
+    placeholders = ", ".join(["?"] * len(columns))
+    insert_sql = f"INSERT INTO apps ({', '.join(columns)}) VALUES ({placeholders})"
+    for row in dlist:
+        values = [row.get(col, "") for col in columns]
+        cursor.execute(insert_sql, values)
+
+    if "appid" in columns:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_appId ON apps(appid)")
+    conn.commit()
+    conn.close()
 
 
 if __name__ == "__main__":

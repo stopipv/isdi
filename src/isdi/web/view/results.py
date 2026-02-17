@@ -38,7 +38,7 @@ def view_results():
         clientid=session['clientid']
     )
     
-    apps = sc.find_spyapps(serialno=ser).fillna('').to_dict(orient='index')
+    apps = sc.find_spyapps(serialno=ser)
 
     
     template_d.update(dict(
