@@ -29,28 +29,33 @@ Finally screen capture.
     adb shell am start 'com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity' && sleep 10 && adb shell input tap 20 80
 """
 
-from subprocess import Popen, PIPE
-import re
+import re, os
+import shlex
 import time
-from flask import url_for
 import random
+from subprocess import Popen, PIPE, TimeoutExpired, run, CalledProcessError
+from pathlib import Path
+from flask import url_for
 from isdi.config import get_config
 
 config = get_config()
 adb = config.ADB_PATH
-print(f">>>>>>>>>>>>>>> {adb} <<<<<<<<<<<<<<<<<<<<")
-
 
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(**kwargs)
     print(_cmd)
-    p = Popen(_cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.wait()
-    stdout = p.stdout.read().decode("utf-8") if p.stdout else ""
-    stderr = p.stderr.read().decode("utf-8") if p.stderr else ""
-    return stdout, stderr
-
-
+    try:
+        p = Popen(_cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        p.wait(4)
+        return p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
+    except FileNotFoundError as e:
+        return "", f"Command not found: {e}"
+    except TimeoutExpired:
+        p.kill()
+        return "", "Command timed out"
+    except Exception as e:
+        return "", f"Error: {e}"
+    
 def thiscli(ser):
     if ser:
         return "{adb} -s {ser}".format(adb=adb, ser=ser)
@@ -116,7 +121,6 @@ def is_screen_on(ser):
     else:
         return False
 
-
 def take_screenshot(ser, fname=None):
     """
     Take a screenshot and output the iamge
@@ -125,26 +129,44 @@ def take_screenshot(ser, fname=None):
     #     keycode(ser, 'power'); keycode(ser, 'menu') # Wakes the screen up
     if not fname:
         fname = "tmp_screencap.png"
-    cmd = "{cli} shell screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g' > '{fname}'"
-    # cmd = "{cli} shell screencap -p > '{fname}'"
-    run_command(cmd, cli=thiscli(ser), fname=fname)
 
+    cli = thiscli(ser)
+    cmd = "{} exec-out screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g'".format(cli)
+    if os.name == 'posix':  # Formatting for posix systems
+        cmd = "{} exec-out screencap -p".format(cli)
+
+    try:
+        # This command spits out the screenshot to stdout, which we capture
+        # and write to the file.
+        result = run(shlex.split(cmd), check=True, stdout=PIPE)
+        with open(fname, 'wb') as f:
+            f.write(result.stdout)
+
+        # Return the image that will be inserted into the HTML.
+        return add_image(fname.split("webstatic/", 1)[-1], nocache=True)
+
+    except CalledProcessError as e:
+        print(f"Command failed with exit code {e.returncode}: {e.output}")
+        return "<div class='screenshotfail'>Screenshot failed with exit code {}</div>".format(e.returncode)
+
+    except Exception as e:
+        print(e)
+        return "<div class='screenshotfail'>Screenshot failed with exception {}</div>".format(e)
 
 def wait(t):
     time.sleep(t)
 
+def add_image(img, nocache=False):
+    rand = random.randint(0, 10000)
+    query_string = f"?nocache={rand}" if nocache else ""
+    return (
+        "<img height='400px' src='"
+        + url_for("static", filename="images/" + img)
+        + query_string
+        + "'/>"
+    )
 
-def do_privacy_check(ser, command):
-    def add_image(img, nocache=False):
-        rand = random.randint(0, 10000)
-        query_string = f"?nocache={rand}" if nocache else ""
-        return (
-            "<img height='400px' src='"
-            + url_for("static", filename="images/" + img)
-            + query_string
-            + "'/>"
-        )
-
+def do_privacy_check(ser, command, screenshot_fname=None):
     command = command.lower()
     if command == "account":  # 1. Account ownership  & 3. Sync (if present)
         open_activity(
@@ -202,12 +224,15 @@ def do_privacy_check(ser, command):
 
     elif command == "screenshot":
         # Use config to get the proper static directory
-        from pathlib import Path
-        static_dir = Path(__file__).parent.parent / "web" / "static" / "images"
-        static_dir.mkdir(parents=True, exist_ok=True)
-        screenshot_path = static_dir / "tmp.png"
-        take_screenshot(ser, fname=str(screenshot_path))
-        return add_image("tmp.png", nocache=True)
+        if screenshot_fname is None:
+            from pathlib import Path
+            static_dir = Path(__file__).parent.parent / "web" / "static" / "images"
+            static_dir.mkdir(parents=True, exist_ok=True)
+            screenshot_fname = static_dir / "tmp.png"
+        elif isinstance(screenshot_fname, str):
+            screenshot_fname = Path(screenshot_fname)
+        take_screenshot(ser, fname=str(screenshot_fname))
+        return add_image(screenshot_fname.name, nocache=True)
     else:
         return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 
