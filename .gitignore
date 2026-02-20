@@ -56,3 +56,6 @@ Thumbs.db
 
 # Backups
 *.backup/
+
+
+tmp.png
