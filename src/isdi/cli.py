@@ -11,7 +11,7 @@ __all__ = ["main", "cli"]
 
 
 @click.group()
-@click.version_option(version=1.0.2)
+@click.version_option(version="1.0.2")
 def cli():
     """ISDI - Intimate Surveillance Detection Instrument
 

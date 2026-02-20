@@ -41,6 +41,7 @@ from isdi.config import get_config
 config = get_config()
 adb = config.ADB_PATH
 
+
 def run_command(cmd, **kwargs):
     _cmd = cmd.format(**kwargs)
     print(_cmd)
@@ -55,7 +56,8 @@ def run_command(cmd, **kwargs):
         return "", "Command timed out"
     except Exception as e:
         return "", f"Error: {e}"
-    
+
+
 def thiscli(ser):
     if ser:
         return "{adb} -s {ser}".format(adb=adb, ser=ser)
@@ -121,6 +123,7 @@ def is_screen_on(ser):
     else:
         return False
 
+
 def take_screenshot(ser, fname=None):
     """
     Take a screenshot and output the iamge
@@ -132,14 +135,14 @@ def take_screenshot(ser, fname=None):
 
     cli = thiscli(ser)
     cmd = "{} exec-out screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g'".format(cli)
-    if os.name == 'posix':  # Formatting for posix systems
+    if os.name == "posix":  # Formatting for posix systems
         cmd = "{} exec-out screencap -p".format(cli)
 
     try:
         # This command spits out the screenshot to stdout, which we capture
         # and write to the file.
         result = run(shlex.split(cmd), check=True, stdout=PIPE)
-        with open(fname, 'wb') as f:
+        with open(fname, "wb") as f:
             f.write(result.stdout)
 
         # Return the image that will be inserted into the HTML.
@@ -147,14 +150,20 @@ def take_screenshot(ser, fname=None):
 
     except CalledProcessError as e:
         print(f"Command failed with exit code {e.returncode}: {e.output}")
-        return "<div class='screenshotfail'>Screenshot failed with exit code {}</div>".format(e.returncode)
+        return "<div class='screenshotfail'>Screenshot failed with exit code {}</div>".format(
+            e.returncode
+        )
 
     except Exception as e:
         print(e)
-        return "<div class='screenshotfail'>Screenshot failed with exception {}</div>".format(e)
+        return "<div class='screenshotfail'>Screenshot failed with exception {}</div>".format(
+            e
+        )
+
 
 def wait(t):
     time.sleep(t)
+
 
 def add_image(img, nocache=False):
     rand = random.randint(0, 10000)
@@ -165,6 +174,7 @@ def add_image(img, nocache=False):
         + query_string
         + "'/>"
     )
+
 
 def do_privacy_check(ser, command, screenshot_fname=None):
     command = command.lower()
@@ -226,6 +236,7 @@ def do_privacy_check(ser, command, screenshot_fname=None):
         # Use config to get the proper static directory
         if screenshot_fname is None:
             from pathlib import Path
+
             static_dir = Path(__file__).parent.parent / "web" / "static" / "images"
             static_dir.mkdir(parents=True, exist_ok=True)
             screenshot_fname = static_dir / "tmp.png"
