@@ -21,16 +21,18 @@ config = get_config()
 # Load blocklist using lightweight DataFrame
 try:
     APP_FLAGS = (
-        LightDataFrame.read_csv(config.APP_FLAGS_FILE, encoding='latin1')
-        .fillna({
-            "title": "",
-            "store": "",
-            "flag": "",
-            "human": 0,
-            "ml_score": 0.0,
-            "source": "",
-        })
-        .isin('flag', {'dual-use', 'spyware', 'co-occurrence'})
+        LightDataFrame.read_csv(config.APP_FLAGS_FILE, encoding="latin1")
+        .fillna(
+            {
+                "title": "",
+                "store": "",
+                "flag": "",
+                "human": 0,
+                "ml_score": 0.0,
+                "source": "",
+            }
+        )
+        .isin("flag", {"dual-use", "spyware", "co-occurrence"})
     )
 except FileNotFoundError as e:
     print(f"I can't find the blocklist file: {config.APP_FLAGS_FILE!r}.")
@@ -49,23 +51,23 @@ def dedup_app_flags(apps_list):
     """
     result = {}
     for app in apps_list:
-        appid = app.get('appId', '')
+        appid = app.get("appId", "")
         if not appid:
             continue
         if appid not in result:
             result[appid] = {
-                'appId': appid,
-                'title': app.get('title', ''),
-                'flags': [],
+                "appId": appid,
+                "title": app.get("title", ""),
+                "flags": [],
             }
         # Collect titles
-        title = app.get('title', '')
-        if result[appid]['title'] == '':
-            result[appid]['title'] = title
-        elif title and title != result[appid]['title']:
-            result[appid]['title'] = result[appid]['title'] + ' -+- ' + title
+        title = app.get("title", "")
+        if result[appid]["title"] == "":
+            result[appid]["title"] = title
+        elif title and title != result[appid]["title"]:
+            result[appid]["title"] = result[appid]["title"] + " -+- " + title
         # Collect flags
-        flags = app.get('flag', [])
+        flags = app.get("flag", [])
         if isinstance(flags, str):
             flags = [flags] if flags else []
         elif isinstance(flags, list):
@@ -73,11 +75,10 @@ def dedup_app_flags(apps_list):
         else:
             flags = []
         for flag in flags:
-            if flag and flag not in result[appid]['flags']:
-                result[appid]['flags'].append(flag)
-    
-    return list(result.values())
+            if flag and flag not in result[appid]["flags"]:
+                result[appid]["flags"].append(flag)
 
+    return list(result.values())
 
 
 def _regex_blocklist(app):
@@ -161,81 +162,78 @@ def store_str(st):
 def app_title_and_flag(apps_list, offstore_apps=None, system_apps=None):
     """
     Gets app flags and title from app-flags data.
-    
+
     Args:
         apps_list: List of dicts with 'appId' key, LightDataFrame, or single dict
         offstore_apps: List of offstore app IDs
         system_apps: List of system app IDs
-    
+
     Returns:
         List of dicts with keys: appId, title, flags
     """
     offstore_apps = offstore_apps or []
     system_apps = system_apps or []
-    
+
     # Convert input to list of dicts
     if isinstance(apps_list, LightDataFrame):
         apps_data = apps_list.data
     elif isinstance(apps_list, dict):
         apps_data = [apps_list]
     else:
-        apps_data = list(apps_list) if hasattr(apps_list, '__iter__') else [apps_list]
-    
+        apps_data = list(apps_list) if hasattr(apps_list, "__iter__") else [apps_list]
+
     # Get APP_FLAGS as dict keyed by appId for fast lookup
     flags_dict = {}
     for row in APP_FLAGS.data:
-        appid = row.get('appId', '')
+        appid = row.get("appId", "")
         if appid:
             flags_dict[appid] = row
-    
+
     # Build result: merge with APP_FLAGS
     result = {}
     for app in apps_data:
-        appid = app.get('appId', '')
+        appid = app.get("appId", "")
         if not appid:
             continue
-        
+
         # Get flags from APP_FLAGS
         flag_data = flags_dict.get(appid, {})
-        title = flag_data.get('title', '') or app.get('title', '')
-        flag_str = flag_data.get('flag', '')
+        title = flag_data.get("title", "") or app.get("title", "")
+        flag_str = flag_data.get("flag", "")
         flags = [flag_str] if flag_str else []
-        
+
         if appid not in result:
             result[appid] = {
-                'appId': appid,
-                'title': title,
-                'flags': flags,
+                "appId": appid,
+                "title": title,
+                "flags": flags,
             }
-    
+
     # Convert to list for dedup
     apps_list_for_dedup = list(result.values())
     deduped = dedup_app_flags(apps_list_for_dedup)
-    
+
     # Now process the deduped list
-    result_dict = {app['appId']: app for app in deduped}
-    
+    result_dict = {app["appId"]: app for app in deduped}
+
     # Add offstore-app flag
     for appid in offstore_apps:
         if appid in result_dict:
-            if 'offstore-app' not in result_dict[appid]['flags']:
-                result_dict[appid]['flags'].append('offstore-app')
-    
+            if "offstore-app" not in result_dict[appid]["flags"]:
+                result_dict[appid]["flags"].append("offstore-app")
+
     # Add system-app flag
     for appid in system_apps:
         if appid in result_dict:
-            if 'system-app' not in result_dict[appid]['flags']:
-                result_dict[appid]['flags'].append('system-app')
-    
+            if "system-app" not in result_dict[appid]["flags"]:
+                result_dict[appid]["flags"].append("system-app")
+
     # Regex-based flagging
     for appid, app_data in result_dict.items():
-        is_spy = (
-            _regex_blocklist(appid) or 
-            _regex_blocklist(app_data.get('title', ''))
-        )
-        if is_spy and 'regex-spy' not in app_data['flags']:
-            app_data['flags'].append('regex-spy')
-    
+        is_spy = _regex_blocklist(appid) or _regex_blocklist(app_data.get("title", ""))
+        if is_spy and "regex-spy" not in app_data["flags"]:
+            app_data["flags"].append("regex-spy")
+
     # Return as list
     return list(result_dict.values())
 

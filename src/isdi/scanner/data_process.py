@@ -57,12 +57,16 @@ def create_app_flags_file():
                 row["relevant"] = "y"
         elif (not has_relevant) and has_ml_score:
             for row in d:
-                row["relevant"] = "y" if _score_is_relevant(row.get("ml_score")) else "n"
+                row["relevant"] = (
+                    "y" if _score_is_relevant(row.get("ml_score")) else "n"
+                )
             print("---->  'relevant' column is missing... recreating", k, v)
 
             ## TODO: Remove this or set 0.5 to 0.2 or something
         elif has_ml_score:
-            relevant_count = len([row for row in d if row.get("relevant") not in (None, "")])
+            relevant_count = len(
+                [row for row in d if row.get("relevant") not in (None, "")]
+            )
             if relevant_count >= len(d) * 0.5:
                 pass
             else:
@@ -73,7 +77,9 @@ def create_app_flags_file():
                 )
                 for row in d:
                     if row.get("relevant") in (None, ""):
-                        row["relevant"] = "y" if _score_is_relevant(row.get("ml_score")) else "n"
+                        row["relevant"] = (
+                            "y" if _score_is_relevant(row.get("ml_score")) else "n"
+                        )
 
         print("done reading: {} (l={})".format(k, len(d)))
         for row in d:
@@ -101,12 +107,14 @@ def create_app_flags_file():
         writer = csv.DictWriter(fh, fieldnames=["appId", "store", "flag", "title"])
         writer.writeheader()
         for row in fulld:
-            writer.writerow({
-                "appId": row.get("appId", ""),
-                "store": row.get("store", ""),
-                "flag": row.get("flag", ""),
-                "title": row.get("title", ""),
-            })
+            writer.writerow(
+                {
+                    "appId": row.get("appId", ""),
+                    "store": row.get("store", ""),
+                    "flag": row.get("flag", ""),
+                    "title": row.get("title", ""),
+                }
+            )
 
 
 def create_app_info_dict():

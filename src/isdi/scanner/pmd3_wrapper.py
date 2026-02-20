@@ -39,6 +39,7 @@ usbmux_module.MuxConnection.create_usbmux_socket = patched_create_usbmux_socket
 def main():
     """Entry point: call pymobiledevice3 with patches applied."""
     from pymobiledevice3.__main__ import main as pmd3_main
+
     return pmd3_main()
 
 

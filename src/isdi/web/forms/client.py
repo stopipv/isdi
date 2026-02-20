@@ -1,4 +1,11 @@
-from wtforms import Form, StringField, IntegerField, TextAreaField, SelectField, SelectMultipleField
+from wtforms import (
+    Form,
+    StringField,
+    IntegerField,
+    TextAreaField,
+    SelectField,
+    SelectMultipleField,
+)
 from wtforms.validators import Email, DataRequired, Optional as OptionalValidator
 from wtforms.fields import SelectMultipleField
 from wtforms.widgets import CheckboxInput, ListWidget
@@ -6,13 +13,19 @@ from wtforms.widgets import CheckboxInput, ListWidget
 
 class ClientForm(Form):
     """Manual WTForms form for client consultation data (replaces ModelForm from wtforms-alchemy)"""
-    
+
     # Auto-generated from Client model fields
-    
+
     fjc = SelectField(
         "FJC*",
-        choices=[("", ""), ("Brooklyn", "Brooklyn"), ("Queens", "Queens"), ("The Bronx", "The Bronx"), 
-                 ("Manhattan", "Manhattan"), ("Staten Island", "Staten Island")],
+        choices=[
+            ("", ""),
+            ("Brooklyn", "Brooklyn"),
+            ("Queens", "Queens"),
+            ("The Bronx", "The Bronx"),
+            ("Manhattan", "Manhattan"),
+            ("Staten Island", "Staten Island"),
+        ],
         validators=[DataRequired()],
     )
 
@@ -43,8 +56,12 @@ class ClientForm(Form):
 
     caseworker_present = SelectField(
         "Caseworker present*",
-        choices=[("", ""), ("For entire consult", "For entire consult"), 
-                 ("For part of the consult", "For part of the consult"), ("No", "No")],
+        choices=[
+            ("", ""),
+            ("For entire consult", "For entire consult"),
+            ("For part of the consult", "For part of the consult"),
+            ("No", "No"),
+        ],
         validators=[DataRequired()],
     )
 
@@ -204,37 +221,42 @@ class ClientForm(Form):
     )
 
     vulnerabilities_other = TextAreaField(
-        "Other vulnerabilities discovered (Optional)", 
+        "Other vulnerabilities discovered (Optional)",
         render_kw={"rows": 5, "cols": 70},
         validators=[OptionalValidator()],
     )
 
     safety_planning_onsite = SelectField(
         "Safety planning conducted onsite*",
-        choices=[("", ""), ("Yes", "Yes"), ("No", "No"), ("Not applicable", "Not applicable")],
+        choices=[
+            ("", ""),
+            ("Yes", "Yes"),
+            ("No", "No"),
+            ("Not applicable", "Not applicable"),
+        ],
         validators=[DataRequired()],
     )
 
     changes_made_onsite = TextAreaField(
-        "Changes made onsite (Optional)", 
+        "Changes made onsite (Optional)",
         render_kw={"rows": 5, "cols": 70},
         validators=[OptionalValidator()],
     )
 
     unresolved_issues = TextAreaField(
-        "Unresolved issues (Optional)", 
+        "Unresolved issues (Optional)",
         render_kw={"rows": 5, "cols": 70},
         validators=[OptionalValidator()],
     )
 
     follow_ups_todo = TextAreaField(
-        "Follow-ups To-do (Optional)", 
+        "Follow-ups To-do (Optional)",
         render_kw={"rows": 5, "cols": 70},
         validators=[OptionalValidator()],
     )
 
     general_notes = TextAreaField(
-        "General notes (Optional)", 
+        "General notes (Optional)",
         render_kw={"rows": 10, "cols": 70},
         validators=[OptionalValidator()],
     )

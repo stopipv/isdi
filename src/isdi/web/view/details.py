@@ -30,6 +30,6 @@ def app_details(device):
         app=d,
         info=info,
         device=device,
-        is_termux=bool(os.environ.get('PREFIX')),
+        is_termux=bool(os.environ.get("PREFIX")),
         is_debug=config.DEBUG,
     )

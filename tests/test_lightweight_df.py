@@ -4,9 +4,7 @@ from isdi.scanner.lightweight_df import LightDataFrame
 def test_read_csv_fillna_isin(tmp_path):
     csv_path = tmp_path / "apps.csv"
     csv_path.write_text(
-        "appId,title,flag\n"
-        "com.example.app,,spyware\n"
-        "com.safe.app,Safe App,\n"
+        "appId,title,flag\n" "com.example.app,,spyware\n" "com.safe.app,Safe App,\n"
     )
 
     df = LightDataFrame.read_csv(str(csv_path))
@@ -46,10 +44,12 @@ def test_merge_groupby_sort_values():
 
 
 def test_to_dict_orientations():
-    df = LightDataFrame([
-        {"appId": "a", "title": "A"},
-        {"appId": "b", "title": "B"},
-    ])
+    df = LightDataFrame(
+        [
+            {"appId": "a", "title": "A"},
+            {"appId": "b", "title": "B"},
+        ]
+    )
 
     records = df.to_dict(orient="records")
     index = df.to_dict(orient="index")
@@ -61,10 +61,12 @@ def test_to_dict_orientations():
 
 
 def test_with_columns_select_and_to_csv(tmp_path):
-    df = LightDataFrame([
-        {"appId": "a", "score": 1},
-        {"appId": "b", "score": 2},
-    ])
+    df = LightDataFrame(
+        [
+            {"appId": "a", "score": 1},
+            {"appId": "b", "score": 2},
+        ]
+    )
 
     updated = df.with_columns({"risk": lambda row: row["score"] * 2})
     selected = updated.select(["appId", "risk"])

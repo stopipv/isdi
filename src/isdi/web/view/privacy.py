@@ -19,7 +19,7 @@ def privacy():
         task="privacy",
         device_primary_user=config.DEVICE_PRIMARY_USER,
         title=config.TITLE,
-        is_termux=bool(os.environ.get('PREFIX')),
+        is_termux=bool(os.environ.get("PREFIX")),
         is_debug=config.DEBUG,
     )
 

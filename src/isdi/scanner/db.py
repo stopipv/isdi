@@ -172,7 +172,7 @@ def get_db():
                 _init_schema(db)
         return db
     except RuntimeError:
-        if not hasattr(_thread_local, 'db') or _thread_local.db is None:
+        if not hasattr(_thread_local, "db") or _thread_local.db is None:
             print("Creating fallback db connection {}".format(DATABASE))
             _thread_local.db = sqlite3.connect(DATABASE)
             _thread_local.db.row_factory = make_dicts

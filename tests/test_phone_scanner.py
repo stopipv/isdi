@@ -3,6 +3,7 @@ import pytest
 
 """Fake Tests!!"""
 
+
 @pytest.mark.skip(reason="Fake test")
 def test_android():
     a = AndroidScanner()
@@ -11,6 +12,7 @@ def test_android():
         print("No Android phone connected")
         return
     print(a.find_spyapps(d[0]))
+
 
 @pytest.mark.skip(reason="Fake test")
 def test_ios():

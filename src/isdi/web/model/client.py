@@ -35,14 +35,14 @@ class Client(sa.Model):
         sa.String(100),
         nullable=False,
         info=_lr("Consultant Names (separate with commas)", "r"),
-        **_d
+        **_d,
     )
 
     fjc = sa.Column(
         sa.Enum("", "Brooklyn", "Queens", "The Bronx", "Manhattan", "Staten Island"),
         nullable=False,
         info=_lr("FJC", "r"),
-        **_d
+        **_d,
     )
 
     preferred_language = sa.Column(
@@ -57,7 +57,7 @@ class Client(sa.Model):
         sa.String(100),
         nullable=False,
         info=_lr("Name of Referring Professional", "r"),
-        **_d
+        **_d,
     )
 
     referring_professional_email = sa.Column(
@@ -79,28 +79,28 @@ class Client(sa.Model):
         sa.Enum("", "For entire consult", "For part of the consult", "No"),
         nullable=False,
         info=_lr("Caseworker present", "r"),
-        **_d
+        **_d,
     )
 
     caseworker_present_safety_planning = sa.Column(
         sa.Enum("", "Yes", "No"),
         nullable=False,
         info=_lr("Caseworker present for safety planning", "r"),
-        **_d
+        **_d,
     )
 
     caseworker_recorded = sa.Column(
         sa.Enum("", "Yes", "No"),
         nullable=False,
         info=_lr("If caseworker present, permission to audio-record them", "r"),
-        **_d
+        **_d,
     )
 
     recorded = sa.Column(
         sa.Enum("", "Yes", "No"),
         nullable=False,
         info=_lr("Permission to audio-record clinic", "r"),
-        **_d
+        **_d,
     )
 
     chief_concerns = sa.Column(
@@ -111,21 +111,21 @@ class Client(sa.Model):
         sa.Text,
         nullable=False,
         info=_lr("Chief concerns if not listed above (Optional)", ""),
-        **_d
+        **_d,
     )
 
     android_phones = sa.Column(
         sa.Integer,
         nullable=False,
         info=_lr("# of Android phones brought in", "r"),
-        **_d0
+        **_d0,
     )
 
     android_tablets = sa.Column(
         sa.Integer,
         nullable=False,
         info=_lr("# of Android tablets brought in", "r"),
-        **_d0
+        **_d0,
     )
 
     iphone_devices = sa.Column(
@@ -144,21 +144,21 @@ class Client(sa.Model):
         sa.Integer,
         nullable=False,
         info=_lr("# of Windows laptops brought in", "r"),
-        **_d0
+        **_d0,
     )
 
     echo_devices = sa.Column(
         sa.Integer,
         nullable=False,
         info=_lr("# of Amazon Echoes brought in", "r"),
-        **_d0
+        **_d0,
     )
 
     other_devices = sa.Column(
         sa.String(400),
         nullable=True,
         info=_lr("Other devices brought in if not listed above (Optional)", ""),
-        **_d
+        **_d,
     )
 
     # consider adding checkboxes for this
@@ -166,21 +166,21 @@ class Client(sa.Model):
         sa.String(400),
         nullable=True,
         info=_lr("List apps/accounts manually checked (Optional)", ""),
-        **_d
+        **_d,
     )
 
     checkups_other = sa.Column(
         sa.String(400),
         nullable=True,
         info=_lr("Other apps/accounts manually checked (Optional)", ""),
-        **_d
+        **_d,
     )
 
     vulnerabilities = sa.Column(
         sa.String(600),
         nullable=False,
         info=_lr("Vulnerabilities discovered", "r"),
-        **_d
+        **_d,
     )
 
     vulnerabilities_trusted_devices = sa.Column(
@@ -189,21 +189,21 @@ class Client(sa.Model):
         info=_lr(
             "List accounts with unknown trusted devices if discovered (Optional)", ""
         ),
-        **_d
+        **_d,
     )
 
     vulnerabilities_other = sa.Column(
         sa.Text,
         nullable=True,
         info=_lr("Other vulnerabilities discovered (Optional)", ""),
-        **_d
+        **_d,
     )
 
     safety_planning_onsite = sa.Column(
         sa.Enum("", "Yes", "No", "Not applicable"),
         nullable=False,
         info=_lr("Safety planning conducted onsite", "r"),
-        **_d
+        **_d,
     )
 
     changes_made_onsite = sa.Column(
@@ -228,7 +228,7 @@ class Client(sa.Model):
         info=_lr(
             'Case Summary (Can fill out after consult, see "Edit previous forms")', ""
         ),
-        **_d
+        **_d,
     )
 
     # way to edit data/add case summaries afterwards? Or keep text files.

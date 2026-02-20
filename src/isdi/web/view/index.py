@@ -34,7 +34,7 @@ def index():
         "main.html",
         title=config.TITLE,
         platform=config.PLATFORM,
-        is_termux=bool(os.environ.get('PREFIX')),
+        is_termux=bool(os.environ.get("PREFIX")),
         is_debug=config.DEBUG,
         device_primary_user=config.DEVICE_PRIMARY_USER,
         task="home",

@@ -47,39 +47,70 @@ def test_get_all_leaves():
     assert sorted(pdump.get_all_leaves(keys)) == ["cd11", "cd21"]
 
 
-
-@pytest.mark.parametrize("fname, conds", [
-     ("./phone_dumps/test/test1-rc-pixel4_android.txt", {
-         "in_apps" : [("com.amazon.mShop.android.shopping", "56b26bf"), 
+@pytest.mark.parametrize(
+    "fname, conds",
+    [
+        (
+            "./phone_dumps/test/test1-rc-pixel4_android.txt",
+            {
+                "in_apps": [
+                    ("com.amazon.mShop.android.shopping", "56b26bf"),
                     ("com.aljazeera.mobile", "fa6702e"),
-                    ("com.android.sdm.plugins.usccdm", "db6e2b0")],
-         "in_info" : [ 
-             ("com.google.android.uwb.resources", {
-             "firstInstallTime": "1969-12-31 18:00:00",
-             "lastUpdateTime": "1969-12-31 18:00:00",
-             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
-             "battery_usage": "0 (mAh)",
-         }),
-         ("com.Slack", {
-             "firstInstallTime": "2023-09-22 15:22:45",
-             "lastUpdateTime": "2025-04-06 01:03:03",
-             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
-             "battery_usage": "0 (mAh)",
-         }),
-         ("com.android.providers.downloads", {
-             "firstInstallTime": "2008-12-31 18:00:00",
-             "lastUpdateTime": "2008-12-31 18:00:00",
-             "data_usage": {"data_used": "unknown", "background_data_allowed": "unknown"},
-             "battery_usage": "0 (mAh)",
-         })
-         ]
-    }),
-    ("./phone_dumps/test/test2-lge-rc.txt", {
-        "in_apps" : [("com.hy.system.fontserver", "10f809f"),
-                    ('com.lge.penprime.overlay', 'ba26d8b'),
-                    ('com.android.incallui.overlay', '86a753f')],
-        "in_info" : []
-    })])
+                    ("com.android.sdm.plugins.usccdm", "db6e2b0"),
+                ],
+                "in_info": [
+                    (
+                        "com.google.android.uwb.resources",
+                        {
+                            "firstInstallTime": "1969-12-31 18:00:00",
+                            "lastUpdateTime": "1969-12-31 18:00:00",
+                            "data_usage": {
+                                "data_used": "unknown",
+                                "background_data_allowed": "unknown",
+                            },
+                            "battery_usage": "0 (mAh)",
+                        },
+                    ),
+                    (
+                        "com.Slack",
+                        {
+                            "firstInstallTime": "2023-09-22 15:22:45",
+                            "lastUpdateTime": "2025-04-06 01:03:03",
+                            "data_usage": {
+                                "data_used": "unknown",
+                                "background_data_allowed": "unknown",
+                            },
+                            "battery_usage": "0 (mAh)",
+                        },
+                    ),
+                    (
+                        "com.android.providers.downloads",
+                        {
+                            "firstInstallTime": "2008-12-31 18:00:00",
+                            "lastUpdateTime": "2008-12-31 18:00:00",
+                            "data_usage": {
+                                "data_used": "unknown",
+                                "background_data_allowed": "unknown",
+                            },
+                            "battery_usage": "0 (mAh)",
+                        },
+                    ),
+                ],
+            },
+        ),
+        (
+            "./phone_dumps/test/test2-lge-rc.txt",
+            {
+                "in_apps": [
+                    ("com.hy.system.fontserver", "10f809f"),
+                    ("com.lge.penprime.overlay", "ba26d8b"),
+                    ("com.android.incallui.overlay", "86a753f"),
+                ],
+                "in_info": [],
+            },
+        ),
+    ],
+)
 def test_apps(fname, conds):
     if not os.path.exists(fname):
         pytest.skip(f"File {fname} does not exist. Skipping test.")
@@ -87,7 +118,7 @@ def test_apps(fname, conds):
     apps = ad.all_apps()
     print(fname, apps[:5])
     # Check if the apps are in the dump
-    for app,_ in conds["in_apps"]:
+    for app, _ in conds["in_apps"]:
         assert app in apps
     # Check if the app info is correct
     for app, expected in conds["in_info"]:
@@ -95,7 +126,6 @@ def test_apps(fname, conds):
         # print(info)
         for k, v in expected.items():
             assert info[k] == v
-
 
 
 class TestIosDump(object):

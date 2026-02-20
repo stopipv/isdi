@@ -3,7 +3,7 @@ Author: Rahul Chatterjee
 Date: 2018-06-11
 Doc: https://docs.google.com/document/d/1HAzmB1IiViMrY7eyEt2K7-IwqFOKcczsgtRRaySCInA/edit
 
-Privacy configuration for Android. An attempt to automate most of this. 
+Privacy configuration for Android. An attempt to automate most of this.
 
 
 Automatic settings check
@@ -12,7 +12,7 @@ To find what activity is running on the current window (*Super useful command*)
 
     adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'
 
-Finally screen capture. 
+Finally screen capture.
 
     adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > screen.png
 

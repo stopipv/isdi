@@ -40,13 +40,12 @@ def scan():
     device_owner = get_param("device_owner")
     ser = get_param("devid")
 
-
     currently_scanned = get_client_devices_from_db(session["clientid"])
     template_d = dict(
         task="home",
         title=config.TITLE,
         platform=config.PLATFORM,
-        is_termux=bool(os.environ.get('PREFIX')),
+        is_termux=bool(os.environ.get("PREFIX")),
         is_debug=config.DEBUG,
         device=device,
         device_primary_user=config.DEVICE_PRIMARY_USER,  # TODO: Why is this sent

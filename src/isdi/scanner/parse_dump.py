@@ -18,30 +18,33 @@ config = get_config()
 
 def complexparse(lines: list[str]) -> dict:
     """Binary search how much str can be parsed without error"""
+
     def _find_length_of_valid_string(text: str, s: int, e: int) -> int:
         """Finds the length of the valid string"""
         if s == e:
             return s
         mid = (s + e) // 2
         try:
-            simpleparse(''.join(text[:mid]))
+            simpleparse("".join(text[:mid]))
             return _find_length_of_valid_string(text, mid + 1, e)
         except Exception as ex:
             return _find_length_of_valid_string(text, s, mid)
+
     try:
-        d = simpleparse(''.join(lines))
+        d = simpleparse("".join(lines))
         return d
     except IndentationError as ex:
         pass
-        #logging.error(f"IndentationError: {ex}")
-    n = _find_length_of_valid_string(lines, 0, len(lines))-1
+        # logging.error(f"IndentationError: {ex}")
+    n = _find_length_of_valid_string(lines, 0, len(lines)) - 1
     logging.info(f"Parsed {n} (out of {len(lines)}) lines. starting {lines[:2]}")
-    d = simpleparse(''.join(lines[:n]))
+    d = simpleparse("".join(lines[:n]))
     if isinstance(d, list):
-        d.append({'UNPARSED':  lines[n:]})
+        d.append({"UNPARSED": lines[n:]})
     else:
-        d['UNPARSED'] = lines[n:]
+        d["UNPARSED"] = lines[n:]
     return d
+
 
 def count_lspaces(lspaces: str) -> int:
     """Counts the number of leading spaces in a line"""
@@ -77,7 +80,7 @@ def _match_keys_w_one(d, key: str) -> list:
     return ret
 
 
-def match_keys(d, keys: str|list) -> OrderedDict | list:
+def match_keys(d, keys: str | list) -> OrderedDict | list:
     """d is a dictionary, and finds all keys that matches @keys
     Returns a list of lists
     """
@@ -103,7 +106,7 @@ def match_keys(d, keys: str|list) -> OrderedDict | list:
     return result
 
 
-def prune_empty_leaves(dkeys: list|dict) -> dict|list:
+def prune_empty_leaves(dkeys: list | dict) -> dict | list:
     """Remove the entries from dkeys all the paths that lead to empty keys"""
     if isinstance(dkeys, list):
         return dkeys
@@ -119,7 +122,7 @@ def get_all_leaves(d: dict) -> list:
     return list(itertools.chain(*(get_all_leaves(v) for v in d.values())))
 
 
-def extract(d: list|dict, lkeys_dict: list|dict) -> list:
+def extract(d: list | dict, lkeys_dict: list | dict) -> list:
     """Extracts the values from d that match the keys in lkeys_dict"""
     if isinstance(d, list):
         d = d[0]
@@ -144,10 +147,10 @@ def split_equalto_delim(k: str) -> list[str]:
     return k.split("=", 1)
 
 
-def prune_empty_keys(d: dict) -> dict|list:
+def prune_empty_keys(d: dict) -> dict | list:
     """d is an multi-layer dictionary. The function
     converts a sequence of keys into
-    array if all have empty values. Also, if keys are of the 
+    array if all have empty values. Also, if keys are of the
     format {"key=value": []}, then convert this into
     a dictionary of {key: value}."""
     if not isinstance(d, dict):
@@ -156,13 +159,13 @@ def prune_empty_keys(d: dict) -> dict|list:
         return list(d.keys())
     remove_keys = []
     for k, v in d.items():
-        if len(k.split('=')) == 2 and len(v) == 0:
+        if len(k.split("=")) == 2 and len(v) == 0:
             remove_keys.append(k)
         else:
             d[k] = prune_empty_keys(v)
     for k in remove_keys:
         if k in d:
-            t = k.split('=')            
+            t = k.split("=")
             del d[k]
             d[t[0]] = t[1]
     return d
@@ -176,19 +179,23 @@ def retrieve(dict_: dict, nest: list) -> str | dict:
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
-       logging.error(f"KeyError: {e} for dict_={dict_} and nest={nest}")
-       return ""
+        logging.error(f"KeyError: {e} for dict_={dict_} and nest={nest}")
+        return ""
     except TypeError as e:
         logging.error(f"TypeError: {e} for dict_={dict_} and nest={nest}")
         return ""
+
+
 ################ CUSTOM ANDROID PARSING #########################
 def parse_procstats(text: str) -> dict:
-    """Parses the output of `adb shell dumsys procstats` """
+    """Parses the output of `adb shell dumsys procstats`"""
     apps = {}
     current_app = None
 
-    app_re = re.compile(r'^\s*\* ([^ ]+) / ([^ ]+) / (v\d+):')
-    stat_re = re.compile(r'^\s+([\w\s]+): ([\d\.]+%) \(([^/]+)/([^/]+)/([^)]+)\s+over\s+(\d+)\)')
+    app_re = re.compile(r"^\s*\* ([^ ]+) / ([^ ]+) / (v\d+):")
+    stat_re = re.compile(
+        r"^\s+([\w\s]+): ([\d\.]+%) \(([^/]+)/([^/]+)/([^)]+)\s+over\s+(\d+)\)"
+    )
 
     for line in text.splitlines():
         app_match = app_re.match(line)
@@ -196,13 +203,8 @@ def parse_procstats(text: str) -> dict:
 
         if app_match:
             name, uid, version = app_match.groups()
-            current_app = {
-                "process": name,
-                "uid": uid,
-                "version": version,
-                "stats": {}
-            }
-            apps[current_app['process']] = current_app
+            current_app = {"process": name, "uid": uid, "version": version, "stats": {}}
+            apps[current_app["process"]] = current_app
 
         elif stat_match and current_app:
             stat_type, percent, ram, swap, zram, over = stat_match.groups()
@@ -211,13 +213,10 @@ def parse_procstats(text: str) -> dict:
                 "ram": ram.split("-"),
                 "swap": swap.split("-"),
                 "zram": zram.split("-"),
-                "samples": int(over)
+                "samples": int(over),
             }
 
     return apps
-
-
-
 
 
 class PhoneDump(object):
@@ -229,7 +228,7 @@ class PhoneDump(object):
 
     def apps(self):
         raise Exception("Not Implemented")
-    
+
     def load_file(self):
         raise Exception("Not Implemented")
 
@@ -238,6 +237,7 @@ class PhoneDump(object):
 
     def offstore_apps(self):
         return []
+
 
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
@@ -270,7 +270,7 @@ class AndroidDump(PhoneDump):
                 return d
             keys = list(d.keys())
             for k in keys:
-                new_key = re.sub(r'\W+$', '', k)
+                new_key = re.sub(r"\W+$", "", k)
                 # if new_key != k:
                 #   print(f"Cleaning key: {k} --> {new_key}")
                 d[new_key] = _clean_dictionary(d.pop(k))
@@ -298,7 +298,7 @@ class AndroidDump(PhoneDump):
             if l.startswith("DUMP OF SERVICE") or l.startswith("DUMP OF SETTINGS"):
                 if service:
                     d[service] = _parse(join_lines)
-                service = re.sub(r'DUMP OF SERVICE |DUMP OF SETTINGS ', '', l).strip()
+                service = re.sub(r"DUMP OF SERVICE |DUMP OF SETTINGS ", "", l).strip()
                 if service == "netstats detail":
                     service = "net_stats"
                 join_lines = []
@@ -351,7 +351,7 @@ class AndroidDump(PhoneDump):
             curr[lvls[curr_lvl]] = {}
         return prune_empty_keys(res)
 
-    def load_file(self, failed_before: str=False) -> dict:
+    def load_file(self, failed_before: str = False) -> dict:
         fname = self.dumpf.rsplit(".", 1)[0] + ".txt"
         json_fname = fname.rsplit(".", 1)[0] + ".json"
         d = {}
@@ -371,7 +371,9 @@ class AndroidDump(PhoneDump):
                     d = self.new_parse_dump_file(fname)
                     json.dump(d, f, indent=2)
                 except Exception as ex:
-                    logging.error("File ({!r}) could not be opened or parsed.".format(fname))
+                    logging.error(
+                        "File ({!r}) could not be opened or parsed.".format(fname)
+                    )
                     logging.error("Exception: {}".format(ex))
                     raise (ex)
         return d
@@ -380,14 +382,14 @@ class AndroidDump(PhoneDump):
     def get_data_usage(d, appid, process_uid):
         """Get the data usage for the appid and process_uid"""
         res = {"data_used": "unknown", "background_data_allowed": "unknown"}
-        if "net_stats" not in d or not d['net_stats']:
+        if "net_stats" not in d or not d["net_stats"]:
             return res
-        if isinstance(d['net_stats'], list):
-            d['net_stats'] = d['net_stats'][0]
-        dn = d['net_stats']
+        if isinstance(d["net_stats"], list):
+            d["net_stats"] = d["net_stats"][0]
+        dn = d["net_stats"]
         if process_uid.startswith("u0a"):
             process_uid = "10" + process_uid[3:]
-        
+
         # Backgroud data allowed?
         bgdata = dn.get("BPF map content", {}).get("mUidCounterSetMap", [])
         allowed = False
@@ -408,11 +410,12 @@ class AndroidDump(PhoneDump):
                     return {"foreground": "unknown", "background": "unknown"}
                 else:
                     uid, rxBytes, rxPackets, txBytes, txPackets = s
-                    res['data_used'] = "{:.2f} MB".format((int(rxBytes) + int(txBytes)) / (1024 * 1024))
-                    res['background_data_allowed'] = "yes" if allowed else "not allowed"
+                    res["data_used"] = "{:.2f} MB".format(
+                        (int(rxBytes) + int(txBytes)) / (1024 * 1024)
+                    )
+                    res["background_data_allowed"] = "yes" if allowed else "not allowed"
                     return res
         return res
-
 
     @staticmethod
     def get_battery_stat(d, appid, uidu):
@@ -431,7 +434,6 @@ class AndroidDump(PhoneDump):
             t = b[0].split(":")
             return t[1]
         return b
-    
 
     def _get_apps(self) -> dict:
         if self.apps:
@@ -439,37 +441,37 @@ class AndroidDump(PhoneDump):
         d = self.df
         if not d:
             return {}
-        app_d = d['package'][0]['Packages']
+        app_d = d["package"][0]["Packages"]
         # get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*"))
         packages = {}
         for k, v in app_d.items():
             m = re.match(r"Package \[(?P<appId>.*)\] \((?P<h>.*)", k)
-            if not m: 
+            if not m:
                 logging.error(f"{k} is not an appId")
                 continue
                 # k is a valid appId
             appId, h = m.groups()
-            if 'firstInstallTime' not in v:
+            if "firstInstallTime" not in v:
                 t = v.get("User 0", {})
                 if isinstance(t, list):
-                    t=t[0]
-                v['firstInstallTime'] = t.get("firstInstallTime", "")
+                    t = t[0]
+                v["firstInstallTime"] = t.get("firstInstallTime", "")
             packages[appId] = {
-                    "packageKey": k,
-                    "flags": v.get("flags", ""),
-                    "installerPackageName": v.get("installerPackageName", ""),
-                    "userId": v.get("userId", ""),
-                    "firstInstallTime": v.get('firstInstallTime', ""),
-                    "lastUpdateTime": v.get("lastUpdateTime", ""),
+                "packageKey": k,
+                "flags": v.get("flags", ""),
+                "installerPackageName": v.get("installerPackageName", ""),
+                "userId": v.get("userId", ""),
+                "firstInstallTime": v.get("firstInstallTime", ""),
+                "lastUpdateTime": v.get("lastUpdateTime", ""),
             }
         self.apps = packages
         return self.apps
-    
+
     def all_apps(self) -> list:
         """returns all apps"""
         a = self._get_apps()
         return list(a.keys())
-    
+
     def system_apps(self) -> list:
         """Return system apps: flags=[ SYSTEM ]"""
         a = self._get_apps()
@@ -483,19 +485,21 @@ class AndroidDump(PhoneDump):
                 if "SYSTEM" in str(flags):
                     system_apps.append(appid)
         return system_apps
-    
+
     def offstore_apps(self) -> list:
         approved_installers = {
             "com.android.vending",
             "com.dti.att",  # AT&T phones have this installer
-            "com.facebook.system", # Some phones sell themselves to Facebook
+            "com.facebook.system",  # Some phones sell themselves to Facebook
         }
         a = self._get_apps()
         sys_apps = self.system_apps()
-        return [k for k, v in a.items() 
-                if k not in sys_apps and
-                v["installerPackageName"] not in approved_installers
-            ]
+        return [
+            k
+            for k, v in a.items()
+            if k not in sys_apps
+            and v["installerPackageName"] not in approved_installers
+        ]
 
     def info(self, appid):
         d = self.df
@@ -505,12 +509,19 @@ class AndroidDump(PhoneDump):
         if appid not in a:
             logging.error(f"AppId {appid} not found in apps={a}")
             return {}
-        app = d['package'][0]['Packages'][a[appid]["packageKey"]]
+        app = d["package"][0]["Packages"][a[appid]["packageKey"]]
         res = {
-            k: app.get(k, "") 
-            for k in ["userId", "firstInstallTime", "lastUpdateTime", "versionCode", "versionName",
-                      "install permissions", "declared permissions", "runtime permissions",
-                      ]
+            k: app.get(k, "")
+            for k in [
+                "userId",
+                "firstInstallTime",
+                "lastUpdateTime",
+                "versionCode",
+                "versionName",
+                "install permissions",
+                "declared permissions",
+                "runtime permissions",
+            ]
         }
 
         if "userId" not in res:
@@ -536,7 +547,6 @@ class AndroidDump(PhoneDump):
         res["data_usage"] = self.get_data_usage(d, appid, process_uid)
         res["battery_usage"] = self.get_battery_stat(d, appid, uidu)  # (mAh)
         return res
-
 
 
 class IosDump(PhoneDump):
@@ -591,7 +601,7 @@ class IosDump(PhoneDump):
         self.appinfo = apps
 
         self.deviceinfo = {
-            k: d['devinfo'].get(k, "")
+            k: d["devinfo"].get(k, "")
             for k in [
                 "DeviceClass",
                 "ProductType",
@@ -607,7 +617,9 @@ class IosDump(PhoneDump):
             if not permission:
                 continue  # Empty permission, skip
             if permission not in self.permissions_map:
-                logging.info(f"Have not seen {permission} before. Making note of this...")
+                logging.info(
+                    f"Have not seen {permission} before. Making note of this..."
+                )
                 permission_human_readable = permission.replace("kTCCService", "")
                 with open(
                     os.path.join(config.STATIC_DATA, "ios_permissions.json"), "w"
@@ -687,7 +699,7 @@ class IosDump(PhoneDump):
         if not app:
             logging.warning(f"App with bundle identifier {appid} not found")
             return None
-        
+
         party = app.get("ApplicationType", "").lower()
         permissions = []
         if party in ["system", "user", "hidden"]:
@@ -699,17 +711,13 @@ class IosDump(PhoneDump):
         res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
         res["title"] = app.get("CFBundleExecutable", "")
         res["App Version"] = app.get("CFBundleVersion", "")
-        res["Install Date"] = (
-            """
+        res["Install Date"] = """
         Apple does not officially record iOS app installation dates.  To view when
         '{}' was *last used*: [Settings -> General -> {} Storage].  To view the
         *purchase date* of '{}', follow these instructions:
         https://www.ipvtechresearch.org/post/guides/apple/.  These are the
         closest possible approximations to installation date available to
-        end-users.  """.format(
-                res["title"], self.device_class, res["title"]
-            )
-        )
+        end-users.  """.format(res["title"], self.device_class, res["title"])
 
         res["Battery Usage"] = (
             "To see recent battery usage of '{title}': "
@@ -764,7 +772,7 @@ if __name__ == "__main__":
             indent=2,
         )
         # print(json.dumps(ddump.info("ru.kidcontrol.gpstracker"), indent=2))
-        print(ddump.df['appops'].keys())
+        print(ddump.df["appops"].keys())
         # print(ddump.info("com.isharing.isharing"))
     elif sys.argv[2] == "ios":
         ddump = IosDump(fname)

@@ -105,7 +105,9 @@ def run_command(cmd: str, **kwargs) -> subprocess.Popen[bytes]:
     if not (kwargs.get("nowait", False) or kwargs.get("NOWAIT", False)):
         p.wait()
         if p.returncode != 0:
-            logging.error(f"Error running command: {_cmd!r}. returncode: {p.returncode}")
+            logging.error(
+                f"Error running command: {_cmd!r}. returncode: {p.returncode}"
+            )
         else:
             logging.info(f"Command {_cmd!r} executed successfully.")
     return p

@@ -26,14 +26,16 @@ from .runcmd import catch_err, run_command
 
 cfg = get_config()
 
+
 class AppScanner:
     """Base class for device scanners (Android/iOS)."""
+
     app_info_conn: Optional[sqlite3.Connection] = None
 
     def __init__(self, dev_type: str, cli: str):
         """
         Initialize scanner.
-        
+
         Args:
             dev_type: 'android', 'ios', or 'test'
             cli: Command path (e.g., 'adb' or 'pymobiledevice3')
@@ -42,7 +44,7 @@ class AppScanner:
         self.device_type: str = dev_type
         self.cli: str = cli
         self.ddump: Optional[parse_dump.PhoneDump] = None
-        
+
         # Initialize database connection once
         if AppScanner.app_info_conn is None:
             self._init_db()
@@ -87,14 +89,14 @@ class AppScanner:
     def dump_path(self, serial: str) -> str:
         """Get the file path for a device's dump."""
         hmac_serial = cfg.hmac_serial(serial)
-        fkind = 'json' if self.device_type == 'ios' else 'txt'
+        fkind = "json" if self.device_type == "ios" else "txt"
         return os.path.join(cfg.DUMP_DIR, f"{hmac_serial}_{self.device_type}.{fkind}")
 
     def _load_dump(self, serialno: str) -> Optional[parse_dump.PhoneDump]:
         """Load device dump from file, creating it if needed."""
         if isinstance(self.ddump, parse_dump.PhoneDump):
             return self.ddump
-            
+
         dumpf = self.dump_path(serialno)
         if not os.path.exists(dumpf):
             if not self._dump_phone(serialno):
@@ -114,15 +116,15 @@ class AppScanner:
         """Dump device info by running shell script."""
         dumpf = self.dump_path(serial)
         os.makedirs(os.path.dirname(dumpf), exist_ok=True)
-        
+
         # Resolve script path
         script_path = cfg.SCRIPT_DIR / f"{self.device_type}_scan.sh"
         if not script_path.exists():
             logging.error(f"Script not found: {script_path}")
             return False
-        
+
         logging.info(f"Dumping {self.device_type} device {serial}...")
-        
+
         # Run script: bash script.sh <serial> <output_file>
         p = run_command(
             "bash {script} {ser} {dump_file}",
@@ -131,12 +133,12 @@ class AppScanner:
             dump_file=dumpf,
             nowait=False,
         )
-        
+
         # run_command() with nowait=False already waits and sets returncode
         if p.returncode != 0:
             logging.error(f"Dump failed with returncode {p.returncode}")
             return False
-        
+
         logging.info(f"Dump completed successfully: {dumpf}")
         return os.path.exists(dumpf)
 
@@ -144,10 +146,10 @@ class AppScanner:
         """Get detailed info for an app."""
         if not self.ddump:
             self._load_dump(serialno)
-        
+
         if not AppScanner.app_info_conn:
             return {}, {}
-        
+
         # Query the database for app info
         conn = AppScanner.app_info_conn
         if conn.row_factory is None:
@@ -202,27 +204,27 @@ class AppScanner:
         installed_apps = self.get_apps(serialno)
         if not installed_apps:
             return {}
-        
+
         # Get offstore and system apps (Android only - iOS returns empty)
         offstore = self.get_offstore_apps(serialno)
         system = self.get_system_apps(serialno)
-        
+
         # Get app flags from blocklist
         flagged_apps = blocklist.app_title_and_flag(
             [{"appId": appid} for appid in installed_apps],
             offstore_apps=offstore,
             system_apps=system,
         )
-        
+
         # Convert to dict with appId as key
         result = {}
         for app in flagged_apps:
-            appid = app.get('appId', '')
+            appid = app.get("appId", "")
             if not appid:
                 continue
-            title = app.get('title', '') or ''
-            flags = app.get('flags', [])
-            
+            title = app.get("title", "") or ""
+            flags = app.get("flags", [])
+
             # Get app titles from database (Android)
             if self.device_type == "android" and AppScanner.app_info_conn and not title:
                 try:
@@ -230,36 +232,33 @@ class AppScanner:
                     cursor.execute("SELECT title FROM apps WHERE appid = ?", (appid,))
                     row = cursor.fetchone()
                     if row:
-                        title = row[0] or ''
+                        title = row[0] or ""
                 except Exception as e:
                     logging.error(f"Error getting title for {appid}: {e}")
             elif self.device_type == "ios":
                 # Get titles from iOS dump
                 td = self.get_app_titles(serialno)
-                title = td.get(appid, '') or title
-            
+                title = td.get(appid, "") or title
+
             # ASCII encode/decode to handle special characters
-            title = title.encode('ascii', errors='ignore').decode('ascii')
-            
+            title = title.encode("ascii", errors="ignore").decode("ascii")
+
             # Classify and score
             score_val = blocklist.score(flags)
             class_val = blocklist.assign_class(flags)
             html_flags = blocklist.flag_str(flags)
-            
+
             result[appid] = {
-                'title': title,
-                'flags': flags,
-                'score': score_val,
-                'class_': class_val,
-                'html_flags': html_flags,
+                "title": title,
+                "flags": flags,
+                "score": score_val,
+                "class_": class_val,
+                "html_flags": html_flags,
             }
-        
+
         # Sort by risk score descending, then by appId ascending
-        sorted_apps = sorted(
-            result.items(),
-            key=lambda x: (-x[1]['score'], x[0])
-        )
-        
+        sorted_apps = sorted(result.items(), key=lambda x: (-x[1]["score"], x[0]))
+
         # Return as dict keyed by appId (maintains compatibility with .to_dict(orient='index'))
         return {appid: app_info for appid, app_info in sorted_apps}
 
@@ -293,7 +292,7 @@ class AndroidScanner(AppScanner):
         cmd = "{cli} devices | tail -n +2"
         p = run_command(cmd, cli=self.cli)
         output = catch_err(p, cmd=cmd).strip()
-        
+
         devices = []
         for line in output.split("\n"):
             parts = line.split()
@@ -318,15 +317,15 @@ class AndroidScanner(AppScanner):
                 "model": "ro.product.model",
                 "version": "ro.build.version.release",
             }
-            
+
             for key, prop in props.items():
                 cmd = "{cli} -s {serial} shell getprop {prop}"
                 p = run_command(cmd, cli=self.cli, serial=serial, prop=prop)
                 output = catch_err(p, cmd=cmd).strip()
                 m[key] = output or "Unknown"
-            
+
             m["last_full_charge"] = datetime.now().isoformat()
-            
+
             info_str = f"{m['brand']} {m['model']} (Android {m['version']})"
             return info_str, m
         except Exception as e:
@@ -340,7 +339,7 @@ class AndroidScanner(AppScanner):
             ("frida", "ps -A | grep frida"),
             ("magisk", "ls -la /data/adb/magisk"),
         ]
-        
+
         reasons: List[str] = []
         for name, cmd_str in root_indicators:
             cmd = "{cli} -s {serial} shell '{cmd_str}'"
@@ -351,7 +350,7 @@ class AndroidScanner(AppScanner):
                     reasons.append(f"Found {name}")
             except Exception as e:
                 logging.debug(f"Root check failed: {e}")
-        
+
         return len(reasons) > 0, reasons
 
     def uninstall(self, serial: str, appid: str) -> bool:
@@ -373,7 +372,7 @@ class IosScanner(AppScanner):
         cmd = "{cli} usbmux list"
         p = run_command(cmd, cli=self.cli)
         output = catch_err(p, cmd=cmd).strip()
-        
+
         try:
             if not output:
                 return []
@@ -388,12 +387,12 @@ class IosScanner(AppScanner):
         if not self._dump_phone(serialno):
             logging.error("Failed to dump iOS device")
             return []
-        
+
         result = self._load_dump(serialno)
         if not result or not self.ddump:
             logging.error("Failed to load iOS dump")
             return []
-        
+
         return self.ddump.installed_apps()
 
     def get_app_titles(self, serialno: str) -> Dict[str, str]:
@@ -414,7 +413,9 @@ class IosScanner(AppScanner):
         else:
             # Try to iterate
             try:
-                return {item.get('appId'): item.get('title') for item in titles_df if item}
+                return {
+                    item.get("appId"): item.get("title") for item in titles_df if item
+                }
             except:
                 return {}
 
@@ -422,7 +423,7 @@ class IosScanner(AppScanner):
         """Get iOS device info."""
         if not self._dump_phone(serial):
             return "Unknown iOS Device", {}
-        
+
         self._load_dump(serial)
         if self.ddump:
             return self.ddump.device_info()
