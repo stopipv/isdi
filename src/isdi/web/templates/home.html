@@ -41,12 +41,14 @@
                 <button class="btn btn-primary mx-2">Scan now</button>
             </form>
             <br/>
+            {% if is_termux or is_debug %}
             <div id="termux-usb-section">
                 <button type="button" id="btn-termux-usb" class="btn btn-warning btn-sm">
                     📱 Request USB Access
                 </button>
                 <div id="termux-usb-msg" class="small mt-2" style="display:none;"></div>
             </div>
+            {% endif %}
             <script>
                 (function() {
                     var btn = document.getElementById('btn-termux-usb');

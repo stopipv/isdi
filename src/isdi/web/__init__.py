@@ -23,6 +23,10 @@ def init_routes(flask_app):
         import traceback
         traceback.print_exc()
         
+        # Capture exception details for closure
+        exc_error = str(e)
+        exc_traceback = traceback.format_exc()
+        
         # Create minimal fallback route
         @flask_app.route('/')
         def index_fallback():
@@ -31,10 +35,10 @@ def init_routes(flask_app):
             <head><title>ISDI</title></head>
             <body>
                 <h1>ISDI - Intimate Surveillance Detection Instrument</h1>
-                <p><strong>Error loading web interface:</strong> {e}</p>
+                <p><strong>Error loading web interface:</strong> {exc_error}</p>
                 <p>The server is running but some routes failed to load.</p>
                 <hr>
-                <pre>{traceback.format_exc()}</pre>
+                <pre>{exc_traceback}</pre>
             </body>
             </html>
             """

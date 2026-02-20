@@ -3,6 +3,7 @@ from isdi.web import app
 from isdi.web.view.index import get_device
 from isdi.scanner.privacy_scan_android import do_privacy_check
 from isdi.config import get_config
+import os
 
 config = get_config()
 
@@ -18,11 +19,15 @@ def privacy():
         task="privacy",
         device_primary_user=config.DEVICE_PRIMARY_USER,
         title=config.TITLE,
+        is_termux=bool(os.environ.get('PREFIX')),
+        is_debug=config.DEBUG,
     )
 
 
 @app.route("/privacy/<device>/<cmd>", methods=["GET"])
 def privacy_scan(device, cmd):
     sc = get_device(device)
+    if sc is None:
+        return "No device loaded", 400
     res = do_privacy_check(sc.serialno, cmd)
     return res

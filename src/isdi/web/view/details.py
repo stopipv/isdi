@@ -2,6 +2,7 @@ from flask import request, render_template
 from isdi.web import app
 from isdi.web.view.index import get_device
 from isdi.config import get_config
+import os
 
 config = get_config()
 
@@ -29,4 +30,6 @@ def app_details(device):
         app=d,
         info=info,
         device=device,
+        is_termux=bool(os.environ.get('PREFIX')),
+        is_debug=config.DEBUG,
     )

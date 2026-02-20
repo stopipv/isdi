@@ -1,4 +1,4 @@
-"""
+r"""
 Author: Rahul Chatterjee
 Date: 2018-06-11
 Doc: https://docs.google.com/document/d/1HAzmB1IiViMrY7eyEt2K7-IwqFOKcczsgtRRaySCInA/edit
@@ -45,8 +45,10 @@ def run_command(cmd, **kwargs):
     _cmd = cmd.format(**kwargs)
     print(_cmd)
     p = Popen(_cmd, stdout=PIPE, stderr=PIPE, shell=True)
-    p.wait(4)
-    return p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
+    p.wait()
+    stdout = p.stdout.read().decode("utf-8") if p.stdout else ""
+    stderr = p.stderr.read().decode("utf-8") if p.stderr else ""
+    return stdout, stderr
 
 
 def thiscli(ser):
@@ -135,10 +137,12 @@ def wait(t):
 def do_privacy_check(ser, command):
     def add_image(img, nocache=False):
         rand = random.randint(0, 10000)
+        query_string = f"?nocache={rand}" if nocache else ""
         return (
             "<img height='400px' src='"
             + url_for("static", filename="images/" + img)
-            + "?{}'/>".format(rand if nocache else "")
+            + query_string
+            + "'/>"
         )
 
     command = command.lower()
@@ -205,7 +209,7 @@ def do_privacy_check(ser, command):
 
 if __name__ == "__main__":
     # ser = "ZY224F8TKG"
-    # print(get_screen_res(ser)
+    # print(get_screen_res(ser))
     # print(is_screen_on(ser))
     # do_privacy_check(ser, 'account')
     take_screenshot(ser="")
