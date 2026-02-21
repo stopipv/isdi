@@ -170,13 +170,15 @@ def add_image(img, nocache=False):
     query_string = f"?nocache={rand}" if nocache else ""
     return (
         "<img height='400px' src='"
-        + url_for("static", filename="images/" + img)
+        + url_for("static", filename=img)
         + query_string
         + "'/>"
     )
 
 
 def do_privacy_check(ser, command, screenshot_fname=None):
+    from pathlib import Path
+    
     command = command.lower()
     if command == "account":  # 1. Account ownership  & 3. Sync (if present)
         open_activity(
@@ -235,15 +237,12 @@ def do_privacy_check(ser, command, screenshot_fname=None):
     elif command == "screenshot":
         # Use config to get the proper static directory
         if screenshot_fname is None:
-            from pathlib import Path
-
             static_dir = Path(__file__).parent.parent / "web" / "static" / "images"
             static_dir.mkdir(parents=True, exist_ok=True)
             screenshot_fname = static_dir / "tmp.png"
         elif isinstance(screenshot_fname, str):
             screenshot_fname = Path(screenshot_fname)
-        take_screenshot(ser, fname=str(screenshot_fname))
-        return add_image(screenshot_fname.name, nocache=True)
+        return take_screenshot(ser, fname=str(screenshot_fname))
     else:
         return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 

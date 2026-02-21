@@ -7,6 +7,7 @@ Phone scanner module - handles Android and iOS device scanning.
 - catch_err(): Takes Popen object, waits & returns string output
 """
 
+from math import perm
 import os
 import json
 import shlex
@@ -142,64 +143,77 @@ class AppScanner:
         logging.info(f"Dump completed successfully: {dumpf}")
         return os.path.exists(dumpf)
 
-    def app_details(self, serialno: str, appid: str) -> Tuple[Dict, Dict]:
-        """Get detailed info for an app."""
+    def get_multiple_app_details(self, serialno: str, appids: List[str]) -> Dict[str, Tuple[Dict, Dict]]:
+        """Get details for multiple apps at once, returning dict keyed by appId."""
+
+        def _process_app_row(appid: str, d: Dict) -> Tuple[Dict, Dict]:
+            permissions = d.get("permissions")
+            if isinstance(permissions, str):
+                d["permissions"] = [p.strip() for p in permissions.split(",") if p.strip()]
+            elif not permissions:
+                d["permissions"] = []
+
+            description = ""
+            for col in ("description", "description_html", "descriptionhtml", "summary"):
+                if d.get(col):
+                    description = str(d[col])
+                    break
+            if not description:
+                description = next(
+                    (
+                        str(v)
+                        for k, v in d.items()
+                        if v and ("description" in k.lower() or "summary" in k.lower())
+                    ),
+                    "",
+                )
+
+            d["descriptionHTML"] = description
+            d.setdefault("summary", d.get("title", ""))
+
+            info = self.ddump.info(appid) if self.ddump else None
+            return d, info or {}
+
+        if not appids:
+            return {}
+
         if not self.ddump:
             self._load_dump(serialno)
 
         if not AppScanner.app_info_conn:
-            return {}, {}
+            return {appid: ({}, {}) for appid in appids}
 
-        # Query the database for app info
         conn = AppScanner.app_info_conn
         if conn.row_factory is None:
             conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        cur.execute("SELECT * FROM apps WHERE appid=?", (appid,))
-        row = cur.fetchone()
-        if row is None:
-            logging.warning(f"No app info found for {appid}")
-            return {}, {}
+        placeholders = ",".join("?" * len(appids))
+        cur.execute(f"SELECT * FROM apps WHERE appid IN ({placeholders})", appids)
 
-        d = dict(row)
+        details: Dict[str, Tuple[Dict, Dict]] = {}
+        for row in cur.fetchall():
+            d = dict(row)
+            appid = d.get("appid") or d.get("appId") or ""
+            if appid:
+                details[appid] = _process_app_row(appid, d)
 
-        # Handle permissions - convert string to list if needed
-        perm = d.get("permissions", "")
-        if perm and isinstance(perm, str):
-            d["permissions"] = [p.strip() for p in perm.split(",")]
-        elif not perm:
-            d["permissions"] = []
+        for appid in appids:
+            details.setdefault(appid, ({}, {}))
+        return details
 
-        # Handle description - look for various possible column names
-        description = ""
-        for col in ["description", "description_html", "descriptionhtml", "summary"]:
-            if d.get(col):
-                description = str(d[col])
-                break
 
-        if not description:
-            # Try camelCase variants used in template
-            for col in d.keys():
-                if "description" in col.lower() or "summary" in col.lower():
-                    if d.get(col):
-                        description = str(d[col])
-                        break
-
-        d["descriptionHTML"] = description
-        if "summary" not in d:
-            d["summary"] = d.get("title", "")
-
-        # Get device-specific info if dump is available
-        info = {}
-        if self.ddump:
-            info = self.ddump.info(appid) or {}
-
-        return d, info
+    def app_details(self, serialno: str, appid: str) -> Tuple[Dict, Dict]:
+        """Get detailed info for an app."""
+        details = self.get_multiple_app_details(serialno, [appid])
+        return details.get(appid, ({}, {}))
 
     def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
         """
-        Find spyware apps using blocklist.
-        Returns dict with appId as keys and app info as values: {appId: {title, flags, score, class_, html_flags}}
+        Optimized find_spyapps for iOS that caches app titles lookup.
+        
+        The original isdi.scanner.find_spyapps calls get_app_titles() inside the loop
+        for iOS, causing it to be called once per app. This optimized version
+        pre-loads app titles once and reuses them.
         """
         installed_apps = self.get_apps(serialno)
         if not installed_apps:
@@ -215,6 +229,15 @@ class AppScanner:
             offstore_apps=offstore,
             system_apps=system,
         )
+
+        # Pre-load app titles once for iOS instead of in the loop
+        app_titles_cache = None
+        if self.device_type == "ios":
+            try:
+                app_titles_cache = self.get_app_titles(serialno)
+            except Exception as e:
+                logging.warning(f"Failed to get app titles cache: {e}")
+                app_titles_cache = {}
 
         # Convert to dict with appId as key
         result = {}
@@ -235,10 +258,9 @@ class AppScanner:
                         title = row[0] or ""
                 except Exception as e:
                     logging.error(f"Error getting title for {appid}: {e}")
-            elif self.device_type == "ios":
-                # Get titles from iOS dump
-                td = self.get_app_titles(serialno)
-                title = td.get(appid, "") or title
+            elif self.device_type == "ios" and app_titles_cache:
+                # Use cached titles from iOS dump (loaded once, not in loop)
+                title = app_titles_cache.get(appid, "") or title
 
             # ASCII encode/decode to handle special characters
             title = title.encode("ascii", errors="ignore").decode("ascii")
@@ -259,7 +281,7 @@ class AppScanner:
         # Sort by risk score descending, then by appId ascending
         sorted_apps = sorted(result.items(), key=lambda x: (-x[1]["score"], x[0]))
 
-        # Return as dict keyed by appId (maintains compatibility with .to_dict(orient='index'))
+        # Return as dict keyed by appId
         return {appid: app_info for appid, app_info in sorted_apps}
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
@@ -345,7 +367,7 @@ class AndroidScanner(AppScanner):
             cmd = "{cli} -s {serial} shell '{cmd_str}'"
             try:
                 p = run_command(cmd, cli=self.cli, serial=serial, cmd_str=cmd_str)
-                output = catch_err(p, cmd=cmd).strip()
+                output = catch_err(p, cmd=cmd, msg_on_err=f"not found {name}").strip()
                 if output and "not found" not in output.lower():
                     reasons.append(f"Found {name}")
             except Exception as e:

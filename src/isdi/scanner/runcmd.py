@@ -26,7 +26,7 @@ def error():
 # application level errors. They should go to particular application specific
 # handling.
 def catch_err(
-    p: subprocess.Popen[bytes], cmd="", msg="", time=10, large_output=False
+    p: subprocess.Popen[bytes], cmd="", msg_on_err="", time=10, large_output=False
 ) -> str:
     """TODO: Therer are two different types. homogenize them"""
     try:
@@ -48,14 +48,14 @@ def catch_err(
                 )
 
             m = "[{}]: Error running {!r}. Error ({}): {}\n{}".format(
-                "android", cmd, p.returncode, err_msg, msg
+                "android", cmd, p.returncode, err_msg, msg_on_err
             )
-            print(cmd, p.returncode, err_msg, msg)
             if "insufficient permissions for device: user in plugdev group" in err_msg:
                 e = 'Error: Please set "USB For File Transfers" mode on your Android device.'
                 print(e)
                 return ""
             # config.add_to_error(m)
+            print(f"Returning from catch_err: {m}")
             return m
         else:
             if large_output:
