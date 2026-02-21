@@ -1,4 +1,4 @@
-.PHONY: help clean build upload upload-test install install-dev test lint format
+.PHONY: help clean build upload upload-test install install-dev test lint format bump-version
 
 # Default Python
 PYTHON := python3
@@ -16,6 +16,7 @@ help:
 	@echo "  make build            - Build distribution packages"
 	@echo "  make upload-test      - Upload to TestPyPI (requires .pypirc)"
 	@echo "  make upload           - Upload to PyPI (requires .pypirc)"
+	@echo "  make bump-version     - Bump version (PART=patch|minor|major, default=patch)"
 	@echo "  make clean            - Remove build artifacts"
 	@echo "  make clean-all        - Remove all generated files"
 	@echo ""
@@ -58,6 +59,11 @@ upload: build
 	else \
 		echo "Upload cancelled."; \
 	fi
+
+VERSION_PART ?= patch
+
+bump-version:
+	@$(PYTHON) scripts/bump_version.py
 
 clean:
 	rm -rf build/ dist/ *.egg-info .eggs/ src/*.egg-info
