@@ -50,7 +50,7 @@ t=0
 for i in $(${adb_cmd} shell pm list packages -3 -f | tr -d '\r');
 do
     echo "------------------"
-    read -ra a <<< "$(echo "$i" | sed -n 's/^package:\(.*\.apk\)=\(.*\)/\1 \2/p') | tr -d '\r'""
+    read -ra a <<< $(echo "$i" | sed -n 's/^package:\(.*\.apk\)=\(.*\)/\1 \2/p') | tr -d '\r'
     pkg_path=${a[0]}
     pkg=${a[1]}
     echo "[INFO] pkg_path = ${pkg_path} apk_name = ${pkg}"
