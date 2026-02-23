@@ -48,17 +48,19 @@ upload-test: build
 
 upload: build
 	@echo "Uploading to PyPI..."
-	@echo "⚠️  This will publish the package publicly!"
-	@read -p "Continue? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		$(PYTHON) -m twine upload dist/*; \
-		echo ""; \
-		echo "✓ Successfully uploaded to PyPI!"; \
-		echo "Install with: pip install isdi-scanner"; \
-	else \
-		echo "Upload cancelled."; \
-	fi
+	@printf "Continue? [y/N] "
+	@read REPLY; \
+	case "$$REPLY" in \
+		[yY]) \
+			$(PYTHON) -m twine upload dist/*; \
+			echo ""; \
+			echo "✓ Successfully uploaded to PyPI!"; \
+			echo "Install with: pip install isdi-scanner"; \
+			;; \
+		*) \
+			echo "Upload cancelled."; \
+			;; \
+	esac
 
 VERSION_PART ?= patch
 
