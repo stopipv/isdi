@@ -5,12 +5,13 @@ BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 PKG_DIR="${BASE_DIR}/../dumps/pkgs"
 mkdir -p "${PKG_DIR}"
 serial_cmd="$1"
+adb=${adb:-$(command -v adb || command -v adb.exe)}
 adb_cmd="${adb} ${serial_cmd}"
 echo "ADB command: ${adb_cmd}"
 function pkg_version {
     _pkg="$1"
     # echo "$adb $serial shell dumpsys package $pkg | grep versionName | cut -d '=' -f 2"
-    echo $(${adb_cmd} shell dumpsys package "${_pkg}" | grep versionName | cut -d '=' -f 2 | tr -d '\r')
+    ${adb_cmd} shell dumpsys package "${_pkg}" | grep versionName | cut -d '=' -f 2 | tr -d '\r'
 }
 
 hashing_exe=$(${adb_cmd} shell "command -v md5 || command -v md5sum || command -v sha1sum" | tr -d '\r')
@@ -39,7 +40,7 @@ check_apk() {
 
 function pull {
     echo "Clearing the folder"
-    ${adb_cmd} pull "/sdcard/apps/" $PKG_DIR
+    ${adb_cmd} pull "/sdcard/apps/" "$PKG_DIR"
     mv "$PKG_DIR"/apps/* "$PKG_DIR"
     ${adb_cmd} shell "rm -rf /sdcard/apps/"
     ${adb_cmd} shell "mkdir -p /sdcard/apps/"
@@ -49,7 +50,7 @@ t=0
 for i in $(${adb_cmd} shell pm list packages -3 -f | tr -d '\r');
 do
     echo "------------------"
-    read -ra a <<< "$(echo $i | sed -n 's/^package:\(.*\.apk\)=\(.*\)/\1 \2/p') | tr -d '\r')"
+    read -ra a <<< "$(echo "$i" | sed -n 's/^package:\(.*\.apk\)=\(.*\)/\1 \2/p') | tr -d '\r'""
     pkg_path=${a[0]}
     pkg=${a[1]}
     echo "[INFO] pkg_path = ${pkg_path} apk_name = ${pkg}"
@@ -57,7 +58,7 @@ do
         echo "~> Ignoring $pkg"
         continue
     fi
-    h=$(${adb_cmd} shell ${hashing_exe} ${pkg_path} | awk '{print substr($1, 1, 6)}' | tr -d '\r')
+    h=$(${adb_cmd} shell "${hashing_exe}" "${pkg_path}" | awk '{print substr($1, 1, 6)}' | tr -d '\r')
     echo "[INFO] Hash: $h"
     if [[ -z "$h" ]]; then
         echo "Error: Hashing failed for $pkg_path"
@@ -69,7 +70,7 @@ do
     if [[ ! -e "${PKG_DIR}/${out_pkg_name}" ]]; then
 	    t=$((t+1))
         echo "Copying $pkg_path"
-        echo ${adb_cmd} shell "cp $pkg_path /sdcard/apps/${out_pkg_name}"
+        echo "${adb_cmd}" shell "cp $pkg_path /sdcard/apps/${out_pkg_name}"
         ${adb_cmd} shell "cp $pkg_path /sdcard/apps/${out_pkg_name}"
     else
         echo "Already exists: ${out_pkg_name}"

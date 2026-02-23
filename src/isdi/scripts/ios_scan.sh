@@ -26,13 +26,13 @@ outf="$2"
 printf "Serial: %s\n" "$serial"
 
 # dump only if the file is at least 20 bytes and was modified within the last day
-if [ -f "$outf" ] && [ $(wc -c < "$outf") -ge 20 ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
+if [ -f "$outf" ] && [ "$(wc -c < "$outf")" -ge 20 ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
     echo "Dump file already exists and is recent: $outf"
     exit 0
 fi
 echo "{
-    \"apps\": $(${idb} apps list $serial),
-    \"devinfo\": $(${idb} lockdown info $serial)
+    \"apps\": $(${idb} apps list "$serial"),
+    \"devinfo\": $(${idb} lockdown info "$serial")
 }" > "$outf"
 
 if [ -s "$outf" ]; then

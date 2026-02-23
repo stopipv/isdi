@@ -2,7 +2,7 @@
 
 ## For scanning the phone and downloading some specific information of the phone
 ## Input: serial number 
-adb=$((command -v adb || command -v adb.exe) | tr -d '\r')
+adb=$(command -v adb || command -v adb.exe) | tr -d '\r'
 if [[ -z "$adb" ]]; then
     echo "adb not found in path. Please install it from https://developer.android.com/studio/command-line/adb"
     echo "Or use brew install android-platform-tools"
@@ -30,7 +30,7 @@ fi
 
 function scan {
     act=$1
-    $adb $serial shell dumpsys "$act" | sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
+    $adb "$serial" shell dumpsys "$act" | sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
 }
 
 
@@ -52,7 +52,7 @@ function retrieve {
         return 1
     fi
     app="$1"
-    process_uid=$(grep -A1 "Package \[$app\]" $ofname | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
+    process_uid=$(grep -A1 "Package \[$app\]" "$ofname" | sed '1d;s/.*userId=\([0-9]\+\).*/\1/g')
     process_uidu=$(grep -Eo "app=ProcessRecord{[a-f0-9]+ [0-9]+:$app/([a-z0-9]*)" "$ofname" | cut -d '/' -f 2 | sort -u)
     
     echo "$process_uid  $process_uidu"
@@ -60,7 +60,7 @@ function retrieve {
     printf 'Install: %s\n' "$(awk "/Package \[$app\]/{flag=1;next}/install permissions:/{flag=0}flag" "$ofname" | grep Time | tr -d '  ')"
 
     # Memory info 
-    printf 'Memory: %s\n' "$(awk '/Total PSS by process/{flag=1;next}/Total PSS/{flag=0}flag' "$ofname" | grep $app | sed '/^\s*$/d')"
+    printf 'Memory: %s\n' "$(awk '/Total PSS by process/{flag=1;next}/Total PSS/{flag=0}flag' "$ofname" | grep "$app" | sed '/^\s*$/d')"
 
     # Network info - cnt_set=0 => background,rx_bytes
     printf 'DataUsage (%s): %s\n' "${process_uid}" "$(awk "/DUMP OF SERVICE net_stats/{flag=1;next}/DUMP OF SERVICE/{flag=0}flag" "$ofname" | sed 's/ /,/g' | csvgrep -c 4 -m ${process_uid} | csvcut -c 4,5,6,8)"
