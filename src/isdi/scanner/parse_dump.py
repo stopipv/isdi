@@ -439,7 +439,8 @@ class AndroidDump(PhoneDump):
         if self.apps:
             return self.apps
         d = self.df
-        if not d:
+        if not d or not d["package"]:
+            logging.error(f"'package' is not a key in self.df, where keys = {list(d.keys())}")
             return {}
         app_d = d["package"][0]["Packages"]
         # get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*"))

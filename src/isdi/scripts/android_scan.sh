@@ -2,7 +2,7 @@
 
 ## For scanning the phone and downloading some specific information of the phone
 ## Input: serial number 
-adb=$(command -v adb || command -v adb.exe) | tr -d '\r'
+adb=$( (command -v adb || command -v adb.exe) | tr -d '\r' )
 if [[ -z "$adb" ]]; then
     echo "adb not found in path. Please install it from https://developer.android.com/studio/command-line/adb"
     echo "Or use brew install android-platform-tools"
@@ -30,7 +30,7 @@ fi
 
 function scan {
     act=$1
-    $adb "$serial" shell dumpsys "$act" | sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
+    $adb $serial shell dumpsys "$act" | sed -e 's/\(\s*\)[a-zA-Z0-9._%+-]\+@[a-zA-Z0-9.-]\+\.[a-zA-Z]\{2,4\}\b/\1<email>/g;s/\(\s*\)[a-zA-Z0-9._%+-]\+_gmail.com/\1<db_email>/g'
 }
 
 
