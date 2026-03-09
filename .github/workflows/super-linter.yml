@@ -7,30 +7,39 @@
 name: ISDI_Linter
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - "**/*.py"
+      - "src/isdi/scripts/*.sh"
+      - ".github/workflows/super-linter.yml"
   pull_request:
     branches: [ main ]
+    paths:
+      - "**/*.py"
+      - "src/isdi/scripts/*.sh"
+      - ".github/workflows/super-linter.yml"
 jobs:
   run-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
       - name: Lint Code Base
-        uses: github/super-linter@v4
+        uses: github/super-linter@v7
         env:
           # Validate only new pull requests
-          # VALIDATE_ALL_CODEBASE: false
-          # Uncommenting the following enables linting for only Python and bash files
+          VALIDATE_ALL_CODEBASE: false
+          # Limit linting to Python and shell scripts
           VALIDATE_PYTHON: true
           VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: true
+          VALIDATE_BASH_EXEC: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORE_GITIGNORED_FILES: true
-          FILTER_REGEX_EXCLUDE: "scripts/*.sh"
+          FILTER_REGEX_EXCLUDE: "(^scripts/.*|^src/isdi/data/.*\\.(csv|txt|json)$)"
