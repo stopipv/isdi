@@ -38,7 +38,6 @@ jobs:
           # Limit linting to Python and shell scripts
           VALIDATE_PYTHON: true
           VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORE_GITIGNORED_FILES: true
