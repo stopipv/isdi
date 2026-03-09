@@ -10,7 +10,7 @@ on apps crawled in ["The Spyware Used in Intimate Partner Violence" (IEEE S&P 20
 [![Sync with IOC stalkerware indicators](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml/badge.svg)](https://github.com/stopipv/isdi/actions/workflows/get-stalkerware-indicators.yml)
 
 ## Contribution Guidelines
-For more information about contributing to ISDi, see the [contribution guidelines](contribution.md).
+For more information about contributing to ISDi, see the [contribution guidelines](https://github.com/stopipv/isdi/blob/main/contribution.md).
 
 
 ## Installing ISDi :computer:
@@ -18,34 +18,6 @@ For more information about contributing to ISDi, see the [contribution guideline
 ISDi currently supports **macOS, Linux, and Termux/Android**. If you are using a Windows device, you can use the Windows Subsystem for Linux 2
 (WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
 follow the remaining instructions as a Linux user would.
-
-### Option 1: Install via pip (Recommended)
-
-The easiest way to install ISDi is via pip:
-
-```bash
-pip install isdi
-```
-
-Then run ISDi with:
-```bash
-isdi run
-```
-
-### Option 2: Install from Source (Development)
-
-Clone the repository and install in development mode:
-
-```bash
-git clone https://github.com/stopipv/isdi.git
-cd isdi
-pip install -e .
-```
-
-Then run ISDi with:
-```bash
-isdi run
-```
 
 ### System Requirements
 
@@ -56,6 +28,7 @@ isdi run
 - On Linux (Debian/Ubuntu): `sudo apt install python3 python3-pip`
 
 #### Operating System Dependencies
+ISDi needs `adb` for scanning Android devices and `pymobiledevice3` for scanning iOS devices. 
 
 **macOS:**
 ```bash
@@ -64,17 +37,39 @@ brew bundle
 brew install --cask android-platform-tools
 ```
 
+For iOS device support on macOS, `pymobiledevice3` will be installed automatically with ISDi. For Android device support, ensure `adb` (Android Debug Bridge) is installed via the android-platform-tools above.
+
 **Linux (Debian/Ubuntu):**
 ```bash
 sudo apt install adb
 ```
 
+For iOS device support on Linux, `pymobiledevice3` will be installed automatically with ISDi. For Android device support, ensure `adb` is installed via the command above.
+
 **Windows Subsystem Linux (v2):**
-- Install `adb` in Windows and ensure it's in PATH
-- Install `pymobiledevice3` via pip (done automatically with `pip install isdi`)
+- Install `adb` and `pymobiledevice3` in Windows and ensure it's in PATH. Do not install them in WSL2, as WSL cannot have access to USB devices. Verify the installation by running `adb.exe` and `pymobiledevice3.exe` in a command prompt terminal. 
+
 
 **Termux/Android:**
-See [TERMUX_INSTALL.md](TERMUX_INSTALL.md) for Android device setup. 
+See [TERMUX_INSTALL.md](https://github.com/stopipv/isdi/blob/main/TERMUX_INSTALL.md) for Android device setup.
+
+### Option 1: Install via pip (Recommended)
+
+The easiest way to install ISDi is via pip:
+
+```bash
+pip install isdi-scanner
+```
+
+### Option 2: Install from Source (Development)
+
+Clone the repository and install in development mode:
+
+```bash
+git clone https://github.com/stopipv/isdi.git
+cd isdi
+pip install -e .
+``` 
 
 ## Running ISDi
 
@@ -84,7 +79,7 @@ After ISDi is installed, with an Android or iOS device plugged in and unlocked, 
 isdi run
 ```
 
-ISDi will start a local web server on port 6200. Open your browser to `http://localhost:6200` for the ISDi UI.
+ISDi will start a local web server on port 6200. Open your browser to `http://localhost:6200` for the ISDi UI. In debug mode, the server is on port 6202. 
 
 **Note:** On first run, ISDi will download the app information database (~47MB) from GitHub. This may take a minute depending on your internet connection. An internet connection is required for the first run.
 
@@ -101,7 +96,7 @@ Then navigate to the URL shown in the terminal. Click on `"Scan Instructions"` a
 
 It should look something like this:
 
-![Phone Scanner UI before scan](webstatic/ISDi_before_scan.png "Phone Scanner
+![Phone Scanner UI before scan](https://github.com/stopipv/isdi/blob/main/webstatic/ISDi_before_scan.png "Phone Scanner
 UI before scan")
 
 Connect a device and click on the suitable button `Android` or `iOS`. Give it a
@@ -112,24 +107,9 @@ device plugged in when clicking on apps on the scan results table.
 
 After the scan, the UI will look something like this:
 
-![Phone Scanner UI after scan](webstatic/ISDi_after_scan.png "Phone Scanner
+![Phone Scanner UI after scan](https://github.com/stopipv/isdi/blob/main/webstatic/ISDi_after_scan.png "Phone Scanner
 UI")
 
-## Consultation form data 
-ISDi is intended to be used by advocates for victims of intimate partner violence in 
-a [clinical setting](http://www.nixdell.com/papers/2019-usenix_clinical_security_FULL.pdf); 
-you can add detailed notes about a victim's tech abuse situation 
-by clicking `"Start Consult Form"` on ISDi's homepage. The results
-will be saved in `data/fieldstudy.db` and can be viewed/edited
-by navigating to `/form/edit`.
-
-Some consult form data may not be relevant for use in
-other organizations (e.g., the meeting location being 
-in a borough of New York City). Please consider adapting the form 
-for your needs. One can do this by modifying the `Client` class in 
-`isdi` and use `sa.create_all()` (`sa` is obtained by wrapping SQLAlchemy over 
-the Flask app) to obtain the new
-schema. Then place the new schema in `schema.sql` by updating the `clients_notes` table.
 
 ## Debugging Tips
 
@@ -148,10 +128,10 @@ pymobiledevice3 usbmux list
 ### General
 - Run ISDi with `--debug` flag for verbose logging
 - Check logs in `~/.local/share/isdi/logs/`
-- File issues on [GitHub](../../issues/) with error messages
+- File issues on [GitHub](https://github.com/stopipv/isdi/issues/) with error messages
 
 ### Termux/Android
-See [TERMUX_INSTALL.md](TERMUX_INSTALL.md) for Termux-specific troubleshooting.
+See [TERMUX_INSTALL.md](https://github.com/stopipv/isdi/blob/main/TERMUX_INSTALL.md) for Termux-specific troubleshooting.
 
 ## Downloaded data ## 
 The data downloaded and stored in the study are the
@@ -169,7 +149,7 @@ following.
 * `batterystats`, `netstats`, `usagestats` App running information: `activity`,
 * `appops`
 
-See details about the services in [notes.md](notes.md)
+See details about the services in [notes.md](https://github.com/stopipv/isdi/blob/main/notes.md)
 
 ##### iOS 
 Only the `appIds`, and their names. Also, I got "permissions" granted
@@ -208,12 +188,4 @@ to the application. I don't know how to get install date, resource usage, etc.
 
 
 
-## TODO 1.
-https://docs.google.com/document/d/1fy6RTo9Gc0rBUBHAhKfSmqI99PSPCBsAdEUIbpGIkzQ/edit
-2. ~How to figure out off-store apps in Android and iOS? Check the installer in
-`adb shell pm packages -i`~ 3. For iOS, how to find out app installation dates,
-resource usage, etc?  4. Explore viability of
-[WebUSB](https://github.com/WICG/webusb) and
-[WebADB](https://github.com/webadb/webadb.js).
-
-See [notes.md](notes.md) for other developer helps.
+See [notes.md](https://github.com/stopipv/isdi/blob/main/notes.md) for other developer helps.
