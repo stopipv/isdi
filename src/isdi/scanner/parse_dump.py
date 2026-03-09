@@ -179,10 +179,10 @@ def retrieve(dict_: dict, nest: list) -> str | dict:
     try:
         return reduce(operator.getitem, nest, dict_)
     except KeyError as e:
-        logging.error(f"KeyError: {e} for dict_={dict_} and nest={nest}")
+        logging.error(f"KeyError: {e} for dict_.keys={list(dict_.keys())} and nest={nest}")
         return ""
     except TypeError as e:
-        logging.error(f"TypeError: {e} for dict_={dict_} and nest={nest}")
+        logging.error(f"TypeError: {e} for dict_.keys={list(dict_.keys())} and nest={nest}")
         return ""
 
 
