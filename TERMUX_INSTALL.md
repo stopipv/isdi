@@ -9,9 +9,9 @@ Termux is a Linux terminal emulator and environment for Android. It allows you t
 ## Prerequisites
 
 1. **Android Device**: Android 5.0+
-2. **Termux App**: Install from [F-Droid](https://f-droid.org/packages/com.termux/) or [Google Play](https://play.google.com/store/apps/details?id=com.termux)
+2. **Termux App**: Install from [F-Droid](https://f-droid.org/packages/com.termux/) or the Termux GitHub releases. Do not use the Google Play version because it is outdated.
 3. **USB Debugging**: Enabled on the device being scanned (Settings → Developer Options)
-4. **USB Cable**: For connecting Android device to the device running Termux scans
+4. **USB Cable or OTG Adapter**: For connecting the scanned device to the Android device running Termux
 
 ## Installation
 
@@ -20,39 +20,34 @@ Termux is a Linux terminal emulator and environment for Android. It allows you t
 Open Termux and run:
 
 ```bash
-pkg update
-pkg install python git build-essential libusb \
-	python-cryptography python-pillow usbmux libusb-1.0-dev
+pkg update -y && pkg upgrade -y
+pkg install -y python git build-essential libusb usbmuxd rust clang cmake pkg-config libffi openssl android-tools
 ```
 
-**Note:** Native/compiled Python modules must be installed via `pkg` on Termux.
-If a package is not available in Termux, let `pip` install it instead.
-
-### Step 2: Clone ISDI Repository
+Installing `pymobiledevice3` on Android is more involved because some dependencies may need to be compiled locally.
 
 ```bash
-git clone https://github.com/rchatterjee/isdi.git
-cd isdi
+export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+echo "$ANDROID_API_LEVEL"
 ```
 
-### Step 3: Install ISDI
+If you want to persist that setting for future Termux sessions, add it to your shell profile manually.
+
+### Step 2: Install ISDI
+Install some dependencies first to reduce the amount of local compilation:
 
 ```bash
-pip install -e .
+pip install --extra-index-url https://termux-user-repository.github.io/pypi/ qh3 zeroconf pydantic-core gpxpy psutil pyyaml markupsafe hexdump
+pip install isdi-scanner --prefer-binary
 ```
 
-This installs ISDI in development mode, making it editable for customization.
+Keeping the phone screen on during installation can help prevent Android from pausing Termux while packages are compiling. The installation can take a while, so keep the device charged.
 
 **First Run:** The app-info.db database (~47MB) will be automatically downloaded from GitHub on first run. This may take a minute depending on your connection.
 
 ## Running ISDi on Termux
-
-### Using pip (Recommended)
-
-After `pip install -e .`, simply run:
-
 ```bash
-isdi run
+$ isdi run
 ```
 
 Then access the web UI at `http://localhost:6200` from your browser.
@@ -63,9 +58,10 @@ Then access the web UI at `http://localhost:6200` from your browser.
 
 1. **Connect Android device** via USB cable
 2. **Enable USB Debugging** on the connected device
-3. **Allow access** when prompted on the connected device
-4. **Click "Android" button** in ISDI web UI
-5. **Results will appear** after scan completes
+3. **Click "Request USB Access"** in the web UI
+4. **Allow access** when prompted on the connected device
+5. **Click \"Android\" button** in ISDI web UI
+6. **Results will appear** after scan completes
 
 ### Scanning iOS Devices
 
@@ -94,39 +90,13 @@ adb devices
 termux-usb -r -E -e "usbmuxd -f -v" <device-path>
 ```
 
-### Python/Module Errors
-
-If you get `ModuleNotFoundError` after installation:
-
-```bash
-# Reinstall in development mode
-pip install --force-reinstall -e .
-
-# OR use the .pyz archive instead
-python3 dist/isdi.pyz run
-```
-
-### Native Python Modules on Termux
-
-On Termux, install native/compiled modules using `pkg` (not `pip`).
-Common ones needed for ISDI and dependencies:
-
-```bash
-pkg install python-cryptography python-pillow
-```
-
-If a module is not available in Termux (for example, `qh3`), allow `pip` to install it.
-# Also try:
-pip install -e .
-```
-
 ### Permission Denied Errors
 
 Some Termux operations require:
 
 ```bash
 # Grant Termux storage access
-termux-setup-storage
+$ termux-setup-storage
 ```
 
 ### Port Already in Use
@@ -135,10 +105,10 @@ If port 6200 is in use:
 
 ```bash
 # Check what's using the port
-lsof -i :6200
+ss -ltnp | grep 6200
 
-# Or use a different port via environment variable
-FLASK_PORT=6201 isdi run
+# Or use a different port
+isdi run --port 6201
 # Then access http://localhost:6201
 ```
 
@@ -149,29 +119,4 @@ FLASK_PORT=6201 isdi run
 - **Scans**: Take 30-60 seconds per device (depends on app count)
 - **Memory**: ISDi uses ~200-400 MB RAM
 
-## Building a Portable .pyz for Other Termux Devices
 
-If you want to share the `.pyz` with another Termux device:
-
-```bash
-# On the build device (native ARM64):
-./build-termux-pex.sh
-
-# Transfer the .pyz to another Termux device:
-adb push dist/isdi.pyz /sdcard/
-# Then on the target device:
-mv /sdcard/isdi.pyz ~/isdi.pyz
-python3 ~/isdi.pyz run
-```
-
-## Next Steps
-
-- [Main README](README.md) - For overview and general usage
-- [BUILD-GUIDE.md](BUILD-GUIDE.md) - For detailed build options
-- [Contributing](contribution.md) - To contribute to ISDI
-
-## Support
-
-For issues specific to Termux, check:
-- [Termux Wiki](https://wiki.termux.com/)
-- [ISDI GitHub Issues](../../issues/)

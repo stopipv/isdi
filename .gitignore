@@ -21,6 +21,9 @@ wheels/
 .installed.cfg
 *.egg
 
+##  Termux
+termux-packages/
+
 # Virtual environments
 venv/
 ENV/

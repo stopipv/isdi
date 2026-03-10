@@ -17,14 +17,14 @@
  });
  
 </script>
-<div class="container">
+<div class="container isdi-page">
     <div>
-        <h4 class="display-4"> Privacy Checkup <a href="#" style="float:right; font-size: 20px" onclick="close_window('close the privacy checkup?');return false;">close the privacy checkup</a>
+    <h4 class="display-4"> Privacy Checkup <a href="#" style="font-size: 20px" onclick="close_window('close the privacy checkup?');return false;">close the privacy checkup</a>
         </h4>
         <h3>Android</h3>
-	<img src="/webstatic/images/android.resiz.png">
+	<img class="content-image" src="/webstatic/images/android.resiz.png">
 	<br><br>
-        <div class="display-4">
+    <div class="button-cluster">
             {% for k, v in  {"account": "Account", "sync": "Accounts and Sync", "backup": "Backup account", "gmap": "Google Map Sharing", "gphotos": "Google Photos Sharing"}.items() %}
             <button class="btn btn-primary mx-2"  onclick="get('/privacy/android/{{ k }}')" value="{{ k }}">{{ v | title }}</button>
             {% endfor %}
@@ -37,7 +37,7 @@
 	<br><br>
 
         <h3>iOS (iPhone/iPad)</h3>
-	<img src="/webstatic/images/apple.resized.png">
+    <img class="content-image" src="/webstatic/images/apple.resized.png">
 	<br><br>
         <div class="jumbotron">
             Please go to 
