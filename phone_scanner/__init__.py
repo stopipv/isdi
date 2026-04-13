@@ -141,6 +141,34 @@ class AppScan(object):
             offstore_apps=self.get_offstore_apps(serialno, from_dump=from_dump),
             system_apps=self.get_system_apps(serialno, from_dump=from_dump),
         )
+
+        # Device Owner apps detection
+        if self.device_type == "android":
+            device_owner_apps = set()
+
+            if not from_dump:
+                device_owner_apps = self.get_device_owner_apps(serialno)
+            elif getattr(self, "dump_d", None):
+                def _walk(node):
+                    if isinstance(node, dict):
+                        for k, v in node.items():
+                            if "DeviceOwner" in k and "admin=" in k:
+                                m = re.search(r"admin=([a-zA-Z0-9_.]+)/", k)
+                                if m:
+                                    device_owner_apps.add(m.group(1))
+                            else:
+                                _walk(v)
+                    elif isinstance(node, list):
+                        for item in node:
+                            if isinstance(item, str):
+                                if "DeviceOwner" in item and "admin=" in item:
+                                    m = re.search(r"admin=([a-zA-Z0-9_.]+)/", item)
+                                    if m:
+                                        device_owner_apps.add(m.group(1))
+                            else:
+                                _walk(item)
+                _walk(self.dump_d.df.get("device_owner", {}))
+
         r["title"] = r.title.fillna("")
         if self.device_type == "android":
             td = pd.read_sql(
@@ -302,6 +330,22 @@ class AndroidScan(AppScan):
             else:
                 print(">>>>>> ERROR: {}".format(line), file=sys.stderr)
         return offstore
+
+    def get_device_owner_apps(self, serialno: str) -> set:
+        cmd = "{cli} -s {serial} shell dpm list-owners"
+        s = catch_err(
+            run_command(cmd, cli=self.cli, serial=serialno),
+            cmd=cmd
+        )
+        device_owner_apps = set()
+        if not s:
+            return device_owner_apps
+        for line in s.splitlines():
+            if "DeviceOwner" in line and "admin=" in line:
+                m = re.search(r"admin=([a-zA-Z0-9_.]+)/", line)
+                if m:
+                    device_owner_apps.add(m.group(1))
+        return device_owner_apps
 
     def devices(self):
         # FIXME: check for errors related to err in runcmd.py.

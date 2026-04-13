@@ -78,6 +78,7 @@ def score(flags):
         "regex-spy": 0.3,
         "odds-ratio": 0.2,
         "system-app": -0.1,
+        "device-owner": 1.0,
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
 
@@ -97,7 +98,7 @@ def flag_str(flags):
     def _add_class(flag):
         return (
             "primary"
-            if "spyware" in flag
+            if "spyware" in flag or flag == "device-owner"
             else "warning" if "dual-use" in flag else "info" if "spy" in flag else ""
         )
 
@@ -113,6 +114,7 @@ def flag_str(flags):
             "offstore-app": "This app is installed outside Play Store. It might be a preinstalled app too.",
             "dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",
             "system-app": "This app came preinstalled with the device.",
+            "device-owner": "This app has device owner privilege, allowing it to have almost full control over the device.",
         }.get(flag.lower(), flag)
 
     # If spyware <span class='text-danger'>{}</span>
