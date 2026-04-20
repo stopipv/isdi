@@ -20,42 +20,29 @@ Termux is a Linux terminal emulator and environment for Android. It allows you t
 Open Termux and run:
 
 ```bash
-pkg update
-pkg install python git build-essential libusb \
-	python-cryptography python-pillow usbmux libusb-1.0-dev
+pkg update -y && pkg upgrade -y
+pkg install -y python git build-essential rust clang libusb usbmuxd termux-api cmake pkg-config libffi openssl android-tools 
 ```
 
 **Note:** Native/compiled Python modules must be installed via `pkg` on Termux.
 If a package is not available in Termux, let `pip` install it instead.
 
-### Step 2: Clone ISDI Repository
+### Step 2: Install ISDI
 
 ```bash
-git clone https://github.com/rchatterjee/isdi.git
-cd isdi
+pip install qh3 zeroconf pydantic-core gpxpy psutil pyyaml markupsafe hexdump rsonlite
+pip install isdi-scanner --prefer-binary
 ```
-
-### Step 3: Install ISDI
-
-```bash
-pip install -e .
-```
-
-This installs ISDI in development mode, making it editable for customization.
-
-**First Run:** The app-info.db database (~47MB) will be automatically downloaded from GitHub on first run. This may take a minute depending on your connection.
 
 ## Running ISDi on Termux
-
-### Using pip (Recommended)
-
-After `pip install -e .`, simply run:
 
 ```bash
 isdi run
 ```
-
 Then access the web UI at `http://localhost:6200` from your browser.
+
+**First Run:** The app-info.db database (~47MB) will be automatically downloaded from GitHub on first run. This may take a minute depending on your connection.
+
 
 ## Scanning Devices from Termux
 
@@ -63,7 +50,7 @@ Then access the web UI at `http://localhost:6200` from your browser.
 
 1. **Connect Android device** via USB cable
 2. **Enable USB Debugging** on the connected device
-3. **Allow access** when prompted on the connected device
+3. **Click on Termux Allow USB** A button on the left. It will prompt on the `scanner phone` a popup to allow USB access to termux. Click yes, this should create another pop up on the `scanned phone` about "Allow USB debugging". Click allow.   
 4. **Click "Android" button** in ISDI web UI
 5. **Results will appear** after scan completes
 
@@ -71,7 +58,7 @@ Then access the web UI at `http://localhost:6200` from your browser.
 
 iOS scanning from Termux requires:
 
-1. **USB connection** to the Termux device
+1. **USB connection** to the Termux device, and click "Termux Allow USB". 
 2. **Usbmux socket setup** (automated by ISDI via pmd3_wrapper)
 
 ```bash
