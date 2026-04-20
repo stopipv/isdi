@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isdi-scanner"
+version = "1.0.6"
+description = "Intimate Surveillance Detection Instrument - Phone privacy scanner"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-only"
+authors = [
+    {name = "ISDI Contributors"}
+]
+keywords = ["privacy", "security", "stalkerware", "phone-scanner"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "flask>=3.0",
+    "flask-sqlalchemy>=3.0",
+    "flask-wtf>=1.2",
+    "pymobiledevice3>=4.0",
+    "click>=8.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+]
+termux = [
+    "pymobiledevice3>=4.0",
+]
+
+[project.scripts]
+isdi = "isdi.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+isdi = [
+    "data/**/*",
+    "web/templates/**/*",
+    "web/static/**/*",
+]
