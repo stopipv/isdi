@@ -324,18 +324,25 @@ def get_device_info(ser: str) -> dict:
 
 
 def get_client_devices_from_db(clientid: str) -> list:
-    # TODO: change 'select serial ...' to 'select device_model ...' (setup
-    # first)
+    # Return one (latest) scan row per serial for this client.
     d = query_db(
-        'select id,device,device_model,serial,device_primary_user from scan_res where serial like "HSN_%" group by serial',
-        # args=(clientid,),
+        "select sr.id, sr.device, sr.device_model, sr.serial, sr.device_primary_user "
+        "from scan_res sr "
+        "join ("
+        "  select serial, max(id) as max_id "
+        "  from scan_res "
+        "  where clientid=? and serial is not null and serial <> '' "
+        "  group by serial"
+        ") latest on sr.id = latest.max_id "
+        "order by sr.id desc",
+        args=(clientid,),
         one=False,
     )
     print("<>get_client_devices_from_db<>", d)
     if d:
         return d
     else:
-        return [{}]
+        return []
 
 
 def get_most_recent_scan_id(ser: str) -> int:
@@ -378,6 +385,43 @@ def get_serial_from_db(scanid):
 def first_element_or_none(l):
     if l and len(l) > 0:
         return l[0]
+
+
+def delete_scan_data(serial: str) -> bool:
+    """
+    Delete all data for a scanned device identified by its stored serial.
+    Removes app_info rows, scan_res rows, and any dump files on disk.
+    Returns True on success.
+    """
+    import glob
+    import shutil
+
+    db_conn = get_db()
+
+    # Get all scan IDs for this serial
+    scan_ids = query_db(
+        "SELECT id FROM scan_res WHERE serial=?", args=(serial,), one=False
+    )
+    if scan_ids:
+        for row in scan_ids:
+            db_conn.execute(
+                "DELETE FROM app_info WHERE scanid=?", (row["id"],)
+            )
+        db_conn.execute("DELETE FROM scan_res WHERE serial=?", (serial,))
+        db_conn.commit()
+
+    # Remove dump files: stored as <serial>_<device_type>.<ext> inside DUMP_DIR
+    dump_dir = config.DUMP_DIR
+    for fpath in glob.glob(os.path.join(dump_dir, f"{serial}_*")):
+        try:
+            if os.path.isdir(fpath):
+                shutil.rmtree(fpath)
+            else:
+                os.remove(fpath)
+        except OSError:
+            pass
+
+    return True
 
 
 def create_report(clientid):

@@ -119,14 +119,23 @@
             <hr/>
         </div>
         <div class="border-warning visible" align="center">
-	    {% if currently_scanned %}
+	    {% if currently_scanned and currently_scanned | selectattr('serial') | list %}
       <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
 		    {% for scanned in currently_scanned %}
-      <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
-          {{ scanned.device_model }} ({{ scanned.device_primary_user }})
-      </a><br>
+		    {% if scanned.serial %}
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+        <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
+            {{ scanned.device_model }} ({{ scanned.device_primary_user }})
+        </a>
+        <form method="POST" action="/delete_device" style="display:inline;" onsubmit="return confirm('Delete all data for {{ scanned.device_model }} ({{ scanned.device_primary_user }})? This cannot be undone.');">
+          <input type="hidden" name="serial" value="{{ scanned.serial }}">
+          <button type="submit" class="btn btn-danger btn-sm py-0 px-1" title="Delete all data for this device" style="font-size:0.75em;">&#x1F5D1; Delete</button>
+        </form>
+      </div>
+		    {% endif %}
 		    {% endfor %}
-
+	    {% else %}
+      <p style="color: grey; font-size: 0.9em;">No previously scanned device found.</p>
 	    {% endif %}
 	    {% if False %}
             <form id="session_scans" method="GET" action="/view_results">

@@ -1,17 +1,35 @@
 from isdi.web import app
-from flask import request, jsonify
+from flask import request, jsonify, url_for, redirect
 import subprocess
 import json
 import os
+import signal
+import threading
 
 
 @app.route("/kill", methods=["POST", "GET"])
 def killme():
-    func = request.environ.get("werkzeug.server.shutdown")
-    if func is None:
-        raise RuntimeError("Not running with the Werkzeug Server")
-    func()
+    def _shutdown():
+        import time
+        time.sleep(0.5)
+        os.kill(os.getpid(), signal.SIGTERM)
+
+    t = threading.Thread(target=_shutdown, daemon=True)
+    t.start()
     return "The app has been closed!"
+
+
+@app.route("/delete_device", methods=["POST"])
+def delete_device():
+    """Delete all scan data and files for a device identified by its stored serial."""
+    from isdi.scanner.db import delete_scan_data
+
+    serial = request.form.get("serial", "").strip()
+    if not serial:
+        return jsonify({"error": "No serial provided"}), 400
+
+    delete_scan_data(serial)
+    return redirect(url_for("index"))
 
 
 @app.route("/termux-usb-permission", methods=["POST"])

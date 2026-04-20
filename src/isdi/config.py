@@ -73,7 +73,8 @@ class Config:
         # Additional paths for legacy compatibility
         self.STATIC_DATA = str(self.package_data)
         self.ADB_PATH = "adb" + (".exe" if self.PLATFORM in ("wsl", "win32") else "")
-        self.DUMP_DIR = str(self.phone_dumps_dir)  # Phone dumps directory
+        # Keep dumps under the legacy dumps path for compatibility.
+        self.DUMP_DIR = str(self.dumps_dir)
         self.DEV_SUPPORTED = ["android", "ios"]  # Supported device types
         self.SCRIPT_DIR = Path(__file__).parent / "scripts"  # Shell scripts in package
 

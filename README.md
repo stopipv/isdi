@@ -96,7 +96,7 @@ Then navigate to the URL shown in the terminal. Click on `"Scan Instructions"` a
 
 It should look something like this:
 
-![Phone Scanner UI before scan](https://github.com/stopipv/isdi/blob/main/webstatic/ISDi_before_scan.png "Phone Scanner
+![Phone Scanner UI before scan](https://github.com/stopipv/isdi/blob/main/src/isdi/web/static/ISDi_before_scan.png "Phone Scanner
 UI before scan")
 
 Connect a device and click on the suitable button `Android` or `iOS`. Give it a
@@ -107,7 +107,7 @@ device plugged in when clicking on apps on the scan results table.
 
 After the scan, the UI will look something like this:
 
-![Phone Scanner UI after scan](https://github.com/stopipv/isdi/blob/main/webstatic/ISDi_after_scan.png "Phone Scanner
+![Phone Scanner UI after scan](https://github.com/stopipv/isdi/blob/main/src/isdi/web/static/ISDi_after_scan.png "Phone Scanner
 UI")
 
 
