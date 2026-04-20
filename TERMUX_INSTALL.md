@@ -21,7 +21,7 @@ Open Termux and run:
 
 ```bash
 pkg update -y && pkg upgrade -y
-pkg install -y python git build-essential libusb usbmuxd rust clang cmake pkg-config libffi openssl android-tools
+pkg install -y python git build-essential rust clang libusb usbmuxd termux-api cmake pkg-config libffi openssl android-tools 
 ```
 
 Installing `pymobiledevice3` on Android is more involved because some dependencies may need to be compiled locally.
@@ -37,7 +37,7 @@ If you want to persist that setting for future Termux sessions, add it to your s
 Install some dependencies first to reduce the amount of local compilation:
 
 ```bash
-pip install --extra-index-url https://termux-user-repository.github.io/pypi/ qh3 zeroconf pydantic-core gpxpy psutil pyyaml markupsafe hexdump
+pip install qh3 zeroconf pydantic-core gpxpy psutil pyyaml markupsafe hexdump rsonlite
 pip install isdi-scanner --prefer-binary
 ```
 

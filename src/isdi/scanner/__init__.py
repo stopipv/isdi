@@ -398,7 +398,11 @@ class IosScanner(AppScanner):
         try:
             if not output:
                 return []
-            data = json.loads(output)
+            # Strip any non-JSON preamble (e.g. download warnings from pymobiledevice3)
+            json_start = output.find('[')
+            if json_start == -1:
+                return []
+            data = json.loads(output[json_start:])
             return [d.get("Identifier", "") for d in data if "Identifier" in d]
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse device list: {e}. output={output}")
