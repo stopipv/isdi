@@ -24,6 +24,7 @@ pkg update -y && pkg upgrade -y
 pkg install -y python git build-essential rust clang libusb usbmuxd termux-api cmake pkg-config libffi openssl android-tools 
 ```
 
+
 Installing `pymobiledevice3` on Android is more involved because some dependencies may need to be compiled locally.
 
 ```bash
@@ -49,8 +50,10 @@ Keeping the phone screen on during installation can help prevent Android from pa
 ```bash
 $ isdi run
 ```
-
 Then access the web UI at `http://localhost:6200` from your browser.
+
+**First Run:** The app-info.db database (~47MB) will be automatically downloaded from GitHub on first run. This may take a minute depending on your connection.
+
 
 ## Scanning Devices from Termux
 
@@ -58,16 +61,15 @@ Then access the web UI at `http://localhost:6200` from your browser.
 
 1. **Connect Android device** via USB cable
 2. **Enable USB Debugging** on the connected device
-3. **Click "Request USB Access"** in the web UI
-4. **Allow access** when prompted on the connected device
-5. **Click \"Android\" button** in ISDI web UI
-6. **Results will appear** after scan completes
+3. **Click on Termux Allow USB** A button on the left. It will prompt on the `scanner phone` a popup to allow USB access to termux. Click yes, this should create another pop up on the `scanned phone` about "Allow USB debugging". Click allow.   
+4. **Click "Android" button** in ISDI web UI
+5. **Results will appear** after scan completes
 
 ### Scanning iOS Devices
 
 iOS scanning from Termux requires:
 
-1. **USB connection** to the Termux device
+1. **USB connection** to the Termux device, and click "Termux Allow USB". 
 2. **Usbmux socket setup** (automated by ISDI via pmd3_wrapper)
 
 ```bash

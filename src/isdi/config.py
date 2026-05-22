@@ -59,7 +59,7 @@ class Config:
         self.DEBUG = env == "development"
 
         # App metadata
-        self.TITLE = "ISDi - Scan Phone for Stalkerware apps"
+        self.TITLE = "ISDi - Stalkerware Scanner"
         self.VERSION = "1.0.0"
         self.DEVICE_PRIMARY_USER = "client"  # Default label for device owner
 

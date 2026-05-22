@@ -61,7 +61,7 @@ def create_app(config=None):
             <html>
             <head><title>ISDI</title></head>
             <body>
-                <h1>ISDi - Scan Phone for Stalkerware apps</h1>
+                <h1>ISDi - Stalkerware Scanner</h1>
                 <p>Server is running but web routes are not fully initialized.</p>
                 <p>Data directory: {config.dirs['data']}</p>
                 <p>Database: {config.database_path}</p>

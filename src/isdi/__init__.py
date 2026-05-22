@@ -1,5 +1,5 @@
 """
-ISDi - Scan Phone for Stalkerware apps
+ISDi - Stalkerware Scanner
 A privacy and security scanner for mobile devices
 """
 

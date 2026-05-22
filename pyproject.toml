@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "isdi-scanner"
 version = "1.0.7"
-description = "ISDi - Scan Phone for Stalkerware apps"
+description = "ISDi - Stalkerware Scanner"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0-only"
@@ -32,6 +32,7 @@ dependencies = [
     "pymobiledevice3>=4.0",
     "click>=8.0",
     "pyyaml>=6.0",
+    "rsonlite>=0.1.0",
 ]
 
 [project.optional-dependencies]

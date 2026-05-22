@@ -14,7 +14,7 @@ __all__ = ["main", "cli"]
 @click.group()
 @click.version_option(version="1.0.2")
 def cli():
-    """ISDi - Scan Phone for Stalkerware apps
+    """ISDi - Stalkerware Scanner
 
     A privacy and security scanner for mobile devices.
     """

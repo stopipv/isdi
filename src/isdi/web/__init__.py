@@ -45,7 +45,7 @@ def init_routes(flask_app):
             <html>
             <head><title>ISDI</title></head>
             <body>
-                <h1>ISDi - Scan Phone for Stalkerware apps</h1>
+                <h1>ISDi - Stalkerware Scanner</h1>
                 <p><strong>Error loading web interface:</strong> {exc_error}</p>
                 <p>The server is running but some routes failed to load.</p>
                 <hr>
