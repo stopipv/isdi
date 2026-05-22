@@ -222,7 +222,8 @@ class Config:
             import urllib.request
             import urllib.error
 
-            github_url = "https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db"
+            # github_url = "https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db"
+            github_url = "https://github.com/stopipv/isdi/releases/download/app-info/app-info.db"
 
             print(f"Downloading app-info.db from GitHub...")
             dst_db.parent.mkdir(parents=True, exist_ok=True)
