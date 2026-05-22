@@ -1,9 +1,12 @@
 import json
 import os
+import threading
+import time
+import uuid
 from isdi.config import get_config
 from isdi.web import app
 from isdi.web.view.index import get_device
-from flask import render_template, request, session, redirect, url_for
+from flask import jsonify, render_template, request, session, redirect, url_for
 from isdi.scanner import db, blocklist
 from isdi.scanner.db import (
     get_client_devices_from_db,
@@ -15,9 +18,286 @@ from isdi.scanner.db import (
 
 config = get_config()
 
+_SCAN_JOBS = {}
+_SCAN_JOBS_LOCK = threading.Lock()
+
+
+def _create_scan_job(clientid, device, device_owner, serial):
+    job_id = uuid.uuid4().hex
+    with _SCAN_JOBS_LOCK:
+        _SCAN_JOBS[job_id] = {
+            "job_id": job_id,
+            "status": "queued",
+            "percent": 0,
+            "step": "Queued",
+            "message": "Preparing scan request",
+            "clientid": clientid,
+            "device": device,
+            "device_owner": device_owner,
+            "serial": serial,
+            "result": None,
+            "error": None,
+            "updated_at": time.time(),
+        }
+    return job_id
+
+
+def _update_scan_job(job_id, **updates):
+    with _SCAN_JOBS_LOCK:
+        job = _SCAN_JOBS.get(job_id)
+        if not job:
+            return None
+        job.update(updates)
+        job["updated_at"] = time.time()
+        return dict(job)
+
+
+def _get_scan_job(job_id):
+    with _SCAN_JOBS_LOCK:
+        job = _SCAN_JOBS.get(job_id)
+        return dict(job) if job else None
+
+
+def _job_payload(job):
+    if not job:
+        return None
+    return {
+        "job_id": job["job_id"],
+        "status": job["status"],
+        "percent": job["percent"],
+        "step": job["step"],
+        "message": job["message"],
+        "error": job.get("error"),
+        "result_url": url_for("scan_result", job_id=job["job_id"]),
+    }
+
+
+def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
+    def progress(percent, step, message):
+        if job_id:
+            _update_scan_job(
+                job_id,
+                status="running",
+                percent=percent,
+                step=step,
+                message=message,
+            )
+
+    progress(5, "Starting", "Validating scan request")
+
+    template_d = dict(
+        task="home",
+        title=config.TITLE,
+        platform=config.PLATFORM,
+        is_termux=bool(os.environ.get("PREFIX")),
+        is_debug=config.DEBUG,
+        device=device,
+        device_primary_user=config.DEVICE_PRIMARY_USER,
+        device_primary_user_sel=device_owner,
+        apps={},
+        currently_scanned=get_client_devices_from_db(clientid),
+        clientid=clientid,
+    )
+
+    sc = get_device(device)
+    if not sc:
+        template_d["error"] = "Please choose one device to scan."
+        return template_d, 201
+
+    progress(12, "Connecting", f"Looking for {device} device {ser}")
+    if not ser:
+        template_d["error"] = "A device was not detected. Please reconnect it and try again."
+        return template_d, 201
+
+    if device == "ios":
+        error = (
+            "If an iPhone is connected, open iTunes, click through the "
+            'connection dialog and wait for the "Trust this computer" '
+            "prompt to pop up in the iPhone, and then scan again."
+        )
+    else:
+        error = (
+            "If an Android device is connected, disconnect and reconnect "
+            "the device, make sure developer options is activated and USB "
+            "debugging is turned on on the device, and then scan again."
+        )
+    error += (
+        "{} <b>Please follow the <a href='/instruction' target='_blank'"
+        " rel='noopener'>setup instructions here,</a> if needed.</b>"
+    )
+
+    progress(30, "Reading device", "Collecting device details")
+    device_name_print, device_name_map = sc.device_info(serial=ser)
+
+    progress(60, "Scanning apps", "Reading installed apps and classifying them")
+    apps = sc.find_spyapps(serialno=ser)
+
+    if len(apps) <= 0:
+        template_d["error"] = (
+            "The scanning failed. This could be due to many reasons. Try"
+            " rerunning the scan from the beginning. If the problem persists,"
+            " please report it in the file. <code>report_failed.md</code> in the<code>"
+            "phone_scanner/</code> directory. Checn the phone manually. Sorry for"
+            " the inconvenience."
+        )
+        return template_d, 201
+
+    progress(82, "Security check", "Checking root or jailbreak status")
+
+    scan_d = {
+        "clientid": clientid,
+        "serial": config.hmac_serial(ser),
+        "device": device,
+        "device_model": device_name_map.get("model", "<Unknown>").strip(),
+        "device_version": device_name_map.get("version", "<Unknown>").strip(),
+        "device_primary_user": device_owner,
+    }
+
+    if device == "ios":
+        scan_d["device_manufacturer"] = "Apple"
+        scan_d["last_full_charge"] = "unknown"
+    else:
+        scan_d["device_manufacturer"] = device_name_map.get("brand", "<Unknown>").strip()
+        scan_d["last_full_charge"] = device_name_map.get("last_full_charge", "<Unknown>")
+
+    rooted, rooted_reason = sc.isrooted(ser)
+    scan_d["is_rooted"] = rooted
+    scan_d["rooted_reasons"] = json.dumps(rooted_reason)
+
+    progress(94, "Saving", "Writing scan results to the local database")
+    scanid = create_scan(scan_d)
+
+    create_mult_appinfo(
+        [
+            (scanid, appid, json.dumps(info["flags"]), "", "<new>")
+            for appid, info in apps.items()
+        ]
+    )
+
+    apps_sorted = sorted(
+        apps.items(),
+        key=lambda item: (-item[1].get("score", 0.0), item[0]),
+    )
+
+    template_d.update(
+        dict(
+            isrooted=(
+                "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}".format(
+                    rooted_reason
+                )
+                if rooted
+                else "Don't know" if rooted is None else "No"
+            ),
+            device_name=device_name_print,
+            apps=apps,
+            apps_sorted=apps_sorted,
+            scanid=scanid,
+            sysapps=set(),
+            serial=ser,
+            currently_scanned=get_client_devices_from_db(clientid),
+            error=config.error(),
+        )
+    )
+
+    progress(100, "Complete", "Scan finished")
+    return template_d, 200
+
+
+def _scan_worker(job_id, clientid, device, device_owner, ser):
+    try:
+        template_d, status_code = _run_live_scan(clientid, device, device_owner, ser, job_id=job_id)
+        if status_code == 200:
+            _update_scan_job(job_id, status="done", percent=100, step="Complete", message="Scan finished", result=template_d)
+        else:
+            _update_scan_job(
+                job_id,
+                status="error",
+                percent=100,
+                step="Failed",
+                message=template_d.get("error", "Scan failed"),
+                error=template_d.get("error", "Scan failed"),
+            )
+    except Exception as exc:
+        _update_scan_job(
+            job_id,
+            status="error",
+            percent=100,
+            step="Failed",
+            message=str(exc),
+            error=str(exc),
+        )
+
 
 def get_param(key):
     return request.form.get(key, request.args.get(key))
+
+
+@app.route("/scan/start", methods=["POST"])
+def scan_start():
+    if "clientid" not in session:
+        return jsonify({"error": "Please start from the home page again."}), 401
+
+    device = get_param("device")
+    device_owner = get_param("device_owner")
+    if not device:
+        return jsonify({"error": "Please choose one device to scan."}), 400
+    if not device_owner:
+        return jsonify({"error": "Please give the device a nickname."}), 400
+
+    sc = get_device(device)
+    if not sc:
+        return jsonify({"error": "Please choose one device to scan."}), 400
+
+    ser = get_param("devid")
+    if not ser:
+        ser = first_element_or_none(sc.devices())
+
+    if not ser:
+        return jsonify(
+            {
+                "error": (
+                    "A device wasn't detected. Please follow the setup instructions and try again."
+                )
+            }
+        ), 409
+
+    job_id = _create_scan_job(session["clientid"], device, device_owner, ser)
+    worker = threading.Thread(
+        target=_scan_worker,
+        args=(job_id, session["clientid"], device, device_owner, ser),
+        daemon=True,
+    )
+    worker.start()
+
+    return jsonify(
+        {
+            "job_id": job_id,
+            "status_url": url_for("scan_status", job_id=job_id),
+            "result_url": url_for("scan_result", job_id=job_id),
+        }
+    )
+
+
+@app.route("/scan/status/<job_id>", methods=["GET"])
+def scan_status(job_id):
+    job = _get_scan_job(job_id)
+    if not job:
+        return jsonify({"error": "Unknown scan job."}), 404
+    return jsonify(_job_payload(job))
+
+
+@app.route("/scan/result/<job_id>", methods=["GET"])
+def scan_result(job_id):
+    job = _get_scan_job(job_id)
+    if not job:
+        return redirect(url_for("index"))
+
+    if job.get("status") != "done" or not job.get("result"):
+        return jsonify({"error": job.get("error") or "Scan is still running."}), 202
+
+    template_d = dict(job["result"])
+    template_d["currently_scanned"] = get_client_devices_from_db(session["clientid"])
+    return render_template("main.html", **template_d), 200
 
 
 @app.route("/scan", methods=["POST", "GET"])

@@ -4,6 +4,7 @@ import sys
 import webbrowser
 from threading import Timer
 from pathlib import Path
+from time import perf_counter
 
 import click
 
@@ -13,7 +14,7 @@ __all__ = ["main", "cli"]
 @click.group()
 @click.version_option(version="1.0.2")
 def cli():
-    """ISDI - Intimate Surveillance Detection Instrument
+    """ISDi - Scan Phone for Stalkerware apps
 
     A privacy and security scanner for mobile devices.
     """
@@ -35,6 +36,8 @@ def run(host, port, debug, test_mode, no_browser):
     from isdi.config import get_config
     from isdi.app import create_app
 
+    startup_started = perf_counter()
+
     # Determine environment
     if test_mode:
         env = "test"
@@ -43,14 +46,18 @@ def run(host, port, debug, test_mode, no_browser):
     else:
         env = "production"
 
+    config_started = perf_counter()
     config = get_config(env)
+    click.echo(f"⏱ Config init: {perf_counter() - config_started:.2f}s")
 
     # Override from command line
     final_host = host or config.host
     final_port = port or config.port
 
     # Create app
+    app_started = perf_counter()
     app = create_app(config)
+    click.echo(f"⏱ App factory: {perf_counter() - app_started:.2f}s")
 
     # Open browser after short delay
     if not no_browser and not debug and not test_mode:
@@ -63,6 +70,7 @@ def run(host, port, debug, test_mode, no_browser):
     click.echo(f"🔍 Starting ISDI on http://{final_host}:{final_port}")
     click.echo(f'📁 Data directory: {config.dirs["data"]}')
     click.echo(f"📊 Database: {config.database_path}")
+    click.echo(f"⏱ Total startup prep: {perf_counter() - startup_started:.2f}s")
 
     if test_mode:
         click.echo("🧪 Running in TEST mode")

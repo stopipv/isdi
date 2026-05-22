@@ -19,7 +19,7 @@
             </p>
             <hr/>
             <label class="font-weight-bold lead">What type of device is this?</label>
-            <form id="scan_select" method="GET" action="/scan">
+            <form id="scan_select" method="GET" action="/scan" onsubmit="return startScan(this);">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS"] %}
                     <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
@@ -206,11 +206,12 @@
             <!-- <button onclick="postform(this)" id="btn-submit"
                  class="btn btn-primary btn-lg">Submit</button> -->
         </div>
-        <div class="progress">
+        <div id="scan-progress-wrap" class="progress" style="display:none;">
             <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
             </div>
         </div>
+        <div id="scan-progress-text" class="small text-muted mt-2" style="display:none;"></div>
         </div>
     </div>
 </div>

@@ -1,5 +1,5 @@
 """
-ISDI - Intimate Surveillance Detection Instrument
+ISDi - Scan Phone for Stalkerware apps
 A privacy and security scanner for mobile devices
 """
 

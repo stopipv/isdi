@@ -1,6 +1,7 @@
 """Flask application factory"""
 
 from pathlib import Path
+from time import perf_counter
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -32,6 +33,7 @@ def create_app(config=None):
     # Initialize extensions
     from isdi.web import sa
 
+    db_init_started = perf_counter()
     sa.init_app(app)
 
     try:
@@ -40,8 +42,11 @@ def create_app(config=None):
         init_db(app, sa, force=config.TEST)
     except Exception as e:
         print(f"Warning: Could not initialize database: {e}")
+    else:
+        print(f"Database init: {perf_counter() - db_init_started:.2f}s")
 
     # Register routes
+    routes_started = perf_counter()
     try:
         from isdi.web import init_routes
 
@@ -56,12 +61,14 @@ def create_app(config=None):
             <html>
             <head><title>ISDI</title></head>
             <body>
-                <h1>ISDI - Intimate Surveillance Detection Instrument</h1>
+                <h1>ISDi - Scan Phone for Stalkerware apps</h1>
                 <p>Server is running but web routes are not fully initialized.</p>
                 <p>Data directory: {config.dirs['data']}</p>
                 <p>Database: {config.database_path}</p>
             </body>
             </html>
             """
+    else:
+        print(f"Route import/init: {perf_counter() - routes_started:.2f}s")
 
     return app
