@@ -9,6 +9,199 @@ a.appid {
     color: unset;
 }
 
+body.isdi-body {
+  background: #f5f7fa;
+  color: #1f2933;
+}
+
+.isdi-page {
+  padding: 12px;
+}
+
+.isdi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.isdi-title {
+  margin: 0;
+  color: #156c2f;
+  font-family: sans-serif;
+  font-size: 1.1em;
+}
+
+.isdi-subtitle {
+  color: #666;
+  font-size: 0.8em;
+}
+
+.isdi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.isdi-close-link {
+  align-self: center;
+  white-space: nowrap;
+}
+
+.isdi-panel {
+  background: #fff;
+  border: 1px solid #d8dee4;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 16px;
+}
+
+.isdi-sidebar,
+.isdi-results {
+  min-height: calc(100vh - 150px);
+}
+
+.isdi-scroll-region {
+  max-height: calc(100vh - 260px);
+  overflow: auto;
+}
+
+.isdi-section-copy {
+  text-align: center;
+}
+
+.isdi-device-list a {
+  display: inline-block;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.isdi-form-actions {
+  margin-top: 12px;
+}
+
+.applist-table {
+  background: #fff;
+}
+
+.applist-table code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.content-image,
+.container img {
+  max-width: 100%;
+  height: auto;
+}
+
+.button-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-cluster .btn {
+  margin: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+@media (max-width: 991.98px) {
+  .isdi-sidebar,
+  .isdi-results {
+    min-height: auto;
+  }
+
+  .isdi-scroll-region {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.isdi-body {
+    font-size: 15px;
+  }
+
+  .isdi-page {
+    padding: 8px;
+  }
+
+  .isdi-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .isdi-actions {
+    justify-content: flex-start;
+  }
+
+  .isdi-actions .btn,
+  .isdi-actions a,
+  .button-cluster .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .applist-table thead {
+    display: none;
+  }
+
+  .applist-table,
+  .applist-table tbody,
+  .applist-table tr,
+  .applist-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .applist-table tr {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #fff;
+  }
+
+  .applist-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border: none;
+  }
+
+  .applist-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    flex: 0 0 38%;
+  }
+
+  .applist-table td > * {
+    flex: 1 1 62%;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .applist-table td[data-label="Flags"] {
+    display: block;
+  }
+
+  .applist-table td[data-label="Flags"]::before {
+    display: block;
+    margin-bottom: 6px;
+  }
+}
+
 
 
 /* fallback */
@@ -16,7 +209,7 @@ a.appid {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(http://localhost:6200/webstatic/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+  src: url('/webstatic/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2') format('woff2');
 }
 
 .material-icons {

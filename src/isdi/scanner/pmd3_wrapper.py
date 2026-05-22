@@ -5,7 +5,6 @@ invoked as: python3 -m isdi.scanner.pmd3_wrapper <args>
 """
 
 import sys
-import socket
 
 import pymobiledevice3.osu.os_utils as os_utils_module
 import pymobiledevice3.usbmux as usbmux_module
@@ -19,21 +18,8 @@ def _fake_is_wsl():
 # Patch: Prevent WSL detection
 os_utils_module.is_wsl = _fake_is_wsl
 
-# Store original method
-_original_create = usbmux_module.MuxConnection.create_usbmux_socket
-
-
-@staticmethod
-def patched_create_usbmux_socket(usbmux_address=None):
-    """Patch: Force use of Termux usbmux socket path."""
-    socket_path = "/data/data/com.termux/files/usr/var/run/usbmuxd"
-    if usbmux_address is None:
-        return usbmux_module.SafeStreamSocket(socket_path, socket.AF_UNIX)
-    return _original_create(usbmux_address)
-
-
-# Apply usbmux patch
-usbmux_module.MuxConnection.create_usbmux_socket = patched_create_usbmux_socket
+# Patch: Override usbmuxd socket path for Termux
+usbmux_module.MuxConnection.USBMUXD_PIPE = "/data/data/com.termux/files/usr/var/run/usbmuxd"
 
 
 def main():

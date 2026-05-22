@@ -1,28 +1,25 @@
-<div class="">
-  <h4><span style="color: green; font-family: sans-serif; font-size: 1.1em"><b>{{ title }}</b>{% if platform %} <span style="color: #666; font-size: 0.8em;">({{ platform }})</span>{% endif %} <!-- ({{ title.version_current }}) --></span>
-	<!-- <span style="float: right; font-size: 15px"><a href="#" onclick="(confirm('Close {{ title.title }}?')) ? (function(){window.open('','_self').close()}()) : (function(){return false;}())">&#x274C; Close App and End Session</a></span> -->
-        <span style="float: center; font-size: 15px">
-            <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
+<div class="isdi-page">
+    <div class="isdi-header">
+        <h4 class="isdi-title"><b>{{ title }}</b>{% if platform %} <span class="isdi-subtitle">({{ platform }})</span>{% endif %}</h4>
+        <div class="isdi-actions">
+            <a class='btn btn-normal' href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instructions</u></a>
             <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
-            <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
-        </span> 
-    </h4>
-    <!-- <form id="kill-server" method="POST" action="/kill" name="form-kill">
-	 <button value="submit" class="btn btn-primary mx-2">Close App</button>
-	 </form> -->
-</div>
-<div class="row  h-100">
-    <div class="col-md-3 border py-2" style="height:90vh;">
-        <div align="center">
+            <a class="isdi-close-link" href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-lg-4 col-xl-3">
+        <div class="isdi-panel isdi-sidebar">
+        <div class="isdi-section-copy">
             <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
                 for scanning Android and iOS devices to find apps that
                 can be used to spy, track, or otherwise monitor a person.
             </p>
             <hr/>
             <label class="font-weight-bold lead">What type of device is this?</label>
-            <form id="scan_select" method="GET" action="/scan">
+            <form id="scan_select" method="GET" action="/scan" onsubmit="return startScan(this);">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
 		    {% for a in ["Android", "iOS"] %}
                     <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
@@ -38,12 +35,12 @@
                        placeholder="Nickname for device? Whose is it?"
                        rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
 		<br>
-                <button class="btn btn-primary mx-2">Scan now</button>
+                <button class="btn btn-primary btn-block isdi-form-actions">Scan now</button>
             </form>
             <br/>
             {% if is_termux or is_debug %}
             <div id="termux-usb-section">
-                <button type="button" id="btn-termux-usb" class="btn btn-warning btn-sm">
+                <button type="button" id="btn-termux-usb" class="btn btn-warning btn-sm btn-block">
                     📱 Request USB Access
                 </button>
                 <div id="termux-usb-msg" class="small mt-2" style="display:none;"></div>
@@ -118,8 +115,9 @@
 	    <!-- {% endfor %} -->
             <hr/>
         </div>
-        <div class="border-warning visible" align="center">
-	    {% if currently_scanned and currently_scanned | selectattr('serial') | list %}
+
+        <div class="border-warning visible isdi-device-list" align="center">
+	    {% if currently_scanned %}
       <label class="font-weight-bold lead">Devices scanned for this client:</label><br><br>
 		    {% for scanned in currently_scanned %}
 		    {% if scanned.serial %}
@@ -153,53 +151,17 @@
 	    </form>
 	    {% endif %}
         </div>
+        </div>
     </div>
-    <div class="col-md-9 border py-2" style="height: 90vh">
+    <div class="col-lg-8 col-xl-9">
+        <div class="isdi-panel isdi-results">
         <div id="msg" class="alert alert-primary">  {{ error | safe }}   </div>
-        <div class="w-100" style="height: 80vh; overflow: auto;">
+        <div class="w-100 isdi-scroll-region">
             {% if device_name %}
             <label>Scanned: <b>{{ device_name }}</b></label>
   	    <label>Jailbroken or rooted? {{ isrooted | safe }}</label>
             {% endif %}
-            <style>
-                @media (max-width: 768px) {
-                    .applist-table thead {
-                        display: none;
-                    }
-                    .applist-table,
-                    .applist-table tbody,
-                    .applist-table tr,
-                    .applist-table td {
-                        display: block;
-                        width: 100%;
-                    }
-                    .applist-table tr {
-                        border: 1px solid #e0e0e0;
-                        border-radius: 8px;
-                        margin-bottom: 12px;
-                        padding: 6px 10px;
-                        background: #fff;
-                    }
-                    .applist-table td {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: 6px 0;
-                        border: none;
-                    }
-                    .applist-table td::before {
-                        content: attr(data-label);
-                        font-weight: 600;
-                        color: #555;
-                        padding-right: 12px;
-                        flex: 0 0 40%;
-                    }
-                    .applist-table td > * {
-                        flex: 1 1 60%;
-                        text-align: right;
-                    }
-                }
-            </style>
+            <div class="table-wrap">
             <table class="table table-bordered w-100 applist-table">
                 <thead>
                     <tr class="something">
@@ -211,7 +173,7 @@
                         <th class="col-md-1" style="width: 8%">Class</th>
                     </tr>
                 </thead>
-                <form style="font-size: 76px;" id="form-applist" onsubmit="" method="post" name="form-applist" >
+                <form id="form-applist" onsubmit="" method="post" name="form-applist" >
                     <tbody id="applist" class="h-100">
                         {% set app_items = apps_sorted if apps_sorted is defined else apps.items() %}
                         {% for appId, info in app_items %}
@@ -240,13 +202,17 @@
                     </tbody>
                 </form>
             </table>
+            </div>
             <!-- <button onclick="postform(this)" id="btn-submit"
                  class="btn btn-primary btn-lg">Submit</button> -->
         </div>
-        <div class="progress">
+        <div id="scan-progress-wrap" class="progress" style="display:none;">
             <div id='scan-prog' class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
             </div>
         </div>
+        <div id="scan-progress-text" class="small text-muted mt-2" style="display:none;"></div>
+        </div>
     </div>
+</div>
 </div>

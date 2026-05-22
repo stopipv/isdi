@@ -1,7 +1,8 @@
-<div class="container">
+<div class="container isdi-page">
     <br/>
     <h2>Information about "{{ app.title | safe }}"</h2>
     <div class="container form-group">
+        <div class="table-wrap">
         <table class="table table-bordered">
             <tbody>
                 <!-- <i class="material-icons">info</i> -->
@@ -17,6 +18,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
 	    <div class="text-sm-left">
 		<h4> The app used {{ app.permissions| length }} app permissions recently:</h4>
 		<br>

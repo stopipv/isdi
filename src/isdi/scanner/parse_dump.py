@@ -439,8 +439,14 @@ class AndroidDump(PhoneDump):
         if self.apps:
             return self.apps
         d = self.df
-        if not d or not d.get("package"):
-            logging.error(f"'package' section is empty or missing from dump; keys = {list(d.keys())}")
+        if not d:
+            logging.error("self.df is empty")
+            return {}
+        if 'package' not in d:
+            logging.error(f"'package' is not a key in self.df, where keys = {list(d.keys())}")
+            return {}
+        if not isinstance(d['package'], list) or len(d['package']) == 0:
+            logging.error(f"'package' key in self.df is not a non-empty list, d['package']={d['package']}")
             return {}
         app_d = d["package"][0]["Packages"]
         # get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*"))

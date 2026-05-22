@@ -59,7 +59,7 @@ class Config:
         self.DEBUG = env == "development"
 
         # App metadata
-        self.TITLE = "ISDI - Intimate Surveillance Detection Instrument"
+        self.TITLE = "ISDi - Stalkerware Scanner"
         self.VERSION = "1.0.0"
         self.DEVICE_PRIMARY_USER = "client"  # Default label for device owner
 
@@ -212,6 +212,9 @@ class Config:
     def _ensure_app_info_db(self) -> None:
         """Download app-info.db from GitHub releases if missing or empty."""
         try:
+            import time
+
+            start = time.perf_counter()
             dst_db = Path(self.dirs["cache"]) / "app-info.db"
 
             # If database exists and has content, skip download
@@ -222,7 +225,8 @@ class Config:
             import urllib.request
             import urllib.error
 
-            github_url = "https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db"
+            # github_url = "https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db"
+            github_url = "https://github.com/stopipv/isdi/releases/download/app-info/app-info.db"
 
             print(f"Downloading app-info.db from GitHub...")
             dst_db.parent.mkdir(parents=True, exist_ok=True)
@@ -235,6 +239,9 @@ class Config:
                             f.write(response.read())
                         print(
                             f"✓ Downloaded app-info.db ({dst_db.stat().st_size} bytes)"
+                        )
+                        print(
+                            f"app-info.db ready in {time.perf_counter() - start:.2f}s"
                         )
                         return
             except urllib.error.HTTPError as e:
@@ -249,6 +256,7 @@ class Config:
                 print(f"If the problem persists, manually download from:")
                 print(f"  {github_url}")
                 print(f"And place it at: {dst_db}")
+                print(f"app-info.db download attempt took {time.perf_counter() - start:.2f}s")
 
         except Exception as e:
             # Avoid failing config init if download fails
