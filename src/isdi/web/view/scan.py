@@ -185,7 +185,7 @@ def scan():
                 "The scanning failed. This could be due to many reasons. Try"
                 " rerunning the scan from the beginning. If the problem persists,"
                 " please report it in the file. <code>report_failed.md</code> in the<code>"
-                "phone_scanner/</code> directory. Checn the phone manually. Sorry for"
+                "phone_scanner/</code> directory. Check the phone manually. Sorry for"
                 " the inconvenience."
             )
             template_d["error"] = error
