@@ -24,7 +24,7 @@ from isdi.config import get_config
 
 from . import blocklist
 from . import parse_dump
-from .android_permissions import all_permissions
+from .android_permissions import all_permissions, get_all_accessibility_apps
 from .runcmd import catch_err, run_command
 
 cfg = get_config()
@@ -296,6 +296,21 @@ class AppScanner:
                     flags = result[appid]["flags"]
                     if "device-owner" not in flags:
                         flags = flags + ["device-owner"]
+                        result[appid] = {
+                            **result[appid],
+                            "flags": flags,
+                            "score": blocklist.score(flags),
+                            "class_": blocklist.assign_class(flags),
+                            "html_flags": blocklist.flag_str(flags),
+                        }
+
+        # Accessibility detection (Android only)
+        if self.device_type == "android" and self.ddump:
+            for appid in get_all_accessibility_apps(self.ddump):
+                if appid in result:
+                    flags = result[appid]["flags"]
+                    if "accessibility" not in flags:
+                        flags = flags + ["accessibility"]
                         result[appid] = {
                             **result[appid],
                             "flags": flags,

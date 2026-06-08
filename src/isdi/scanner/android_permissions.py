@@ -18,6 +18,41 @@ config = get_config()
 # MAP = config.ANDROID_PERMISSIONS
 DUMPPKG = "dumppkg"
 
+# Find apps with ACCESS_ACCESSIBILITY in appops dump
+def get_all_accessibility_apps(ddump) -> set:
+    if not ddump or not getattr(ddump, "dumpf", None):
+        return set()
+
+    result: set = set()
+    in_appops = False
+    current_pkg = None
+
+    try:
+        with open(ddump.dumpf, "r", encoding="utf-8", errors="replace") as f:
+            for raw_line in f:
+                line = raw_line.rstrip("\n\r")
+                content = line.lstrip()
+
+                if line.startswith("DUMP OF SERVICE") or line.startswith("DUMP OF SETTINGS"):
+                    in_appops = "appops" in line and line.startswith("DUMP OF SERVICE")
+                    current_pkg = None
+                    continue
+
+                if not in_appops:
+                    continue
+
+                if content.startswith("Package ") and not content.startswith("Package ["):
+                    m = re.match(r"Package ([\w.]+)", content)
+                    if m:
+                        current_pkg = m.group(1)
+                elif current_pkg and content.startswith("ACCESS_ACCESSIBILITY"):
+                    result.add(current_pkg)
+    except OSError:
+        pass
+
+    return result
+
+
 
 def _parse_time(time_str):
     """
