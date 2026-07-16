@@ -106,7 +106,9 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
 
     progress(12, "Connecting", f"Looking for {device} device {ser}")
     if not ser:
-        template_d["error"] = "A device was not detected. Please reconnect it and try again."
+        template_d["error"] = (
+            "A device was not detected. Please reconnect it and try again."
+        )
         return template_d, 201
 
     if device == "ios":
@@ -157,8 +159,12 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
         scan_d["device_manufacturer"] = "Apple"
         scan_d["last_full_charge"] = "unknown"
     else:
-        scan_d["device_manufacturer"] = device_name_map.get("brand", "<Unknown>").strip()
-        scan_d["last_full_charge"] = device_name_map.get("last_full_charge", "<Unknown>")
+        scan_d["device_manufacturer"] = device_name_map.get(
+            "brand", "<Unknown>"
+        ).strip()
+        scan_d["last_full_charge"] = device_name_map.get(
+            "last_full_charge", "<Unknown>"
+        )
 
     rooted, rooted_reason = sc.isrooted(ser)
     scan_d["is_rooted"] = rooted
@@ -209,9 +215,18 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
 
 def _scan_worker(job_id, clientid, device, device_owner, ser):
     try:
-        template_d, status_code = _run_live_scan(clientid, device, device_owner, ser, job_id=job_id)
+        template_d, status_code = _run_live_scan(
+            clientid, device, device_owner, ser, job_id=job_id
+        )
         if status_code == 200:
-            _update_scan_job(job_id, status="done", percent=100, step="Complete", message="Scan finished", result=template_d)
+            _update_scan_job(
+                job_id,
+                status="done",
+                percent=100,
+                step="Complete",
+                message="Scan finished",
+                result=template_d,
+            )
         else:
             _update_scan_job(
                 job_id,
@@ -257,13 +272,16 @@ def scan_start():
         ser = first_element_or_none(sc.devices())
 
     if not ser:
-        return jsonify(
-            {
-                "error": (
-                    "A device wasn't detected. Please follow the setup instructions and try again."
-                )
-            }
-        ), 409
+        return (
+            jsonify(
+                {
+                    "error": (
+                        "A device wasn't detected. Please follow the setup instructions and try again."
+                    )
+                }
+            ),
+            409,
+        )
 
     job_id = _create_scan_job(session["clientid"], device, device_owner, ser)
     worker = threading.Thread(
@@ -488,8 +506,12 @@ def scan():
             scan_d["device_manufacturer"] = "Apple"
             scan_d["last_full_charge"] = "unknown"
         else:
-            scan_d["device_manufacturer"] = device_name_map.get("brand", "<Unknown>").strip()
-            scan_d["last_full_charge"] = device_name_map.get("last_full_charge", "<Unknown>")
+            scan_d["device_manufacturer"] = device_name_map.get(
+                "brand", "<Unknown>"
+            ).strip()
+            scan_d["last_full_charge"] = device_name_map.get(
+                "last_full_charge", "<Unknown>"
+            )
 
         rooted, rooted_reason = sc.isrooted(ser)
         scan_d["is_rooted"] = rooted

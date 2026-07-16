@@ -19,7 +19,9 @@ def _fake_is_wsl():
 os_utils_module.is_wsl = _fake_is_wsl
 
 # Patch: Override usbmuxd socket path for Termux
-usbmux_module.MuxConnection.USBMUXD_PIPE = "/data/data/com.termux/files/usr/var/run/usbmuxd"
+usbmux_module.MuxConnection.USBMUXD_PIPE = (
+    "/data/data/com.termux/files/usr/var/run/usbmuxd"
+)
 
 
 def main():

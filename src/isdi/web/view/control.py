@@ -11,6 +11,7 @@ import threading
 def killme():
     def _shutdown():
         import time
+
         time.sleep(0.5)
         os.kill(os.getpid(), signal.SIGTERM)
 

@@ -178,7 +178,7 @@ def add_image(img, nocache=False):
 
 def do_privacy_check(ser, command, screenshot_fname=None):
     from pathlib import Path
-    
+
     command = command.lower()
     if command == "account":  # 1. Account ownership  & 3. Sync (if present)
         open_activity(
