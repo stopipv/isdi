@@ -467,24 +467,8 @@ class AndroidScanner(AppScanner):
 
     def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
         """Check if Android device is rooted."""
-        root_indicators = [
-            ("su", "command -v su"),
-            ("frida", "ps -A | grep frida"),
-            ("magisk", "ls -la /data/adb/magisk"),
-        ]
-
-        reasons: List[str] = []
-        for name, cmd_str in root_indicators:
-            cmd = "{cli} -s {serial} shell '{cmd_str}'"
-            try:
-                p = run_command(cmd, cli=self.cli, serial=serial, cmd_str=cmd_str)
-                output = catch_err(p, cmd=cmd, msg_on_err=f"not found {name}").strip()
-                if output and "not found" not in output.lower():
-                    reasons.append(f"Found {name}")
-            except Exception as e:
-                logging.debug(f"Root check failed: {e}")
-
-        return len(reasons) > 0, reasons
+        from isdi.scanner.root_check import check_android_root
+        return check_android_root(serial, self.cli)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
@@ -566,10 +550,10 @@ class IosScanner(AppScanner):
             return self.ddump.device_info()
         return "Unknown iOS Device", {}
 
-    def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
+    def isrooted(self, serial: str) -> Tuple[Optional[bool], List[str]]:
         """Check if iOS device is jailbroken."""
-        # Jailbreak detection not yet implemented
-        return False, ["Jailbreak detection not implemented"]
+        from isdi.scanner.root_check import check_ios_jailbreak
+        return check_ios_jailbreak(serial, self.cli)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
