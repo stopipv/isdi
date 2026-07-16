@@ -1,5 +1,7 @@
 from typing import Tuple, List, Optional
 import logging
+import socket
+from pymobiledevice3.lockdown import create_using_usbmux
 from isdi.scanner.runcmd import run_command, catch_err
 
 ANDROID_ROOT_INDICATORS = [
@@ -151,15 +153,16 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
 # ----------------------------------------------------------------
 
 
-def check_ios_jailbreak(serial: str, cli_path: str) -> Tuple[Optional[bool], List[str]]:
+def check_ios_jailbreak(serial: str, cli_path: str, apps: List[dict]) -> Tuple[Optional[bool], List[str]]:
     """checks afc2 service and common jailbreak package managers"""
     reasons: List[str] = []
+    timed_out = False
 
     # Check if afc2 is active (indicates root filesystem access over USB)
+    orig_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(5.0)
     try:
-        from pymobiledevice3.lockdown import LockdownClient
-
-        client = LockdownClient(udid=serial)
+        client = create_using_usbmux(udid=serial)
         client.start_service("com.apple.afc2")
 
         msg = (
@@ -169,36 +172,28 @@ def check_ios_jailbreak(serial: str, cli_path: str) -> Tuple[Optional[bool], Lis
             f"Command to reproduce: `{cli_path} lockdown service com.apple.afc2 --udid {serial}`"
         )
         reasons.append(msg)
-    except Exception:
-        pass  # fails on stock devices
-
-    cmd = "{cli} apps list --udid {serial}"
-    cmd_run = cmd.format(cli=cli_path, serial=serial)
-    try:
-        import json
-
-        p = run_command(cmd, cli=cli_path, serial=serial)
-        output = catch_err(p, cmd=cmd).strip()
-        json_start = output.find("[")
-        if json_start != -1:
-            apps = json.loads(output[json_start:])
-            for app in apps:
-                appid = app.get("Identifier", "")
-                if appid in IOS_JAILBREAK_PACKAGES:
-                    name = IOS_JAILBREAK_PACKAGES[appid]
-                    msg = (
-                        f"Failed rootcheck '{appid}'. "
-                        f"Detected: '{appid}'. "
-                        f"{name} ({appid}) installed. "
-                        f"Command to reproduce: `{cmd_run}`"
-                    )
-                    reasons.append(msg)
+    except socket.timeout:
+        logging.warning("Jailbreak check (iOS): afc2 query timed out (device may be locked or untrusted).")
+        timed_out = True
     except Exception as e:
-        logging.debug(f"iOS app jailbreak check failed: {e}")
+        logging.warning(f"Jailbreak check (iOS): afc2 query failed: {e}")
+    finally:
+        socket.setdefaulttimeout(orig_timeout)
+
+    for app in apps:
+        appid = app.get("Identifier", "")
+        if appid in IOS_JAILBREAK_PACKAGES:
+            name = IOS_JAILBREAK_PACKAGES[appid]
+            msg = (
+                f"Failed rootcheck '{appid}'. "
+                f"Detected: '{appid}'. "
+                f"{name} ({appid}) installed. "
+            )
+            reasons.append(msg)
 
     if reasons:
         return True, reasons
 
     return None, [
         "No obvious ios jailbreak indicators detected, but cannot be ruled out."
-    ]
+    ] + (["(afc2 check timed out, device may be locked or untrusted)"] if timed_out else [])

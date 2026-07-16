@@ -104,9 +104,11 @@ class Config:
             else:
                 self.LIBIMOBILEDEVICE_PATH = f"{py_exec} -m isdi.scanner.pmd3_wrapper"
         else:
-            self.LIBIMOBILEDEVICE_PATH = (
-                "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
-            )
+            if self.PLATFORM != "wsl":
+                py_exec = shlex.quote(sys.executable)
+                self.LIBIMOBILEDEVICE_PATH = f"{py_exec} -m pymobiledevice3"
+            else:
+                self.LIBIMOBILEDEVICE_PATH = "pymobiledevice3.exe"
 
         # Approved app installers
         self.APPROVED_INSTALLERS = {
