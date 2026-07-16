@@ -553,7 +553,8 @@ class IosScanner(AppScanner):
     def isrooted(self, serial: str) -> Tuple[Optional[bool], List[str]]:
         """Check if iOS device is jailbroken."""
         from isdi.scanner.root_check import check_ios_jailbreak
-        return check_ios_jailbreak(serial, self.cli)
+        apps = self.ddump.appinfo if self.ddump else []
+        return check_ios_jailbreak(serial, self.cli, apps)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
