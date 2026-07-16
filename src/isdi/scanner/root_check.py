@@ -78,8 +78,20 @@ ANDROID_ROOT_INDICATORS = [
         "cmd_str": "ps -A 2>/dev/null | grep [f]rida || ps | grep [f]rida",
         "expected": "",
         "desc": "Frida is running on the device",
-    }
+    },
 ]
+
+
+IOS_JAILBREAK_PACKAGES = {
+    "com.saurik.Cydia": "Cydia",
+    "org.swiftapps.sileo": "Sileo",
+    "org.coolstar.SileoStore": "Sileo",
+    "xyz.willy.Zebra": "Zebra",
+    "com.tigisoftware.Filza": "Filza",
+}
+
+# ----------------------------------------------------------------
+
 
 def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
     """Runs standard integrity/root checks on an Android device."""
@@ -95,7 +107,7 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
             if output == "" and check.get("skip_if_missing", False):
                 continue
 
-            is_existence_check = (check["expected"] == "")
+            is_existence_check = check["expected"] == ""
 
             if p.returncode != 0:
                 if not is_existence_check:
@@ -110,7 +122,7 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
 
             output_lower = output.lower()
             expected_lower = check["expected"].lower()
-            failed_check = (output_lower != expected_lower)
+            failed_check = output_lower != expected_lower
 
             if failed_check:
                 clean_output = output.replace("package:", "")
@@ -136,6 +148,57 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
     return len(reasons) > 0, reasons
 
 
+# ----------------------------------------------------------------
+
+
 def check_ios_jailbreak(serial: str, cli_path: str) -> Tuple[Optional[bool], List[str]]:
-    """iOS jailbreak check placeholder."""
-    return None, ["Jailbreak detection not implemented"]
+    """checks afc2 service and common jailbreak package managers"""
+    reasons: List[str] = []
+
+    # Check if afc2 is active (indicates root filesystem access over USB)
+    try:
+        from pymobiledevice3.lockdown import LockdownClient
+
+        client = LockdownClient(udid=serial)
+        client.start_service("com.apple.afc2")
+
+        msg = (
+            f"Failed rootcheck 'afc2_service'. "
+            f"Detected: 'com.apple.afc2 active'. "
+            f"Apple File Conduit 2 (afc2) service is active. This permits full root filesystem access over a USB connection. "
+            f"Command to reproduce: `{cli_path} lockdown service com.apple.afc2 --udid {serial}`"
+        )
+        reasons.append(msg)
+    except Exception:
+        pass  # fails on stock devices
+
+    cmd = "{cli} apps list --udid {serial}"
+    cmd_run = cmd.format(cli=cli_path, serial=serial)
+    try:
+        import json
+
+        p = run_command(cmd, cli=cli_path, serial=serial)
+        output = catch_err(p, cmd=cmd).strip()
+        json_start = output.find("[")
+        if json_start != -1:
+            apps = json.loads(output[json_start:])
+            for app in apps:
+                appid = app.get("Identifier", "")
+                if appid in IOS_JAILBREAK_PACKAGES:
+                    name = IOS_JAILBREAK_PACKAGES[appid]
+                    msg = (
+                        f"Failed rootcheck '{appid}'. "
+                        f"Detected: '{appid}'. "
+                        f"{name} ({appid}) installed. "
+                        f"Command to reproduce: `{cmd_run}`"
+                    )
+                    reasons.append(msg)
+    except Exception as e:
+        logging.debug(f"iOS app jailbreak check failed: {e}")
+
+    if reasons:
+        return True, reasons
+
+    return None, [
+        "No obvious ios jailbreak indicators detected, but cannot be ruled out."
+    ]
