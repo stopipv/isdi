@@ -194,6 +194,9 @@ def check_ios_jailbreak(serial: str, cli_path: str, apps: List[dict]) -> Tuple[O
     if reasons:
         return True, reasons
 
-    return None, [
-        "No obvious ios jailbreak indicators detected, but cannot be ruled out."
-    ] + (["(afc2 check timed out, device may be locked or untrusted)"] if timed_out else [])
+    default_reasons = ["No obvious ios jailbreak indicators detected, but cannot be ruled out."]
+    if timed_out:
+        default_reasons.append("afc2 check timed out (device may be locked or untrusted).")
+        return None, default_reasons
+
+    return False, default_reasons

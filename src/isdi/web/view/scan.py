@@ -179,15 +179,19 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
         key=lambda item: (-item[1].get("score", 0.0), item[0]),
     )
 
+    if rooted:
+        isrooted_str = "<strong class='text-danger'>Detected</strong>"
+    elif rooted is None:
+        isrooted_str = "Not Detected (some checks incomplete)"
+    else:
+        isrooted_str = "Not Detected"
+
+    if rooted_reason:
+        isrooted_str += f". Reason(s): {rooted_reason}"
+
     template_d.update(
         dict(
-            isrooted=(
-                "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}".format(
-                    rooted_reason
-                )
-                if rooted
-                else "Don't know" if rooted is None else "No"
-            ),
+            isrooted=isrooted_str,
             device_name=device_name_print,
             apps=apps,
             apps_sorted=apps_sorted,
@@ -506,15 +510,19 @@ def scan():
         key=lambda item: (-item[1].get("score", 0.0), item[0]),
     )
     currently_scanned = get_client_devices_from_db(session["clientid"])
+    if rooted:
+        isrooted_str = "<strong class='text-danger'>Detected</strong>"
+    elif rooted is None:
+        isrooted_str = "Not Detected (some checks incomplete)"
+    else:
+        isrooted_str = "Not Detected"
+
+    if rooted_reason:
+        isrooted_str += f". Reason(s): {rooted_reason}"
+
     template_d.update(
         dict(
-            isrooted=(
-                "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}".format(
-                    rooted_reason
-                )
-                if rooted
-                else "Don't know" if rooted is None else "No"
-            ),
+            isrooted=isrooted_str,
             device_name=device_name_print,
             apps=apps,
             apps_sorted=apps_sorted,
