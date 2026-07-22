@@ -68,6 +68,7 @@ def create_app(config=None):
             </body>
             </html>
             """
+
     else:
         print(f"Route import/init: {perf_counter() - routes_started:.2f}s")
 

@@ -154,18 +154,27 @@ class AppScanner:
         logging.info(f"Dump completed successfully: {dumpf}")
         return os.path.exists(dumpf)
 
-    def get_multiple_app_details(self, serialno: str, appids: List[str]) -> Dict[str, Tuple[Dict, Dict]]:
+    def get_multiple_app_details(
+        self, serialno: str, appids: List[str]
+    ) -> Dict[str, Tuple[Dict, Dict]]:
         """Get details for multiple apps at once, returning dict keyed by appId."""
 
         def _process_app_row(appid: str, d: Dict) -> Tuple[Dict, Dict]:
             permissions = d.get("permissions")
             if isinstance(permissions, str):
-                d["permissions"] = [p.strip() for p in permissions.split(",") if p.strip()]
+                d["permissions"] = [
+                    p.strip() for p in permissions.split(",") if p.strip()
+                ]
             elif not permissions:
                 d["permissions"] = []
 
             description = ""
-            for col in ("description", "description_html", "descriptionhtml", "summary"):
+            for col in (
+                "description",
+                "description_html",
+                "descriptionhtml",
+                "summary",
+            ):
                 if d.get(col):
                     description = str(d[col])
                     break
@@ -212,7 +221,6 @@ class AppScanner:
             details.setdefault(appid, ({}, {}))
         return details
 
-
     def app_details(self, serialno: str, appid: str) -> Tuple[Dict, Dict]:
         """Get detailed info for an app."""
         details = self.get_multiple_app_details(serialno, [appid])
@@ -221,7 +229,7 @@ class AppScanner:
     def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
         """
         Optimized find_spyapps for iOS that caches app titles lookup.
-        
+
         The original isdi.scanner.find_spyapps calls get_app_titles() inside the loop
         for iOS, causing it to be called once per app. This optimized version
         pre-loads app titles once and reuses them.
@@ -352,9 +360,20 @@ class AndroidScanner(AppScanner):
         logging.info(f"Dumping android device {serial}...")
 
         services = [
-            "package", "location", "media.camera", "netpolicy", "mount",
-            "cpuinfo", "dbinfo", "meminfo", "procstats", "batterystats",
-            "netstats detail", "usagestats", "activity", "appops",
+            "package",
+            "location",
+            "media.camera",
+            "netpolicy",
+            "mount",
+            "cpuinfo",
+            "dbinfo",
+            "meminfo",
+            "procstats",
+            "batterystats",
+            "netstats detail",
+            "usagestats",
+            "activity",
+            "appops",
         ]
         _email_re = re.compile(
             r"(\s*)[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}\b"
@@ -364,8 +383,10 @@ class AndroidScanner(AppScanner):
             try:
                 r = subprocess.run(
                     [self.cli, "-s", serial, *args],
-                    capture_output=True, text=True,
-                    timeout=timeout, errors="replace",
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                    errors="replace",
                 )
                 return r.stdout
             except subprocess.TimeoutExpired:
@@ -376,11 +397,17 @@ class AndroidScanner(AppScanner):
             with open(dumpf, "w", encoding="utf-8", errors="replace") as f:
                 for svc in services:
                     f.write(f"\nDUMP OF SERVICE {svc}\n")
-                    out = _email_re.sub(r"\1<email>", _run("shell", "dumpsys", *svc.split()))
+                    out = _email_re.sub(
+                        r"\1<email>", _run("shell", "dumpsys", *svc.split())
+                    )
                     f.write(out)
 
                 f.write("\nDUMP OF SERVICE net_stats\n")
-                f.write(_run("shell", "cat", "/proc/net/xt_qtaguid/stats", timeout=30).replace(" ", ","))
+                f.write(
+                    _run(
+                        "shell", "cat", "/proc/net/xt_qtaguid/stats", timeout=30
+                    ).replace(" ", ",")
+                )
 
                 for ns in ("secure", "system", "global"):
                     f.write(f"\nDUMP OF SETTINGS {ns}\n")
@@ -468,6 +495,7 @@ class AndroidScanner(AppScanner):
     def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
         """Check if Android device is rooted."""
         from isdi.scanner.root_check import check_android_root
+
         return check_android_root(serial, self.cli)
 
     def uninstall(self, serial: str, appid: str) -> bool:
@@ -494,7 +522,7 @@ class IosScanner(AppScanner):
             if not output:
                 return []
             # Strip any non-JSON preamble (e.g. download warnings from pymobiledevice3)
-            json_start = output.find('[')
+            json_start = output.find("[")
             if json_start == -1:
                 return []
             data = json.loads(output[json_start:])
@@ -553,6 +581,7 @@ class IosScanner(AppScanner):
     def isrooted(self, serial: str) -> Tuple[Optional[bool], List[str]]:
         """Check if iOS device is jailbroken."""
         from isdi.scanner.root_check import check_ios_jailbreak
+
         apps = self.ddump.appinfo if self.ddump else []
         return check_ios_jailbreak(serial, self.cli, apps)
 

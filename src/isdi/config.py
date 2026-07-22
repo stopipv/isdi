@@ -228,7 +228,9 @@ class Config:
             import urllib.error
 
             # github_url = "https://github.com/rchatterjee/isdi/raw/refs/heads/main/static_data/app-info.db"
-            github_url = "https://github.com/stopipv/isdi/releases/download/app-info/app-info.db"
+            github_url = (
+                "https://github.com/stopipv/isdi/releases/download/app-info/app-info.db"
+            )
 
             print(f"Downloading app-info.db from GitHub...")
             dst_db.parent.mkdir(parents=True, exist_ok=True)
@@ -258,7 +260,9 @@ class Config:
                 print(f"If the problem persists, manually download from:")
                 print(f"  {github_url}")
                 print(f"And place it at: {dst_db}")
-                print(f"app-info.db download attempt took {time.perf_counter() - start:.2f}s")
+                print(
+                    f"app-info.db download attempt took {time.perf_counter() - start:.2f}s"
+                )
 
         except Exception as e:
             # Avoid failing config init if download fails

@@ -404,9 +404,7 @@ def delete_scan_data(serial: str) -> bool:
     )
     if scan_ids:
         for row in scan_ids:
-            db_conn.execute(
-                "DELETE FROM app_info WHERE scanid=?", (row["id"],)
-            )
+            db_conn.execute("DELETE FROM app_info WHERE scanid=?", (row["id"],))
         db_conn.execute("DELETE FROM scan_res WHERE serial=?", (serial,))
         db_conn.commit()
 

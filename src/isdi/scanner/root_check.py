@@ -153,7 +153,9 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
 # ----------------------------------------------------------------
 
 
-def check_ios_jailbreak(serial: str, cli_path: str, apps: List[dict]) -> Tuple[Optional[bool], List[str]]:
+def check_ios_jailbreak(
+    serial: str, cli_path: str, apps: List[dict]
+) -> Tuple[Optional[bool], List[str]]:
     """checks afc2 service and common jailbreak package managers"""
     reasons: List[str] = []
     timed_out = False
@@ -173,7 +175,9 @@ def check_ios_jailbreak(serial: str, cli_path: str, apps: List[dict]) -> Tuple[O
         )
         reasons.append(msg)
     except socket.timeout:
-        logging.warning("Jailbreak check (iOS): afc2 query timed out (device may be locked or untrusted).")
+        logging.warning(
+            "Jailbreak check (iOS): afc2 query timed out (device may be locked or untrusted)."
+        )
         timed_out = True
     except Exception as e:
         logging.warning(f"Jailbreak check (iOS): afc2 query failed: {e}")
@@ -194,9 +198,13 @@ def check_ios_jailbreak(serial: str, cli_path: str, apps: List[dict]) -> Tuple[O
     if reasons:
         return True, reasons
 
-    default_reasons = ["No obvious ios jailbreak indicators detected, but cannot be ruled out."]
+    default_reasons = [
+        "No obvious ios jailbreak indicators detected, but cannot be ruled out."
+    ]
     if timed_out:
-        default_reasons.append("afc2 check timed out (device may be locked or untrusted).")
+        default_reasons.append(
+            "afc2 check timed out (device may be locked or untrusted)."
+        )
         return None, default_reasons
 
     return False, default_reasons
