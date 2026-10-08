@@ -44,3 +44,40 @@ def test_app_title_and_flags():
     appids = {app.get("appId") for app in ret}
     assert "core.framework" in appids
     assert "com.android.system" in appids
+
+
+def _csv_rows():
+    import csv
+    from isdi.scanner import blocklist
+
+    with open(blocklist.config.APP_FLAGS_FILE, encoding="latin1") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_blocklist_flags_are_kept():
+    """Every flagged app in app-flags.csv must keep its flag after lookup."""
+    rows = [
+        r
+        for r in _csv_rows()
+        if r["flag"] in {"dual-use", "spyware", "stalkerware", "co-occurrence"}
+    ]
+    assert rows
+    expected = {r["appId"]: r["flag"] for r in rows}
+    ret = app_title_and_flag([{"appId": a} for a in expected])
+    assert len(ret) == len(expected)
+    for app in ret:
+        assert expected[app["appId"]] in app["flags"], app
+
+
+def test_spyware_and_stalkerware_get_top_class():
+    from isdi.scanner.blocklist import assign_class, flag_str, score
+
+    for flag in ("spyware", "stalkerware"):
+        assert score([flag]) == 1.0
+        assert assign_class([flag]) == "alert-primary"
+        assert "text-primary" in flag_str([flag])
+    assert assign_class(["dual-use"]) == "alert-warning"
+
+    ids = [r["appId"] for r in _csv_rows() if r["flag"] in ("spyware", "stalkerware")]
+    for app in app_title_and_flag([{"appId": a} for a in ids]):
+        assert assign_class(app["flags"]) == "alert-primary", app
