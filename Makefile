@@ -38,6 +38,7 @@ format:
 
 build: clean
 	$(PYTHON) -m build
+	$(PYTHON) scripts/check_dist.py dist
 
 upload-test: build
 	@echo "Uploading to TestPyPI..."
