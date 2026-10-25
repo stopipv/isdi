@@ -24,7 +24,7 @@ window.onbeforeunload = function (e) {
                       device for a scan."><u>Scan Instruction</u></a>
             <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
-            <a href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
+            <a href="javascript:;" onclick="return kill_app();">&#x274C; Close App and End Session</a>
         </span> 
   </div>
 
@@ -47,6 +47,7 @@ window.onbeforeunload = function (e) {
 {% from "_formhelpers.html" import render_field %}
 <div class="">
   <form method=post>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-row align-items-center">
       <dl>
         {% for f in form %}

@@ -1,6 +1,6 @@
 <div class="container isdi-page">
     <br/>
-    <h2>Information about "{{ app.title | safe }}"</h2>
+    <h2>Information about "{{ app.title }}"</h2>
     <div class="container form-group">
         <div class="table-wrap">
         <table class="table table-bordered">
@@ -28,23 +28,20 @@
             <li class="code">{{ perm | capitalize | replace('_', ' ') }}</li>
             {% endfor %}
         </ul>
-	<!-- label class="btn btn-danger">
-	     <button type="button" class="btn btn-danger"
-	     onclick="delete_app('{{ app.appId }}', this)" disabled>Delete</button>
-	     </label -->
     </div>
 
     <div class="jumbotron" style="padding: 1em">
         <h3>{% if device=="android" %} Google Play Store {% endif %} {% if device=="ios" %} Apple App Store {% endif %} Description of the app</h3>
-        <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
-        {{ app.descriptionHTML|safe }}
+        <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary }}</b></mark></span>
+        {# descriptionHTML is escaped Markup with only <br> kept; see sanitize_description #}
+        {{ app.descriptionHTML }}
     </div>
     
     {% if device=="android" %} 
     <div class="jumbotron" style="padding: 1em">
         <h3>Recently used permissions</h3>
         <p>(Here, <code>mode=allow</code> only means the permission is requested, not necessarily granted.)</p>
-        {{ app.non_hf_permissions_html | safe }}
+        {{ app.non_hf_permissions_html }}
     </div>
     {% endif %}
 

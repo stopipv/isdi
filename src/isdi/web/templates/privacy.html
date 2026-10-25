@@ -1,13 +1,14 @@
 <script>
- function get(url){
+ function privacy_check(url){
      $('#loadingDiv').show();
      $('#msg').html("")
-     $.get(url, function(data) {
+     $.post(url, function(data) {
+         // Server-generated instructions and <img> tags
          $('#msg').html(data);
          $('#loadingDiv').hide();
-     }).done(function(data) {
-     }).fail(function(data) {
-         alert("Failed:" + JSON.serialize(data));
+     }).fail(function(xhr) {
+         $('#loadingDiv').hide();
+         $('#msg').text("Failed: " + (xhr.responseText || xhr.status));
      })
  }
 
@@ -22,13 +23,13 @@
     <h4 class="display-4"> Privacy Checkup <a href="#" style="font-size: 20px" onclick="close_window('close the privacy checkup?');return false;">close the privacy checkup</a>
         </h4>
         <h3>Android</h3>
-	<img class="content-image" src="/webstatic/images/android.resiz.png">
+	<img class="content-image" src="{{ url_for('static', filename='images/android.resiz.png') }}">
 	<br><br>
     <div class="button-cluster">
             {% for k, v in  {"account": "Account", "sync": "Accounts and Sync", "backup": "Backup account", "gmap": "Google Map Sharing", "gphotos": "Google Photos Sharing"}.items() %}
-            <button class="btn btn-primary mx-2"  onclick="get('/privacy/android/{{ k }}')" value="{{ k }}">{{ v | title }}</button>
+            <button class="btn btn-primary mx-2"  onclick="privacy_check('/privacy/android/{{ k }}')" value="{{ k }}">{{ v | title }}</button>
             {% endfor %}
-            <button class="btn btn-secondary mx-2"  onclick="get('/privacy/android/screenshot')" value="screenshot">Screenshot</button>      
+            <button class="btn btn-secondary mx-2"  onclick="privacy_check('/privacy/android/screenshot')" value="screenshot">Screenshot</button>      
         </div>
         <div class="jumbotron" id="msg">
         </div>
@@ -37,7 +38,7 @@
 	<br><br>
 
         <h3>iOS (iPhone/iPad)</h3>
-    <img class="content-image" src="/webstatic/images/apple.resized.png">
+    <img class="content-image" src="{{ url_for('static', filename='images/apple.resized.png') }}">
 	<br><br>
         <div class="jumbotron">
             Please go to 

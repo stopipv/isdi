@@ -3,6 +3,7 @@ import os
 import threading
 import time
 import uuid
+from markupsafe import Markup
 from isdi.config import get_config
 from isdi.web import app
 from isdi.web.view.index import get_device
@@ -20,6 +21,12 @@ config = get_config()
 
 _SCAN_JOBS = {}
 _SCAN_JOBS_LOCK = threading.Lock()
+
+
+def _rooted_html(reasons):
+    return Markup(
+        "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}"
+    ).format(", ".join(str(r) for r in reasons))
 
 
 def _create_scan_job(clientid, device, device_owner, serial):
@@ -182,9 +189,7 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
     template_d.update(
         dict(
             isrooted=(
-                "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}".format(
-                    rooted_reason
-                )
+                _rooted_html(rooted_reason)
                 if rooted
                 else "Don't know" if rooted is None else "No"
             ),
@@ -260,6 +265,8 @@ def scan_start():
                 )
             }
         ), 409
+    if not sc.is_connected(ser):
+        return jsonify({"error": "That device is not connected."}), 400
 
     job_id = _create_scan_job(session["clientid"], device, device_owner, ser)
     worker = threading.Thread(
@@ -353,7 +360,15 @@ def scan():
         template_d["error"] = "Please give the device a nickname."
         return render_template("main.html", **template_d), 201
 
-    if not ser:
+    # Only explicit from_dump requests should load old results.
+    # Some real device serials are long hex strings and were mis-detected as hashed.
+    from_dump = get_param("from_dump") == "1"
+
+    if not from_dump and request.method != "POST":
+        # A live scan runs commands on the phone and writes to the database.
+        return redirect(url_for("index"))
+
+    if not ser and not from_dump:
         ser = first_element_or_none(sc.devices())
 
     print("Devices: {}".format(ser))
@@ -370,10 +385,6 @@ def scan():
 
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
-
-    # Only explicit from_dump requests should load old results.
-    # Some real device serials are long hex strings and were mis-detected as hashed.
-    from_dump = get_param("from_dump") == "1"
 
     if from_dump:
         # Load scan data from database — do NOT run ADB/iOS commands with hashed serial
@@ -438,6 +449,9 @@ def scan():
 
     else:
         # Live scan — device must be connected
+        if not sc.is_connected(ser):
+            template_d["error"] = "That device is not connected. Please reconnect it and try again."
+            return render_template("main.html", **template_d), 201
 
         if device == "ios":
             error = (
@@ -509,9 +523,7 @@ def scan():
     template_d.update(
         dict(
             isrooted=(
-                "<strong class='text-info'>Maybe (this is possibly just a bug with our scanning tool).</strong> Reason(s): {}".format(
-                    rooted_reason
-                )
+                _rooted_html(rooted_reason)
                 if rooted
                 else "Don't know" if rooted is None else "No"
             ),
