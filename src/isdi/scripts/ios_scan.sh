@@ -20,19 +20,15 @@ if [ $# -ne 2 ]; then
     echo "Usage: $0 <serial> <dumpfile>"
     exit 1
 fi
-serial="--udid $1"
+serial="$1"
 outf="$2"
 
 printf "Serial: %s\n" "$serial"
 
-# dump only if the file is at least 20 bytes and was modified within the last day
-if [ -f "$outf" ] && [ "$(wc -c < "$outf")" -ge 20 ] && [ "$(find "$outf" -mtime -1 -print)" ]; then
-    echo "Dump file already exists and is recent: $outf"
-    exit 0
-fi
+# Always dump: a cached dump would hide apps installed since the last scan.
 echo "{
-    \"apps\": $(${idb} apps list "$serial"),
-    \"devinfo\": $(${idb} lockdown info "$serial")
+    \"apps\": $(${idb} apps list --udid "$serial"),
+    \"devinfo\": $(${idb} lockdown info --udid "$serial")
 }" > "$outf"
 
 if [ -s "$outf" ]; then

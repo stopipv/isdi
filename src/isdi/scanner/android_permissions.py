@@ -10,7 +10,7 @@ import datetime
 from isdi.config import get_config
 import re
 from collections import defaultdict
-from .runcmd import run_command, catch_err
+
 from . import parse_dump
 
 config = get_config()

@@ -1,14 +1,45 @@
 """Configuration management with XDG Base Directory support"""
 
+import hashlib
 import os
 import sys
 import shutil
-import shlex
 from pathlib import Path
 from typing import Optional
 import secrets
 
 __all__ = ["Config", "get_config", "get_data_dir", "get_config_dir"]
+
+# SHA-256 of the app-info.db release asset. Update it whenever the asset at
+# https://github.com/stopipv/isdi/releases/tag/app-info is replaced.
+APP_INFO_DB_SHA256 = "87ea193f41b35b94f7136560a8b570a2c97a81ccd45bd0dcac4ce4acaa456f38"
+
+
+def _private_dir(path: Path) -> None:
+    """Create path (and parents) and restrict it to the current user (0700).
+
+    chmod can fail on filesystems without Unix permissions (e.g. Android
+    shared storage under Termux); that is not fatal.
+    """
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    try:
+        os.chmod(path, 0o700)
+    except OSError:
+        pass
+
+
+def _private_key_file(path: Path, nbytes: int = 32) -> bytes:
+    """Return the key stored in path, creating it (0600) if missing."""
+    if not path.exists():
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as f:
+            f.write(secrets.token_bytes(nbytes))
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass
+    with open(path, "rb") as f:
+        return f.read()
 
 
 def get_platform_dirs():
@@ -44,15 +75,20 @@ class Config:
         self.env = env
         self.dirs = get_platform_dirs()
 
-        # Ensure directories exist
+        # Ensure directories exist and are private to this user
         for dir_path in self.dirs.values():
-            dir_path.mkdir(parents=True, exist_ok=True)
+            _private_dir(dir_path)
 
         # Setup paths
         self.setup_paths()
 
         # Setup secrets
         self.setup_secrets()
+
+        # Per-run token required by every web route (see isdi.app). Kept in the
+        # environment so the debug reloader's child process uses the same one.
+        self.ACCESS_TOKEN = os.environ.get("ISDI_ACCESS_TOKEN") or secrets.token_urlsafe(32)
+        os.environ["ISDI_ACCESS_TOKEN"] = self.ACCESS_TOKEN
 
         # Basic settings
         self.TEST = env == "test"
@@ -78,10 +114,10 @@ class Config:
         self.DEV_SUPPORTED = ["android", "ios"]  # Supported device types
         self.SCRIPT_DIR = Path(__file__).parent / "scripts"  # Shell scripts in package
 
-        # iOS tools
+        # iOS tools: IOS_CLI is an argv prefix, IOS_CLI_ENV the environment
+        # to run it with (None means inherit).
+        self.IOS_CLI_ENV = None
         if os.environ.get("PREFIX"):
-            py_exec = shlex.quote(sys.executable)
-
             pyz_path = None
             argv_path = Path(sys.argv[0]).resolve()
             if argv_path.suffix == ".pyz" and argv_path.exists():
@@ -94,19 +130,17 @@ class Config:
                             pyz_path = candidate
                             break
 
+            self.IOS_CLI = [sys.executable, "-m", "isdi.scanner.pmd3_wrapper"]
             if pyz_path is not None:
                 # Shiv bundles packages under site-packages inside the .pyz
-                pyz_site = f"{pyz_path}/site-packages"
-                pyz_quoted = shlex.quote(str(pyz_site))
-                self.LIBIMOBILEDEVICE_PATH = (
-                    f"PYTHONPATH={pyz_quoted} {py_exec} -m isdi.scanner.pmd3_wrapper"
-                )
-            else:
-                self.LIBIMOBILEDEVICE_PATH = f"{py_exec} -m isdi.scanner.pmd3_wrapper"
+                self.IOS_CLI_ENV = {
+                    **os.environ,
+                    "PYTHONPATH": f"{pyz_path}/site-packages",
+                }
         else:
-            self.LIBIMOBILEDEVICE_PATH = (
+            self.IOS_CLI = [
                 "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
-            )
+            ]
 
         # Approved app installers
         self.APPROVED_INSTALLERS = {
@@ -165,6 +199,8 @@ class Config:
         self.reports_dir = self.dirs["data"] / "reports"
         self.dumps_dir = self.dirs["data"] / "dumps"
         self.phone_dumps_dir = self.dirs["data"] / "phone_dumps"
+        # Privacy-checkup screenshots; served only through a token-checked route
+        self.screenshots_dir = self.dirs["local_data"] / "screenshots"
 
         # Config directory
         self.secrets_dir = self.dirs["config"]
@@ -179,10 +215,11 @@ class Config:
             self.reports_dir,
             self.dumps_dir,
             self.phone_dumps_dir,
+            self.screenshots_dir,
             self.temp_dir,
             self.logs_dir,
         ]:
-            path.mkdir(parents=True, exist_ok=True)
+            _private_dir(path)
 
         # Database
         self.database_path = self.dirs["local_data"] / "database.db"
@@ -231,12 +268,26 @@ class Config:
             print(f"Downloading app-info.db from GitHub...")
             dst_db.parent.mkdir(parents=True, exist_ok=True)
 
-            # Download with timeout
+            # Download to a temp file in the same directory, check the pinned
+            # hash, then move it into place, so a partial or tampered download
+            # is never used.
+            tmp_db = dst_db.with_name(f".app-info.db.{os.getpid()}.tmp")
             try:
+                digest = hashlib.sha256()
                 with urllib.request.urlopen(github_url, timeout=30) as response:
                     if response.status == 200:
-                        with open(dst_db, "wb") as f:
-                            f.write(response.read())
+                        with open(tmp_db, "wb") as f:
+                            for chunk in iter(lambda: response.read(1 << 20), b""):
+                                digest.update(chunk)
+                                f.write(chunk)
+                        if digest.hexdigest() != APP_INFO_DB_SHA256:
+                            print(
+                                "Error: downloaded app-info.db does not match the expected "
+                                f"SHA-256 ({digest.hexdigest()} != {APP_INFO_DB_SHA256}); "
+                                "not using it."
+                            )
+                            return
+                        os.replace(tmp_db, dst_db)
                         print(
                             f"✓ Downloaded app-info.db ({dst_db.stat().st_size} bytes)"
                         )
@@ -257,6 +308,8 @@ class Config:
                 print(f"  {github_url}")
                 print(f"And place it at: {dst_db}")
                 print(f"app-info.db download attempt took {time.perf_counter() - start:.2f}s")
+            finally:
+                tmp_db.unlink(missing_ok=True)
 
         except Exception as e:
             # Avoid failing config init if download fails
@@ -268,21 +321,11 @@ class Config:
         """Setup encryption keys and secrets"""
         # PII encryption key
         self.pii_key_file = self.secrets_dir / "pii.key"
-        if not self.pii_key_file.exists():
-            with open(self.pii_key_file, "wb") as f:
-                f.write(secrets.token_bytes(32))
-
-        with open(self.pii_key_file, "rb") as f:
-            self.PII_KEY = f.read(32)
+        self.PII_KEY = _private_key_file(self.pii_key_file)[:32]
 
         # Flask secret
         self.flask_secret_file = self.secrets_dir / "flask.secret"
-        if not self.flask_secret_file.exists():
-            with open(self.flask_secret_file, "wb") as f:
-                f.write(secrets.token_bytes(32))
-
-        with open(self.flask_secret_file, "rb") as f:
-            self.FLASK_SECRET = f.read()
+        self.FLASK_SECRET = _private_key_file(self.flask_secret_file)
 
     def set_test_mode(self, enabled: bool = True):
         """Set test mode"""
@@ -303,7 +346,9 @@ class Config:
 
     @property
     def host(self) -> str:
-        return "127.0.0.1" if self.DEBUG else "0.0.0.0"
+        # Never listen on other interfaces by default: the web UI can run
+        # commands on the connected phone.
+        return "127.0.0.1"
 
     @property
     def port(self) -> int:

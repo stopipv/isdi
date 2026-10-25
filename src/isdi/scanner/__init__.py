@@ -2,32 +2,79 @@
 # -*- coding: utf-8 -*-
 """
 Phone scanner module - handles Android and iOS device scanning.
-- cli: Command path (adb for Android, pymobiledevice3 for iOS)
-- run_command(): Returns subprocess.Popen object
-- catch_err(): Takes Popen object, waits & returns string output
+- cli: argv prefix of the device tool (adb for Android, pymobiledevice3 for iOS)
+- runcmd.run()/runcmd.output(): run an argv list without a shell
 """
 
-from math import perm
 import os
 import json
 import re
-import shlex
 import sqlite3
-import subprocess
 import logging
+import time
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 from typing import Optional, List, Tuple, Dict, Any
+
+from markupsafe import Markup, escape
 
 from isdi.config import get_config
 
 from . import blocklist
 from . import parse_dump
 from .android_permissions import all_permissions
-from .runcmd import catch_err, run_command
+from . import runcmd
 
 cfg = get_config()
+
+# Android package names and iOS bundle IDs: letters, digits, '.', '_', '-'.
+_APPID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$")
+
+
+# Packages installed by common root managers.
+ROOT_PACKAGES = {
+    "com.topjohnwu.magisk": "Magisk",
+    "io.github.huskydg.magisk": "Magisk (Kitsune)",
+    "io.github.vvb2060.magisk": "Magisk (Alpha)",
+    "me.weishu.kernelsu": "KernelSU",
+    "me.bmax.apatch": "APatch",
+    "eu.chainfire.supersu": "SuperSU",
+    "com.koushikdutta.superuser": "Superuser",
+    "com.noshufou.android.su": "Superuser",
+    "com.thirdparty.superuser": "Superuser",
+    "me.phh.superuser": "Superuser",
+    "com.kingroot.kinguser": "KingRoot",
+    "com.kingo.root": "Kingo Root",
+}
+
+
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b")
+# Google account databases are named after the account, e.g. alice_gmail.com.db
+_DB_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+_gmail\.com")
+
+
+def redact_emails(text: str) -> str:
+    """Replace email addresses (and gmail-named databases) in dump output."""
+    text = _EMAIL_RE.sub("<email>", text)
+    return _DB_EMAIL_RE.sub("<db_email>", text)
+
+
+_BR_RE = re.compile(r"&lt;br\s*/?&gt;", re.IGNORECASE)
+
+
+def sanitize_description(text: str) -> Markup:
+    """HTML-escape an app store description, keeping only <br> line breaks.
+
+    Descriptions come from app-info.db, which is downloaded, so they must
+    not be able to inject markup or scripts into the page.
+    """
+    return Markup(_BR_RE.sub("<br>", str(escape(text or ""))))
+
+
+def valid_appid(appid: str) -> bool:
+    """True if appid looks like an Android package name or iOS bundle ID."""
+    return bool(appid) and bool(_APPID_RE.match(appid))
 
 
 class AppScanner:
@@ -35,18 +82,25 @@ class AppScanner:
 
     app_info_conn: Optional[sqlite3.Connection] = None
 
-    def __init__(self, dev_type: str, cli: str):
+    def __init__(self, dev_type: str, cli: List[str], cli_env=None):
         """
         Initialize scanner.
 
         Args:
             dev_type: 'android', 'ios', or 'test'
-            cli: Command path (e.g., 'adb' or 'pymobiledevice3')
+            cli: argv prefix of the device tool (e.g., ['adb'] or ['pymobiledevice3'])
+            cli_env: environment to run the tool with (None inherits)
         """
         assert dev_type in cfg.DEV_SUPPORTED, f"Device type {dev_type} not supported"
         self.device_type: str = dev_type
-        self.cli: str = cli
-        self.ddump: Optional[parse_dump.PhoneDump] = None
+        self.cli: List[str] = list(cli)
+        self.cli_env = cli_env
+        # Parsed dumps keyed by dump file path (one per device), and when this
+        # process last dumped each serial.
+        self._dumps: Dict[str, parse_dump.PhoneDump] = {}
+        self._dumped_at: Dict[str, float] = {}
+        # When is_connected() last saw each serial connected.
+        self._seen: Dict[str, float] = {}
 
         # Initialize database connection once
         if AppScanner.app_info_conn is None:
@@ -69,54 +123,95 @@ class AppScanner:
         """Return list of connected device serial numbers."""
         raise NotImplementedError()
 
+    def is_connected(self, serial: str) -> bool:
+        """True if serial is one of the currently connected devices.
+
+        Every serial that comes from an HTTP request must pass this check
+        before it is handed to a device tool. Listing devices can take
+        seconds (pymobiledevice3), so a serial seen in the last 30 seconds is
+        accepted without listing again.
+        """
+        if not serial:
+            return False
+        if time.time() - self._seen.get(serial, 0) < 30:
+            return True
+        listed = self.devices()
+        now = time.time()
+        for s in listed:
+            self._seen[s] = now
+        return serial in listed
+
+    def connected_serial_for_hmac(self, hmac_serial: str) -> Optional[str]:
+        """Return the connected device serial whose HMAC is hmac_serial."""
+        for serial in self.devices():
+            if cfg.hmac_serial(serial) == hmac_serial:
+                return serial
+        return None
+
     def get_apps(self, serialno: str) -> List[str]:
         """Return list of installed app package IDs."""
         raise NotImplementedError()
 
     def get_system_apps(self, serialno: str) -> List[str]:
         """Return list of system app package IDs (Android only)."""
-        if not self.ddump:
-            return []
-        return self.ddump.system_apps()
+        ddump = self._get_dump(serialno)
+        return ddump.system_apps() if ddump else []
 
     def get_offstore_apps(self, serialno: str) -> List[str]:
         """Return list of offstore/sideloaded app package IDs (Android only)."""
-        if not self.ddump:
-            return []
-        return self.ddump.offstore_apps()
+        ddump = self._get_dump(serialno)
+        return ddump.offstore_apps() if ddump else []
 
     def get_app_titles(self, serialno: str) -> Dict[str, str]:
         """Return dict of app package IDs and titles: {appId: title}."""
         return {}
 
-    def dump_path(self, serial: str) -> str:
-        """Get the file path for a device's dump."""
-        hmac_serial = cfg.hmac_serial(serial)
+    def dump_path(self, serial: str, hashed: bool = False) -> str:
+        """Get the file path for a device's dump.
+
+        serial is the device serial, or its HMAC if hashed is True.
+        """
+        hmac_serial = serial if hashed else cfg.hmac_serial(serial)
         fkind = "json" if self.device_type == "ios" else "txt"
         return os.path.join(cfg.DUMP_DIR, f"{hmac_serial}_{self.device_type}.{fkind}")
 
-    def _load_dump(self, serialno: str) -> Optional[parse_dump.PhoneDump]:
-        """Load device dump from file, creating it if needed."""
-        dumpf = self.dump_path(serialno)
+    def _forget_dump(self, serial: str) -> None:
+        self._dumps.pop(self.dump_path(serial), None)
+        self._dumped_at.pop(serial, None)
 
-        # Re-dump if file is missing or suspiciously small (a header-only empty dump is ~600B)
-        if not os.path.exists(dumpf) or os.path.getsize(dumpf) < 5000:
-            self.ddump = None
-            if not self._dump_phone(serialno):
-                return None
+    def _get_dump(
+        self, serial: str, hashed: bool = False
+    ) -> Optional[parse_dump.PhoneDump]:
+        """Parse (or return the cached parse of) the dump file for this serial.
 
-        if isinstance(self.ddump, parse_dump.PhoneDump):
-            return self.ddump
-
+        Never runs device commands; returns None if there is no dump file.
+        """
+        dumpf = self.dump_path(serial, hashed=hashed)
+        if dumpf in self._dumps:
+            return self._dumps[dumpf]
+        if not os.path.exists(dumpf):
+            return None
         try:
             if self.device_type == "android":
-                self.ddump = parse_dump.AndroidDump(dumpf)
+                ddump = parse_dump.AndroidDump(dumpf)
             elif self.device_type == "ios":
-                self.ddump = parse_dump.IosDump(dumpf)
-            return self.ddump
+                ddump = parse_dump.IosDump(dumpf)
+            else:
+                return None
         except Exception as e:
             logging.error(f"Error loading dump {dumpf}: {e}")
             return None
+        self._dumps[dumpf] = ddump
+        return ddump
+
+    def _fresh_dump(
+        self, serialno: str, max_age: float = 300
+    ) -> Optional[parse_dump.PhoneDump]:
+        """Dump the device unless this process already did so in the last max_age seconds."""
+        if time.time() - self._dumped_at.get(serialno, 0) > max_age:
+            if not self._dump_phone(serialno):
+                return None
+        return self._get_dump(serialno)
 
     def _dump_phone(self, serial: str) -> bool:
         """Dump device info by running shell script."""
@@ -127,7 +222,7 @@ class AppScanner:
         json_cache = dumpf.rsplit(".", 1)[0] + ".json"
         if os.path.exists(json_cache):
             os.unlink(json_cache)
-        self.ddump = None
+        self._forget_dump(serial)
 
         # Resolve script path
         script_path = cfg.SCRIPT_DIR / f"{self.device_type}_scan.sh"
@@ -138,24 +233,26 @@ class AppScanner:
         logging.info(f"Dumping {self.device_type} device {serial}...")
 
         # Run script: bash script.sh <serial> <output_file>
-        p = run_command(
-            "bash {script} {ser} {dump_file}",
-            script=shlex.quote(str(script_path)),
-            ser=shlex.quote(serial),
-            dump_file=shlex.quote(dumpf),
-            nowait=False,
-        )
-
-        # run_command() with nowait=False already waits and sets returncode
+        p = runcmd.run(["bash", str(script_path), serial, dumpf], timeout=300)
         if p.returncode != 0:
             logging.error(f"Dump failed with returncode {p.returncode}")
             return False
 
         logging.info(f"Dump completed successfully: {dumpf}")
-        return os.path.exists(dumpf)
+        if not os.path.exists(dumpf):
+            return False
+        self._dumped_at[serial] = time.time()
+        return True
 
-    def get_multiple_app_details(self, serialno: str, appids: List[str]) -> Dict[str, Tuple[Dict, Dict]]:
-        """Get details for multiple apps at once, returning dict keyed by appId."""
+    def get_multiple_app_details(
+        self, serialno: str, appids: List[str], hashed: bool = False
+    ) -> Dict[str, Tuple[Dict, Dict]]:
+        """Get details for multiple apps at once, returning dict keyed by appId.
+
+        Device info comes from the stored dump of serialno (its HMAC if
+        hashed); no device commands are run.
+        """
+        ddump = self._get_dump(serialno, hashed=hashed)
 
         def _process_app_row(appid: str, d: Dict) -> Tuple[Dict, Dict]:
             permissions = d.get("permissions")
@@ -179,17 +276,14 @@ class AppScanner:
                     "",
                 )
 
-            d["descriptionHTML"] = description
+            d["descriptionHTML"] = sanitize_description(description)
             d.setdefault("summary", d.get("title", ""))
 
-            info = self.ddump.info(appid) if self.ddump else None
+            info = ddump.info(appid) if ddump else None
             return d, info or {}
 
         if not appids:
             return {}
-
-        if not self.ddump:
-            self._load_dump(serialno)
 
         if not AppScanner.app_info_conn:
             return {appid: ({}, {}) for appid in appids}
@@ -213,9 +307,11 @@ class AppScanner:
         return details
 
 
-    def app_details(self, serialno: str, appid: str) -> Tuple[Dict, Dict]:
+    def app_details(
+        self, serialno: str, appid: str, hashed: bool = False
+    ) -> Tuple[Dict, Dict]:
         """Get detailed info for an app."""
-        details = self.get_multiple_app_details(serialno, [appid])
+        details = self.get_multiple_app_details(serialno, [appid], hashed=hashed)
         return details.get(appid, ({}, {}))
 
     def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
@@ -327,11 +423,16 @@ class AndroidScanner(AppScanner):
     """Scanner for Android devices using adb."""
 
     def __init__(self):
-        super().__init__("android", cfg.ADB_PATH)
+        super().__init__("android", [cfg.ADB_PATH])
+
+    def _adb(self, serial: str, *args: str, timeout: float = 60) -> str:
+        """Run `adb -s <serial> <args...>` and return stdout ("" on failure)."""
+        return runcmd.output([*self.cli, "-s", serial, *args], timeout=timeout)
 
     def setup(self) -> None:
         """Initialize ADB server."""
-        p = run_command("{cli} kill-server; {cli} start-server", cli=self.cli)
+        runcmd.run([*self.cli, "kill-server"])
+        p = runcmd.run([*self.cli, "start-server"])
         if p.returncode != 0:
             logging.error(f"ADB setup failed with returncode {p.returncode}")
 
@@ -347,7 +448,7 @@ class AndroidScanner(AppScanner):
         json_cache = dumpf.rsplit(".", 1)[0] + ".json"
         if os.path.exists(json_cache):
             os.unlink(json_cache)
-        self.ddump = None
+        self._forget_dump(serial)
 
         logging.info(f"Dumping android device {serial}...")
 
@@ -356,35 +457,22 @@ class AndroidScanner(AppScanner):
             "cpuinfo", "dbinfo", "meminfo", "procstats", "batterystats",
             "netstats detail", "usagestats", "activity", "appops",
         ]
-        _email_re = re.compile(
-            r"(\s*)[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}\b"
-        )
 
         def _run(*args, timeout=120) -> str:
-            try:
-                r = subprocess.run(
-                    [self.cli, "-s", serial, *args],
-                    capture_output=True, text=True,
-                    timeout=timeout, errors="replace",
-                )
-                return r.stdout
-            except subprocess.TimeoutExpired:
-                logging.warning(f"adb timeout: {args}")
-                return ""
+            return runcmd.run([*self.cli, "-s", serial, *args], timeout=timeout).stdout
 
         try:
             with open(dumpf, "w", encoding="utf-8", errors="replace") as f:
                 for svc in services:
                     f.write(f"\nDUMP OF SERVICE {svc}\n")
-                    out = _email_re.sub(r"\1<email>", _run("shell", "dumpsys", *svc.split()))
-                    f.write(out)
+                    f.write(redact_emails(_run("shell", "dumpsys", *svc.split())))
 
                 f.write("\nDUMP OF SERVICE net_stats\n")
                 f.write(_run("shell", "cat", "/proc/net/xt_qtaguid/stats", timeout=30).replace(" ", ","))
 
                 for ns in ("secure", "system", "global"):
                     f.write(f"\nDUMP OF SETTINGS {ns}\n")
-                    f.write(_run("shell", "settings", "list", ns, timeout=30))
+                    f.write(redact_emails(_run("shell", "settings", "list", ns, timeout=30)))
 
             size = os.path.getsize(dumpf)
             if size < 5000:
@@ -394,6 +482,7 @@ class AndroidScanner(AppScanner):
                 )
                 return False
             logging.info(f"Dump completed: {dumpf} ({size} bytes)")
+            self._dumped_at[serial] = time.time()
             return True
         except Exception as e:
             logging.error(f"Android dump failed: {e}")
@@ -401,8 +490,7 @@ class AndroidScanner(AppScanner):
 
     def get_device_owner_apps(self, serialno: str) -> set:
         """Return package names that hold device owner privilege on the device."""
-        cmd = "{cli} -s {serial} shell dpm list-owners"
-        s = catch_err(run_command(cmd, cli=self.cli, serial=serialno), cmd=cmd)
+        s = self._adb(serialno, "shell", "dpm", "list-owners")
         device_owner_apps = set()
         if not s:
             return device_owner_apps
@@ -415,12 +503,10 @@ class AndroidScanner(AppScanner):
 
     def devices(self) -> List[str]:
         """Get list of connected Android devices."""
-        cmd = "{cli} devices | tail -n +2"
-        p = run_command(cmd, cli=self.cli)
-        output = catch_err(p, cmd=cmd).strip()
+        output = runcmd.output([*self.cli, "devices"], timeout=30)
 
         devices = []
-        for line in output.split("\n"):
+        for line in output.splitlines()[1:]:
             parts = line.split()
             if len(parts) == 2 and parts[1] == "device":
                 devices.append(parts[0])
@@ -428,18 +514,12 @@ class AndroidScanner(AppScanner):
 
     def get_apps(self, serialno: str) -> List[str]:
         """Get installed apps from dump."""
-        # Always start with a fresh dump — delete old txt so _load_dump re-runs _dump_phone.
-        # This also ensures the stale JSON cache (cleaned up inside _dump_phone) is never reused.
-        dumpf = self.dump_path(serialno)
-        if os.path.exists(dumpf):
-            os.unlink(dumpf)
-        self.ddump = None
-
-        result = self._load_dump(serialno)
-        if not result or not self.ddump:
+        # Always start with a fresh dump (_dump_phone also drops the stale JSON cache).
+        ddump = self._dump_phone(serialno) and self._get_dump(serialno)
+        if not ddump:
             logging.error(f"Cannot load dump for {serialno}")
             return []
-        return self.ddump.all_apps()
+        return ddump.all_apps()
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
         """Get Android device info."""
@@ -452,10 +532,7 @@ class AndroidScanner(AppScanner):
             }
 
             for key, prop in props.items():
-                cmd = "{cli} -s {serial} shell getprop {prop}"
-                p = run_command(cmd, cli=self.cli, serial=serial, prop=prop)
-                output = catch_err(p, cmd=cmd).strip()
-                m[key] = output or "Unknown"
+                m[key] = self._adb(serial, "shell", "getprop", prop).strip() or "Unknown"
 
             m["last_full_charge"] = datetime.now().isoformat()
 
@@ -467,44 +544,43 @@ class AndroidScanner(AppScanner):
 
     def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
         """Check if Android device is rooted."""
-        root_indicators = [
-            ("su", "command -v su"),
-            ("frida", "ps -A | grep frida"),
-            ("magisk", "ls -la /data/adb/magisk"),
-        ]
-
         reasons: List[str] = []
-        for name, cmd_str in root_indicators:
-            cmd = "{cli} -s {serial} shell '{cmd_str}'"
-            try:
-                p = run_command(cmd, cli=self.cli, serial=serial, cmd_str=cmd_str)
-                output = catch_err(p, cmd=cmd, msg_on_err=f"not found {name}").strip()
-                if output and "not found" not in output.lower():
-                    reasons.append(f"Found {name}")
-            except Exception as e:
-                logging.debug(f"Root check failed: {e}")
+
+        p = runcmd.run([*self.cli, "-s", serial, "shell", "command", "-v", "su"])
+        if p.returncode == 0 and p.stdout.strip():
+            reasons.append("Found su")
+
+        if "frida" in self._adb(serial, "shell", "ps", "-A"):
+            reasons.append("Found frida")
+
+        packages = self._adb(serial, "shell", "pm", "list", "packages")
+        for line in packages.splitlines():
+            pkg = line.strip()
+            if pkg.startswith("package:"):
+                pkg = pkg[len("package:"):]
+            if pkg in ROOT_PACKAGES:
+                reasons.append(f"Found {ROOT_PACKAGES[pkg]} ({pkg})")
 
         return len(reasons) > 0, reasons
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
-        cmd = "{cli} -s {serial} uninstall {appid}"
-        p = run_command(cmd, cli=self.cli, serial=serial, appid=appid)
-        output = catch_err(p, cmd=cmd)
-        return "Success" in output
+        if not valid_appid(appid):
+            return False
+        return "Success" in self._adb(serial, "uninstall", appid)
 
 
 class IosScanner(AppScanner):
     """Scanner for iOS devices using pymobiledevice3."""
 
     def __init__(self):
-        super().__init__("ios", cfg.LIBIMOBILEDEVICE_PATH)
+        super().__init__("ios", cfg.IOS_CLI, cfg.IOS_CLI_ENV)
 
     def devices(self) -> List[str]:
         """Get list of connected iOS devices."""
-        cmd = "{cli} usbmux list"
-        p = run_command(cmd, cli=self.cli)
-        output = catch_err(p, cmd=cmd).strip()
+        output = runcmd.output(
+            [*self.cli, "usbmux", "list"], env=self.cli_env, timeout=30
+        ).strip()
 
         try:
             if not output:
@@ -521,22 +597,20 @@ class IosScanner(AppScanner):
 
     def get_apps(self, serialno: str) -> List[str]:
         """Get installed apps from dump."""
-        if not self._dump_phone(serialno):
-            logging.error("Failed to dump iOS device")
+        # device_info() dumps the device first in a scan; reuse that dump.
+        ddump = self._fresh_dump(serialno)
+        if not ddump:
+            logging.error("Failed to dump or load iOS device")
             return []
 
-        result = self._load_dump(serialno)
-        if not result or not self.ddump:
-            logging.error("Failed to load iOS dump")
-            return []
-
-        return self.ddump.installed_apps()
+        return ddump.installed_apps()
 
     def get_app_titles(self, serialno: str) -> Dict[str, str]:
         """Get iOS app titles as dict: {appId: title}."""
-        if not self.ddump:
+        ddump = self._get_dump(serialno)
+        if not ddump:
             return {}
-        titles_df = self.ddump.installed_apps_titles()
+        titles_df = ddump.installed_apps_titles()
         # If it returns a DataFrame-like object, convert to dict
         # if hasattr(titles_df, 'to_dict'):
         #     # It's a DataFrame, convert to our dict format
@@ -558,12 +632,9 @@ class IosScanner(AppScanner):
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
         """Get iOS device info."""
-        if not self._dump_phone(serial):
-            return "Unknown iOS Device", {}
-
-        self._load_dump(serial)
-        if self.ddump:
-            return self.ddump.device_info()
+        ddump = self._fresh_dump(serial)
+        if ddump:
+            return ddump.device_info()
         return "Unknown iOS Device", {}
 
     def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
@@ -573,17 +644,20 @@ class IosScanner(AppScanner):
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
-        cmd = "{cli} apps uninstall --udid {serial} {appid}"
-        p = run_command(cmd, cli=self.cli, serial=serial, appid=appid)
-        output = catch_err(p, cmd=cmd)
-        return "Success" in output or "uninstalled" in output.lower()
+        if not valid_appid(appid):
+            return False
+        p = runcmd.run(
+            [*self.cli, "apps", "uninstall", "--udid", serial, appid],
+            env=self.cli_env,
+        )
+        return p.returncode == 0
 
 
 class TestScanner(AppScanner):
     """Test scanner using mock data."""
 
     def __init__(self):
-        super().__init__("android", "test")
+        super().__init__("android", ["test"])
 
     def devices(self) -> List[str]:
         return ["testdevice1", "testdevice2"]

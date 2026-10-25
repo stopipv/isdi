@@ -624,16 +624,10 @@ class IosDump(PhoneDump):
             if not permission:
                 continue  # Empty permission, skip
             if permission not in self.permissions_map:
-                logging.info(
-                    f"Have not seen {permission} before. Making note of this..."
-                )
-                permission_human_readable = permission.replace("kTCCService", "")
-                with open(
-                    os.path.join(config.STATIC_DATA, "ios_permissions.json"), "w"
-                ) as fh:
-                    self.permissions_map[permission] = permission_human_readable
-                    fh.write(json.dumps(self.permissions_map))
-                logging.info("Noted.")
+                # Keep it in memory only: never write device data into the
+                # installed package (it would end up in builds made from it).
+                logging.info(f"Have not seen {permission} before.")
+                self.permissions_map[permission] = permission.replace("kTCCService", "")
 
     def get_permissions(self, app: dict) -> list:
         """
