@@ -243,11 +243,9 @@ def scan_start():
         return jsonify({"error": "Please start from the home page again."}), 401
 
     device = get_param("device")
-    device_owner = get_param("device_owner")
+    device_owner = get_param("device_owner") or ""
     if not device:
         return jsonify({"error": "Please choose one device to scan."}), 400
-    if not device_owner:
-        return jsonify({"error": "Please give the device a nickname."}), 400
 
     sc = get_device(device)
     if not sc:
@@ -324,7 +322,7 @@ def scan():
     device_primary_user = get_param("device_primary_user")
     device = get_param("device")
     action = get_param("action")
-    device_owner = get_param("device_owner")
+    device_owner = get_param("device_owner") or ""
     ser = get_param("devid")
 
     currently_scanned = get_client_devices_from_db(session["clientid"])
@@ -355,9 +353,6 @@ def scan():
     sc = get_device(device)
     if not sc:
         template_d["error"] = "Please choose one device to scan."
-        return render_template("main.html", **template_d), 201
-    if not device_owner:
-        template_d["error"] = "Please give the device a nickname."
         return render_template("main.html", **template_d), 201
 
     # Only explicit from_dump requests should load old results.

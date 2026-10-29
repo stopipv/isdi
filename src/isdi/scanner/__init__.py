@@ -123,6 +123,15 @@ class AppScanner:
         """Return list of connected device serial numbers."""
         raise NotImplementedError()
 
+    def connected_devices(self) -> List[Dict[str, str]]:
+        """Return attached devices as {"serial", "label", "state"} dicts.
+
+        state is "ready" if the device can be scanned; otherwise it says why
+        not (e.g. "unauthorized" for an Android phone that has not yet
+        allowed USB debugging).
+        """
+        return [{"serial": s, "label": s, "state": "ready"} for s in self.devices()]
+
     def is_connected(self, serial: str) -> bool:
         """True if serial is one of the currently connected devices.
 
@@ -501,14 +510,29 @@ class AndroidScanner(AppScanner):
 
     def devices(self) -> List[str]:
         """Get list of connected Android devices."""
-        output = runcmd.output([*self.cli, "devices"], timeout=30)
+        return [d["serial"] for d in self.connected_devices() if d["state"] == "ready"]
 
-        devices = []
+    def connected_devices(self) -> List[Dict[str, str]]:
+        """Parse `adb devices -l`, e.g. "SERIAL device usb:1-1 model:Pixel_7 ..."."""
+        output = runcmd.output([*self.cli, "devices", "-l"], timeout=30)
+
+        found = []
         for line in output.splitlines()[1:]:
             parts = line.split()
-            if len(parts) == 2 and parts[1] == "device":
-                devices.append(parts[0])
-        return devices
+            if len(parts) < 2:
+                continue
+            serial, state = parts[0], parts[1]
+            if state == "no":  # "no permissions (...)": adb cannot open the USB device
+                state = "no permissions"
+            props = dict(p.split(":", 1) for p in parts[2:] if ":" in p)
+            found.append(
+                {
+                    "serial": serial,
+                    "label": props.get("model", "Android device").replace("_", " "),
+                    "state": "ready" if state == "device" else state,
+                }
+            )
+        return found
 
     def get_apps(self, serialno: str) -> List[str]:
         """Get installed apps from dump."""
@@ -576,6 +600,10 @@ class IosScanner(AppScanner):
 
     def devices(self) -> List[str]:
         """Get list of connected iOS devices."""
+        return [d["serial"] for d in self.connected_devices()]
+
+    def connected_devices(self) -> List[Dict[str, str]]:
+        """Parse `pymobiledevice3 usbmux list` (a JSON list of devices)."""
         output = runcmd.output(
             [*self.cli, "usbmux", "list"], env=self.cli_env, timeout=30
         ).strip()
@@ -588,10 +616,31 @@ class IosScanner(AppScanner):
             if json_start == -1:
                 return []
             data = json.loads(output[json_start:])
-            return [d.get("Identifier", "") for d in data if "Identifier" in d]
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse device list: {e}. output={output}")
             return []
+
+        found = []
+        for d in data:
+            if "Identifier" not in d:
+                continue
+            label = self._model_names().get(
+                d.get("ProductType", ""), d.get("DeviceClass", "iOS device")
+            )
+            if d.get("ProductVersion"):
+                label += f" (iOS {d['ProductVersion']})"
+            found.append({"serial": d["Identifier"], "label": label, "state": "ready"})
+        return found
+
+    def _model_names(self) -> Dict[str, str]:
+        """ProductType -> marketing name, e.g. "iPhone10,1" -> "iPhone 8"."""
+        if not hasattr(self, "_models"):
+            try:
+                with open(os.path.join(cfg.STATIC_DATA, "ios_device_identifiers.json")) as fh:
+                    self._models = json.load(fh)
+            except (OSError, json.JSONDecodeError):
+                self._models = {}
+        return self._models
 
     def get_apps(self, serialno: str) -> List[str]:
         """Get installed apps from dump."""

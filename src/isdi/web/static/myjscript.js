@@ -55,6 +55,20 @@ function finishScanProgress(message) {
     updateProgress(100, message || 'Scan complete');
 }
 
+// One scan at a time: while it runs, every device's Scan button is disabled.
+function setScanning($button, scanning) {
+    $('#device-list button').prop('disabled', scanning);
+    if (!$button || !$button.length) {
+        return;
+    }
+    if (scanning) {
+        $button.data('original-text', $button.text());
+        $button.prop('disabled', true).text('Scanning...');
+    } else {
+        $button.prop('disabled', false).text($button.data('original-text') || 'Scan');
+    }
+}
+
 function pollScanStatus(statusUrl, resultUrl, $button) {
     var pollDelay = 1000;
     var timer = window.setInterval(function () {
@@ -71,18 +85,14 @@ function pollScanStatus(statusUrl, resultUrl, $button) {
                     window.location.href = resultUrl;
                 } else if (state.status === 'error') {
                     window.clearInterval(timer);
-                    if ($button && $button.length) {
-                        $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                    }
+                    setScanning($button, false);
                     updateProgress(0, state.error || state.message || 'Scan failed');
                     report_failure(state.error || state.message || 'Scan failed');
                 }
             })
             .fail(function () {
                 window.clearInterval(timer);
-                if ($button && $button.length) {
-                    $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                }
+                setScanning($button, false);
                 updateProgress(0, 'Could not read scan status.');
                 report_failure('Could not read scan status.');
             });
@@ -97,18 +107,13 @@ function startScan(form) {
         return true;
     }
 
-    if ($button.length) {
-        $button.data('original-text', $button.text());
-        $button.prop('disabled', true).text('Scanning...');
-    }
+    setScanning($button, true);
 
     resetScanProgress('Starting scan...');
     $.post('/scan/start', $form.serialize())
         .done(function (resp) {
             if (!resp || !resp.status_url || !resp.result_url) {
-                if ($button.length) {
-                    $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                }
+                setScanning($button, false);
                 report_failure('Could not start the scan.');
                 updateProgress(0, 'Could not start the scan.');
                 return;
@@ -118,9 +123,7 @@ function startScan(form) {
             pollScanStatus(resp.status_url, resp.result_url, $button);
         })
         .fail(function (xhr) {
-            if ($button.length) {
-                $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-            }
+            setScanning($button, false);
 
             var message = 'Could not start the scan.';
             if (xhr.responseJSON && xhr.responseJSON.error) {
@@ -132,6 +135,73 @@ function startScan(form) {
 
     return false;
 }
+
+// Home page: poll /devices and offer a Scan button for each attached phone.
+var DEVICE_KINDS = {android: 'Android', ios: 'iOS', test: 'Test'};
+var DEVICE_HINTS = {
+    'unauthorized': 'Unlock the phone and tap "Allow" on the USB debugging prompt.',
+    'offline': 'Unplug the cable and plug it back in.',
+    'no permissions': 'adb cannot access this USB device. See the setup instructions.'
+};
+var lastDeviceList = null;
+var devicePollInFlight = false;
+
+function renderDevices(devices) {
+    var $list = $('#device-list').empty();
+    if (!devices.length) {
+        $list.append($('<p class="text-muted small">').html(
+            'No phone detected. Connect one with a USB cable, then follow the ' +
+            '<a href="/instruction" target="_blank" rel="noopener">scan instructions</a> if it does not appear.'));
+        return;
+    }
+    devices.forEach(function (d) {
+        // Labels come from the phone (e.g. its model name), so insert them as text.
+        var $info = $('<div class="isdi-device-info">')
+            .append($('<b>').text(d.label))
+            .append(' ')
+            .append($('<span class="badge badge-secondary">').text(DEVICE_KINDS[d.device] || d.device));
+        if (d.last_scanned) {
+            $info.append($('<div class="small text-muted">').text('(Last scanned: ' + String(d.last_scanned).slice(0, 16) + ')'));
+        }
+        if (d.state !== 'ready') {
+            $info.append($('<div class="small text-danger">').text(DEVICE_HINTS[d.state] || ('Not ready: ' + d.state)));
+        }
+        var $form = $('<form method="POST" action="/scan" class="isdi-attached-device">')
+            .append($('<input type="hidden" name="device">').val(d.device))
+            .append($('<input type="hidden" name="devid">').val(d.devid))
+            .append($info);
+        if (d.state === 'ready') {
+            $form.append($('<button type="submit" class="btn btn-primary btn-sm">').text('Scan'));
+            $form.on('submit', function () { return startScan(this); });
+        }
+        $list.append($form);
+    });
+}
+
+function pollDevices() {
+    var scanning = $('#device-list button:disabled').length > 0;
+    // Listing iOS devices can take a few seconds; never stack requests.
+    if (document.hidden || scanning || devicePollInFlight) {
+        return;
+    }
+    devicePollInFlight = true;
+    $.getJSON('/devices').done(function (resp) {
+        var key = JSON.stringify(resp.devices);
+        if (key !== lastDeviceList) {
+            lastDeviceList = key;
+            renderDevices(resp.devices);
+        }
+    }).always(function () {
+        devicePollInFlight = false;
+    });
+}
+
+$(function () {
+    if ($('#device-list').length) {
+        pollDevices();
+        setInterval(pollDevices, 3000);
+    }
+});
 
 function delete_app(appid, e) {
     if (!confirm("Are you sure you want to delete the app '" + appid + "'?")) {

@@ -80,6 +80,25 @@ body.isdi-body {
   overflow-wrap: anywhere;
 }
 
+.isdi-attached-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.isdi-attached-device .isdi-device-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.isdi-attached-device .btn {
+  flex-shrink: 0;
+}
+
 .isdi-form-actions {
   margin-top: 12px;
 }

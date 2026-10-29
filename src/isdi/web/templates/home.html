@@ -18,26 +18,10 @@
                 can be used to spy, track, or otherwise monitor a person.
             </p>
             <hr/>
-            <label class="font-weight-bold lead">What type of device is this?</label>
-            <form id="scan_select" method="POST" action="/scan" onsubmit="return startScan(this);">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-		    {% for a in ["Android", "iOS"] %}
-                    <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
-                        <input type="radio" name="device" id="{{ a | lower }}"
-			       value="{{ a | lower }}" autocomplete="off"
-			       {% if device==a.lower() %} checked {% endif %}
-			> {{ a }}
-                    </label>
-		    {% endfor %}
-                </div>
-                <br/><br/>
-                <input class="form-control" name="device_owner" id="device_owner" 
-                       placeholder="Nickname for device? Whose is it?"
-                       rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
-		<br>
-                <button class="btn btn-primary btn-block isdi-form-actions">Scan now</button>
-            </form>
+            <label class="font-weight-bold lead">Connected devices</label>
+            <div id="device-list" class="isdi-attached-devices">
+                <p class="text-muted small">Looking for connected phones&hellip;</p>
+            </div>
             <br/>
             {% if is_termux or is_debug %}
             <div id="termux-usb-section">
@@ -124,11 +108,12 @@
 		    {% for scanned in currently_scanned %}
 		    {% if scanned.serial %}
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+        {% set scanned_name = scanned.device_model ~ (" (" ~ scanned.device_primary_user ~ ")" if scanned.device_primary_user else "") %}
         <a target="_blank" href="{{ url_for('scan', device=scanned.device, device_owner=scanned.device_primary_user, devid=scanned.serial, from_dump=1) }}">
-            {{ scanned.device_model }} ({{ scanned.device_primary_user }})
+            {{ scanned_name }}
         </a>
         <form method="POST" action="/delete_device" style="display:inline;"
-              data-confirm="Delete all data for {{ scanned.device_model }} ({{ scanned.device_primary_user }})? This cannot be undone."
+              data-confirm="Delete all data for {{ scanned_name }}? This cannot be undone."
               onsubmit="return confirm(this.dataset.confirm);">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="serial" value="{{ scanned.serial }}">

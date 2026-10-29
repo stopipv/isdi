@@ -354,6 +354,12 @@ def get_most_recent_scan_id(ser: str) -> int:
     return d["scanid"]
 
 
+def get_last_scan_time(ser: str):
+    """Time of the most recent scan of the device with HMAC serial ser, or None."""
+    d = query_db("select max(time) as time from scan_res where serial=?", args=(ser,), one=True)
+    return d["time"] if d else None
+
+
 def get_scan_res_from_db(scanid):
     d = query_db("select * from scan_res where id=?", args=(scanid,), one=True)
     return d
