@@ -12,6 +12,7 @@ def test_android():
         print("No Android phone connected")
         return
     print(a.find_spyapps(d[0]))
+    print(a.isrooted(d[0]))
 
 
 @pytest.mark.skip(reason="Fake test")
@@ -22,6 +23,7 @@ def test_ios():
         print("No iOS phone connected")
         return
     print(a.find_spyapps(d[0]))
+    print(a.isrooted(d[0]))
 
 
 if __name__ == "__main__":

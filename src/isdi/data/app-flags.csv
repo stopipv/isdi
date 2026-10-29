@@ -88,6 +88,7 @@ app.cybrook.trackviex,playstore,stalkerware,"TrackView,LifeCircle"
 app.cybrook.trackviey,playstore,stalkerware,"TrackView,LifeCircle"
 app.cybrook.trackviez,playstore,stalkerware,"TrackView,LifeCircle"
 app.cybrook.trustserv,playstore,stalkerware,"TrackView,LifeCircle"
+app.everspy.ru,offstore,stalkerware,Everspy
 app.familysecure.locator,playstore,dual-use,Family Secure And Locator
 app.fitmap.app,playstore,dual-use,Fitmap: Events & Challenges
 app.geoloc,playstore,dual-use,GeoLocator — Family Tracker + Baby Monitor Online
@@ -5022,6 +5023,7 @@ io.faceter.faceter,playstore,dual-use,Faceter – Free DIY Cloud Video Surveilla
 io.familytime.dashboard,playstore,dual-use,FamilyTime Parental Controls & Screen Time App
 io.familytime.parentalcontrol,appstore,dual-use,FamilyTime Jr.
 io.geolink.driver,appstore,dual-use,Geolink Driver
+io.github.vvb2060.packageinstaller.test,offstore,stalkerware,"Msafely (Other names: SpyX, SpyPhone)"
 io.hypertrack.locationtrack,playstore,dual-use,Location Share Live
 io.jucr.apps.charging.production,playstore,dual-use,JUCR – Effortless EV charging
 io.konum.mobile,appstore,dual-use,Konum: Family & Friend Locator
@@ -5707,6 +5709,7 @@ universal.tv.remote,playstore,dual-use,UNIVERSAL TV Remote Control
 universoft.placeter.com,appstore,dual-use,Placeter
 update.service.android,offstore,stalkerware,"mSpy (Other names: FakeSys, KidSecured, Phonsee, SecureChildren, celSpy, eyeZy, mSpy, mSpyOnline)"
 update.service.android.installer,offstore,stalkerware,"mSpy (Other names: FakeSys, KidSecured, Phonsee, SecureChildren, celSpy, eyeZy, mSpy, mSpyOnline)"
+update.service.android.pynger,offstore,stalkerware,Spynger (Other names: discovenger)
 us.AutomaticCallRecorder.autorecordphonecalls.phonerecording.callrecordingapp,playstore,dual-use,call recorder auto call record 2021
 us.abaq.myGeoTracking-Agent,appstore,dual-use,myGeoTracking Agent
 us.bark.Bark-iOS-Child2,appstore,dual-use,Bark Kids

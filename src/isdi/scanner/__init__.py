@@ -32,21 +32,6 @@ cfg = get_config()
 _APPID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$")
 
 
-# Packages installed by common root managers.
-ROOT_PACKAGES = {
-    "com.topjohnwu.magisk": "Magisk",
-    "io.github.huskydg.magisk": "Magisk (Kitsune)",
-    "io.github.vvb2060.magisk": "Magisk (Alpha)",
-    "me.weishu.kernelsu": "KernelSU",
-    "me.bmax.apatch": "APatch",
-    "eu.chainfire.supersu": "SuperSU",
-    "com.koushikdutta.superuser": "Superuser",
-    "com.noshufou.android.su": "Superuser",
-    "com.thirdparty.superuser": "Superuser",
-    "me.phh.superuser": "Superuser",
-    "com.kingroot.kinguser": "KingRoot",
-    "com.kingo.root": "Kingo Root",
-}
 
 
 _EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b")
@@ -266,12 +251,19 @@ class AppScanner:
         def _process_app_row(appid: str, d: Dict) -> Tuple[Dict, Dict]:
             permissions = d.get("permissions")
             if isinstance(permissions, str):
-                d["permissions"] = [p.strip() for p in permissions.split(",") if p.strip()]
+                d["permissions"] = [
+                    p.strip() for p in permissions.split(",") if p.strip()
+                ]
             elif not permissions:
                 d["permissions"] = []
 
             description = ""
-            for col in ("description", "description_html", "descriptionhtml", "summary"):
+            for col in (
+                "description",
+                "description_html",
+                "descriptionhtml",
+                "summary",
+            ):
                 if d.get(col):
                     description = str(d[col])
                     break
@@ -324,7 +316,7 @@ class AppScanner:
     def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
         """
         Optimized find_spyapps for iOS that caches app titles lookup.
-        
+
         The original isdi.scanner.find_spyapps calls get_app_titles() inside the loop
         for iOS, causing it to be called once per app. This optimized version
         pre-loads app titles once and reuses them.
@@ -460,9 +452,20 @@ class AndroidScanner(AppScanner):
         logging.info(f"Dumping android device {serial}...")
 
         services = [
-            "package", "location", "media.camera", "netpolicy", "mount",
-            "cpuinfo", "dbinfo", "meminfo", "procstats", "batterystats",
-            "netstats detail", "usagestats", "activity", "appops",
+            "package",
+            "location",
+            "media.camera",
+            "netpolicy",
+            "mount",
+            "cpuinfo",
+            "dbinfo",
+            "meminfo",
+            "procstats",
+            "batterystats",
+            "netstats detail",
+            "usagestats",
+            "activity",
+            "appops",
         ]
 
         def _run(*args, timeout=120) -> str:
@@ -475,7 +478,11 @@ class AndroidScanner(AppScanner):
                     f.write(redact_emails(_run("shell", "dumpsys", *svc.split())))
 
                 f.write("\nDUMP OF SERVICE net_stats\n")
-                f.write(_run("shell", "cat", "/proc/net/xt_qtaguid/stats", timeout=30).replace(" ", ","))
+                f.write(
+                    _run(
+                        "shell", "cat", "/proc/net/xt_qtaguid/stats", timeout=30
+                    ).replace(" ", ",")
+                )
 
                 for ns in ("secure", "system", "global"):
                     f.write(f"\nDUMP OF SETTINGS {ns}\n")
@@ -566,24 +573,9 @@ class AndroidScanner(AppScanner):
 
     def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
         """Check if Android device is rooted."""
-        reasons: List[str] = []
+        from isdi.scanner.root_check import check_android_root
 
-        p = runcmd.run([*self.cli, "-s", serial, "shell", "command", "-v", "su"])
-        if p.returncode == 0 and p.stdout.strip():
-            reasons.append("Found su")
-
-        if "frida" in self._adb(serial, "shell", "ps", "-A"):
-            reasons.append("Found frida")
-
-        packages = self._adb(serial, "shell", "pm", "list", "packages")
-        for line in packages.splitlines():
-            pkg = line.strip()
-            if pkg.startswith("package:"):
-                pkg = pkg[len("package:"):]
-            if pkg in ROOT_PACKAGES:
-                reasons.append(f"Found {ROOT_PACKAGES[pkg]} ({pkg})")
-
-        return len(reasons) > 0, reasons
+        return check_android_root(serial, self.cli)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
@@ -684,10 +676,13 @@ class IosScanner(AppScanner):
             return ddump.device_info()
         return "Unknown iOS Device", {}
 
-    def isrooted(self, serial: str) -> Tuple[bool, List[str]]:
+    def isrooted(self, serial: str) -> Tuple[Optional[bool], List[str]]:
         """Check if iOS device is jailbroken."""
-        # Jailbreak detection not yet implemented
-        return False, ["Jailbreak detection not implemented"]
+        from isdi.scanner.root_check import check_ios_jailbreak
+
+        ddump = self._get_dump(serial)
+        apps = ddump.appinfo if ddump else []
+        return check_ios_jailbreak(serial, self.cli, apps)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""

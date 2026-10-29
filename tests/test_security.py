@@ -27,6 +27,30 @@ def test_run_missing_binary_does_not_raise():
     assert runcmd.output(["isdi-no-such-binary"]) == ""
 
 
+def test_root_checks_pass_serial_as_one_argument(monkeypatch):
+    from isdi.scanner import root_check
+
+    calls = []
+
+    def fake_run(argv, **kwargs):
+        calls.append(argv)
+        return runcmd.subprocess.CompletedProcess(argv, 1, "", "")
+
+    monkeypatch.setattr(runcmd, "run", fake_run)
+    root_check.check_android_root("x; reboot", ["adb"])
+    assert calls
+    for argv in calls:
+        assert argv[:4] == ["adb", "-s", "x; reboot", "shell"] and len(argv) == 5
+
+
+def test_rooted_reasons_are_escaped(app):
+    from isdi.web.view.scan import _rooted_html
+
+    html = str(_rooted_html(True, ["Detected: '<script>alert(1)</script>'"]))
+    assert "<script>" not in html
+    assert "&lt;script&gt;" in html
+
+
 @pytest.mark.parametrize(
     "appid,ok",
     [

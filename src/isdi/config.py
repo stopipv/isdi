@@ -138,9 +138,12 @@ class Config:
                     "PYTHONPATH": f"{pyz_path}/site-packages",
                 }
         else:
-            self.IOS_CLI = [
-                "pymobiledevice3" if self.PLATFORM != "wsl" else "pymobiledevice3.exe"
-            ]
+            # Run the pymobiledevice3 installed with ISDi's own Python (WSL uses
+            # the Windows build, which can reach the USB device).
+            if self.PLATFORM != "wsl":
+                self.IOS_CLI = [sys.executable, "-m", "pymobiledevice3"]
+            else:
+                self.IOS_CLI = ["pymobiledevice3.exe"]
 
         # Approved app installers
         self.APPROVED_INSTALLERS = {
