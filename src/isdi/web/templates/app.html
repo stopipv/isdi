@@ -33,8 +33,12 @@
     <div class="jumbotron" style="padding: 1em">
         <h3>{% if device=="android" %} Google Play Store {% endif %} {% if device=="ios" %} Apple App Store {% endif %} Description of the app</h3>
         <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary }}</b></mark></span>
+        {% if app.descriptionHTML %}
         {# descriptionHTML is escaped Markup with only <br> kept; see sanitize_description #}
         {{ app.descriptionHTML }}
+        {% else %}
+        <p class="text-muted">No store description available. This app is not in ISDi's app database, which only covers apps known to be usable for spying or tracking.</p>
+        {% endif %}
     </div>
     
     {% if device=="android" %} 

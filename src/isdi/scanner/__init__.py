@@ -277,34 +277,32 @@ class AppScanner:
                 )
 
             d["descriptionHTML"] = sanitize_description(description)
-            d.setdefault("summary", d.get("title", ""))
-
-            info = ddump.info(appid) if ddump else None
-            return d, info or {}
+            info = (ddump.info(appid) if ddump else None) or {}
+            if not d.get("title"):
+                d["title"] = info.get("title") or appid
+            d.setdefault("summary", d["title"])
+            return d, info
 
         if not appids:
             return {}
 
-        if not AppScanner.app_info_conn:
-            return {appid: ({}, {}) for appid in appids}
-
+        # Store data (title, description) from app-info.db, which only covers
+        # apps of interest; apps missing from it still get the device's info.
+        rows: Dict[str, Dict] = {}
         conn = AppScanner.app_info_conn
-        if conn.row_factory is None:
-            conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        placeholders = ",".join("?" * len(appids))
-        cur.execute(f"SELECT * FROM apps WHERE appid IN ({placeholders})", appids)
+        if conn:
+            if conn.row_factory is None:
+                conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            placeholders = ",".join("?" * len(appids))
+            cur.execute(f"SELECT * FROM apps WHERE appid IN ({placeholders})", appids)
+            for row in cur.fetchall():
+                d = dict(row)
+                appid = d.get("appid") or d.get("appId") or ""
+                if appid:
+                    rows[appid] = d
 
-        details: Dict[str, Tuple[Dict, Dict]] = {}
-        for row in cur.fetchall():
-            d = dict(row)
-            appid = d.get("appid") or d.get("appId") or ""
-            if appid:
-                details[appid] = _process_app_row(appid, d)
-
-        for appid in appids:
-            details.setdefault(appid, ({}, {}))
-        return details
+        return {appid: _process_app_row(appid, rows.get(appid, {})) for appid in appids}
 
 
     def app_details(
