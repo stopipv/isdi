@@ -8,6 +8,9 @@ if [ -n "${PREFIX:-}" ]; then
 elif grep -qi microsoft /proc/version; then
     platform="wsl"
     idb=pymobiledevice3.exe
+    # Windows Python writes piped output in the ANSI codepage (cp1252) unless told otherwise
+    export PYTHONUTF8=1
+    export WSLENV="${WSLENV:+$WSLENV:}PYTHONUTF8"
 fi
 
 # test if idb is installed

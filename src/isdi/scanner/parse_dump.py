@@ -595,8 +595,14 @@ class IosDump(PhoneDump):
     def load_file(self):
         try:
             logging.info(f"fname is: {self.dumpf}")
-            with open(self.dumpf, "r") as app_data:
-                d = json.load(app_data)
+            with open(self.dumpf, "rb") as app_data:
+                raw = app_data.read()
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                # pymobiledevice3.exe under WSL may emit cp1252 (e.g. a raw 0xa9 for ©)
+                text = raw.decode("cp1252", errors="replace")
+            d = json.loads(text)
         except Exception as ex:
             logging.error(f"Could not load the json file: {self.dumpf}. Exception={ex}")
             return [], {}
