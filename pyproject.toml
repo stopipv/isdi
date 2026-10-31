@@ -69,7 +69,6 @@ isdi = [
     "web/templates/app.html",
     "web/templates/evidence.html",
     "web/templates/form.html",
-    "web/templates/formedit.html",
     "web/templates/home.html",
     "web/templates/instruction.html",
     "web/templates/main.html",

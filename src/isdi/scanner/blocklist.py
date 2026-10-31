@@ -165,6 +165,16 @@ def store_str(st):
         return "offstore"
 
 
+def titles(appids):
+    """Names that app-flags.csv gives for appids: {appId: title}."""
+    wanted = set(appids)
+    return {
+        row["appId"]: row["title"]
+        for row in APP_FLAGS.data
+        if row.get("appId") in wanted and row.get("title")
+    }
+
+
 def app_title_and_flag(apps_list, offstore_apps=None, system_apps=None):
     """
     Gets app flags and title from app-flags data.

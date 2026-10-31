@@ -156,9 +156,29 @@ class AppScanner:
         ddump = self._get_dump(serialno)
         return ddump.offstore_apps() if ddump else []
 
-    def get_app_titles(self, serialno: str) -> Dict[str, str]:
-        """Return dict of app package IDs and titles: {appId: title}."""
-        return {}
+    def app_titles(
+        self, serialno: str, appids: List[str], hashed: bool = False
+    ) -> Dict[str, str]:
+        """Names of appids from app-info.db, then app-flags.csv (unknown apps are left out).
+
+        Reads stored data only, so it works for past scans too; serialno is
+        the HMAC if hashed.
+        """
+        if not appids:
+            return {}
+        titles = {}
+        conn = AppScanner.app_info_conn
+        if conn:
+            placeholders = ",".join("?" * len(appids))
+            try:
+                rows = conn.execute(
+                    f"SELECT appid, title FROM apps WHERE appid IN ({placeholders})",
+                    appids,
+                ).fetchall()
+                titles = {r[0]: r[1] for r in rows if r[1]}
+            except sqlite3.Error as e:
+                logging.error(f"Error getting app titles: {e}")
+        return {**blocklist.titles(appids), **titles}
 
     def dump_path(self, serial: str, hashed: bool = False) -> str:
         """Get the file path for a device's dump.
@@ -314,13 +334,7 @@ class AppScanner:
         return details.get(appid, ({}, {}))
 
     def find_spyapps(self, serialno: str) -> Dict[str, Dict[str, Any]]:
-        """
-        Optimized find_spyapps for iOS that caches app titles lookup.
-
-        The original isdi.scanner.find_spyapps calls get_app_titles() inside the loop
-        for iOS, causing it to be called once per app. This optimized version
-        pre-loads app titles once and reuses them.
-        """
+        """Installed apps of the device with their names, flags and scores."""
         installed_apps = self.get_apps(serialno)
         if not installed_apps:
             return {}
@@ -336,14 +350,7 @@ class AppScanner:
             system_apps=system,
         )
 
-        # Pre-load app titles once for iOS instead of in the loop
-        app_titles_cache = None
-        if self.device_type == "ios":
-            try:
-                app_titles_cache = self.get_app_titles(serialno)
-            except Exception as e:
-                logging.warning(f"Failed to get app titles cache: {e}")
-                app_titles_cache = {}
+        titles = self.app_titles(serialno, list(installed_apps))
 
         # Convert to dict with appId as key
         result = {}
@@ -351,25 +358,8 @@ class AppScanner:
             appid = app.get("appId", "")
             if not appid:
                 continue
-            title = app.get("title", "") or ""
+            title = titles.get(appid, "")
             flags = app.get("flags", [])
-
-            # Get app titles from database (Android)
-            if self.device_type == "android" and AppScanner.app_info_conn and not title:
-                try:
-                    cursor = AppScanner.app_info_conn.cursor()
-                    cursor.execute("SELECT title FROM apps WHERE appid = ?", (appid,))
-                    row = cursor.fetchone()
-                    if row:
-                        title = row[0] or ""
-                except Exception as e:
-                    logging.error(f"Error getting title for {appid}: {e}")
-            elif self.device_type == "ios" and app_titles_cache:
-                # Use cached titles from iOS dump (loaded once, not in loop)
-                title = app_titles_cache.get(appid, "") or title
-
-            # ASCII encode/decode to handle special characters
-            title = title.encode("ascii", errors="ignore").decode("ascii")
 
             # Classify and score
             score_val = blocklist.score(flags)
@@ -644,30 +634,15 @@ class IosScanner(AppScanner):
 
         return ddump.installed_apps()
 
-    def get_app_titles(self, serialno: str) -> Dict[str, str]:
-        """Get iOS app titles as dict: {appId: title}."""
-        ddump = self._get_dump(serialno)
-        if not ddump:
-            return {}
-        titles_df = ddump.installed_apps_titles()
-        # If it returns a DataFrame-like object, convert to dict
-        # if hasattr(titles_df, 'to_dict'):
-        #     # It's a DataFrame, convert to our dict format
-        #     result = {}
-        #     for appid, title in zip(titles_df.get('appId', []), titles_df.get('title', [])):
-        #         result[appid] = title
-        #     return result
-        if isinstance(titles_df, dict):
-            # Already a dict
-            return titles_df
-        else:
-            # Try to iterate
-            try:
-                return {
-                    item.get("appId"): item.get("title") for item in titles_df if item
-                }
-            except:
-                return {}
+    def app_titles(
+        self, serialno: str, appids: List[str], hashed: bool = False
+    ) -> Dict[str, str]:
+        """Names from the device's stored dump, then app-info.db."""
+        ddump = self._get_dump(serialno, hashed=hashed)
+        on_device = ddump.installed_apps_titles() if ddump else {}
+        titles = {a: on_device[a] for a in appids if on_device.get(a)}
+        missing = [a for a in appids if a not in titles]
+        return {**super().app_titles(serialno, missing), **titles}
 
     def device_info(self, serial: str) -> Tuple[str, Dict]:
         """Get iOS device info."""

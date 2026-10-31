@@ -422,35 +422,16 @@ def scan():
 
         app_rows = db.get_app_info_from_db(scanid)
         apps = {}
-        # Pre-fetch titles from the app-info cache database for this device type
-        _title_cache = {}
-        if sc and scan_res.get("device") == "android" and sc.app_info_conn:
-            try:
-                appids_in_scan = [r["appid"] for r in app_rows if r.get("appid")]
-                if appids_in_scan:
-                    cur = sc.app_info_conn.cursor()
-                    placeholders = ",".join("?" * len(appids_in_scan))
-                    cur.execute(
-                        f"SELECT appid, title FROM apps WHERE appid IN ({placeholders})",
-                        appids_in_scan,
-                    )
-                    for r in cur.fetchall():
-                        if isinstance(r, dict):
-                            _title_cache[r["appid"]] = r.get("title") or ""
-                        else:
-                            _title_cache[r[0]] = r[1] or ""
-            except Exception:
-                pass
+        # ser is the stored HMAC; names come from the device's stored dump and app-info.db.
+        titles = sc.app_titles(ser, [r["appid"] for r in app_rows], hashed=True)
         for row in app_rows:
             appid = row["appid"]
             try:
                 flags = json.loads(row["flags"]) if row["flags"] else []
             except (json.JSONDecodeError, TypeError):
                 flags = []
-            title = _title_cache.get(appid, "")
-            title = title.encode("ascii", errors="ignore").decode("ascii")
             apps[appid] = {
-                "title": title,
+                "title": titles.get(appid, ""),
                 "flags": flags,
                 "score": blocklist.score(flags),
                 "class_": blocklist.assign_class(flags),
@@ -549,6 +530,7 @@ def scan():
             scanid=scanid,
             sysapps=set(),
             serial=ser,
+            history=from_dump,  # a past scan: nothing to uninstall
             currently_scanned=currently_scanned,
             error=config.error(),
         )

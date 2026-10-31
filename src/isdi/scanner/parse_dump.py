@@ -564,6 +564,14 @@ class AndroidDump(PhoneDump):
         return res
 
 
+def app_display_name(app: dict) -> str:
+    """The name iOS shows for an app (e.g. "Find My"), falling back to its executable."""
+    for key in ("CFBundleDisplayName", "CFBundleName", "CFBundleExecutable"):
+        if app.get(key):
+            return str(app[key])
+    return ""
+
+
 class IosDump(PhoneDump):
     # COLS = ['ApplicationType', 'BuildMachineOSBuild', 'CFBundleDevelopmentRegion',
     #    'CFBundleDisplayName', 'CFBundleExecutable', 'CFBundleIdentifier',
@@ -643,40 +651,43 @@ class IosDump(PhoneDump):
                 logging.info(f"Have not seen {permission} before.")
                 self.permissions_map[permission] = permission.replace("kTCCService", "")
 
-    def get_permissions(self, app: dict) -> list:
-        """
-        Returns a list of tuples (permission, developer-provided reason for permission).
-        Could modify this function to include whether or not the permission can be adjusted
-        in Settings.
-        """
-        system_permissions = retrieve(
-            app, ["Entitlements", "com.apple.private.tcc.allow"]
-        )
-        adjustable_system_permissions = retrieve(
-            app, ["Entitlements", "com.apple.private.tcc.allow.overridable"]
-        )
-        third_party_permissions = list(set(app.keys()) & set(self.permissions_map))
-        self.check_unseen_permissions(
-            list(system_permissions) + list(adjustable_system_permissions)
-        )
+    # How an app gets each permission, strongest first.
+    PERMISSION_ACCESS = {
+        "always": "Always allowed (built into iOS; cannot be turned off)",
+        "default": "Allowed by default (can be turned off in Settings)",
+        "asks": "Can ask the user",
+    }
 
-        # (permission used, developer reason for requesting the permission)
-        all_permissions = list(
-            set(
-                map(
-                    lambda x: (
-                        self.permissions_map[x],
-                        app.get(x, "permission granted by system"),
-                    ),
-                    list(
-                        set(system_permissions)
-                        | set(adjustable_system_permissions)
-                        | set(third_party_permissions)
-                    ),
-                )
-            )
-        )
-        return all_permissions
+    def get_permissions(self, app: dict) -> list:
+        """Permissions the app has or can request, one dict per permission.
+
+        Each dict has "name", "access" (a PERMISSION_ACCESS value) and
+        "reason" (the developer's usage description, or "" if none is in
+        Info.plist). For "asks", the dump does not say whether the user
+        granted it.
+        """
+        # Only Apple's own apps have these entitlements; most apps have neither.
+        entitlements = app.get("Entitlements") or {}
+        always = set(entitlements.get("com.apple.private.tcc.allow") or [])
+        default = set(entitlements.get("com.apple.private.tcc.allow.overridable") or [])
+        asks = set(app.keys()) & set(self.permissions_map)
+        self.check_unseen_permissions(list(always) + list(default))
+
+        perms = {}
+        for kind, keys in (("always", always), ("default", default), ("asks", asks)):
+            for key in keys:
+                name = self.permissions_map.get(key, key)
+                p = perms.setdefault(name, {"name": name, "access": kind, "reason": ""})
+                reason = app.get(key)
+                # System apps keep the text in a localized InfoPlist.strings file.
+                if isinstance(reason, str) and "InfoPlist.strings" not in reason:
+                    p["reason"] = p["reason"] or reason.strip()
+
+        order = list(self.PERMISSION_ACCESS)
+        result = sorted(perms.values(), key=lambda p: (order.index(p["access"]), p["name"]))
+        for p in result:
+            p["access"] = self.PERMISSION_ACCESS[p["access"]]
+        return result
 
     def device_info(self):
         # TODO: see idevicediagnostics mobilegestalt KEY
@@ -723,8 +734,8 @@ class IosDump(PhoneDump):
             )
             # permissions are an array that returns the permission id and an explanation.
             permissions = self.get_permissions(app)
-        res["permissions"] = [(p.capitalize(), r) for p, r in permissions]
-        res["title"] = app.get("CFBundleExecutable", "")
+        res["permissions"] = permissions
+        res["title"] = app_display_name(app)
         res["App Version"] = app.get("CFBundleVersion", "")
         res["Install Date"] = """
         Apple does not officially record iOS app installation dates.  To view when
@@ -758,11 +769,7 @@ class IosDump(PhoneDump):
     def installed_apps_titles(self) -> Dict[str, str]:
         if not self.df:
             return {}
-        return {
-            app.get("appId", ""): app.get("CFBundleExecutable", "")
-            for app in self.df
-            if app.get("appId")
-        }
+        return {app["appId"]: app_display_name(app) for app in self.df if app.get("appId")}
 
     def installed_apps(self):
         # return self.df.index

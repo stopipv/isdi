@@ -4,7 +4,6 @@
         <div class="isdi-actions">
             <a class='btn btn-normal' href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instructions</u></a>
-            <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
             <a class="isdi-close-link" href="javascript:;" onclick="return kill_app();">&#x274C; Close App and End Session</a>
         </div>
@@ -155,7 +154,9 @@
             <table class="table table-bordered w-100 applist-table">
                 <thead>
                     <tr class="something">
+                        {% if not history %}
                         <th class="col-md-1" style="width: 3%">Uninstall?</th>
+                        {% endif %}
                         <th class="col-md-2" style="width: 23%">App Name</th>
                         <th class="col-md-2" style="width: 23%">App ID</th>
                         <th class="col-md-2" style="width: 20%">Flags</th>
@@ -168,7 +169,8 @@
                         {% set app_items = apps_sorted if apps_sorted is defined else apps.items() %}
                         {% for appId, info in app_items %}
                         <tr data-appid="{{ appId }}">
-                            {% if appId in sysapps %}
+                            {% if history %}
+                            {% elif appId in sysapps %}
                             <td align="center" data-label="Uninstall"><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
                                                    title="System App! Cannot delete">&otimes;</a></td>
                             {%  else %}

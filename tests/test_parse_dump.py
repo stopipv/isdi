@@ -131,3 +131,32 @@ def test_apps(fname, conds):
 class TestIosDump(object):
     # TODO - Write IosDump
     pass
+
+
+def test_ios_permissions_are_merged_and_labelled():
+    from isdi.scanner.parse_dump import IosDump
+
+    dump = IosDump.__new__(IosDump)  # skip loading a dump file
+    dump.permissions_map = {
+        "kTCCServiceCamera": "Camera",
+        "kTCCServiceAddressBook": "Contacts",
+        "NSContactsUsageDescription": "Contacts",
+        "NSLocationWhenInUseUsageDescription": "Location (While Using)",
+    }
+    dump.check_unseen_permissions = lambda perms: None
+    app = {
+        "Entitlements": {
+            "com.apple.private.tcc.allow": ["kTCCServiceCamera"],
+            "com.apple.private.tcc.allow.overridable": ["kTCCServiceAddressBook"],
+        },
+        "NSContactsUsageDescription": "Find friends.",
+        "NSLocationWhenInUseUsageDescription": "See InfoPlist.strings",
+    }
+    assert dump.get_permissions(app) == [
+        {"name": "Camera", "access": IosDump.PERMISSION_ACCESS["always"], "reason": ""},
+        # Granted by default and also requested: one row, strongest access, with the reason.
+        {"name": "Contacts", "access": IosDump.PERMISSION_ACCESS["default"], "reason": "Find friends."},
+        # The InfoPlist.strings placeholder is not a reason.
+        {"name": "Location (While Using)", "access": IosDump.PERMISSION_ACCESS["asks"], "reason": ""},
+    ]
+    assert dump.get_permissions({}) == []
