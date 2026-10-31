@@ -1,3 +1,20 @@
+// CSRF token for state-changing requests (checked by the server on POST).
+function csrf_token() {
+    return $('meta[name="csrf-token"]').attr('content') || '';
+}
+
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS)$/i.test(settings.type)) {
+            xhr.setRequestHeader('X-CSRFToken', csrf_token());
+        }
+    }
+});
+
+$(document).on('click', '.js-delete-app', function () {
+    delete_app($(this).attr('data-appid'), this);
+});
+
 function updateProgress(percentage, message) {
     var $progress = $('#scan-prog');
     var $wrap = $('#scan-progress-wrap');
@@ -38,6 +55,20 @@ function finishScanProgress(message) {
     updateProgress(100, message || 'Scan complete');
 }
 
+// One scan at a time: while it runs, every device's Scan button is disabled.
+function setScanning($button, scanning) {
+    $('#device-list button').prop('disabled', scanning);
+    if (!$button || !$button.length) {
+        return;
+    }
+    if (scanning) {
+        $button.data('original-text', $button.text());
+        $button.prop('disabled', true).text('Scanning...');
+    } else {
+        $button.prop('disabled', false).text($button.data('original-text') || 'Scan');
+    }
+}
+
 function pollScanStatus(statusUrl, resultUrl, $button) {
     var pollDelay = 1000;
     var timer = window.setInterval(function () {
@@ -54,18 +85,14 @@ function pollScanStatus(statusUrl, resultUrl, $button) {
                     window.location.href = resultUrl;
                 } else if (state.status === 'error') {
                     window.clearInterval(timer);
-                    if ($button && $button.length) {
-                        $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                    }
+                    setScanning($button, false);
                     updateProgress(0, state.error || state.message || 'Scan failed');
                     report_failure(state.error || state.message || 'Scan failed');
                 }
             })
             .fail(function () {
                 window.clearInterval(timer);
-                if ($button && $button.length) {
-                    $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                }
+                setScanning($button, false);
                 updateProgress(0, 'Could not read scan status.');
                 report_failure('Could not read scan status.');
             });
@@ -80,18 +107,13 @@ function startScan(form) {
         return true;
     }
 
-    if ($button.length) {
-        $button.data('original-text', $button.text());
-        $button.prop('disabled', true).text('Scanning...');
-    }
+    setScanning($button, true);
 
     resetScanProgress('Starting scan...');
     $.post('/scan/start', $form.serialize())
         .done(function (resp) {
             if (!resp || !resp.status_url || !resp.result_url) {
-                if ($button.length) {
-                    $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-                }
+                setScanning($button, false);
                 report_failure('Could not start the scan.');
                 updateProgress(0, 'Could not start the scan.');
                 return;
@@ -101,9 +123,7 @@ function startScan(form) {
             pollScanStatus(resp.status_url, resp.result_url, $button);
         })
         .fail(function (xhr) {
-            if ($button.length) {
-                $button.prop('disabled', false).text($button.data('original-text') || 'Scan now');
-            }
+            setScanning($button, false);
 
             var message = 'Could not start the scan.';
             if (xhr.responseJSON && xhr.responseJSON.error) {
@@ -116,120 +136,92 @@ function startScan(form) {
     return false;
 }
 
-function delete_app(appid, e) {
-    y = confirm(`Are you sure you want to delete the app  '${appid}'?"`);
-    if (!y){return;}
-    data = {'appid': appid, 'serial': serial, 'device': device};
-    $.post('/delete/app/' + scanid, data=data).done(function (r){
-        $('tr#' + appid).addClass('text-muted');
-        $(e).removeClass('text-warning');
-        $(e).addClass('text-success');
-        $(e).html('&#10003;');
-        $(e).prop('onclick', null).off('click');
-        report_success(r);
-    }).fail(function(){
-        report_failure("Could not delete the app '" + appid + "'")
-    })
-}
+// Home page: poll /devices and offer a Scan button for each attached phone.
+var DEVICE_KINDS = {android: 'Android', ios: 'iOS', test: 'Test'};
+var DEVICE_HINTS = {
+    'unauthorized': 'Unlock the phone and tap "Allow" on the USB debugging prompt.',
+    'offline': 'Unplug the cable and plug it back in.',
+    'no permissions': 'adb cannot access this USB device. See the setup instructions.'
+};
+var lastDeviceList = null;
+var devicePollInFlight = false;
 
-
-var start = null;
-var maxTime = 5000;  // 30 sec
-var timeoutVal = Math.floor(maxTime/50);
-var perc = 0;
-function startProgressbar() {
-    start = new Date();
-    perc = 0;
-    $('#applist').html('')
-    $('#scan-prog').animate({
-    }, 100, function() {
-        $(this).closest('.progress').fadeIn('fast');
-    });
-    animateUpdate();
-}
-function killProgressbar() {
-    start = new Date(0);
-}
-
-function max(a, b) {
-    if (a>b)
-        return a;
-    else
-        return b;
-}
-
-function animateUpdate() {
-    var now = new Date();
-    var timeDiff = now.getTime() - start.getTime() - 1000;
-    perc = max(perc, Math.round((timeDiff/maxTime)*100));
-
-    if (perc <= 100) {
-        updateProgress(perc);
-        setTimeout(animateUpdate, timeoutVal);
+function renderDevices(devices) {
+    var $list = $('#device-list').empty();
+    if (!devices.length) {
+        $list.append($('<p class="text-muted small">').html(
+            'No phone detected. Connect one with a USB cable, then follow the ' +
+            '<a href="/instruction" target="_blank" rel="noopener">scan instructions</a> if it does not appear.'));
+        return;
     }
-}
-
-
-/* Unused functions */
-
- function get_actions(k) {
-     var s = '<div class="btn-group" data-toggle="buttons">';
-     $.each(['delete', 'ignore'], function(i, b) {
-         s += '<label class="btn btn-danger">'
-         s += '<input type="radio" name="actions-' + k +'" value="' + b + '"> </input>';
-         s += b + '</label>';
-     });
-     s += '</div>';
-     return s;
- }
-
- function create_tab(data, device, ser) {
-     var s = '';
-     var i = 0;
-     d = $.parseJSON(data)
-     console.log(data)
-     for (k in d) {
-         i += 1;
-         s += '<tr id="'+k+'">';
-         s += "<td><a class=\"h4 text-danger\" onclick='delete('" + device+"', '" + k + "')'>"
-         s += "&otimes;</a></td>";
-         s += "<td><a href='/details/app/" + device + "?id=" + k + "&ser=" + ser;
-         s += "' target='_blank'>" + d[k]['title'] + "</td>";
-         s += "<td><code>" + k + "</code></td>";
-         s += "<td>" + d[k]["flags"] + "</td>";
-         // s += "<td>" + get_actions(k) + "</td>";
-         s += "<td><input type=\"text\" placeholder=\"Notes\" class='form-control'/></td>"
-         s += '</tr>';
-     }
-     if (i <= 0) {
-         s = "<tr><td colspan='5' class='alert-success'>No spyware found! ";
-         s += "<sup>1</sup></td></tr>";
-     }
-     return s;
- }
-
-
-function fetch(url, device) {
-    startProgressbar();
-    $.get(url, function (data) {
-        perc = 100;
-        updateProgress(100);
-        var d = $.parseJSON(data);
-        var ser = d['serial'];
-        $('#device-id').attr("value", device);
-        $('#device-id').css("font-size", "0.25in");
-        var s = "";
-        s += create_tab(d['apps'], device, ser);
-        s += '<input type="hidden" name="url" value="';
-        s += url.replace('/scan/', '') + '"></input>';
-        $('#applist').html(s);
-        $('input[value=ignore]').prop('checked', 'checked');
-        $('#btn-submit').prop('disabled', false);
-        $('#error-notice').html(d['error'])
-    }).fail(function (err) {
-        perc = 100;
-        $('#error-notice').html(JSON.stringify(err));
+    devices.forEach(function (d) {
+        // Labels come from the phone (e.g. its model name), so insert them as text.
+        var $info = $('<div class="isdi-device-info">')
+            .append($('<b>').text(d.label))
+            .append(' ')
+            .append($('<span class="badge badge-secondary">').text(DEVICE_KINDS[d.device] || d.device));
+        if (d.last_scanned) {
+            $info.append($('<div class="small text-muted">').text('(Last scanned: ' + String(d.last_scanned).slice(0, 16) + ')'));
+        }
+        if (d.state !== 'ready') {
+            $info.append($('<div class="small text-danger">').text(DEVICE_HINTS[d.state] || ('Not ready: ' + d.state)));
+        }
+        var $form = $('<form method="POST" action="/scan" class="isdi-attached-device">')
+            .append($('<input type="hidden" name="device">').val(d.device))
+            .append($('<input type="hidden" name="devid">').val(d.devid))
+            .append($info);
+        if (d.state === 'ready') {
+            $form.append($('<button type="submit" class="btn btn-primary btn-sm">').text('Scan'));
+            $form.on('submit', function () { return startScan(this); });
+        }
+        $list.append($form);
     });
 }
 
+function pollDevices() {
+    var scanning = $('#device-list button:disabled').length > 0;
+    // Listing iOS devices can take a few seconds; never stack requests.
+    if (document.hidden || scanning || devicePollInFlight) {
+        return;
+    }
+    devicePollInFlight = true;
+    $.getJSON('/devices').done(function (resp) {
+        var key = JSON.stringify(resp.devices);
+        if (key !== lastDeviceList) {
+            lastDeviceList = key;
+            renderDevices(resp.devices);
+        }
+    }).always(function () {
+        devicePollInFlight = false;
+    });
+}
 
+$(function () {
+    if ($('#device-list').length) {
+        pollDevices();
+        setInterval(pollDevices, 3000);
+    }
+});
+
+function delete_app(appid, e) {
+    if (!confirm("Are you sure you want to delete the app '" + appid + "'?")) {
+        return;
+    }
+    $.post('/delete/app/' + scanid, {'appid': appid}).done(function (r) {
+        $('tr').filter(function () { return $(this).attr('data-appid') === appid; })
+            .addClass('text-muted');
+        $(e).removeClass('text-warning js-delete-app')
+            .addClass('text-success')
+            .html('&#10003;');
+        report_success($('<div>').text(r).html());
+    }).fail(function (xhr) {
+        report_failure("Could not delete the app '" + appid + "': " + (xhr.responseText || ''));
+    });
+}
+
+function kill_app() {
+    $.post('/kill').always(function () {
+        window.open('', '_self').close();
+    });
+    return false;
+}

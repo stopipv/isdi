@@ -2,7 +2,8 @@
 This file have different ways to detect spyware apps add flags to them.
 The csv file has two column appId, store, and flag
 store: {'playstore', 'appstore', 'offstore'}
-flag: {'dual-use', 'spyware', 'safe'}
+flag: {'dual-use', 'spyware', 'stalkerware', 'co-occurrence', 'safe'}
+('spyware' and 'stalkerware' mean the same thing and are treated identically.)
 
 Flags added to them are from the following four classes
 1. "onstore-dual-use": onstore dual-use apps
@@ -32,7 +33,7 @@ try:
                 "source": "",
             }
         )
-        .isin("flag", {"dual-use", "spyware", "co-occurrence"})
+        .isin("flag", {"dual-use", "spyware", "stalkerware", "co-occurrence"})
     )
 except FileNotFoundError as e:
     print(f"I can't find the blocklist file: {config.APP_FLAGS_FILE!r}.")
@@ -46,7 +47,7 @@ SPY_REGEX = {
 
 def dedup_app_flags(apps_list):
     """
-    Takes list of dicts like [{"appId": "com.x", "title": "X", "flag": [...]}, ...]
+    Takes list of dicts like [{"appId": "com.x", "title": "X", "flags": [...]}, ...]
     Returns deduplicated version by appId
     """
     result = {}
@@ -67,7 +68,7 @@ def dedup_app_flags(apps_list):
         elif title and title != result[appid]["title"]:
             result[appid]["title"] = result[appid]["title"] + " -+- " + title
         # Collect flags
-        flags = app.get("flag", [])
+        flags = app.get("flags", [])
         if isinstance(flags, str):
             flags = [flags] if flags else []
         elif isinstance(flags, list):
@@ -96,11 +97,14 @@ def score(flags):
     weight = {
         "onstore-dual-use": 0.8,
         "dual-use": 0.8,
+        "spyware": 1.0,
+        "stalkerware": 1.0,
         "onstore-spyware": 1.0,
         "offstore-spyware": 1.0,
         "offstore-app": 0.8,
         "regex-spy": 0.3,
         "odds-ratio": 0.2,
+        "co-occurrence": 0.2,
         "system-app": -0.1,
         "device-owner": 1.0,
         "accessibility": 1.0,
@@ -123,12 +127,14 @@ def flag_str(flags):
     def _add_class(flag):
         return (
             "primary"
-            if "spyware" in flag or flag == "device-owner" or flag == "accessibility"
+            if "spyware" in flag or flag in ("stalkerware", "device-owner", "accessibility")
             else "warning" if "dual-use" in flag else "info" if "spy" in flag else ""
         )
 
     def _info(flag):
         return {
+            "spyware": "This app is a known spyware/stalkerware app.",
+            "stalkerware": "This app is a known spyware/stalkerware app.",
             "regex-spy": "This app's name or its app-id contain words like 'spy', 'track', etc.",
             "offstore-spyware": (
                 "This app is a spyware app, distributed outside official applicate stores, e.g., "
@@ -159,6 +165,16 @@ def store_str(st):
         return "onstore"
     else:
         return "offstore"
+
+
+def titles(appids):
+    """Names that app-flags.csv gives for appids: {appId: title}."""
+    wanted = set(appids)
+    return {
+        row["appId"]: row["title"]
+        for row in APP_FLAGS.data
+        if row.get("appId") in wanted and row.get("title")
+    }
 
 
 def app_title_and_flag(apps_list, offstore_apps=None, system_apps=None):

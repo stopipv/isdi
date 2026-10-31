@@ -4,6 +4,7 @@ from isdi.config import get_config
 from flask import g
 from datetime import datetime as dt
 import os
+import re
 import csv
 import threading
 
@@ -353,6 +354,12 @@ def get_most_recent_scan_id(ser: str) -> int:
     return d["scanid"]
 
 
+def get_last_scan_time(ser: str):
+    """Time of the most recent scan of the device with HMAC serial ser, or None."""
+    d = query_db("select max(time) as time from scan_res where serial=?", args=(ser,), one=True)
+    return d["time"] if d else None
+
+
 def get_scan_res_from_db(scanid):
     d = query_db("select * from scan_res where id=?", args=(scanid,), one=True)
     return d
@@ -387,6 +394,11 @@ def first_element_or_none(l):
         return l[0]
 
 
+def is_hmac_serial(serial: str) -> bool:
+    """True if serial has the form of a stored (HMAC-SHA256 hex) serial."""
+    return bool(re.fullmatch(r"[0-9a-f]{64}", serial or ""))
+
+
 def delete_scan_data(serial: str) -> bool:
     """
     Delete all data for a scanned device identified by its stored serial.
@@ -395,6 +407,10 @@ def delete_scan_data(serial: str) -> bool:
     """
     import glob
     import shutil
+
+    # serial is used in a glob below; only accept the stored HMAC form.
+    if not is_hmac_serial(serial):
+        return False
 
     db_conn = get_db()
 

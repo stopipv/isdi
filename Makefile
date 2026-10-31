@@ -38,6 +38,7 @@ format:
 
 build: clean
 	$(PYTHON) -m build
+	$(PYTHON) scripts/check_dist.py dist
 
 upload-test: build
 	@echo "Uploading to TestPyPI..."
@@ -52,10 +53,15 @@ upload: build
 	@read REPLY; \
 	case "$$REPLY" in \
 		[yY]) \
-			$(PYTHON) -m twine upload dist/*; \
-			echo ""; \
-			echo "✓ Successfully uploaded to PyPI!"; \
-			echo "Install with: pip install isdi-scanner"; \
+			if $(PYTHON) -m twine upload dist/*; then \
+				echo ""; \
+				echo "✓ Successfully uploaded to PyPI!"; \
+				echo "Install with: pip install isdi-scanner"; \
+			else \
+				echo ""; \
+				echo "Upload failed."; \
+				exit 1; \
+			fi; \
 			;; \
 		*) \
 			echo "Upload cancelled."; \

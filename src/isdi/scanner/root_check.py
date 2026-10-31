@@ -2,7 +2,7 @@ from typing import Tuple, List, Optional
 import logging
 import socket
 from pymobiledevice3.lockdown import create_using_usbmux
-from isdi.scanner.runcmd import run_command, catch_err
+from isdi.scanner import runcmd
 
 ANDROID_ROOT_INDICATORS = [
     {
@@ -71,7 +71,7 @@ ANDROID_ROOT_INDICATORS = [
     {
         # low confidence if not found, magisk can rename itself
         "name": "root_package",
-        "cmd_str": "pm list packages | grep -E 'magisk|kernelsu|apatch|supersu'",
+        "cmd_str": "pm list packages | grep -E 'magisk|kernelsu|apatch|supersu|superuser|kingroot|kinguser|kingo'",
         "expected": "",
         "desc": "Root manager package detected",
     },
@@ -95,16 +95,19 @@ IOS_JAILBREAK_PACKAGES = {
 # ----------------------------------------------------------------
 
 
-def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
-    """Runs standard integrity/root checks on an Android device."""
+def check_android_root(serial: str, cli: List[str]) -> Tuple[bool, List[str]]:
+    """Runs standard integrity/root checks on an Android device.
+
+    cli is the adb argv prefix. Each check's cmd_str is a fixed string run by
+    the device's shell (so pipes work there); nothing is run by a local shell.
+    """
     reasons: List[str] = []
 
     for check in ANDROID_ROOT_INDICATORS:
-        cmd = "{cli} -s {serial} shell '{cmd_str}'"
-        cmd_run = cmd.format(cli=cli_path, serial=serial, cmd_str=check["cmd_str"])
+        cmd_run = f"adb -s {serial} shell \"{check['cmd_str']}\""
         try:
-            p = run_command(cmd, cli=cli_path, serial=serial, cmd_str=check["cmd_str"])
-            output = catch_err(p, cmd=cmd).strip()
+            p = runcmd.run([*cli, "-s", serial, "shell", check["cmd_str"]], timeout=30)
+            output = (p.stdout or "").strip()
 
             if output == "" and check.get("skip_if_missing", False):
                 continue
@@ -118,7 +121,7 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
                         f"This command ('{check['cmd_str']}') should always run successfully on any standard Android device. "
                         f"Failure usually indicates an ABD/USB authorization issue, a locked screen, or a super old device. "
                         f"Command: '{cmd_run}' (Exit code: {p.returncode}). "
-                        f"Details: {output}"
+                        f"Details: {(p.stderr or output).strip()}"
                     )
                 continue
 
@@ -154,7 +157,7 @@ def check_android_root(serial: str, cli_path: str) -> Tuple[bool, List[str]]:
 
 
 def check_ios_jailbreak(
-    serial: str, cli_path: str, apps: List[dict]
+    serial: str, cli: List[str], apps: List[dict]
 ) -> Tuple[Optional[bool], List[str]]:
     """checks afc2 service and common jailbreak package managers"""
     reasons: List[str] = []
@@ -171,7 +174,7 @@ def check_ios_jailbreak(
             f"Failed rootcheck 'afc2_service'. "
             f"Detected: 'com.apple.afc2 active'. "
             f"Apple File Conduit 2 (afc2) service is active. This permits full root filesystem access over a USB connection. "
-            f"Command to reproduce: `{cli_path} lockdown service com.apple.afc2 --udid {serial}`"
+            f"Command to reproduce: `{' '.join(cli)} lockdown service com.apple.afc2 --udid {serial}`"
         )
         reasons.append(msg)
     except socket.timeout:
@@ -185,7 +188,7 @@ def check_ios_jailbreak(
         socket.setdefaulttimeout(orig_timeout)
 
     for app in apps:
-        appid = app.get("Identifier", "")
+        appid = app.get("CFBundleIdentifier") or app.get("appId", "")
         if appid in IOS_JAILBREAK_PACKAGES:
             name = IOS_JAILBREAK_PACKAGES[appid]
             msg = (

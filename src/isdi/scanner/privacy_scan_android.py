@@ -29,46 +29,36 @@ Finally screen capture.
     adb shell am start 'com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity' && sleep 10 && adb shell input tap 20 80
 """
 
-import re, os
-import shlex
+import os
+import re
+import secrets
 import time
-import random
-from subprocess import Popen, PIPE, TimeoutExpired, run, CalledProcessError
 from pathlib import Path
 from flask import url_for
 from isdi.config import get_config
+from isdi.scanner import runcmd
 
 config = get_config()
 adb = config.ADB_PATH
 
-
-def run_command(cmd, **kwargs):
-    _cmd = cmd.format(**kwargs)
-    print(_cmd)
-    try:
-        p = Popen(_cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        p.wait(4)
-        return p.stdout.read().decode("utf-8"), p.stderr.read().decode("utf-8")
-    except FileNotFoundError as e:
-        return "", f"Command not found: {e}"
-    except TimeoutExpired:
-        p.kill()
-        return "", "Command timed out"
-    except Exception as e:
-        return "", f"Error: {e}"
+# Screenshots are named <16 hex chars>.png inside config.screenshots_dir.
+SCREENSHOT_RE = re.compile(r"^[0-9a-f]{16}\.png$")
 
 
 def thiscli(ser):
-    if ser:
-        return "{adb} -s {ser}".format(adb=adb, ser=ser)
-    else:
-        return "{adb}".format(adb=adb)
+    """argv prefix for adb, targeting ser if given."""
+    return [adb, "-s", ser] if ser else [adb]
+
+
+def run_command(argv, timeout=10):
+    """Run argv (no shell) and return (stdout, stderr)."""
+    p = runcmd.run(argv, timeout=timeout)
+    return p.stdout, p.stderr if p.returncode != 0 else ""
 
 
 def get_screen_res(ser):
-    cmd = "{cli} shell dumpsys window | grep 'mUnrestrictedScreen'"
-    out, err = run_command(cmd, cli=thiscli(ser))
-    m = re.match(r"mUnrestrictedScreen=\(0,0\) (?P<w>\d+)x(?P<h>\d+)", out.strip())
+    out, err = run_command(thiscli(ser) + ["shell", "dumpsys", "window"])
+    m = re.search(r"mUnrestrictedScreen=\(0,0\) (?P<w>\d+)x(?P<h>\d+)", out)
     if m:
         return int(m.group("w")), int(m.group("h"))
     else:
@@ -79,8 +69,9 @@ def open_activity(ser, activity_name):
     """
     Opens an activity
     """
-    cmd = "{cli} shell am start '{act}'"
-    out, err = run_command(cmd, cli=thiscli(ser), act=activity_name)
+    # adb shell joins its arguments into a command line for the device's
+    # shell, so quote the activity name ($ appears in some of them).
+    out, err = run_command(thiscli(ser) + ["shell", "am", "start", f"'{activity_name}'"])
     if err:
         print("ERROR (open_activity): {!r}".format(err))
         return False
@@ -97,8 +88,7 @@ def tap(ser, xpercent, ypercent):
     w, h = get_screen_res(ser)
     x = int(xpercent * w / 100)
     y = int(ypercent * h / 100)
-    cmd = "{cli} shell input tap {x} {y}"
-    out, err = run_command(cmd, cli=thiscli(ser), x=x, y=y)
+    out, err = run_command(thiscli(ser) + ["shell", "input", "tap", str(x), str(y)])
     if err:
         print("ERROR (tap): {!r}".format(err))
 
@@ -107,78 +97,54 @@ def keycode(ser, evt):
     cmds = {"home": "3", "back": "4", "menu": "82", "power": "26"}
     if evt not in cmds:
         print("ERROR (keycode): No support for {}".format(evt))
+        return
 
-    key = cmds.get(evt)
-    run_command("{cli} shell input keyevent {key}", cli=thiscli(ser), key=key)
+    run_command(thiscli(ser) + ["shell", "input", "keyevent", cmds[evt]])
 
 
 def is_screen_on(ser):
-    cmd = "{cli} shell dumpsys input_method | grep 'mInteractive' | sed 's/.*mInteractive=//g'"
-    out, err = run_command(cmd, cli=thiscli(ser))
+    out, err = run_command(thiscli(ser) + ["shell", "dumpsys", "input_method"])
     if err:
         print("ERROR (is_screen_on): {!r}".format(err))
-    out = out.strip()
-    if out == "true":
-        return True
-    else:
-        return False
+    return "mInteractive=true" in out
 
 
 def take_screenshot(ser, fname=None):
     """
-    Take a screenshot and output the iamge
+    Take a screenshot, save it in the private screenshots directory, and
+    return an <img> tag that loads it through the token-checked route.
     """
-    # if not is_screen_on(ser):
-    #     keycode(ser, 'power'); keycode(ser, 'menu') # Wakes the screen up
     if not fname:
-        fname = "tmp_screencap.png"
+        fname = Path(config.screenshots_dir) / f"{secrets.token_hex(8)}.png"
+    fname = Path(fname)
 
-    cli = thiscli(ser)
-    cmd = "{} exec-out screencap -p | perl -pe 's/\\x0D\\x0A/\\x0A/g'".format(cli)
-    if os.name == "posix":  # Formatting for posix systems
-        cmd = "{} exec-out screencap -p".format(cli)
-
-    try:
-        # This command spits out the screenshot to stdout, which we capture
-        # and write to the file.
-        result = run(shlex.split(cmd), check=True, stdout=PIPE)
-        with open(fname, "wb") as f:
-            f.write(result.stdout)
-
-        # Return the image that will be inserted into the HTML.
-        return add_image(fname.split("webstatic/", 1)[-1], nocache=True)
-
-    except CalledProcessError as e:
-        print(f"Command failed with exit code {e.returncode}: {e.output}")
+    p = runcmd.run(thiscli(ser) + ["exec-out", "screencap", "-p"], timeout=30, text=False)
+    if p.returncode != 0 or not p.stdout:
+        print(f"Screenshot failed with exit code {p.returncode}: {p.stderr!r}")
         return "<div class='screenshotfail'>Screenshot failed with exit code {}</div>".format(
-            e.returncode
+            p.returncode
         )
 
-    except Exception as e:
-        print(e)
-        return "<div class='screenshotfail'>Screenshot failed with exception {}</div>".format(
-            e
-        )
+    fname.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with open(os.open(fname, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "wb") as f:
+        f.write(p.stdout)
+    return (
+        "<img height='400px' src='"
+        + url_for("privacy_screenshot", name=fname.name)
+        + "'/>"
+    )
 
 
 def wait(t):
     time.sleep(t)
 
 
-def add_image(img, nocache=False):
-    rand = random.randint(0, 10000)
-    query_string = f"?nocache={rand}" if nocache else ""
-    return (
-        "<img height='400px' src='"
-        + url_for("static", filename=img)
-        + query_string
-        + "'/>"
-    )
+def add_image(img):
+    """<img> tag for a bundled image in web/static/images."""
+    return "<img height='400px' src='" + url_for("static", filename=f"images/{img}") + "'/>"
 
 
-def do_privacy_check(ser, command, screenshot_fname=None):
-    from pathlib import Path
-
+def do_privacy_check(ser, command):
     command = command.lower()
     if command == "account":  # 1. Account ownership  & 3. Sync (if present)
         open_activity(
@@ -218,7 +184,7 @@ def do_privacy_check(ser, command, screenshot_fname=None):
         wait(2)
         keycode(ser, "menu")
         return "Check the <code>Shared library</code>. " + add_image(
-            "google_maps_sharing.png"
+            "google_photos_sharing.png"
         )
     elif command == "sync":
         if not open_activity(
@@ -235,14 +201,7 @@ def do_privacy_check(ser, command, screenshot_fname=None):
             )
 
     elif command == "screenshot":
-        # Use config to get the proper static directory
-        if screenshot_fname is None:
-            static_dir = Path(__file__).parent.parent / "web" / "static" / "images"
-            static_dir.mkdir(parents=True, exist_ok=True)
-            screenshot_fname = static_dir / "tmp.png"
-        elif isinstance(screenshot_fname, str):
-            screenshot_fname = Path(screenshot_fname)
-        return take_screenshot(ser, fname=str(screenshot_fname))
+        return take_screenshot(ser)
     else:
         return "Command not supported; should be one of ['account', 'backup', 'gmap', 'gphotos'] (case in-sensitive)"
 

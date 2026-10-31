@@ -4,19 +4,20 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel=stylesheet type=text/css
               href="{{ url_for('static', filename='bootstrap.min.css') }}">
         <link rel=stylesheet type=text/css
               href="{{ url_for('static', filename='style.css') }}?234">
-        <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='myjscript.js') }}?3"></script>
+        <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='myjscript.js') }}?4"></script>
 	<title>{{ title }} {% if platform %}({{ platform }}){% endif %}</title>
         <script>
 
-         var device = "{{ device }}";
-         var serial = "{{ serial }}";
-         var scanid = "{{ scanid }}";
+         var device = {{ (device or "") | tojson }};
+         var serial = {{ (serial or "") | tojson }};
+         var scanid = {{ (scanid or "") | tojson }};
 	
          function close_window(msg) {
 		 if (confirm(msg)) {
@@ -37,7 +38,7 @@
          }
 
          function report_failure(m) {
-             $('#msg').html(m);
+             $('#msg').text(m);
              $('#msg').prop('class', 'alert alert-warning')
          }
 
@@ -109,9 +110,6 @@
         {% endif %}
         {% if task == 'form' %}
           {% include "form.html" %}
-        {% endif %}
-        {% if task == 'formedit' %}
-          {% include "formedit.html" %}
         {% endif %}
       {% endblock %}
   </body>

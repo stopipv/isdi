@@ -3,6 +3,7 @@ import os
 import threading
 import time
 import uuid
+from markupsafe import Markup
 from isdi.config import get_config
 from isdi.web import app
 from isdi.web.view.index import get_device
@@ -20,6 +21,19 @@ config = get_config()
 
 _SCAN_JOBS = {}
 _SCAN_JOBS_LOCK = threading.Lock()
+
+
+def _rooted_html(rooted, reasons):
+    """Root/jailbreak status for the page; reasons hold device output, so are escaped."""
+    if rooted:
+        status = Markup("<strong class='text-danger'>Detected</strong>")
+    elif rooted is None:
+        status = Markup("Not Detected (some checks incomplete)")
+    else:
+        status = Markup("Not Detected")
+    if reasons:
+        status += Markup(". Reason(s): {}").format("; ".join(str(r) for r in reasons))
+    return status
 
 
 def _create_scan_job(clientid, device, device_owner, serial):
@@ -185,19 +199,9 @@ def _run_live_scan(clientid, device, device_owner, ser, job_id=None):
         key=lambda item: (-item[1].get("score", 0.0), item[0]),
     )
 
-    if rooted:
-        isrooted_str = "<strong class='text-danger'>Detected</strong>"
-    elif rooted is None:
-        isrooted_str = "Not Detected (some checks incomplete)"
-    else:
-        isrooted_str = "Not Detected"
-
-    if rooted_reason:
-        isrooted_str += f". Reason(s): {rooted_reason}"
-
     template_d.update(
         dict(
-            isrooted=isrooted_str,
+            isrooted=_rooted_html(rooted, rooted_reason),
             device_name=device_name_print,
             apps=apps,
             apps_sorted=apps_sorted,
@@ -257,11 +261,9 @@ def scan_start():
         return jsonify({"error": "Please start from the home page again."}), 401
 
     device = get_param("device")
-    device_owner = get_param("device_owner")
+    device_owner = get_param("device_owner") or ""
     if not device:
         return jsonify({"error": "Please choose one device to scan."}), 400
-    if not device_owner:
-        return jsonify({"error": "Please give the device a nickname."}), 400
 
     sc = get_device(device)
     if not sc:
@@ -282,6 +284,8 @@ def scan_start():
             ),
             409,
         )
+    if not sc.is_connected(ser):
+        return jsonify({"error": "That device is not connected."}), 400
 
     job_id = _create_scan_job(session["clientid"], device, device_owner, ser)
     worker = threading.Thread(
@@ -339,7 +343,7 @@ def scan():
     device_primary_user = get_param("device_primary_user")
     device = get_param("device")
     action = get_param("action")
-    device_owner = get_param("device_owner")
+    device_owner = get_param("device_owner") or ""
     ser = get_param("devid")
 
     currently_scanned = get_client_devices_from_db(session["clientid"])
@@ -371,11 +375,16 @@ def scan():
     if not sc:
         template_d["error"] = "Please choose one device to scan."
         return render_template("main.html", **template_d), 201
-    if not device_owner:
-        template_d["error"] = "Please give the device a nickname."
-        return render_template("main.html", **template_d), 201
 
-    if not ser:
+    # Only explicit from_dump requests should load old results.
+    # Some real device serials are long hex strings and were mis-detected as hashed.
+    from_dump = get_param("from_dump") == "1"
+
+    if not from_dump and request.method != "POST":
+        # A live scan runs commands on the phone and writes to the database.
+        return redirect(url_for("index"))
+
+    if not ser and not from_dump:
         ser = first_element_or_none(sc.devices())
 
     print("Devices: {}".format(ser))
@@ -392,10 +401,6 @@ def scan():
 
     # clientid = new_client_id()
     print(">>>scanning_device", device, ser, "<<<<<")
-
-    # Only explicit from_dump requests should load old results.
-    # Some real device serials are long hex strings and were mis-detected as hashed.
-    from_dump = get_param("from_dump") == "1"
 
     if from_dump:
         # Load scan data from database — do NOT run ADB/iOS commands with hashed serial
@@ -417,35 +422,16 @@ def scan():
 
         app_rows = db.get_app_info_from_db(scanid)
         apps = {}
-        # Pre-fetch titles from the app-info cache database for this device type
-        _title_cache = {}
-        if sc and scan_res.get("device") == "android" and sc.app_info_conn:
-            try:
-                appids_in_scan = [r["appid"] for r in app_rows if r.get("appid")]
-                if appids_in_scan:
-                    cur = sc.app_info_conn.cursor()
-                    placeholders = ",".join("?" * len(appids_in_scan))
-                    cur.execute(
-                        f"SELECT appid, title FROM apps WHERE appid IN ({placeholders})",
-                        appids_in_scan,
-                    )
-                    for r in cur.fetchall():
-                        if isinstance(r, dict):
-                            _title_cache[r["appid"]] = r.get("title") or ""
-                        else:
-                            _title_cache[r[0]] = r[1] or ""
-            except Exception:
-                pass
+        # ser is the stored HMAC; names come from the device's stored dump and app-info.db.
+        titles = sc.app_titles(ser, [r["appid"] for r in app_rows], hashed=True)
         for row in app_rows:
             appid = row["appid"]
             try:
                 flags = json.loads(row["flags"]) if row["flags"] else []
             except (json.JSONDecodeError, TypeError):
                 flags = []
-            title = _title_cache.get(appid, "")
-            title = title.encode("ascii", errors="ignore").decode("ascii")
             apps[appid] = {
-                "title": title,
+                "title": titles.get(appid, ""),
                 "flags": flags,
                 "score": blocklist.score(flags),
                 "class_": blocklist.assign_class(flags),
@@ -460,6 +446,9 @@ def scan():
 
     else:
         # Live scan — device must be connected
+        if not sc.is_connected(ser):
+            template_d["error"] = "That device is not connected. Please reconnect it and try again."
+            return render_template("main.html", **template_d), 201
 
         if device == "ios":
             error = (
@@ -532,25 +521,16 @@ def scan():
         key=lambda item: (-item[1].get("score", 0.0), item[0]),
     )
     currently_scanned = get_client_devices_from_db(session["clientid"])
-    if rooted:
-        isrooted_str = "<strong class='text-danger'>Detected</strong>"
-    elif rooted is None:
-        isrooted_str = "Not Detected (some checks incomplete)"
-    else:
-        isrooted_str = "Not Detected"
-
-    if rooted_reason:
-        isrooted_str += f". Reason(s): {rooted_reason}"
-
     template_d.update(
         dict(
-            isrooted=isrooted_str,
+            isrooted=_rooted_html(rooted, rooted_reason),
             device_name=device_name_print,
             apps=apps,
             apps_sorted=apps_sorted,
             scanid=scanid,
             sysapps=set(),
             serial=ser,
+            history=from_dump,  # a past scan: nothing to uninstall
             currently_scanned=currently_scanned,
             error=config.error(),
         )

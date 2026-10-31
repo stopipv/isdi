@@ -1,6 +1,6 @@
 <div class="container isdi-page">
     <br/>
-    <h2>Information about "{{ app.title | safe }}"</h2>
+    <h2>Information about "{{ app.title }}"</h2>
     <div class="container form-group">
         <div class="table-wrap">
         <table class="table table-bordered">
@@ -13,12 +13,30 @@
 		{% if app.website %}
 		<tr><td>Website</td> <td>{{ app.website }} </td></tr>
 		{% endif %}
-                {% for k, v in info.items() %}
+                {% for k, v in info.items() if v and k not in ("title", "permissions") %}
 		<tr><td>{{ k }}</td> <td>{{ v }} </td></tr>
                 {% endfor %}
             </tbody>
         </table>
         </div>
+        {% if device == "ios" and info.permissions %}
+        <h4>Permissions ({{ info.permissions | length }})</h4>
+        <p class="text-muted small">From the app's settings on the phone. For "Can ask the user",
+            the phone does not tell us whether the user said yes: check
+            Settings &rarr; Privacy &amp; Security on the iPhone.</p>
+        <div class="table-wrap">
+        <table class="table table-bordered table-sm">
+            <thead><tr><th>Permission</th><th>Access</th><th>Reason the app gives</th></tr></thead>
+            <tbody>
+            {% for p in info.permissions %}
+            <tr><td>{{ p.name }}</td><td>{{ p.access }}</td>
+                <td>{% if p.reason %}{{ p.reason }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% endif %}
+        {% if app.permissions %}
 	    <div class="text-sm-left">
 		<h4> The app used {{ app.permissions| length }} app permissions recently:</h4>
 		<br>
@@ -28,23 +46,25 @@
             <li class="code">{{ perm | capitalize | replace('_', ' ') }}</li>
             {% endfor %}
         </ul>
-	<!-- label class="btn btn-danger">
-	     <button type="button" class="btn btn-danger"
-	     onclick="delete_app('{{ app.appId }}', this)" disabled>Delete</button>
-	     </label -->
+        {% endif %}
     </div>
 
     <div class="jumbotron" style="padding: 1em">
         <h3>{% if device=="android" %} Google Play Store {% endif %} {% if device=="ios" %} Apple App Store {% endif %} Description of the app</h3>
-        <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary|safe }}</b></mark></span>
-        {{ app.descriptionHTML|safe }}
+        <span style="margin-bottom: 2em; display:block"><mark><b>{{ app.summary }}</b></mark></span>
+        {% if app.descriptionHTML %}
+        {# descriptionHTML is escaped Markup with only <br> kept; see sanitize_description #}
+        {{ app.descriptionHTML }}
+        {% else %}
+        <p class="text-muted">No store description available. This app is not in ISDi's app database, which only covers apps known to be usable for spying or tracking.</p>
+        {% endif %}
     </div>
     
     {% if device=="android" %} 
     <div class="jumbotron" style="padding: 1em">
         <h3>Recently used permissions</h3>
         <p>(Here, <code>mode=allow</code> only means the permission is requested, not necessarily granted.)</p>
-        {{ app.non_hf_permissions_html | safe }}
+        {{ app.non_hf_permissions_html }}
     </div>
     {% endif %}
 

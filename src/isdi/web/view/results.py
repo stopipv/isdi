@@ -1,6 +1,7 @@
 from isdi.web import app
 from isdi.web.view.index import get_device
 from flask import request, render_template, redirect, url_for
+from markupsafe import escape
 from isdi.config import get_config
 from isdi.scanner.db import (
     get_scan_res_from_db,
@@ -19,7 +20,7 @@ def view_results():
     scan_res_pk = request.form.get("scan_res", request.args.get("scan_res"))
     scan_res = first_element_or_none(get_scan_res_from_db(scan_res_pk))
     if not scan_res:
-        return f"No scan found with id={scan_res_pk}"
+        return f"No scan found with id={escape(scan_res_pk)}", 404
     serial = scan_res["serial"]
     device = scan_res["device"]
     model = scan_res["device_model"]

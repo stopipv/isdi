@@ -8,7 +8,9 @@ from isdi.scanner.db import (
     update_mul_appinfo,
     create_report,
     get_device_from_db,
+    get_app_info_from_db,
 )
+from isdi.scanner import valid_appid
 from isdi.web.view.index import get_device
 
 config = get_config()
@@ -36,14 +38,26 @@ def record_scanres(scanid):
     )
 
 
-@app.route("/delete/app/<scanid>", methods=["POST", "GET"])
+@app.route("/delete/app/<scanid>", methods=["POST"])
 def delete_app(scanid):
     device = get_device_from_db(scanid)
-    serial = get_serial_from_db(scanid)
     sc = get_device(device)
-    appid = request.form.get("appid")
+    if sc is None:
+        return "Unknown scan", 400
+    appid = request.form.get("appid", "")
     remark = request.form.get("remark")
     action = "delete"
+
+    # Only uninstall apps that this scan found, on the device it scanned.
+    # The database stores the HMAC of the serial, so find the connected
+    # device with that HMAC.
+    scanned_apps = {row["appid"] for row in get_app_info_from_db(scanid) or []}
+    if not valid_appid(appid) or appid not in scanned_apps:
+        return "Unknown app for this scan", 400
+    serial = sc.connected_serial_for_hmac(get_serial_from_db(scanid) or "")
+    if not serial:
+        return "The scanned device is not connected", 409
+
     # TODO: Record the uninstall and note
     r = sc.uninstall(serial=serial, appid=appid)
     if r:

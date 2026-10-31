@@ -4,9 +4,8 @@
         <div class="isdi-actions">
             <a class='btn btn-normal' href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instructions</u></a>
-            <a class='btn btn-normal' href="/form/edit" target="_blank" rel="noopener" data-toggle="tooltip" title="Edit previously submitted consult forms."><u>Edit previous consult forms</u></a>
             <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
-            <a class="isdi-close-link" href="/kill" onclick="window.open('','_self').close();">&#x274C; Close App and End Session</a>
+            <a class="isdi-close-link" href="javascript:;" onclick="return kill_app();">&#x274C; Close App and End Session</a>
         </div>
     </div>
 <div class="row">
@@ -18,25 +17,10 @@
                 can be used to spy, track, or otherwise monitor a person.
             </p>
             <hr/>
-            <label class="font-weight-bold lead">What type of device is this?</label>
-            <form id="scan_select" method="GET" action="/scan" onsubmit="return startScan(this);">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-		    {% for a in ["Android", "iOS"] %}
-                    <label class="btn btn-outline-secondary {% if device==a.lower() %} active {% endif %}">
-                        <input type="radio" name="device" id="{{ a | lower }}"
-			       value="{{ a | lower }}" autocomplete="off"
-			       {% if device==a.lower() %} checked {% endif %}
-			> {{ a }}
-                    </label>
-		    {% endfor %}
-                </div>
-                <br/><br/>
-                <input class="form-control" name="device_owner" id="device_owner" 
-                       placeholder="Nickname for device? Whose is it?"
-                       rows="2" value="{% if device_primary_user_sel %}{{ device_primary_user_sel }}{% endif %}"/>
-		<br>
-                <button class="btn btn-primary btn-block isdi-form-actions">Scan now</button>
-            </form>
+            <label class="font-weight-bold lead">Connected devices</label>
+            <div id="device-list" class="isdi-attached-devices">
+                <p class="text-muted small">Looking for connected phones&hellip;</p>
+            </div>
             <br/>
             {% if is_termux or is_debug %}
             <div id="termux-usb-section">
@@ -70,6 +54,7 @@
                         var xhr = new XMLHttpRequest();
                         xhr.open('POST', '/termux-usb-permission', true);
                         xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.setRequestHeader('X-CSRFToken', csrf_token());
                         
                         xhr.onload = function() {
                             console.log('Response received:', xhr.status, xhr.statusText);
@@ -122,10 +107,14 @@
 		    {% for scanned in currently_scanned %}
 		    {% if scanned.serial %}
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-        <a target="_blank" href="/scan?device={{ scanned.device }}&device_owner={{ scanned.device_primary_user }}&devid={{ scanned.serial }}&from_dump=1">
-            {{ scanned.device_model }} ({{ scanned.device_primary_user }})
+        {% set scanned_name = scanned.device_model ~ (" (" ~ scanned.device_primary_user ~ ")" if scanned.device_primary_user else "") %}
+        <a target="_blank" href="{{ url_for('scan', device=scanned.device, device_owner=scanned.device_primary_user, devid=scanned.serial, from_dump=1) }}">
+            {{ scanned_name }}
         </a>
-        <form method="POST" action="/delete_device" style="display:inline;" onsubmit="return confirm('Delete all data for {{ scanned.device_model }} ({{ scanned.device_primary_user }})? This cannot be undone.');">
+        <form method="POST" action="/delete_device" style="display:inline;"
+              data-confirm="Delete all data for {{ scanned_name }}? This cannot be undone."
+              onsubmit="return confirm(this.dataset.confirm);">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="serial" value="{{ scanned.serial }}">
           <button type="submit" class="btn btn-danger btn-sm py-0 px-1" title="Delete all data for this device" style="font-size:0.75em;">&#x1F5D1; Delete</button>
         </form>
@@ -165,7 +154,9 @@
             <table class="table table-bordered w-100 applist-table">
                 <thead>
                     <tr class="something">
+                        {% if not history %}
                         <th class="col-md-1" style="width: 3%">Uninstall?</th>
+                        {% endif %}
                         <th class="col-md-2" style="width: 23%">App Name</th>
                         <th class="col-md-2" style="width: 23%">App ID</th>
                         <th class="col-md-2" style="width: 20%">Flags</th>
@@ -177,22 +168,23 @@
                     <tbody id="applist" class="h-100">
                         {% set app_items = apps_sorted if apps_sorted is defined else apps.items() %}
                         {% for appId, info in app_items %}
-                        <tr id="{{ appId.replace('.', '-') }}">
-                            {% if appId in sysapps %}
+                        <tr data-appid="{{ appId }}">
+                            {% if history %}
+                            {% elif appId in sysapps %}
                             <td align="center" data-label="Uninstall"><a class="h4" onclick="" href="javascript:;" data-toggle="tooltip"
                                                    title="System App! Cannot delete">&otimes;</a></td>
                             {%  else %}
-                            <td align="center" data-label="Uninstall"><a class="h4" onclick="delete_app('{{ appId }}', this)" href="javascript:;" data-toggle="tooltip"
+                            <td align="center" data-label="Uninstall"><a class="h4 js-delete-app" data-appid="{{ appId }}" href="javascript:;" data-toggle="tooltip"
                                                   title="Delete app">&otimes;</a></td>
                             {% endif %}
                             {% if info['title'] %}
-                            <td data-label="App Name"><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
+                            <td data-label="App Name"><a href="{{ url_for('app_details', device=device, appId=appId, serial=serial) }}" target="_blank" rel="noopener"
 		                   class="text text-dark">{{ info['title'] }}</a></td>
                             {% else %}
-                            <td data-label="App Name"><a href="/details/app/{{ device }}?appId={{ appId }}&serial={{ serial }}" target="_blank" rel="noopener"
+                            <td data-label="App Name"><a href="{{ url_for('app_details', device=device, appId=appId, serial=serial) }}" target="_blank" rel="noopener"
                                    class="text text-dark"> &lt;Unknown&gt;</a></td>
                             {% endif %}
-                            <td data-label="App ID"><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId }}"
+                            <td data-label="App ID"><a class="{{ info.class_ }} appid" href="https://www.google.com/search?q={{ appId | urlencode }}"
                                    target="_blank" rel="noopener"><code>{{ appId }}</code></a></td>
                             <td data-label="Flags">{{ info['html_flags'] | safe }}</td>
                             <td data-label="Score">{{ '%.2f'|format(info['score']) if info['score'] is not none else '' }}</td>

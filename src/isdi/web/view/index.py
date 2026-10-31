@@ -1,9 +1,11 @@
 from isdi.config import get_config
 from isdi.web import app
-from flask import render_template, request, session
+from flask import jsonify, render_template, request, session
 from isdi.scanner import AndroidScanner, IosScanner, TestScanner
-from isdi.scanner.db import get_client_devices_from_db, new_client_id
+from isdi.scanner.db import get_client_devices_from_db, get_last_scan_time, new_client_id
 import os
+import threading
+import time
 
 config = get_config()
 
@@ -38,12 +40,42 @@ def index():
         is_debug=config.DEBUG,
         device_primary_user=config.DEVICE_PRIMARY_USER,
         task="home",
-        devices={
-            "Android": android.devices(),
-            "iOS": ios.devices(),
-            "Test": test.devices(),
-        },
         apps={},
         clientid=session["clientid"],
         currently_scanned=get_client_devices_from_db(session["clientid"]),
     )
+
+
+_attached = {"at": 0.0, "devices": []}
+_attached_lock = threading.Lock()
+
+
+def attached_devices(max_age=2.0):
+    """List attached phones, running the device tools at most every max_age seconds.
+
+    The home page polls this; the lock makes concurrent polls share one
+    listing instead of each starting adb and pymobiledevice3.
+    """
+    with _attached_lock:
+        if time.time() - _attached["at"] > max_age:
+            scanners = [("android", android), ("ios", ios)]
+            if config.DEBUG:
+                scanners.append(("test", test))
+            found = []
+            for kind, sc in scanners:
+                for d in sc.connected_devices():
+                    found.append(
+                        {"device": kind, "devid": d["serial"], "label": d["label"], "state": d["state"]}
+                    )
+            _attached.update(at=time.time(), devices=found)
+        return _attached["devices"]
+
+
+@app.route("/devices", methods=["GET"])
+def devices():
+    # Looked up on every request (not cached) so a scan that just finished shows.
+    found = [
+        dict(d, last_scanned=get_last_scan_time(config.hmac_serial(d["devid"])))
+        for d in attached_devices()
+    ]
+    return jsonify({"devices": found})

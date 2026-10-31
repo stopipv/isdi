@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "isdi-scanner"
-version = "1.0.9"
+version = "1.0.10"
 description = "ISDi - Stalkerware Scanner"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -51,9 +51,42 @@ isdi = "isdi.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools]
+# Ship only the files listed below. Globs over data/ or web/static/ once
+# picked up local keys and a phone screenshot; scripts/check_dist.py checks
+# the built wheel and sdist against this list.
+include-package-data = false
+
 [tool.setuptools.package-data]
 isdi = [
-    "data/**/*",
-    "web/templates/**/*",
-    "web/static/**/*",
+    "data/app-flags.csv",
+    "data/ios_device_identifiers.json",
+    "data/ios_permissions.json",
+    "data/android.test.apps_list",
+    "scripts/ios_scan.sh",
+    "web/schema.sql",
+    "web/templates/_formhelpers.html",
+    "web/templates/app.html",
+    "web/templates/evidence.html",
+    "web/templates/form.html",
+    "web/templates/home.html",
+    "web/templates/instruction.html",
+    "web/templates/main.html",
+    "web/templates/privacy.html",
+    "web/templates/summary.html",
+    "web/static/bootstrap.bundle.min.js",
+    "web/static/bootstrap.min.css",
+    "web/static/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2",
+    "web/static/jquery-3.7.1.min.js",
+    "web/static/myjscript.js",
+    "web/static/style.css",
+    "web/static/images/android.png",
+    "web/static/images/android.resiz.png",
+    "web/static/images/apple.png",
+    "web/static/images/apple.resized.png",
+    "web/static/images/google_maps_sharing.png",
+    "web/static/images/google_photos_sharing.png",
+    "web/static/images/usb_android.png",
+    "web/static/images/usb_android.resized.png",
+    "web/static/images/waiting.gif",
 ]

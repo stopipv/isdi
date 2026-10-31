@@ -25,7 +25,7 @@ def cli():
 @click.option(
     "--host",
     default=None,
-    help="Host to bind to (default: 127.0.0.1 in debug, 0.0.0.0 in production)",
+    help="Host to bind to (default: 127.0.0.1). Other hosts expose the UI to the network.",
 )
 @click.option("--port", type=int, default=None, help="Port to bind to (default: 6200)")
 @click.option("--debug/--no-debug", default=False, help="Enable debug mode")
@@ -59,15 +59,25 @@ def run(host, port, debug, test_mode, no_browser):
     app = create_app(config)
     click.echo(f"⏱ App factory: {perf_counter() - app_started:.2f}s")
 
+    if final_host not in ("127.0.0.1", "localhost", "::1"):
+        click.echo(
+            f"⚠ Listening on {final_host}: anyone who can reach this address and has "
+            "the access link below can control the connected phone.",
+            err=True,
+        )
+
+    url = f"http://{final_host}:{final_port}/?token={config.ACCESS_TOKEN}"
+
     # Open browser after short delay
     if not no_browser and not debug and not test_mode:
 
         def open_browser():
-            webbrowser.open(f"http://{final_host}:{final_port}")
+            webbrowser.open(url)
 
         Timer(1.5, open_browser).start()
 
     click.echo(f"🔍 Starting ISDI on http://{final_host}:{final_port}")
+    click.echo(f"🔑 Open this link to use ISDi (valid until ISDi stops): {url}")
     click.echo(f'📁 Data directory: {config.dirs["data"]}')
     click.echo(f"📊 Database: {config.database_path}")
     click.echo(f"⏱ Total startup prep: {perf_counter() - startup_started:.2f}s")
