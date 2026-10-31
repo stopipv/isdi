@@ -217,3 +217,10 @@ def test_screenshot_route_only_serves_screenshot_names(authed, tmp_path):
     assert r.headers["Cache-Control"] == "no-store"
     assert client.get("/privacy/screenshot/..%2Fpii.key").status_code == 404
     assert client.get("/privacy/screenshot/tmp.png").status_code == 404
+
+
+def test_view_results_escapes_scan_id(authed):
+    client, _ = authed
+    r = client.get("/view_results?scan_res=<script>x</script>")
+    assert r.status_code == 404
+    assert b"<script>" not in r.data
