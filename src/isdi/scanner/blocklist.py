@@ -103,6 +103,7 @@ def score(flags):
         "odds-ratio": 0.2,
         "system-app": -0.1,
         "device-owner": 1.0,
+        "accessibility": 1.0,
     }
     return sum(map(lambda x: weight.get(x, 0.0), flags))
 
@@ -122,7 +123,7 @@ def flag_str(flags):
     def _add_class(flag):
         return (
             "primary"
-            if "spyware" in flag or flag == "device-owner"
+            if "spyware" in flag or flag == "device-owner" or flag == "accessibility"
             else "warning" if "dual-use" in flag else "info" if "spy" in flag else ""
         )
 
@@ -139,6 +140,7 @@ def flag_str(flags):
             "dual-use": "This app has a legitimate usecase, but can be harmful in certain situations.",
             "system-app": "This app came preinstalled with the device.",
             "device-owner": "This app has device owner privilege, allowing it to have almost full control over the device.",
+            "accessibility": "This app uses Accessibility Services, which can read all on-screen text, intercept keystrokes, and monitor other apps in real time. Commonly abused by stalkerware.",
         }.get(flag.lower(), flag)
 
     # If spyware <span class='text-danger'>{}</span>
