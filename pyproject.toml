@@ -7,7 +7,7 @@ name = "isdi-scanner"
 version = "1.0.10"
 description = "ISDi - Stalkerware Scanner"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "GPL-3.0-only"
 authors = [
     {name = "ISDI Contributors"}
@@ -18,18 +18,20 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Topic :: Security",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 dependencies = [
     "flask>=3.0",
     "flask-sqlalchemy>=3.0",
     "flask-wtf>=1.2",
-    "pymobiledevice3>=4.0",
+    # Same range as PhoneView, so both share one install (`isdi-scanner[phoneview]`).
+    # Pinned to a tested minor: pymobiledevice3's APIs change between releases.
+    "pymobiledevice3>=11.49,<11.50",
     "click>=8.0",
     "pyyaml>=6.0",
     "rsonlite>=0.1.0",
@@ -42,7 +44,11 @@ dev = [
     "black>=23.0",
 ]
 termux = [
-    "pymobiledevice3>=4.0",
+    "pymobiledevice3>=11.49,<11.50",
+]
+# Live screen view and control (PhoneView needs Python 3.11+).
+phoneview = [
+    "phoneview>=0.2,<0.3; python_version >= '3.11'",
 ]
 
 [project.scripts]
@@ -63,7 +69,6 @@ isdi = [
     "data/ios_device_identifiers.json",
     "data/ios_permissions.json",
     "data/android.test.apps_list",
-    "scripts/ios_scan.sh",
     "web/schema.sql",
     "web/templates/_formhelpers.html",
     "web/templates/app.html",

@@ -1,0 +1,82 @@
+name: Publish to PyPI
+
+# Runs when a version tag is pushed, which `make bump-version` does after asking.
+# The tag must be v<version>, e.g. v1.0.11 for version 1.0.11. After uploading to
+# PyPI it creates the matching GitHub release.
+# Uses PyPI trusted publishing: no API token is stored in the repository.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install
+      run: |
+        python -m pip install --upgrade pip build twine
+        python -m pip install -e ".[dev]"
+
+    - name: Check the tag matches the package version
+      run: |
+        version=$(python -c "import isdi; print(isdi.__version__)")
+        project=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+        test "$version" = "$project" || { echo "pyproject.toml ($project) != isdi.__version__ ($version)"; exit 1; }
+        test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME != v$version"; exit 1; }
+
+    - name: Run tests
+      run: python -m pytest tests/ -q
+
+    - name: Build wheel and sdist
+      run: python -m build
+
+    - name: Check package contents
+      run: |
+        python scripts/check_dist.py dist
+        python -m twine check --strict dist/*
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # PyPI trusted publishing
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the GitHub release for this tag
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: >
+        gh release create "$GITHUB_REF_NAME" dist/*
+        --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag

@@ -8,11 +8,13 @@ from time import perf_counter
 
 import click
 
+from isdi import __version__
+
 __all__ = ["main", "cli"]
 
 
 @click.group()
-@click.version_option(version="1.0.2")
+@click.version_option(version=__version__)
 def cli():
     """ISDi - Stalkerware Scanner
 
@@ -192,6 +194,29 @@ def paths():
     }
 
     click.echo(json.dumps(paths_dict, indent=2))
+
+
+@cli.group()
+def phoneview():
+    """PhoneView: optional live view and control of the phone's screen."""
+
+
+@phoneview.command("status")
+def phoneview_status():
+    """Show which PhoneView ISDi will start."""
+    import subprocess
+    from isdi import phoneview as pv
+    from isdi.config import get_config
+
+    launcher = pv.get_launcher(get_config())
+    argv = launcher.argv()
+    if argv is None:
+        click.echo('PhoneView is not installed. Run: pip install "isdi-scanner[phoneview]" (Python 3.11+)')
+        return
+    version = subprocess.run(argv + ["--version"], capture_output=True, text=True)
+    click.echo(f"Command: {' '.join(argv)}")
+    click.echo(f"Version: {version.stdout.strip() or 'unknown (' + version.stderr.strip()[-200:] + ')'}")
+    click.echo(f"Port:    {launcher.port}")
 
 
 def main():

@@ -27,6 +27,7 @@ def init_routes(flask_app):
             error,
             results,
             save,
+            phoneview,
         )
     except Exception as e:
         print(f"Warning: Could not load all view modules: {e}")

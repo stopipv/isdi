@@ -22,3 +22,18 @@ if _real_db.exists():
 
 os.environ.pop("PREFIX", None)  # not Termux
 os.environ.pop("ISDI_ACCESS_TOKEN", None)
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(scope="session")
+def app():
+    """One app per test run: views register their routes on a module-level app
+    when first imported, so a second create_app() would have no routes."""
+    from isdi.app import create_app
+    from isdi.config import get_config
+
+    app = create_app(get_config("test"))
+    app.config["TESTING"] = True
+    return app

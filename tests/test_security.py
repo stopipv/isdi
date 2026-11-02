@@ -107,16 +107,6 @@ def test_sanitize_description_keeps_only_br():
 # --- Web UI -------------------------------------------------------------------
 
 
-@pytest.fixture(scope="module")
-def app():
-    from isdi.app import create_app
-
-    config = get_config("test")
-    app = create_app(config)
-    app.config["TESTING"] = True
-    return app
-
-
 @pytest.fixture
 def client(app):
     return app.test_client()
@@ -224,3 +214,42 @@ def test_view_results_escapes_scan_id(authed):
     r = client.get("/view_results?scan_res=<script>x</script>")
     assert r.status_code == 404
     assert b"<script>" not in r.data
+
+
+# --- iOS jailbreak check (pymobiledevice3 11.x async API) -------------------------
+
+
+def test_afc2_check_uses_async_lockdown(monkeypatch):
+    """Regression: the old call passed udid= (no such parameter) and never ran."""
+    import pymobiledevice3.lockdown as lockdown_mod
+    from isdi.scanner import root_check
+
+    calls = []
+
+    class Service:
+        async def close(self):
+            calls.append("service.close")
+
+    class Lockdown:
+        async def start_lockdown_service(self, name):
+            calls.append(name)
+            return Service()
+
+        async def close(self):
+            calls.append("lockdown.close")
+
+    async def fake_create(serial=None, autopair=True, **kwargs):
+        calls.append(("create", serial, autopair))
+        return Lockdown()
+
+    monkeypatch.setattr(lockdown_mod, "create_using_usbmux", fake_create)
+    rooted, reasons = root_check.check_ios_jailbreak("SERIAL", ["pymobiledevice3"], [])
+    assert rooted is True and "afc2" in reasons[0]
+    assert calls == [("create", "SERIAL", False), "com.apple.afc2", "service.close", "lockdown.close"]
+
+    async def no_afc2(serial=None, autopair=True, **kwargs):
+        raise RuntimeError("InvalidService")
+
+    monkeypatch.setattr(lockdown_mod, "create_using_usbmux", no_afc2)
+    rooted, _ = root_check.check_ios_jailbreak("SERIAL", ["pymobiledevice3"], [])
+    assert rooted is False

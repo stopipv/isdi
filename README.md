@@ -19,10 +19,17 @@ ISDi currently supports **macOS, Linux, and Termux/Android**. If you are using a
 (WSL2), which can be installed by following [these instructions](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install). After this,
 follow the remaining instructions as a Linux user would.
 
+**iOS support by platform.** On Linux, macOS and Windows, ISDi uses
+`pymobiledevice3` as a Python library, in the same process. WSL2 and Termux have
+**limited iOS support**: there ISDi runs the `pymobiledevice3` command-line tool
+(on WSL, the Windows `pymobiledevice3.exe`), and the afc2 jailbreak check is not
+available. Running ISDi natively on Windows works for iPhones only for now; Android
+scanning on native Windows is still to be done.
+
 ### System Requirements
 
 #### Python
-- Python 3.8 or higher is required
+- Python 3.9 or higher is required (3.11+ for the optional PhoneView screen viewer)
 - Check your version: `python3 --version`
 - On macOS, install via: `brew install python`
 - On Linux (Debian/Ubuntu): `sudo apt install python3 python3-pip`
@@ -47,7 +54,7 @@ sudo apt install adb
 For iOS device support on Linux, `pymobiledevice3` will be installed automatically with ISDi. For Android device support, ensure `adb` is installed via the command above.
 
 **Windows Subsystem Linux (v2):**
-- Install `adb` and `pymobiledevice3` in Windows and ensure it's in PATH. Do not install them in WSL2, as WSL cannot have access to USB devices. Verify the installation by running `adb.exe` and `pymobiledevice3.exe` in a command prompt terminal. 
+- Install `adb` and `pymobiledevice3` in Windows and ensure it's in PATH. Use the same pymobiledevice3 version as ISDi (`pip install "pymobiledevice3>=11.49,<11.50"` in Windows Python). Do not install them in WSL2, as WSL cannot have access to USB devices. Verify the installation by running `adb.exe` and `pymobiledevice3.exe` in a command prompt terminal. 
 
 
 **Termux/Android:**
@@ -110,6 +117,30 @@ After the scan, the UI will look something like this:
 ![Phone Scanner UI after scan](https://github.com/stopipv/isdi/blob/main/src/isdi/web/static/ISDi_after_scan.png "Phone Scanner
 UI")
 
+### Viewing the phone's screen (optional: PhoneView)
+
+[PhoneView](https://github.com/rchatterjee/phone-controller) shows the connected
+phone's screen in the browser, and lets the consultant tap and type on it. It needs
+Python 3.11+. Install it together with ISDi:
+
+```bash
+pip install "isdi-scanner[phoneview]"
+isdi phoneview status       # shows what ISDi will run
+```
+
+ISDi and PhoneView pin the same pymobiledevice3 version, and ISDi starts PhoneView
+with its own Python, so the two always share one copy. `ISDI_PHONEVIEW_CMD` can point
+at a PhoneView installed elsewhere.
+
+ISDi then shows a **PhoneView** button. Pressing it starts PhoneView (port 6201) and
+opens it in a new tab, already signed in. PhoneView stops when ISDi stops. The phone's
+owner still unlocks the phone and approves the connection on it every time.
+
+### Remote consultants
+
+ISDi and PhoneView listen on this computer only. To let a consultant work remotely,
+publish both inside your Tailscale network with `tailscale serve`. See
+[remote.md](https://github.com/stopipv/isdi/blob/main/remote.md) for setup, the session checklist, and the security model.
 
 ## Debugging Tips
 
@@ -178,7 +209,6 @@ to the application. I don't know how to get install date, resource usage, etc.
 
 - **`src/isdi/scripts/`** - Shell scripts for device interaction
   - `android_scan.sh` - Android device scanning
-  - `ios_scan.sh` - iOS device scanning
 
 - **`src/isdi/data/`** - Static data and reference files
   - `app-flags.csv` - App classification metadata
@@ -189,3 +219,31 @@ to the application. I don't know how to get install date, resource usage, etc.
 
 
 See [notes.md](https://github.com/stopipv/isdi/blob/main/notes.md) for other developer helps.
+
+## Releasing to PyPI
+
+From an up-to-date `main` with a clean working tree:
+
+```bash
+make bump-version              # 1.0.10 -> 1.0.11; or PART=minor / PART=major
+```
+
+This checks that `main` matches `origin/main` and that the tag is new, then:
+
+1. updates `pyproject.toml` and `src/isdi/__init__.py`;
+2. renames the CHANGELOG's `## Unreleased` heading to `## 1.0.11 (date)`;
+3. commits "Release v1.0.11" and creates the tag `v1.0.11`, both locally;
+4. asks `Push main and v1.0.11 to origin? This publishes 1.0.11 to PyPI. [y/N]`.
+
+If you answer no, nothing leaves your machine, and it prints the commands to push later
+or to undo. Pushing the tag starts `.github/workflows/publish.yml`. That workflow checks
+the tag matches the version, runs the tests, builds, runs `scripts/check_dist.py` and
+`twine check`, uploads to PyPI, and creates the GitHub release.
+
+It uses PyPI trusted publishing, so no API token is stored in the repository. One-time
+setup by a PyPI owner of `isdi-scanner`: under **Manage → Publishing**, add a GitHub
+trusted publisher with owner `stopipv`, repository `isdi`, workflow `publish.yml`,
+environment `pypi`. In the GitHub repository settings, create the `pypi` environment,
+and optionally require a reviewer's approval before each upload.
+
+`make upload` remains as a manual fallback.

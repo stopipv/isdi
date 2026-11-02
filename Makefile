@@ -16,7 +16,7 @@ help:
 	@echo "  make build            - Build distribution packages"
 	@echo "  make upload-test      - Upload to TestPyPI (requires .pypirc)"
 	@echo "  make upload           - Upload to PyPI (requires .pypirc)"
-	@echo "  make bump-version     - Bump version (PART=patch|minor|major, default=patch)"
+	@echo "  make bump-version     - Release: bump (PART=patch|minor|major), commit, tag, push after confirmation"
 	@echo "  make clean            - Remove build artifacts"
 	@echo "  make clean-all        - Remove all generated files"
 	@echo ""
@@ -70,8 +70,9 @@ upload: build
 
 VERSION_PART ?= patch
 
+# Bumps, commits and tags locally, then asks before pushing (which publishes to PyPI).
 bump-version:
-	@$(PYTHON) scripts/bump_version.py
+	@VERSION_PART=$(or $(PART),$(VERSION_PART),patch) $(PYTHON) scripts/bump_version.py
 
 clean:
 	rm -rf build/ dist/ *.egg-info .eggs/ src/*.egg-info

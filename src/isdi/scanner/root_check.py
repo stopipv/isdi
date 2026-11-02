@@ -1,7 +1,5 @@
 from typing import Tuple, List, Optional
 import logging
-import socket
-from pymobiledevice3.lockdown import create_using_usbmux
 from isdi.scanner import runcmd
 
 ANDROID_ROOT_INDICATORS = [
@@ -157,19 +155,23 @@ def check_android_root(serial: str, cli: List[str]) -> Tuple[bool, List[str]]:
 
 
 def check_ios_jailbreak(
-    serial: str, cli: List[str], apps: List[dict]
+    serial: str, cli: List[str], apps: List[dict], tool=None
 ) -> Tuple[Optional[bool], List[str]]:
-    """checks afc2 service and common jailbreak package managers"""
+    """checks afc2 service and common jailbreak package managers
+
+    tool is an isdi.scanner.ios_device tool; the afc2 check needs one that
+    supports it (the pymobiledevice3 library, not the WSL/Termux CLI).
+    """
+    if tool is None:
+        from isdi.scanner.ios_device import IosLibrary
+        tool = IosLibrary()
     reasons: List[str] = []
     timed_out = False
+    afc2_unchecked = not tool.supports_afc2
 
-    # Check if afc2 is active (indicates root filesystem access over USB)
-    orig_timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(5.0)
-    try:
-        client = create_using_usbmux(udid=serial)
-        client.start_service("com.apple.afc2")
-
+    # Check if afc2 is active (indicates root filesystem access over USB).
+    afc2 = tool.afc2_active(serial) if tool.supports_afc2 else None
+    if afc2:
         msg = (
             f"Failed rootcheck 'afc2_service'. "
             f"Detected: 'com.apple.afc2 active'. "
@@ -177,15 +179,11 @@ def check_ios_jailbreak(
             f"Command to reproduce: `{' '.join(cli)} lockdown service com.apple.afc2 --udid {serial}`"
         )
         reasons.append(msg)
-    except socket.timeout:
+    elif afc2 is None and tool.supports_afc2:
         logging.warning(
             "Jailbreak check (iOS): afc2 query timed out (device may be locked or untrusted)."
         )
         timed_out = True
-    except Exception as e:
-        logging.warning(f"Jailbreak check (iOS): afc2 query failed: {e}")
-    finally:
-        socket.setdefaulttimeout(orig_timeout)
 
     for app in apps:
         appid = app.get("CFBundleIdentifier") or app.get("appId", "")
@@ -207,6 +205,11 @@ def check_ios_jailbreak(
     if timed_out:
         default_reasons.append(
             "afc2 check timed out (device may be locked or untrusted)."
+        )
+        return None, default_reasons
+    if afc2_unchecked:
+        default_reasons.append(
+            "afc2 check is not available on this platform (WSL/Termux: limited iOS support)."
         )
         return None, default_reasons
 

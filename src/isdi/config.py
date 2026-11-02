@@ -90,13 +90,23 @@ class Config:
         self.ACCESS_TOKEN = os.environ.get("ISDI_ACCESS_TOKEN") or secrets.token_urlsafe(32)
         os.environ["ISDI_ACCESS_TOKEN"] = self.ACCESS_TOKEN
 
+        # Optional PhoneView screen viewer (a separate program; see isdi.phoneview).
+        # ISDI_PHONEVIEW_CMD: how to start it (default: `phoneview` on PATH).
+        # ISDI_PHONEVIEW_PUBLIC_URL: its `tailscale serve` address for remote
+        # consultants, e.g. https://laptop.tailnet.ts.net:8443 (default: this
+        # page's host name on port 8443).
+        self.PHONEVIEW_CMD = os.environ.get("ISDI_PHONEVIEW_CMD", "")
+        self.PHONEVIEW_PORT = int(os.environ.get("ISDI_PHONEVIEW_PORT", "6201"))
+        self.PHONEVIEW_PUBLIC_URL = os.environ.get("ISDI_PHONEVIEW_PUBLIC_URL", "")
+
         # Basic settings
         self.TEST = env == "test"
         self.DEBUG = env == "development"
 
         # App metadata
         self.TITLE = "ISDi - Stalkerware Scanner"
-        self.VERSION = "1.0.0"
+        from isdi import __version__
+        self.VERSION = __version__
         self.DEVICE_PRIMARY_USER = "client"  # Default label for device owner
 
         # Platform detection
@@ -108,13 +118,16 @@ class Config:
 
         # Additional paths for legacy compatibility
         self.STATIC_DATA = str(self.package_data)
-        self.ADB_PATH = "adb" + (".exe" if self.PLATFORM in ("wsl", "win32") else "")
+        self.ADB_PATH = "adb" + (".exe" if self.PLATFORM in ("wsl", "windows", "win32") else "")
         # Keep dumps under the legacy dumps path for compatibility.
         self.DUMP_DIR = str(self.dumps_dir)
         self.DEV_SUPPORTED = ["android", "ios"]  # Supported device types
         self.SCRIPT_DIR = Path(__file__).parent / "scripts"  # Shell scripts in package
 
-        # iOS tools: IOS_CLI is an argv prefix, IOS_CLI_ENV the environment
+        # iOS: Linux, macOS and Windows use the pymobiledevice3 library in-process
+        # (isdi.scanner.ios_device). IOS_CLI, the command-line tool, is only used on
+        # WSL and Termux (limited support) and in "command to reproduce" hints.
+        # IOS_CLI is an argv prefix, IOS_CLI_ENV the environment
         # to run it with (None means inherit).
         self.IOS_CLI_ENV = None
         if os.environ.get("PREFIX"):

@@ -26,6 +26,7 @@ from . import parse_dump
 
 from .android_permissions import all_permissions, get_all_accessibility_apps
 from . import runcmd
+from . import ios_device
 
 cfg = get_config()
 
@@ -591,44 +592,47 @@ class AndroidScanner(AppScanner):
 
 
 class IosScanner(AppScanner):
-    """Scanner for iOS devices using pymobiledevice3."""
+    """Scanner for iOS devices using pymobiledevice3 (see isdi.scanner.ios_device)."""
 
     def __init__(self):
         super().__init__("ios", cfg.IOS_CLI, cfg.IOS_CLI_ENV)
+        self.tool = ios_device.get_tool(cfg)
 
     def devices(self) -> List[str]:
-        """Get list of connected iOS devices."""
-        return [d["serial"] for d in self.connected_devices()]
+        """Serials of connected iOS devices that are ready to scan."""
+        return [d["serial"] for d in self.connected_devices() if d["state"] == "ready"]
 
     def connected_devices(self) -> List[Dict[str, str]]:
-        """Parse `pymobiledevice3 usbmux list` (a JSON list of devices)."""
-        output = runcmd.output(
-            [*self.cli, "usbmux", "list"], env=self.cli_env, timeout=30
-        ).strip()
-
-        try:
-            if not output:
-                return []
-            # Strip any non-JSON preamble (e.g. download warnings from pymobiledevice3)
-            json_start = output.find('[')
-            if json_start == -1:
-                return []
-            data = json.loads(output[json_start:])
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse device list: {e}. output={output}")
-            return []
-
         found = []
-        for d in data:
+        for d in self.tool.list_devices():
             if "Identifier" not in d:
                 continue
+            state = d.get("_state", "ready")
+            if state != "ready":
+                found.append({"serial": d["Identifier"], "label": "iPhone or iPad", "state": state})
+                continue
             label = self._model_names().get(
-                d.get("ProductType", ""), d.get("DeviceClass", "iOS device")
+                d.get("ProductType", ""), d.get("DeviceClass") or "iOS device"
             )
             if d.get("ProductVersion"):
                 label += f" (iOS {d['ProductVersion']})"
             found.append({"serial": d["Identifier"], "label": label, "state": "ready"})
         return found
+
+    def _dump_phone(self, serial: str) -> bool:
+        """Dump the app list and device info into this device's dump file."""
+        dumpf = self.dump_path(serial)
+        os.makedirs(os.path.dirname(dumpf), exist_ok=True)
+        self._forget_dump(serial)
+        logging.info(f"Dumping ios device {serial} ({self.tool.name})...")
+        try:
+            dump = self.tool.dump(serial)
+        except ios_device.IosDeviceError as e:
+            logging.error(f"iOS dump failed: {e}")
+            return False
+        ios_device.write_dump(dumpf, dump)
+        self._dumped_at[serial] = time.time()
+        return True
 
     def _model_names(self) -> Dict[str, str]:
         """ProductType -> marketing name, e.g. "iPhone10,1" -> "iPhone 8"."""
@@ -673,17 +677,13 @@ class IosScanner(AppScanner):
 
         ddump = self._get_dump(serial)
         apps = ddump.appinfo if ddump else []
-        return check_ios_jailbreak(serial, self.cli, apps)
+        return check_ios_jailbreak(serial, self.cli, apps, self.tool)
 
     def uninstall(self, serial: str, appid: str) -> bool:
         """Uninstall an app."""
         if not valid_appid(appid):
             return False
-        p = runcmd.run(
-            [*self.cli, "apps", "uninstall", "--udid", serial, appid],
-            env=self.cli_env,
-        )
-        return p.returncode == 0
+        return self.tool.uninstall(serial, appid)
 
 
 class TestScanner(AppScanner):

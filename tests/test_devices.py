@@ -2,6 +2,7 @@
 
 import json
 
+from isdi.scanner.ios_device import IosCli
 from isdi.scanner import AndroidScanner, IosScanner
 from isdi.scanner import runcmd
 
@@ -38,10 +39,11 @@ def test_ios_connected_devices(monkeypatch):
         },
         {"DeviceClass": "iPad", "Identifier": "00008101-unknownmodel", "ProductType": "iPad99,9"},
     ]
-    # pymobiledevice3 may print warnings before the JSON.
+    # pymobiledevice3 may print warnings before the JSON (CLI path: WSL/Termux).
     output = "Downloading something...\n" + json.dumps(usbmux)
-    monkeypatch.setattr(runcmd, "output", lambda *a, **k: output)
+    monkeypatch.setattr(runcmd, "run", lambda argv, **k: runcmd.subprocess.CompletedProcess(argv, 0, output, ""))
     sc = IosScanner()
+    sc.tool = IosCli(["pymobiledevice3"])
     assert sc.connected_devices() == [
         {
             "serial": "7814198a0183d848fe949642d52629fee003906a",
@@ -56,4 +58,7 @@ def test_ios_connected_devices(monkeypatch):
 def test_no_devices_when_tool_fails(monkeypatch):
     monkeypatch.setattr(runcmd, "output", lambda *a, **k: "")
     assert AndroidScanner().connected_devices() == []
-    assert IosScanner().connected_devices() == []
+    monkeypatch.setattr(runcmd, "run", lambda argv, **k: runcmd.subprocess.CompletedProcess(argv, 1, "", "no usbmuxd"))
+    ios = IosScanner()
+    ios.tool = IosCli(["pymobiledevice3"])
+    assert ios.connected_devices() == []

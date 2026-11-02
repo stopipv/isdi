@@ -84,7 +84,7 @@ def get_permissions(app):
     return all_permissions
 
 
-# Get dumps by running ios_scan.sh first.
+# Get dumps by scanning the device in ISDi first.
 def parse_dump():
     apps_json = json.dumps(APPS_PLIST)
     df = pd.read_json(apps_json)
@@ -133,5 +133,5 @@ def parse_dump():
 
 
 if __name__ == "__main__":
-    # Get dumps by running ios_scan.sh first.
+    # Get dumps by scanning the device in ISDi first.
     parse_dump()

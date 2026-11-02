@@ -80,7 +80,7 @@ def get_permissions(app):
     return all_permissions
 
 
-# Get dumps by running ios_scan.sh first.
+# Get dumps by scanning the device in ISDi first.
 def parse_dump():
     dotapps = []
     perms_c = 0
@@ -154,5 +154,5 @@ def parse_dump():
 
 
 if __name__ == "__main__":
-    # Get dumps by running ios_scan.sh first.
+    # Get dumps by scanning the device in ISDi first.
     parse_dump()

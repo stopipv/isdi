@@ -1,5 +1,45 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Optional **PhoneView** button: starts the separate PhoneView screen viewer on
+  demand (one copy, port 6201) and opens it already signed in, with a per-run
+  token derived from ISDi's own. PhoneView exits when ISDi stops, including
+  when ISDi is killed (it watches its stdin pipe). Configure with
+  `ISDI_PHONEVIEW_CMD`, `ISDI_PHONEVIEW_PORT`, `ISDI_PHONEVIEW_PUBLIC_URL`.
+- `pip install "isdi-scanner[phoneview]"` installs PhoneView alongside ISDi
+  (Python 3.11+); ISDi runs it with its own interpreter. `isdi phoneview status`
+  shows what ISDi will run.
+- remote.md: remote consultants through `tailscale serve`.
+
+### Changed
+- iOS uses pymobiledevice3 as a Python library on Linux, macOS and Windows
+  (`isdi.scanner.ios_device`), instead of running its command-line tool three
+  times per scan. `scripts/ios_scan.sh` is gone; dump files keep their format.
+  An iPhone that is plugged in but not trusted now shows up with a hint.
+- WSL2 and Termux keep the command-line tool, as **limited iOS support**: the
+  afc2 jailbreak check is reported as not available there.
+- pymobiledevice3 is pinned to `>=11.49,<11.50`, the same range as PhoneView, so
+  `pip install "isdi-scanner[phoneview]"` installs both into one environment.
+  Python 3.9+ is now required (pymobiledevice3 11.49 needs it).
+
+- `make bump-version` makes the release: it bumps the version, dates the
+  CHANGELOG, commits, tags `v<version>`, and pushes after asking. The tag push
+  publishes to PyPI through GitHub Actions (trusted publishing) and creates the
+  GitHub release. `PART=minor|major` now actually reaches the script.
+- `isdi --version` and `config.VERSION` report the package version (they said
+  1.0.2 and 1.0.0).
+
+### Fixed
+- The iOS afc2 jailbreak check never ran: it passed `udid=` to
+  `create_using_usbmux`, which has no such parameter, and the error was swallowed.
+- Native Windows was not recognised when choosing `adb.exe`.
+
+### Tests
+- One shared Flask app per test run (`tests/conftest.py`); a second
+  `create_app()` in the same process has no routes.
+
 ## 1.0.10 (unreleased)
 
 Security release. Please upgrade, and **rescan any device scanned with

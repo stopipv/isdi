@@ -141,7 +141,8 @@ var DEVICE_KINDS = {android: 'Android', ios: 'iOS', test: 'Test'};
 var DEVICE_HINTS = {
     'unauthorized': 'Unlock the phone and tap "Allow" on the USB debugging prompt.',
     'offline': 'Unplug the cable and plug it back in.',
-    'no permissions': 'adb cannot access this USB device. See the setup instructions.'
+    'no permissions': 'adb cannot access this USB device. See the setup instructions.',
+    'untrusted': 'Unlock the iPhone and tap "Trust" on the "Trust This Computer?" prompt.'
 };
 var lastDeviceList = null;
 var devicePollInFlight = false;
