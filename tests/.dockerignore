@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+.*
+.venv/
+venv/
+.env
+.wheel-*
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Git files
+.git
+.gitignore
+
+# OS files
+.DS_Store

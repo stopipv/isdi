@@ -1,0 +1,155 @@
+<script>
+    function get(url){
+        $('#loadingDiv').show();
+        $('#msg').html("")
+        $.get(url, function(data) {
+            $('#msg').html(data);
+            $('#loadingDiv').hide();
+        }).done(function(data) {
+        }).fail(function(data) {
+            alert("Failed:" + JSON.serialize(data));
+        })
+    }
+   
+    var loading = $('#loadingDiv').hide();
+    $(document).ready(function() {
+        $('#loadingDiv').hide();
+    });
+    
+</script>
+
+<div class="container">
+    <div>
+        <h4 class="display-4"> Evidence Collection</h4>
+        <hr/>
+        
+        {% if not scanned %}
+        <h2>Device information</h2>
+            <form method="post">
+                Name: <input name="name"/>
+                <br/><br/>
+                What type of device is this? 
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Android", "iOS"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="device" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"
+                           {% if device==a.lower() %} checked {% endif %}
+                    > {{ a }}
+                            </label>
+                    {% endfor %}
+                        </div>
+                <br/><br/>
+                <button type="submit">Submit</button>
+          </form>
+        <br></br>
+        {% endif %}
+
+        {% if scanned %}
+        <h2>Scan results for {{device_owner}}'s {{device}} device</h2>
+        <div id="summary">
+            <div>
+                <b>Spyware apps:</b>
+                {% if spyware %}
+                    {% for app in spyware %}
+                    <div>{{app["title"]}} (ID: {{app["appId"]}})</div>
+                    {% endfor %}
+                {% else %}
+                    <div>None found</div>
+                {% endif %}
+            </div>
+            <br/>
+            <div>
+                <b>Dual-use apps:</b>
+                {% if dual_use %}
+                    {% for app in dual_use %}
+                    <div>{{app["title"]}} (ID: {{app["appId"]}})</div>
+                    {% endfor %}
+                {% else %}
+                    <div>None found</div>
+                {% endif %}
+            </div>
+        </div>
+        <br/><br/>
+        {% endif %}
+        
+        <form method="POST", action="/evidence/summary">
+        <input type="hidden" name="dual_use" value={{dual_use_str}} />
+        <input type="hidden" name="spyware" value={{spyware}} />
+
+        {% if spyware %}
+        <h2>Spyware Apps</h2>
+        {% for app in spyware %}
+        <div class="jumbotron">
+            <h3>{{app["title"]}}</h3>
+                Did you know this app was installed on your device? 
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                Did you install this app?
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
+                <br/>
+        </div>
+        <hr/>
+        {% endfor %}
+        {% endif %}
+
+
+        {% if dual_use %}
+        <h2>Dual-Use Apps</h2>
+        {% for app in dual_use %}
+        <div class="jumbotron">
+            <h3>{{app["title"]}}</h3>
+                Did you know this app was installed on your device? 
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="recognize{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                Did you install this app?
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% for a in ["Yes", "No"] %}
+                            <label class="btn btn-outline-secondary">
+                                <input type="radio" name="installed{{app.title | lower}}" id="{{ a | lower }}"
+                           value="{{ a| lower }}" autocomplete="off"> 
+                            {{ a }}
+                            </label>
+                    {% endfor %}
+                </div>
+                <br/><br/>
+                If you did not install this app, do you know who did? <textarea name="installer{{app.title | lower}}"></textarea>
+                <br/>
+        </div>
+        {% endfor %}
+
+        <button type="submit">Submit</button>
+        </form>
+        {% endif %}
+
+
+	<br><br>
+    </div>
+</div>
+

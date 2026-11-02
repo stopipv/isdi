@@ -1,0 +1,44 @@
+# This workflow executes several linters on changed files based on languages used in your code base whenever
+# you push a code or open a pull request.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/github/super-linter
+name: ISDI_Linter
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "**/*.py"
+      - "src/isdi/scripts/*.sh"
+      - ".github/workflows/super-linter.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**/*.py"
+      - "src/isdi/scripts/*.sh"
+      - ".github/workflows/super-linter.yml"
+jobs:
+  run-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      - name: Lint Code Base
+        uses: github/super-linter@v7
+        env:
+          # Validate only new pull requests
+          VALIDATE_ALL_CODEBASE: false
+          # Limit linting to Python and shell scripts
+          VALIDATE_PYTHON: true
+          VALIDATE_BASH: true
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IGNORE_GITIGNORED_FILES: true
+          FILTER_REGEX_EXCLUDE: "(^scripts/.*|^src/isdi/data/.*\\.(csv|txt|json)$)"

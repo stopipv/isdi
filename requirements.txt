@@ -1,12 +1,8 @@
-# appJar==0.90.0
-pandas
-flask
-dataset
-rsonlite==0.1.0
-Flask-WTF==0.14.2
-Flask-SQLAlchemy==2.4.0
-WTForms==2.2.1
-WTForms-Alchemy==0.16.9
-WTForms-Components==0.10.4
-Flask-Migrate==2.5.2
-python-dotenv==0.10.3
+click>=8.1.3
+Flask>=2.2.5
+Flask-SQLAlchemy>=2.5.1
+Flask-WTF>=0.14.2
+pymobiledevice3>=11.49,<11.50
+PyYAML>=6.0
+rsonlite>=0.1.0
+WTForms

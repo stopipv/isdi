@@ -1,0 +1,87 @@
+.PHONY: help clean build upload upload-test install install-dev test lint format bump-version
+
+# Default Python
+PYTHON := python3
+PIP := $(PYTHON) -m pip
+
+help:
+	@echo "ISDI Scanner - Build and Distribution Commands"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  make install          - Install the package in development mode"
+	@echo "  make install-dev      - Install with development dependencies"
+	@echo "  make test             - Run tests"
+	@echo "  make lint             - Run linter (black format check)"
+	@echo "  make format           - Format code with black"
+	@echo "  make build            - Build distribution packages"
+	@echo "  make upload-test      - Upload to TestPyPI (requires .pypirc)"
+	@echo "  make upload           - Upload to PyPI (requires .pypirc)"
+	@echo "  make bump-version     - Release: bump (PART=patch|minor|major), commit, tag, push after confirmation"
+	@echo "  make clean            - Remove build artifacts"
+	@echo "  make clean-all        - Remove all generated files"
+	@echo ""
+
+install:
+	$(PIP) install -e .
+
+install-dev:
+	$(PIP) install -e ".[dev]"
+
+test:
+	$(PYTHON) -m pytest tests/ -v
+
+lint:
+	$(PYTHON) -m black --check src/ tests/
+
+format:
+	$(PYTHON) -m black src/ tests/
+
+build: clean
+	$(PYTHON) -m build
+	$(PYTHON) scripts/check_dist.py dist
+
+upload-test: build
+	@echo "Uploading to TestPyPI..."
+	$(PYTHON) -m twine upload --repository testpypi dist/*
+	@echo ""
+	@echo "✓ Successfully uploaded to TestPyPI!"
+	@echo "Install with: pip install --index-url https://test.pypi.org/simple/ isdi-scanner"
+
+upload: build
+	@echo "Uploading to PyPI..."
+	@printf "Continue? [y/N] "
+	@read REPLY; \
+	case "$$REPLY" in \
+		[yY]) \
+			if $(PYTHON) -m twine upload dist/*; then \
+				echo ""; \
+				echo "✓ Successfully uploaded to PyPI!"; \
+				echo "Install with: pip install isdi-scanner"; \
+			else \
+				echo ""; \
+				echo "Upload failed."; \
+				exit 1; \
+			fi; \
+			;; \
+		*) \
+			echo "Upload cancelled."; \
+			;; \
+	esac
+
+VERSION_PART ?= patch
+
+# Bumps, commits and tags locally, then asks before pushing (which publishes to PyPI).
+bump-version:
+	@VERSION_PART=$(or $(PART),$(VERSION_PART),patch) $(PYTHON) scripts/bump_version.py
+
+clean:
+	rm -rf build/ dist/ *.egg-info .eggs/ src/*.egg-info
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
+
+clean-all: clean
+	rm -rf .venv/ .pytest_cache/ .tox/ htmlcov/ .coverage
+	rm -rf .wheel-cache* wheels-*
+
+.DEFAULT_GOAL := help

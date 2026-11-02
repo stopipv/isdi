@@ -1,0 +1,77 @@
+{% if form %}
+<script>
+  $(document).on("submit", "form", function(event){
+        window.onbeforeunload = null;
+});
+window.onbeforeunload = function (e) {
+    e = e || window.event;
+
+    // For IE and Firefox prior to version 4
+    if (e) {
+        e.returnValue = 'Sure?';
+    }
+
+    // For Safari
+    return 'Sure?';
+};
+</script>
+{% endif %}
+<div class="isdi-page">
+  <div class="isdi-header">
+  <h4 class="isdi-title"><b>{{ title.title }}</b></h4>
+    <span class="isdi-actions">
+            <a class='btn btn-normal'  href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
+                      device for a scan."><u>Scan Instruction</u></a>
+            <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
+            <a href="javascript:;" onclick="return kill_app();">&#x274C; Close App and End Session</a>
+        </span> 
+  </div>
+
+    <p><!-- {{ title.title }} is  -->An <a href="https://github.com/rchatterjee/phone_scanner" target="_blank" rel="noopener">open-source</a> app
+        for scanning mobile devices (e.g., Android and iOS devices) for apps that
+        can be used to spy on, track, or otherwise monitor a person.<br/>
+    </p>
+</div>
+
+{% if form %}
+<div class="">
+          <label for="clientid"><i>Session (Client) ID:</i>
+              <input class="form-control" name="clientid" id="clientid" type="text" placeholder="<Session Id>"
+                           value="{{ clientid }}" readonly/>
+                </label>
+                <a class='btn btn-primary'  href="/" target="_blank" rel="noopener" 
+                      >Scan client devices (opens in new tab)</a>
+              </div>
+
+{% from "_formhelpers.html" import render_field %}
+<div class="">
+  <form method=post>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-row align-items-center">
+      <dl>
+        {% for f in form %}
+          {{ render_field(f) }}
+        {% endfor %}
+        <!-- for custom CSS class, load these individually or attempt to make rules for sa Types -->
+        <!-- {{ render_field(form.fjc, 'btn btn-primary mx-2') }}
+          {{ render_field(form.consultant_initials) }} -->
+
+      </dl>
+      <!-- <p><input type=submit value=Register> -->
+    </div>
+
+      <button class="btn btn-primary mx-2">Submit</button>
+  </form>
+  <br>
+</div>
+{% else %}
+  {% if formdone == "already" %}
+  <h2>A consult form has already been submitted for this client.</h2>
+    <br><a href="/">Return to the homepage</a> to scan devices or choose to start a new client session.
+  {% elif formdone %}
+  <h2>Form submitted successfully!</h2>
+    <br><a href="/">Return to the homepage</a> to scan devices or choose to start a new client session.
+  {% else %}
+  No form generated. Please go back to the <a href="/">homepage</a>.
+  {% endif %}
+{% endif %}

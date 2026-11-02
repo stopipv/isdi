@@ -1,23 +1,23 @@
 import re
-from blocklist import _regex_blocklist, app_title_and_flag
-import pandas as pd
+from isdi.scanner.blocklist import _regex_blocklist, app_title_and_flag
+from isdi.scanner.lightweight_df import LightDataFrame
 import sys
 
 test_list = [
-    ('com.spyware.app', True),
-    ('com.antispyware.app', False),
-    ('com.spyware-anti.app', True),
-    ('com.something.Anti-Spyware.com', False),
-    ('com.something.Anti-something-Spyware.com', False),
-    ('com.-something-Spyware.com', True),
-    ('com.Trackware.com', True),
-    ('com.AntiTrackware.com', False),
-    ('com.spyware-removal.com', False),
+    ("com.spyware.app", True),
+    ("com.antispyware.app", False),
+    ("com.spyware-anti.app", True),
+    ("com.something.Anti-Spyware.com", False),
+    ("com.something.Anti-something-Spyware.com", False),
+    ("com.-something-Spyware.com", True),
+    ("com.Trackware.com", True),
+    ("com.AntiTrackware.com", False),
+    ("com.spyware-removal.com", False),
 ]
 # regex_ = r'(?i)(?!.*anti)[\-\s]*(spy|track|keylog)'
 # regex_ = r'(?i)((?!.*anti)[\-\s]*.*(spy|track)).*'
-regex_pos = r'(?i)(spy|track|keylog)'
-regex_neg = r'(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])'
+regex_pos = r"(?i)(spy|track|keylog)"
+regex_neg = r"(?i)(anti.*(spy|track|keylog)|(spy|track|keylog).*remov[ea])"
 
 
 def test_regex():
@@ -31,16 +31,53 @@ def test_blocklist():
 
 
 def test_app_title_and_flags():
-    d = pd.DataFrame({
-        'appId': ['core.framework', 'com.android.system',
-                  'LEM.TrackMe', 'com.spy2mobile.light']
-    })
-    ret = app_title_and_flag(d, ['core.framework', 'com.android.system'])
-    assert len(ret) == len(ret.appId)
-    # assert ret.flags == 
-    ret.to_csv(index=None) == """appId,title,flags
-LEM.TrackMe,TrackMe - GPS Tracker,"['dual-use', 'regex-spy']"
-com.android.system, System Service,"['spyware', 'co-occurrence', 'offstore-app']"
-com.spy2mobile.light, Data Backup,"['spyware', 'co-occurrence', 'regex-spy']"
-core.framework,mSpy,"['spyware', 'offstore-app', 'regex-spy']"
-"""
+    d = LightDataFrame(
+        [
+            {"appId": "core.framework"},
+            {"appId": "com.android.system"},
+            {"appId": "LEM.TrackMe"},
+            {"appId": "com.spy2mobile.light"},
+        ]
+    )
+    ret = app_title_and_flag(d, ["core.framework", "com.android.system"])
+    assert len(ret) == len({app.get("appId") for app in ret})
+    appids = {app.get("appId") for app in ret}
+    assert "core.framework" in appids
+    assert "com.android.system" in appids
+
+
+def _csv_rows():
+    import csv
+    from isdi.scanner import blocklist
+
+    with open(blocklist.config.APP_FLAGS_FILE, encoding="latin1") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_blocklist_flags_are_kept():
+    """Every flagged app in app-flags.csv must keep its flag after lookup."""
+    rows = [
+        r
+        for r in _csv_rows()
+        if r["flag"] in {"dual-use", "spyware", "stalkerware", "co-occurrence"}
+    ]
+    assert rows
+    expected = {r["appId"]: r["flag"] for r in rows}
+    ret = app_title_and_flag([{"appId": a} for a in expected])
+    assert len(ret) == len(expected)
+    for app in ret:
+        assert expected[app["appId"]] in app["flags"], app
+
+
+def test_spyware_and_stalkerware_get_top_class():
+    from isdi.scanner.blocklist import assign_class, flag_str, score
+
+    for flag in ("spyware", "stalkerware"):
+        assert score([flag]) == 1.0
+        assert assign_class([flag]) == "alert-primary"
+        assert "text-primary" in flag_str([flag])
+    assert assign_class(["dual-use"]) == "alert-warning"
+
+    ids = [r["appId"] for r in _csv_rows() if r["flag"] in ("spyware", "stalkerware")]
+    for app in app_title_and_flag([{"appId": a} for a in ids]):
+        assert assign_class(app["flags"]) == "alert-primary", app
