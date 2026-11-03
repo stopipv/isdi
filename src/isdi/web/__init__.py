@@ -23,7 +23,6 @@ def init_routes(flask_app):
             instructions,
             control,
             details,
-            privacy,
             error,
             results,
             save,

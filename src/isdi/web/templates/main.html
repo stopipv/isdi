@@ -11,7 +11,7 @@
               href="{{ url_for('static', filename='style.css') }}?234">
         <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='myjscript.js') }}?5"></script>
+        <script src="{{ url_for('static', filename='myjscript.js') }}?6"></script>
 	<title>{{ title }} {% if platform %}({{ platform }}){% endif %}</title>
         <script>
 
@@ -95,9 +95,6 @@
         {% endif %}
         {% if task == 'instruction' %}
           {% include "instruction.html" %}
-        {% endif %}
-        {% if task == 'privacy' %}
-          {% include "privacy.html" %}
         {% endif %}
         {% if task == 'evidence' %}
           {% include "evidence.html" %}

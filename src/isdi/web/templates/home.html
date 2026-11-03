@@ -4,17 +4,7 @@
         <div class="isdi-actions">
             <a class='btn btn-normal' href="/instruction" target="_blank" rel="noopener" data-toggle="tooltip" title="Instruction for preparing your
                       device for a scan."><u>Scan Instructions</u></a>
-            <a class='btn btn-normal' href="/privacy" target="_blank" rel="noopener" data-toggle="tooltip" title="Review the built-in sharing feature settings of your device with this."><u>Privacy Checkup</u></a>
-            <form method="post" action="/phoneview" target="_blank" rel="noopener" class="d-inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                {% if phoneview_available %}
-                <button type="submit" class="btn btn-normal" data-toggle="tooltip"
-                        title="Open a live view of the connected phone's screen in a new tab. The phone's owner must unlock it and approve the connection on the phone."><u>PhoneView</u></button>
-                {% else %}
-                <button type="button" class="btn btn-normal" disabled data-toggle="tooltip"
-                        title="PhoneView is not installed. Run: pip install &quot;isdi-scanner[phoneview]&quot; (Python 3.11+)">PhoneView</button>
-                {% endif %}
-            </form>
+            {% include '_phoneview_button.html' %}
             <a class="isdi-close-link" href="javascript:;" onclick="return kill_app();">&#x274C; Close App and End Session</a>
         </div>
     </div>

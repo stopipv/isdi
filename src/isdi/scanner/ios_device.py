@@ -61,25 +61,27 @@ class IosLibrary:
     name = "library"
     supports_afc2 = True
 
-    async def _list(self) -> List[Dict[str, Any]]:
-        from pymobiledevice3 import usbmux
+    @staticmethod
+    async def describe(device) -> Dict[str, Any]:
+        """lockdown short_info for a usbmux MuxDevice, or an "untrusted" placeholder."""
         from pymobiledevice3.lockdown import create_using_usbmux
 
-        found = []
-        for device in await usbmux.list_devices():
-            try:
-                lockdown = await create_using_usbmux(
-                    device.serial, autopair=False, connection_type=device.connection_type)
-            except Exception as exc:
-                # Plugged in but locked, never trusted, or the trust prompt is pending.
-                logging.info("iOS device %s not ready: %s", device.serial, type(exc).__name__)
-                found.append({"Identifier": device.serial, "_state": "untrusted"})
-                continue
-            try:
-                found.append(lockdown.short_info)
-            finally:
-                await lockdown.close()
-        return found
+        try:
+            lockdown = await create_using_usbmux(
+                device.serial, autopair=False, connection_type=device.connection_type)
+        except Exception as exc:
+            # Plugged in but locked, never trusted, or the trust prompt is pending.
+            logging.info("iOS device %s not ready: %s", device.serial, type(exc).__name__)
+            return {"Identifier": device.serial, "_state": "untrusted"}
+        try:
+            return lockdown.short_info
+        finally:
+            await lockdown.close()
+
+    async def _list(self) -> List[Dict[str, Any]]:
+        from pymobiledevice3 import usbmux
+
+        return [await self.describe(device) for device in await usbmux.list_devices()]
 
     def list_devices(self) -> List[Dict[str, Any]]:
         try:

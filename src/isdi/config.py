@@ -99,6 +99,10 @@ class Config:
         self.PHONEVIEW_PORT = int(os.environ.get("ISDI_PHONEVIEW_PORT", "6201"))
         self.PHONEVIEW_PUBLIC_URL = os.environ.get("ISDI_PHONEVIEW_PUBLIC_URL", "")
 
+        # Time zone for times shown in the UI (scan times are stored in the
+        # server's local time, which is often UTC on kiosk/gateway boxes).
+        self.DISPLAY_TZ = os.environ.get("ISDI_DISPLAY_TZ", "America/Chicago")
+
         # Basic settings
         self.TEST = env == "test"
         self.DEBUG = env == "development"
@@ -215,8 +219,9 @@ class Config:
         self.reports_dir = self.dirs["data"] / "reports"
         self.dumps_dir = self.dirs["data"] / "dumps"
         self.phone_dumps_dir = self.dirs["data"] / "phone_dumps"
-        # Privacy-checkup screenshots; served only through a token-checked route
-        self.screenshots_dir = self.dirs["local_data"] / "screenshots"
+        # PhoneView's temporary screenshots (owner-only). PhoneView deletes them when it
+        # stops, which it does 30 s after its page is closed (--stop-when-closed).
+        self.screenshots_dir = self.dirs["cache"] / "temp" / "phoneview-screenshots"
 
         # Config directory
         self.secrets_dir = self.dirs["config"]

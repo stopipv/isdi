@@ -154,7 +154,7 @@ def test_post_requires_csrf(authed):
     assert r.status_code == 400  # past CSRF; rejected for the invalid serial
 
 
-@pytest.mark.parametrize("path", ["/kill", "/delete/app/1", "/privacy/android/account"])
+@pytest.mark.parametrize("path", ["/kill", "/delete/app/1"])
 def test_state_changing_routes_reject_get(authed, path):
     client, _ = authed
     assert client.get(path).status_code == 405
@@ -180,16 +180,6 @@ def test_scan_start_rejects_unknown_serial(authed):
     assert r.status_code == 400
 
 
-def test_privacy_rejects_unknown_serial(authed):
-    client, csrf = authed
-    r = client.post(
-        "/privacy/test/account",
-        data={"serial": "evil; reboot"},
-        headers={"X-CSRFToken": csrf},
-    )
-    assert r.status_code == 400
-
-
 def test_details_rejects_unknown_serial(authed):
     client, _ = authed
     r = client.get("/details/app/test?appId=com.example&serial=not-connected")
@@ -198,15 +188,20 @@ def test_details_rejects_unknown_serial(authed):
     assert r.status_code == 400
 
 
-def test_screenshot_route_only_serves_screenshot_names(authed, tmp_path):
-    client, _ = authed
+def test_privacy_checkup_is_gone(authed):
+    """Replaced by PhoneView; its routes, including the screenshot route, no longer exist."""
+    client, csrf = authed
     screenshots = get_config().screenshots_dir
     (screenshots / "0123456789abcdef.png").write_bytes(b"\x89PNG")
-    r = client.get("/privacy/screenshot/0123456789abcdef.png")
-    assert r.status_code == 200
-    assert r.headers["Cache-Control"] == "no-store"
-    assert client.get("/privacy/screenshot/..%2Fpii.key").status_code == 404
-    assert client.get("/privacy/screenshot/tmp.png").status_code == 404
+    try:
+        assert client.get("/privacy").status_code == 404
+        assert client.get("/privacy/screenshot/0123456789abcdef.png").status_code == 404
+        r = client.post("/privacy/android/account", headers={"X-CSRFToken": csrf})
+        assert r.status_code == 404
+        page = client.get("/").get_data(as_text=True)
+        assert "Privacy Checkup" not in page and "PhoneView" in page
+    finally:
+        (screenshots / "0123456789abcdef.png").unlink()
 
 
 def test_view_results_escapes_scan_id(authed):
@@ -253,3 +248,39 @@ def test_afc2_check_uses_async_lockdown(monkeypatch):
     monkeypatch.setattr(lockdown_mod, "create_using_usbmux", no_afc2)
     rooted, _ = root_check.check_ios_jailbreak("SERIAL", ["pymobiledevice3"], [])
     assert rooted is False
+
+
+def test_sign_in_page_asks_for_token(client, capsys):
+    import isdi.app as isdi_app
+
+    isdi_app._last_banner = 0.0
+    r = client.get("/instruction?x=1")
+    assert r.status_code == 403
+    page = r.get_data(as_text=True)
+    assert 'action="/login"' in page and 'name="token"' in page
+    assert 'value="/instruction?x=1"' in page          # comes back here after sign-in
+    # The token is printed again, in a box, on the terminal (stderr) — never in the page.
+    err = capsys.readouterr().err
+    token = get_config().ACCESS_TOKEN
+    assert "ISDi ACCESS TOKEN" in err and token in err
+    assert token not in page
+
+
+def test_sign_in_with_pasted_token(client):
+    token = get_config().ACCESS_TOKEN
+    r = client.post("/login", data={"token": "wrong", "next": "/instruction"})
+    assert r.status_code == 403 and "Invalid token" in r.get_data(as_text=True)
+    assert client.get("/instruction").status_code == 403
+
+    r = client.post("/login", data={"token": f"  {token}\n", "next": "/instruction"})
+    assert r.status_code == 303 and r.headers["Location"].endswith("/instruction")
+    assert client.get("/instruction").status_code == 200
+    with client.session_transaction() as s:
+        assert s["csrf"]
+
+
+@pytest.mark.parametrize("target", ["https://evil.example/", "//evil.example/", "/\\evil.example", ""])
+def test_sign_in_never_redirects_off_site(client, target):
+    r = client.post("/login", data={"token": get_config().ACCESS_TOKEN, "next": target})
+    assert r.status_code == 303
+    assert r.headers["Location"] in ("/", "http://localhost/")

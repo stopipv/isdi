@@ -34,9 +34,19 @@ def complexparse(lines: list[str]) -> dict:
         d = simpleparse("".join(lines))
         return d
     except IndentationError as ex:
-        pass
-        # logging.error(f"IndentationError: {ex}")
-    n = _find_length_of_valid_string(lines, 0, len(lines)) - 1
+        err_line = getattr(ex, "lineno", None)
+    # rsonlite reports the line it failed on; everything before it usually parses.
+    # Trying that cut first saves the ~log2(len(lines)) full re-parses of the
+    # binary search below (20+ s for a large `dumpsys package` on a slow CPU).
+    n = None
+    if err_line and 1 < err_line <= len(lines):
+        try:
+            simpleparse("".join(lines[: err_line - 1]))
+            n = err_line - 1
+        except Exception:
+            n = None
+    if n is None:
+        n = _find_length_of_valid_string(lines, 0, len(lines)) - 1
     logging.info(f"Parsed {n} (out of {len(lines)}) lines. starting {lines[:2]}")
     d = simpleparse("".join(lines[:n]))
     if isinstance(d, list):
@@ -243,6 +253,12 @@ class PhoneDump(object):
         return []
 
 
+# The only dump sections ISDi reads after parsing (package list, permissions,
+# app-ops, battery and data use). The others stay in the raw .txt dump but are
+# not parsed: parsing them took most of the scan time on slow machines.
+PARSED_SERVICES = {"package", "appops", "procstats", "batterystats", "net_stats"}
+
+
 class AndroidDump(PhoneDump):
     def __init__(self, fname):
         super(AndroidDump, self).__init__("android", fname)
@@ -260,7 +276,7 @@ class AndroidDump(PhoneDump):
         """Not used working using simple parse to parse the files."""
         if not Path(fname).exists():
             logging.error("File: {!r} does not exists".format(fname))
-        data = open(fname)
+        data = open(fname, encoding="utf-8", errors="replace")
         d = {}
         service = ""
         join_lines = []
@@ -300,15 +316,15 @@ class AndroidDump(PhoneDump):
             if l.startswith("----"):
                 continue
             if l.startswith("DUMP OF SERVICE") or l.startswith("DUMP OF SETTINGS"):
-                if service:
+                if service in PARSED_SERVICES:
                     d[service] = _parse(join_lines)
                 service = re.sub(r"DUMP OF SERVICE |DUMP OF SETTINGS ", "", l).strip()
                 if service == "netstats detail":
                     service = "net_stats"
                 join_lines = []
-            else:
+            elif service in PARSED_SERVICES:
                 join_lines.append(l)
-        if len(join_lines) > 0 and len(d.get(service, [])) == 0:
+        if service in PARSED_SERVICES and len(join_lines) > 0 and len(d.get(service, [])) == 0:
             d[service] = _parse(join_lines)
         return _clean_dictionary(d)
 
@@ -361,7 +377,7 @@ class AndroidDump(PhoneDump):
         d = {}
         if os.path.exists(json_fname):
             logging.debug(f"Loading json file: {json_fname}")
-            with open(json_fname, "r") as f:
+            with open(json_fname, "r", encoding="utf-8") as f:
                 try:
                     d = json.load(f)
                 except Exception as ex:
@@ -370,16 +386,20 @@ class AndroidDump(PhoneDump):
                         os.unlink(json_fname)
                         return self.load_file(failed_before=True)
         else:
-            with open(json_fname, "w") as f:
-                try:
-                    d = self.new_parse_dump_file(fname)
-                    json.dump(d, f, indent=2)
-                except Exception as ex:
-                    logging.error(
-                        "File ({!r}) could not be opened or parsed.".format(fname)
-                    )
-                    logging.error("Exception: {}".format(ex))
-                    raise (ex)
+            try:
+                d = self.new_parse_dump_file(fname)
+            except Exception as ex:
+                logging.error(
+                    "File ({!r}) could not be opened or parsed.".format(fname)
+                )
+                logging.error("Exception: {}".format(ex))
+                raise (ex)
+            # Cache the parse; written only after it succeeded, and atomically,
+            # so a failed or interrupted parse never leaves a bad cache behind.
+            tmp = json_fname + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(d, f)
+            os.replace(tmp, json_fname)
         return d
 
     @staticmethod
@@ -595,10 +615,10 @@ class IosDump(PhoneDump):
         # load permissions mappings and apps plist
         self.permissions_map = {}
         self.model_make_map = {}
-        with open(os.path.join(config.STATIC_DATA, "ios_permissions.json"), "r") as fh:
+        with open(os.path.join(config.STATIC_DATA, "ios_permissions.json"), "r", encoding="utf-8") as fh:
             self.permissions_map = json.load(fh)
         with open(
-            os.path.join(config.STATIC_DATA, "ios_device_identifiers.json"), "r"
+            os.path.join(config.STATIC_DATA, "ios_device_identifiers.json"), "r", encoding="utf-8"
         ) as fh:
             self.model_make_map = json.load(fh)
 

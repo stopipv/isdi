@@ -64,6 +64,27 @@ def valid_appid(appid: str) -> bool:
     return bool(appid) and bool(_APPID_RE.match(appid))
 
 
+def parse_adb_devices(lines: List[str]) -> List[Dict[str, str]]:
+    """Device lines of `adb devices -l` / `adb track-devices -l` -> serial/label/state."""
+    found = []
+    for line in lines:
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        serial, state = parts[0], parts[1]
+        if state == "no":  # "no permissions (...)": adb cannot open the USB device
+            state = "no permissions"
+        props = dict(p.split(":", 1) for p in parts[2:] if ":" in p)
+        found.append(
+            {
+                "serial": serial,
+                "label": props.get("model", "Android device").replace("_", " "),
+                "state": "ready" if state == "device" else state,
+            }
+        )
+    return found
+
+
 class AppScanner:
     """Base class for device scanners (Android/iOS)."""
 
@@ -392,8 +413,9 @@ class AppScanner:
                         }
 
         # Accessibility detection (Android only)
-        if self.device_type == "android" and self.ddump:
-            for appid in get_all_accessibility_apps(self.ddump):
+        ddump = self._get_dump(serialno) if self.device_type == "android" else None
+        if ddump:
+            for appid in get_all_accessibility_apps(ddump):
                 if appid in result:
                     flags = result[appid]["flags"]
                     if "accessibility" not in flags:
@@ -529,24 +551,7 @@ class AndroidScanner(AppScanner):
     def connected_devices(self) -> List[Dict[str, str]]:
         """Parse `adb devices -l`, e.g. "SERIAL device usb:1-1 model:Pixel_7 ..."."""
         output = runcmd.output([*self.cli, "devices", "-l"], timeout=30)
-
-        found = []
-        for line in output.splitlines()[1:]:
-            parts = line.split()
-            if len(parts) < 2:
-                continue
-            serial, state = parts[0], parts[1]
-            if state == "no":  # "no permissions (...)": adb cannot open the USB device
-                state = "no permissions"
-            props = dict(p.split(":", 1) for p in parts[2:] if ":" in p)
-            found.append(
-                {
-                    "serial": serial,
-                    "label": props.get("model", "Android device").replace("_", " "),
-                    "state": "ready" if state == "device" else state,
-                }
-            )
-        return found
+        return parse_adb_devices(output.splitlines()[1:])
 
     def get_apps(self, serialno: str) -> List[str]:
         """Get installed apps from dump."""
@@ -603,8 +608,12 @@ class IosScanner(AppScanner):
         return [d["serial"] for d in self.connected_devices() if d["state"] == "ready"]
 
     def connected_devices(self) -> List[Dict[str, str]]:
+        return self.describe(self.tool.list_devices())
+
+    def describe(self, records: List[Dict]) -> List[Dict[str, str]]:
+        """Device records from the iOS tool (lockdown short_info) -> serial/label/state."""
         found = []
-        for d in self.tool.list_devices():
+        for d in records:
             if "Identifier" not in d:
                 continue
             state = d.get("_state", "ready")
@@ -638,7 +647,7 @@ class IosScanner(AppScanner):
         """ProductType -> marketing name, e.g. "iPhone10,1" -> "iPhone 8"."""
         if not hasattr(self, "_models"):
             try:
-                with open(os.path.join(cfg.STATIC_DATA, "ios_device_identifiers.json")) as fh:
+                with open(os.path.join(cfg.STATIC_DATA, "ios_device_identifiers.json"), encoding="utf-8") as fh:
                     self._models = json.load(fh)
             except (OSError, json.JSONDecodeError):
                 self._models = {}
@@ -698,7 +707,7 @@ class TestScanner(AppScanner):
     def get_apps(self, serialno: str) -> List[str]:
         """Load test app list."""
         try:
-            with open(str(cfg.TEST_APP_LIST), "r") as f:
+            with open(str(cfg.TEST_APP_LIST), "r", encoding="utf-8") as f:
                 return f.read().strip().split("\n")
         except Exception as e:
             logging.error(f"Cannot load test apps: {e}")

@@ -48,7 +48,7 @@ termux = [
 ]
 # Live screen view and control (PhoneView needs Python 3.11+).
 phoneview = [
-    "phoneview>=0.2,<0.3; python_version >= '3.11'",
+    "phoneview>=1.2,<2; python_version >= '3.11'",
 ]
 
 [project.scripts]
@@ -71,13 +71,13 @@ isdi = [
     "data/android.test.apps_list",
     "web/schema.sql",
     "web/templates/_formhelpers.html",
+    "web/templates/_phoneview_button.html",
     "web/templates/app.html",
     "web/templates/evidence.html",
     "web/templates/form.html",
     "web/templates/home.html",
     "web/templates/instruction.html",
     "web/templates/main.html",
-    "web/templates/privacy.html",
     "web/templates/summary.html",
     "web/static/bootstrap.bundle.min.js",
     "web/static/bootstrap.min.css",
@@ -89,8 +89,6 @@ isdi = [
     "web/static/images/android.resiz.png",
     "web/static/images/apple.png",
     "web/static/images/apple.resized.png",
-    "web/static/images/google_maps_sharing.png",
-    "web/static/images/google_photos_sharing.png",
     "web/static/images/usb_android.png",
     "web/static/images/usb_android.resized.png",
     "web/static/images/waiting.gif",

@@ -160,3 +160,62 @@ def test_ios_permissions_are_merged_and_labelled():
         {"name": "Location (While Using)", "access": IosDump.PERMISSION_ACCESS["asks"], "reason": ""},
     ]
     assert dump.get_permissions({}) == []
+
+
+ANDROID_DUMP_NON_ASCII = """
+DUMP OF SERVICE package
+Packages:
+  Package [com.example.app] (abc123):
+    userId=10123
+    installerPackageName=com.android.vending
+    flags=[ HAS_CODE ]
+    label=Кошелёк 支付 ‘quoted’
+Settings parse messages:
+DUMP OF SERVICE appops
+Uid 10123:
+  Package com.example.app:
+"""
+
+
+def test_android_dump_is_read_as_utf8_whatever_the_locale(tmp_path):
+    """Dumps are written as UTF-8; reading them with the locale encoding
+    (cp1252 on Windows) failed with "'charmap' codec can't decode byte 0x8f"."""
+    import subprocess
+    import sys
+
+    dump = tmp_path / "x_android.txt"
+    dump.write_text(ANDROID_DUMP_NON_ASCII, encoding="utf-8")
+    code = (
+        "import sys; from isdi.scanner.parse_dump import AndroidDump; "
+        "print(AndroidDump(sys.argv[1]).all_apps()); print(AndroidDump(sys.argv[1]).all_apps())"
+    )
+    # Any open() without an explicit encoding on this path is an error here.
+    p = subprocess.run(
+        [sys.executable, "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
+         "-c", code, str(dump)],
+        capture_output=True, text=True, env=dict(os.environ),
+    )
+    assert p.returncode == 0, p.stderr[-2000:]
+    assert p.stdout.splitlines()[-2:] == ["['com.example.app']"] * 2
+
+
+def test_android_find_spyapps_flags_accessibility(monkeypatch):
+    """find_spyapps used self.ddump, which no longer exists: every Android scan
+    failed with "'AndroidScanner' object has no attribute 'ddump'"."""
+    from isdi.scanner import AndroidScanner
+
+    sc = AndroidScanner()
+    serial = "TESTSERIAL1"
+    path = sc.dump_path(serial)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(ANDROID_DUMP_NON_ASCII.replace(
+            "  Package com.example.app:\n",
+            "  Package com.example.app:\n    ACCESS_ACCESSIBILITY (allow):\n"))
+    monkeypatch.setattr(sc, "_dump_phone", lambda s: True)       # dump already on disk
+    monkeypatch.setattr(sc, "get_device_owner_apps", lambda s: set())
+    try:
+        apps = sc.find_spyapps(serial)
+    finally:
+        os.unlink(path)
+    assert "accessibility" in apps["com.example.app"]["flags"]

@@ -1,5 +1,61 @@
 # Changelog
 
+## Unreleased
+### Removed
+- **Privacy Checkup** and everything behind it (the `/privacy` pages, the adb
+  automation in `privacy_scan_android.py`, its screenshot route and images).
+  Reviewing the phone's sharing settings now happens in **PhoneView**, which shows
+  and controls the real screen. The PhoneView button takes its place on the home
+  page and the consult form.
+
+### Added
+- PhoneView screenshots (full resolution, with notes, reorderable, exportable as
+  one PDF). They are temporary: ISDi starts PhoneView with `--stop-when-closed 30`
+  and a private folder under its temp directory, so 30 s after the PhoneView page
+  is closed PhoneView stops and deletes them (a reload within that time is fine;
+  the page warns before closing if the latest ones are not downloaded). The
+  PhoneView button starts it again. Needs PhoneView 1.2 (`phoneview>=1.2,<2`).
+- Sign-in page: opening ISDi without (or with a wrong) `?token=` shows a form
+  to paste the access token, instead of "Access denied". ISDi prints the token
+  again in its terminal, in a box labelled **ISDi ACCESS TOKEN** (like Jupyter),
+  at most every 10 s. The pasted token is POSTed, so it stays out of URLs and
+  logs, and you land on the page you asked for. Handy behind `tailscale serve`:
+  open `https://<host>.ts.net/` and paste.
+
+### Changed
+- Attached phones are tracked by background watchers instead of polling:
+  `adb track-devices -l` for Android and a usbmuxd `Listen` subscription for
+  iPhones (`isdi.scanner.device_watch`). The home page's `/devices` requests are
+  answered from memory, so an idle ISDi no longer runs adb or opens lockdown
+  sessions every few seconds. A missing usbmuxd is logged once, not every poll.
+  WSL and Termux keep polling.
+- Android dumps parse about 5x faster: when rsonlite fails on a section it
+  reports the line, and ISDi now cuts there instead of binary-searching with
+  ~17 full re-parses. Only the sections ISDi reads (package, appops, procstats,
+  batterystats, net_stats) are parsed; the raw dump still has all of them.
+- "Last scanned" shows the time zone and uses US Central time (set
+  `ISDI_DISPLAY_TZ` to change it). Scan times are stored in the server's local
+  time, which is UTC on many thin clients.
+
+### Fixed
+- Windows: Android phones were not listed. adb.exe writes "\r\n" in
+  `track-devices` output but counts only "\n" in each frame's length, so the
+  device watcher lost its place in the stream. Carriage returns are now skipped.
+- The PhoneView button opened a blank tab: ISDi's Content-Security-Policy
+  (`form-action 'self'`) made the browser block the redirect to PhoneView's
+  port. Pages now also allow PhoneView's address in `form-action`.
+- Android scans failed with "'AndroidScanner' object has no attribute 'ddump'"
+  (the accessibility check still used an attribute removed in 1.0.10).
+- Windows: Android scans failed with "'charmap' codec can't decode byte ...".
+  Dumps are written as UTF-8 but were read with the locale encoding (cp1252).
+  They are now read as UTF-8, and the parse cache is written only after a
+  successful parse.
+- PhoneView behind `tailscale serve`: if nothing on the PhoneView port (8443)
+  forwards to PhoneView, the button now shows the `tailscale serve` command to
+  run, instead of opening a tab that cannot connect.
+- `pip install "isdi-scanner[phoneview]"` failed: it asked for PhoneView 0.2.x,
+  which was never published. It now asks for `phoneview>=1.2,<2`.
+
 ## 1.0.11 (2026-11-02)
 ### Added
 - Optional **PhoneView** button: starts the separate PhoneView screen viewer on

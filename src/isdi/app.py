@@ -14,23 +14,109 @@ SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
 # Inline <script> blocks and on* handlers are still used by the templates,
 # hence 'unsafe-inline'; everything else is restricted to this origin.
-CONTENT_SECURITY_POLICY = (
-    "default-src 'self'; "
-    "script-src 'self' 'unsafe-inline'; "
-    "style-src 'self' 'unsafe-inline'; "
-    "img-src 'self' data:; "
-    "object-src 'none'; "
-    "base-uri 'none'; "
-    "form-action 'self'; "
-    "frame-ancestors 'none'"
-)
+def content_security_policy(form_targets=()) -> str:
+    """ISDi's CSP. form_targets: extra origins a form POST may redirect to.
 
-FORBIDDEN_PAGE = """<!doctype html>
-<title>ISDi - access denied</title>
-<h1>Access denied</h1>
-<p>Open ISDi with the link printed in the terminal where you started
-<code>isdi run</code> (it ends with <code>?token=...</code>).</p>
+    Browsers apply form-action to the redirect after a form POST too, so the
+    PhoneView button (POST /phoneview -> 303 to PhoneView's port) needs
+    PhoneView's origin listed here, or the new tab silently stays blank.
+    """
+    form_action = " ".join(["'self'", *form_targets])
+    return (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "object-src 'none'; "
+        "base-uri 'none'; "
+        f"form-action {form_action}; "
+        "frame-ancestors 'none'"
+    )
+
+
+CONTENT_SECURITY_POLICY = content_security_policy()
+
+LOGIN_PATH = "/login"
+
+LOGIN_PAGE = """<!doctype html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISDi - sign in</title>
+<style>
+  body {{ font-family: sans-serif; background: #f4f6f8; margin: 0; }}
+  main {{ max-width: 460px; margin: 12vh auto; background: #fff; padding: 28px;
+         border: 1px solid #d8dee4; border-radius: 14px; }}
+  h1 {{ font-size: 1.3em; color: #156c2f; margin-top: 0; }}
+  .err {{ color: #b00020; font-weight: bold; }}
+  input[type=password] {{ width: 100%; box-sizing: border-box; font: 1.1em monospace;
+         padding: 10px; margin: 8px 0 14px; border: 1px solid #999; border-radius: 6px; }}
+  button {{ font-size: 1em; padding: 8px 18px; background: #156c2f; color: #fff;
+           border: 0; border-radius: 6px; cursor: pointer; }}
+  p.small {{ color: #555; font-size: .9em; }}
+</style>
+<main>
+  <h1>ISDi needs its access token</h1>
+  {error}
+  <form method="post" action="{login_path}">
+    <input type="hidden" name="next" value="{next}">
+    <label for="token">Paste the access token shown in the terminal where ISDi runs:</label>
+    <input type="password" id="token" name="token" autocomplete="off" autofocus required>
+    <button type="submit">Sign in</button>
+  </form>
+  <p class="small">ISDi has just printed the token again in its terminal,
+  in a box labelled <b>ISDi ACCESS TOKEN</b>. It changes every time ISDi starts.</p>
+</main>
 """
+
+_last_banner = 0.0
+
+
+def token_banner(token: str, link: str = "") -> str:
+    """The access token, framed so it is easy to find and copy in a terminal."""
+    import sys
+
+    color = sys.stderr.isatty()
+    bold = (lambda t: f"\033[1;33m{t}\033[0m") if color else (lambda t: t)
+    rule = "=" * max(60, len(token) + 8)
+    lines = ["", rule, "  ISDi ACCESS TOKEN  (paste it into the browser's sign-in page)", "",
+             "    " + bold(token), ""]
+    if link:
+        lines.append(f"  or open: {link}")
+    lines += [rule, ""]
+    return "\n".join(lines)
+
+
+def _announce_token(token: str, min_interval: float = 10.0) -> None:
+    """Re-print the token banner when someone reaches the sign-in page (like Jupyter)."""
+    import sys
+    import time
+
+    global _last_banner
+    now = time.monotonic()
+    if now - _last_banner < min_interval:
+        return
+    _last_banner = now
+    proto = request.headers.get("X-Forwarded-Proto") or request.scheme
+    host = request.headers.get("X-Forwarded-Host") or request.host
+    print(token_banner(token, f"{proto}://{host}/?token={token}"), file=sys.stderr, flush=True)
+
+
+def _safe_next(target: str) -> str:
+    """Only local paths: never redirect a sign-in to another site."""
+    if not target or not target.startswith("/") or target.startswith("//") or "\\" in target:
+        return "/"
+    return target
+
+
+def _login_page(token: str, next_path: str, error: str = ""):
+    from html import escape
+
+    _announce_token(token)
+    body = LOGIN_PAGE.format(
+        error=f'<p class="err">{escape(error)}</p>' if error else "",
+        login_path=LOGIN_PATH,
+        next=escape(_safe_next(next_path), quote=True),
+    )
+    return body, 403
 
 
 def _same(a, b) -> bool:
@@ -55,17 +141,28 @@ def install_security(app, token: str) -> None:
         if request.endpoint == "static":
             return None
 
-        url_token = request.args.get("token")
+        args = request.args.to_dict(flat=False)
+        url_token = args.pop("token", [None])[0]
+        query = ("?" + urlencode(args, doseq=True)) if args else ""
         if url_token is not None and _same(url_token, token):
             session["auth"] = token
             session["csrf"] = secrets.token_urlsafe(32)
-            args = request.args.to_dict(flat=False)
-            args.pop("token")
-            query = ("?" + urlencode(args, doseq=True)) if args else ""
             return redirect(request.path + query)
 
+        # The sign-in form: the token is POSTed, so it stays out of URLs and logs.
+        if request.path == LOGIN_PATH and request.method == "POST":
+            next_path = request.form.get("next", "/")
+            if _same(request.form.get("token", "").strip(), token):
+                session["auth"] = token
+                session["csrf"] = secrets.token_urlsafe(32)
+                return redirect(_safe_next(next_path), code=303)
+            return _login_page(token, next_path, "Invalid token. Copy it again from the terminal.")
+
         if not _same(session.get("auth"), token):
-            return FORBIDDEN_PAGE, 403
+            if request.method in SAFE_METHODS:
+                error = "Invalid token." if url_token is not None else ""
+                return _login_page(token, request.path + query, error)
+            abort(403, "Not signed in.")
 
         if request.method not in SAFE_METHODS:
             sent = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

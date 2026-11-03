@@ -1,0 +1,11 @@
+{# PhoneView button: opens the live screen viewer (with screenshots) in a new tab. #}
+<form method="post" action="/phoneview" target="_blank" rel="noopener" class="d-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if phoneview_available %}
+    <button type="submit" class="btn btn-normal" data-toggle="tooltip"
+            title="Open a live view of the connected phone's screen in a new tab, to review its settings and take screenshots. The phone's owner must unlock it and approve the connection on the phone."><u>PhoneView</u></button>
+    {% else %}
+    <button type="button" class="btn btn-normal" disabled data-toggle="tooltip"
+            title="PhoneView is not installed. Run: pip install &quot;isdi-scanner[phoneview]&quot; (Python 3.11+)">PhoneView</button>
+    {% endif %}
+</form>

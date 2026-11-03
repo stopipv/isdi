@@ -39,7 +39,8 @@ def fake(tmp_path):
     script.write_text(FAKE)
     record = tmp_path / "record.json"
     command = " ".join(shlex.quote(p) for p in (sys.executable, str(script), str(record)))
-    launcher = PhoneViewLauncher(command, free_port(), "isdi-access-token", tmp_path / "logs")
+    launcher = PhoneViewLauncher(command, free_port(), "isdi-access-token", tmp_path / "logs",
+                                 tmp_path / "screenshots")
     yield launcher, record
     launcher.stop()
 
@@ -72,6 +73,11 @@ def test_start_once_and_stop_on_stdin_close(fake):
     assert data["isdi_token"] is None                     # ISDi's own token is not passed on
     assert "--exit-on-stdin-eof" in data["argv"] and "--no-browser" in data["argv"]
     assert "--public-origin" not in data["argv"]
+    # Screenshots go to ISDi's private temporary folder, and PhoneView stops (deleting
+    # them) 30 s after its page is closed.
+    argv = data["argv"]
+    assert argv[argv.index("--screenshot-dir") + 1] == str(launcher.screenshot_dir)
+    assert argv[argv.index("--stop-when-closed") + 1] == "30"
     launcher.start()
     assert launcher.proc is first                          # never a second copy
     launcher.stop()
@@ -131,9 +137,75 @@ def test_route_starts_and_redirects(authed, fake, monkeypatch):
     assert r.headers["Location"] == f"http://127.0.0.1:{launcher.port}/?token={launcher.token}"
     assert launcher.running()
     # A consultant arriving through tailscale serve gets the tailnet URL.
+    import isdi.web.view.phoneview as view
+    monkeypatch.setattr(view, "tailscale_serve_problem", lambda *a: None)
     r = client.post("/phoneview", data={"csrf_token": csrf},
                     headers={"X-Forwarded-Host": "laptop.tail1.ts.net"})
     assert r.headers["Location"] == f"https://laptop.tail1.ts.net:8443/?token={launcher.token}"
+
+
+def test_csp_allows_the_redirect_to_phoneview(authed, fake, monkeypatch):
+    """Browsers apply form-action to the 303 after POST /phoneview; with only
+    'self' allowed the PhoneView tab stayed blank."""
+    launcher, _ = fake
+    monkeypatch.setattr(phoneview, "_launcher", launcher)
+    client, _ = authed
+
+    def form_action(**headers):
+        csp = client.get("/", headers=headers).headers["Content-Security-Policy"]
+        return next(d for d in csp.split("; ") if d.startswith("form-action")).split()[1:]
+
+    assert form_action() == ["'self'", f"http://127.0.0.1:{launcher.port}"]
+    assert form_action(**{"X-Forwarded-Host": "laptop.tail1.ts.net"}) == \
+        ["'self'", "https://laptop.tail1.ts.net:8443"]
+
+
+def test_csp_unchanged_without_phoneview(authed, tmp_path, monkeypatch):
+    monkeypatch.setattr(phoneview, "_launcher", PhoneViewLauncher("", free_port(), "t", tmp_path))
+    monkeypatch.setattr(PhoneViewLauncher, "available", lambda self: False)
+    client, _ = authed
+    assert "form-action 'self';" in client.get("/").headers["Content-Security-Policy"]
+
+
+def test_route_explains_missing_tailscale_serve(authed, fake, monkeypatch):
+    launcher, _ = fake
+    monkeypatch.setattr(phoneview, "_launcher", launcher)
+    import isdi.web.view.phoneview as view
+    status = {"TCP": {"443": {"HTTPS": True}},
+              "Web": {"laptop.tail1.ts.net:443": {"Handlers": {"/": {"Proxy": "http://127.0.0.1:6200"}}}}}
+    monkeypatch.setattr(view, "tailscale_serve_problem",
+                        lambda url, port: phoneview.tailscale_serve_problem(url, port, json.dumps(status)))
+    client, csrf = authed
+    r = client.post("/phoneview", data={"csrf_token": csrf},
+                    headers={"X-Forwarded-Host": "laptop.tail1.ts.net"})
+    assert r.status_code == 503
+    assert f"tailscale serve --bg --https=8443 http://127.0.0.1:{launcher.port}".encode() in r.data
+
+
+def _serve(web, foreground=False):
+    cfg = {"Web": web}
+    return json.dumps({"Foreground": {"abc": cfg}} if foreground else cfg)
+
+
+@pytest.mark.parametrize("status,problem", [
+    (_serve({"h.t.ts.net:8443": {"Handlers": {"/": {"Proxy": "http://127.0.0.1:6201"}}}}), None),
+    (_serve({"h.t.ts.net:8443": {"Handlers": {"/": {"Proxy": "localhost:6201"}}}}), None),
+    (_serve({"h.t.ts.net:8443": {"Handlers": {"/": {"Proxy": "6201"}}}}, foreground=True), None),
+    (_serve({"h.t.ts.net:443": {"Handlers": {"/": {"Proxy": "http://127.0.0.1:6200"}}}}), "Nothing is published"),
+    ("{}", "Nothing is published"),
+    (_serve({"h.t.ts.net:8443": {"Handlers": {"/": {"Proxy": "http://127.0.0.1:9999"}}}}), "not to PhoneView"),
+    ("not json", None),
+])
+def test_tailscale_serve_problem(status, problem):
+    got = phoneview.tailscale_serve_problem("https://h.t.ts.net:8443", 6201, status)
+    if problem is None:
+        assert got is None
+    else:
+        assert problem in got and "tailscale serve --bg --https=8443 http://127.0.0.1:6201" in got
+
+
+def test_tailscale_check_only_for_tailnet_names():
+    assert phoneview.tailscale_serve_problem("https://192.168.1.5:8443", 6201, "{}") is None
 
 
 def test_route_reports_missing_phoneview(authed, tmp_path, monkeypatch):

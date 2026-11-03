@@ -193,7 +193,6 @@ to the application. I don't know how to get install date, resource usage, etc.
 - **`src/isdi/scanner/`** - Core scanning logic
   - `parse_dump.py` - Parses device dumps (Android/iOS)
   - `android_permissions.py` - Android permission analysis
-  - `privacy_scan_android.py` - Android privacy scanning
   - `blocklist.py` - Stalkerware/spyware blocklist management
   - `lightweight_df.py` - CSV/data processing (pandas-free)
   - `db.py` - SQLite database operations

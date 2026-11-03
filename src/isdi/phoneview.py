@@ -37,6 +37,7 @@ from urllib.parse import urlsplit
 STARTUP_TIMEOUT = 20
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 DEFAULT_PUBLIC_PORT = 8443
+STOP_WHEN_CLOSED = 30      # seconds after the PhoneView page closes
 
 
 class PhoneViewError(RuntimeError):
@@ -63,9 +64,62 @@ def public_url_for(host_header: str, configured: str = "") -> Optional[str]:
     return f"https://{hostname}:{DEFAULT_PUBLIC_PORT}"
 
 
+def _proxy_port(target: str) -> Optional[int]:
+    """Local port of a `tailscale serve` proxy target: "http://127.0.0.1:6201", "localhost:6201", "6201"."""
+    target = (target or "").strip()
+    if target.isdigit():
+        return int(target)
+    parts = urlsplit(target if "://" in target else "http://" + target)
+    if (parts.hostname or "") not in LOOPBACK:
+        return None
+    return parts.port
+
+
+def tailscale_serve_problem(public_url: str, local_port: int, status_json: Optional[str] = None) -> Optional[str]:
+    """Why a *.ts.net PhoneView address will not reach PhoneView, or None if it should.
+
+    Reads `tailscale serve status --json`. None also when that can't be read
+    (no tailscale CLI, not a ts.net address): ISDi only reports what it can see.
+    """
+    import json
+
+    parts = urlsplit(public_url)
+    host = (parts.hostname or "").lower()
+    if not host.endswith(".ts.net"):
+        return None
+    port = parts.port or 443
+    fix = f"tailscale serve --bg --https={port} http://127.0.0.1:{local_port}"
+    if status_json is None:
+        from isdi.scanner import runcmd
+
+        p = runcmd.run(["tailscale", "serve", "status", "--json"], timeout=5)
+        if p.returncode != 0:
+            return None
+        status_json = p.stdout
+    try:
+        status = json.loads(status_json or "{}") or {}
+    except ValueError:
+        return None
+    configs = [status, *(status.get("Foreground") or {}).values()]
+    targets = []
+    for cfg in configs:
+        handlers = ((cfg.get("Web") or {}).get(f"{host}:{port}") or {}).get("Handlers") or {}
+        if "/" in handlers:
+            targets.append(handlers["/"].get("Proxy", ""))
+    if not targets:
+        return (f"Nothing is published on port {port} of {host}, so the PhoneView tab "
+                f"cannot open. On this computer, run:\n{fix}")
+    if not any(_proxy_port(t) == local_port for t in targets):
+        return (f"Port {port} of {host} forwards to {targets[0]}, not to PhoneView "
+                f"(127.0.0.1:{local_port}). On this computer, run:\n{fix}")
+    return None
+
+
 class PhoneViewLauncher:
-    def __init__(self, command: str, port: int, access_token: str, log_dir: Path):
+    def __init__(self, command: str, port: int, access_token: str, log_dir: Path,
+                 screenshot_dir: Optional[Path] = None):
         self.command = command
+        self.screenshot_dir = screenshot_dir
         self.port = port
         self.token = derive_token(access_token)
         self.log_dir = Path(log_dir)
@@ -107,6 +161,11 @@ class PhoneViewLauncher:
                                      "(needs Python 3.11+), or set ISDI_PHONEVIEW_CMD.")
             argv += ["--port", str(self.port), "--no-browser", "--exit-on-stdin-eof",
                      "--audit-log", str(self.log_dir / "phoneview-audit.jsonl")]
+            # PhoneView stops 30 s after its page is closed (a reload is fine) and then
+            # deletes its screenshots; the next button press starts it again.
+            argv += ["--stop-when-closed", str(STOP_WHEN_CLOSED)]
+            if self.screenshot_dir is not None:
+                argv += ["--screenshot-dir", str(self.screenshot_dir)]
             if public_url:
                 argv += ["--public-origin", public_url]
             self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -168,5 +227,5 @@ def get_launcher(config) -> PhoneViewLauncher:
     global _launcher
     if _launcher is None:
         _launcher = PhoneViewLauncher(config.PHONEVIEW_CMD, config.PHONEVIEW_PORT,
-                                      config.ACCESS_TOKEN, config.logs_dir)
+                                      config.ACCESS_TOKEN, config.logs_dir, config.screenshots_dir)
     return _launcher

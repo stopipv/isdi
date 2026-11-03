@@ -79,7 +79,10 @@ def run(host, port, debug, test_mode, no_browser):
         Timer(1.5, open_browser).start()
 
     click.echo(f"🔍 Starting ISDI on http://{final_host}:{final_port}")
-    click.echo(f"🔑 Open this link to use ISDi (valid until ISDi stops): {url}")
+    from isdi.app import token_banner
+
+    click.echo(token_banner(config.ACCESS_TOKEN, url), err=True)
+    click.echo("🔑 Valid until ISDi stops. Open the link, or paste the token into the sign-in page.")
     click.echo(f'📁 Data directory: {config.dirs["data"]}')
     click.echo(f"📊 Database: {config.database_path}")
     click.echo(f"⏱ Total startup prep: {perf_counter() - startup_started:.2f}s")

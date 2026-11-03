@@ -162,7 +162,7 @@ function renderDevices(devices) {
             .append(' ')
             .append($('<span class="badge badge-secondary">').text(DEVICE_KINDS[d.device] || d.device));
         if (d.last_scanned) {
-            $info.append($('<div class="small text-muted">').text('(Last scanned: ' + String(d.last_scanned).slice(0, 16) + ')'));
+            $info.append($('<div class="small text-muted">').text('(Last scanned: ' + String(d.last_scanned) + ')'));
         }
         if (d.state !== 'ready') {
             $info.append($('<div class="small text-danger">').text(DEVICE_HINTS[d.state] || ('Not ready: ' + d.state)));
