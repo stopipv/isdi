@@ -64,8 +64,8 @@ def create_app_flags_file():
 
             ## TODO: Remove this or set 0.5 to 0.2 or something
         elif has_ml_score:
-            relevant_count = len(
-                [row for row in d if row.get("relevant") not in (None, "")]
+            relevant_count = sum(
+                1 for row in d if row.get("relevant") not in (None, "")
             )
             if relevant_count >= len(d) * 0.5:
                 pass
