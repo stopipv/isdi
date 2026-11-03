@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-11-02)
 ### Removed
 - **Privacy Checkup** and everything behind it (the `/privacy` pages, the adb
   automation in `privacy_scan_android.py`, its screenshot route and images).
