@@ -267,7 +267,7 @@ class AppScanner:
             logging.error(f"Script not found: {script_path}")
             return False
 
-        logging.info(f"Dumping {self.device_type} device {serial}...")
+        logging.info(f"Dumping {self.device_type} device {cfg.hmac_serial(serial)}...")
 
         # Run script: bash script.sh <serial> <output_file>
         p = runcmd.run(["bash", str(script_path), serial, dumpf], timeout=300)
@@ -478,7 +478,7 @@ class AndroidScanner(AppScanner):
             os.unlink(json_cache)
         self._forget_dump(serial)
 
-        logging.info(f"Dumping android device {serial}...")
+        logging.info(f"Dumping android device {cfg.hmac_serial(serial)}...")
 
         services = [
             "package",
@@ -558,7 +558,7 @@ class AndroidScanner(AppScanner):
         # Always start with a fresh dump (_dump_phone also drops the stale JSON cache).
         ddump = self._dump_phone(serialno) and self._get_dump(serialno)
         if not ddump:
-            logging.error(f"Cannot load dump for {serialno}")
+            logging.error(f"Cannot load dump for {cfg.hmac_serial(serialno)}")
             return []
         return ddump.all_apps()
 
