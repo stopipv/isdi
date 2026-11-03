@@ -1,7 +1,6 @@
 # Changelog
 
-## Unreleased
-
+## 1.0.11 (2026-11-02)
 ### Added
 - Optional **PhoneView** button: starts the separate PhoneView screen viewer on
   demand (one copy, port 6201) and opens it already signed in, with a per-run
