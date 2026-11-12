@@ -266,7 +266,38 @@ class AndroidDump(PhoneDump):
         self.apps = None
 
     @staticmethod
+    def parse_by_section(lines: list[str]) -> dict:
+        """Parse each top-level section (an unindented line and the indented
+        lines under it) on its own, so a section rsonlite cannot parse does not
+        cut off the sections after it. Newer `dumpsys package` output (e.g.
+        Android 17 on Samsung) has such a section before "Packages:"."""
+        sections: list[list[str]] = []
+        for l in lines:
+            if l.strip() and not l[0].isspace():
+                sections.append([l])
+            elif sections:
+                sections[-1].append(l)
+        res: dict = {}
+        for sec in sections:
+            try:
+                r = complexparse(sec)
+            except Exception as ex:
+                logging.error(f"Could not parse section {sec[0].strip()!r}: {ex}")
+                continue
+            items = r if isinstance(r, list) else [r]
+            for item in items:
+                if isinstance(item, dict):
+                    for k, v in item.items():
+                        if k == "UNPARSED":
+                            res.setdefault("UNPARSED", {})[sec[0].strip()] = v
+                        else:
+                            res[k] = v
+        return res
+
+    @staticmethod
     def custom_parse(service, lines):
+        if service == "package":
+            return AndroidDump.parse_by_section(lines)
         if service == "appops":
             return complexparse(lines)  # TODO: Creat custom parser for appops
         elif service == "procstats":
@@ -280,7 +311,7 @@ class AndroidDump(PhoneDump):
         d = {}
         service = ""
         join_lines = []
-        custom_parse_services = {"appops", "procstats"}
+        custom_parse_services = {"package", "appops", "procstats"}
 
         def _clean_dictionary(d):
             """remove non-alphanumeric characters from the end of each key in the dictionary"""
@@ -459,6 +490,26 @@ class AndroidDump(PhoneDump):
             return t[1]
         return b
 
+    @staticmethod
+    def _packages_section(d: dict) -> dict | None:
+        """Return the "Packages" dict from the parsed `dumpsys package` section.
+
+        rsonlite returns a list when the section starts with a loose line (older
+        Android versions) but a dict when it starts with a keyed header such as
+        "Database versions:" (e.g. Android 17 on Samsung). Accept both.
+        """
+        pkg = d.get("package")
+        if isinstance(pkg, dict):
+            candidates = [pkg]
+        elif isinstance(pkg, list):
+            candidates = [x for x in pkg if isinstance(x, dict)]
+        else:
+            candidates = []
+        for c in candidates:
+            if isinstance(c.get("Packages"), dict):
+                return c["Packages"]
+        return None
+
     def _get_apps(self) -> dict:
         if self.apps:
             return self.apps
@@ -471,12 +522,15 @@ class AndroidDump(PhoneDump):
                 f"'package' is not a key in self.df, where keys = {list(d.keys())}"
             )
             return {}
-        if not isinstance(d["package"], list) or len(d["package"]) == 0:
+        app_d = self._packages_section(d)
+        if app_d is None:
+            pkg = d["package"]
+            keys = list(pkg.keys()) if isinstance(pkg, dict) else type(pkg).__name__
             logging.error(
-                f"'package' key in self.df is not a non-empty list, d['package']={d['package']}"
+                f"No 'Packages' section in the parsed package dump (top level: {keys}). "
+                "The parse may have stopped early; see 'UNPARSED'."
             )
             return {}
-        app_d = d["package"][0]["Packages"]
         # get_all_leaves(match_keys(d, "^package$//^Packages//^Package .*"))
         packages = {}
         for k, v in app_d.items():
@@ -544,7 +598,7 @@ class AndroidDump(PhoneDump):
         if appid not in a:
             logging.error(f"AppId {appid} not found in apps={a}")
             return {}
-        app = d["package"][0]["Packages"][a[appid]["packageKey"]]
+        app = self._packages_section(d)[a[appid]["packageKey"]]
         res = {
             k: app.get(k, "")
             for k in [
